@@ -83,6 +83,21 @@ export function unitToTex(unit: string): string {
  * arithmetic on the page wrong by a factor of a thousand.
  */
 export function siValueToTex(param: Param, si: number): string {
+  // A dimensionless param — eccentricity, an albedo, any pure ratio — is exempt
+  // from both halves of that rule, because neither half applies to it: there is
+  // no unit to keep consistent and no \mathrm to set upright. Forcing scientific
+  // notation on it only makes an ordinary number harder to read; an eccentricity
+  // is 0.0167 in every textbook, on the slider the reader just dragged, and here.
+  if (!param.unit) {
+    const digits = param.format?.digits ?? DEFAULT_DIGITS;
+    if (!Number.isFinite(si)) return formatNumber(si, param.format);
+    // toPrecision rather than formatNumber's 'auto', which escalates to
+    // scientific below 1e-3 — exactly what this branch exists to avoid.
+    return param.format?.notation === 'fixed'
+      ? si.toFixed(digits)
+      : Number(si.toPrecision(digits)).toString();
+  }
+
   const text = formatNumber(si, { ...param.format, notation: 'scientific' });
   return `${numberToTex(text)}${unitToTex(param.unit)}`;
 }

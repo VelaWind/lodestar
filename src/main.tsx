@@ -9,10 +9,13 @@ import App from './App';
 // bundle — `import.meta.env.DEV` is statically false there and the whole branch
 // is dropped.
 if (import.meta.env.DEV) {
-  void import('./physics/sanity').then(({ runSanityChecks, verifyEscapeIntegrator }) => {
-    runSanityChecks();
-    verifyEscapeIntegrator();
-  });
+  void import('./physics/sanity').then(
+    ({ runSanityChecks, verifyEscapeIntegrator, verifyKeplerModel }) => {
+      runSanityChecks();
+      verifyEscapeIntegrator();
+      verifyKeplerModel();
+    },
+  );
 }
 
 const root = document.getElementById('root');

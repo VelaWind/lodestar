@@ -14,19 +14,32 @@ const PLACEHOLDER = /\{\{(\w+)\}\}/g;
 
 type Mode = 'symbols' | 'numbers';
 
+/** True when what follows the placeholder in the template is a superscript. */
+function raisedToAPower(tex: string, after: number): boolean {
+  return /^\s*\^/.test(tex.slice(after));
+}
+
 function substitute(
   tex: string,
   byId: Map<string, Param>,
   values: ParamValues,
   mode: Mode,
 ): string {
-  return tex.replace(PLACEHOLDER, (_match, id: string) => {
+  return tex.replace(PLACEHOLDER, (match: string, id: string, offset: number) => {
     const param = byId.get(id);
     // An unresolved placeholder renders loudly rather than vanishing, so a
     // typo in a data file is obvious on the page instead of quietly wrong.
     if (!param) return `\\textcolor{#e8737d}{\\texttt{${id}?}}`;
     if (mode === 'symbols') return param.symbol;
-    return `{${siValueToTex(param, values[param.id] ?? param.default)}}`;
+
+    const value = siValueToTex(param, values[param.id] ?? param.default);
+    // A substituted value under an exponent has to carry its own brackets:
+    // `{8.00 \times 10^{3}\,\mathrm{m/s}}^{2}` renders with the 2 tucked against
+    // the unit, reading as m/s² — squaring the seconds instead of the quantity.
+    // Symbols mode needs none of this: `v_0^{2}` is already unambiguous.
+    return raisedToAPower(tex, offset + match.length)
+      ? `{\\left(${value}\\right)}`
+      : `{${value}}`;
   });
 }
 
