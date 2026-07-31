@@ -192,10 +192,12 @@ export function verifyEscapeIntegrator(): number {
  *      slip inside `kepler.ts` cannot hide behind a check that never touches it.
  *   2. Kepler's second law, numerically. Specific angular momentum r²·dν/dt must
  *      be constant around the orbit and equal to the closed form √(GM·a(1−e²)).
- *      Sampled at e = 0.8, where the speed varies by a factor of nine between
- *      the apsides and a broken anomaly conversion has nowhere to hide. dν/dt is
- *      a central difference over T/10⁶, small enough that truncation error is
- *      ~10⁻⁹ and large enough that cancellation is ~10⁻¹².
+ *      Sampled at e = 0.97 — the eccentricity slider's maximum, so the check
+ *      covers the whole range a reader can actually reach. Speed there varies by
+ *      a factor of sixty-six between the apsides and a broken anomaly conversion
+ *      has nowhere to hide. dν/dt is a central difference over T/10⁶, small
+ *      enough that truncation error is ~10⁻⁷ and large enough that cancellation
+ *      is ~10⁻¹².
  *   3. Vis-viva against angular momentum at the apsides. At periapsis and
  *      apoapsis, and nowhere else, velocity is perpendicular to the radius, so
  *      v·r there is exactly h. Two independent formulas — one from energy, one
@@ -235,7 +237,7 @@ export function verifyKeplerModel(): number {
   );
 
   /* 2 — r²·dν/dt constant around one orbit at high eccentricity. */
-  const e = 0.8;
+  const e = 0.97;
   const a = AU;
   const T = period(M_SUN, a);
   const hClosed = specificAngularMomentum(M_SUN, a, e);
