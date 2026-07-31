@@ -1,0 +1,42 @@
+/**
+ * Canonical physical constants. SI base units, always.
+ *
+ * These are defined once, here, and imported everywhere else. Never inline a
+ * constant at a call site and never round one at the point of use — rounding is
+ * a display concern and belongs in `lib/format.ts`.
+ *
+ * Never hardcode a *derived* number either. A module that needs Earth's orbital
+ * period computes it from `G`, `M_SUN`, and the semi-major axis; it does not
+ * paste in 365.25.
+ *
+ * Sources: values follow CODATA (2018) for the measured physical constants and
+ * the IAU (2015 Resolution B3) nominal values for solar and terrestrial
+ * quantities. When adding a constant, cite its source in a comment. When a
+ * figure is uncertain or disputed (the Hubble constant, exoplanet masses), note
+ * the uncertainty rather than presenting a picked number as settled.
+ *
+ * This file exports constants and nothing else — no helpers, no conversions.
+ */
+
+// Exact by definition
+export const C = 299_792_458; // m/s, speed of light
+export const AU = 1.495_978_707e11; // m
+export const LIGHT_YEAR = 9.460_730_472_5808e15; // m (c × Julian year)
+export const JULIAN_YEAR = 3.155_76e7; // s
+export const H = 6.626_070_15e-34; // J·s, Planck
+export const K_B = 1.380_649e-23; // J/K, Boltzmann
+
+// Measured
+export const G = 6.674_30e-11; // m³ kg⁻¹ s⁻², gravitational
+export const PARSEC = 3.085_677_581e16; // m
+export const SIGMA_SB = 5.670_374_419e-8; // W m⁻² K⁻⁴, Stefan–Boltzmann
+
+// Bodies
+export const M_SUN = 1.988_4e30; // kg
+export const R_SUN = 6.957e8; // m
+export const L_SUN = 3.828e26; // W
+export const M_EARTH = 5.972_2e24; // kg
+export const R_EARTH = 6.371e6; // m, mean radius
+
+// Scale
+export const OBSERVABLE_UNIVERSE_RADIUS = 4.4e26; // m, ≈46.5 billion ly
