@@ -24,6 +24,14 @@ import {
   tidalAccelerationAtHorizon,
 } from './blackhole';
 import { apexAltitude, integrateFlight, timestepFor } from './escape';
+import {
+  chirpMass,
+  fCutoff,
+  fOfTimeToMerger,
+  inspiralPhase,
+  strainAmplitude,
+  timeToMerger,
+} from './gw';
 import { decadesBetween, lightTravelTime } from './scale';
 import {
   apoapsisDistance,
@@ -424,6 +432,136 @@ export function verifyBlackHoleModel(): number {
   );
 
   const summary = `black hole checks — ${lines.length - failures}/${lines.length} passed`;
+
+  // eslint-disable-next-line no-console
+  console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);
+
+  return failures;
+}
+
+/**
+ * Cross-validates the gravitational-wave inspiral model.
+ *
+ * Outside the five-check count for the same reason as the rest: that list is the
+ * skill's, this is ours. Five checks, each aimed at a different way this code
+ * could be wrong, with GW150914's published masses as the worked case.
+ *
+ *   1. Chirp mass of 36 + 29 M_☉ ≈ 28.1 M_☉. The exponents 3/5 and 1/5 are easy
+ *      to transpose and the result stays plausible when they are; the published
+ *      figure catches it.
+ *   2. Strain at the default distance, evaluated at 100 Hz, is of order 10⁻²¹.
+ *      Asserted as an exponent rather than a value — the amplitude formula is
+ *      sky- and orientation-averaged, so demanding better than an order of
+ *      magnitude would be testing an average against a specific.
+ *   3. Time to merger from 30 Hz for a 28 M_☉ chirp mass is a fraction of a
+ *      second. LIGO's observed GW150914 chirp lasted about 0.2 s from 35 Hz, so
+ *      anything outside 0.1–1 s from 30 Hz means the f^(-8/3) scaling or the
+ *      (GM_c/c³) factor is wrong.
+ *   4. The cutoff frequency against c³/(6^(3/2)πGM) worked out inline. `fCutoff`
+ *      reaches its answer through `fGWAtSeparation`, which is where the factor
+ *      of two between orbital and wave frequency lives; computing the closed
+ *      form independently here is what makes a dropped factor of two visible
+ *      rather than merely halving a number nobody has an independent value for.
+ *   5. The analytic phase against a numerical integration of 2πf dt. The closed
+ *      form in `inspiralPhase` is the one piece of this file that is not a
+ *      direct transcription of a standard result, and it is what the waveform's
+ *      every cycle depends on.
+ */
+export function verifyGravitationalWaveModel(): number {
+  const lines: string[] = [];
+  let failures = 0;
+
+  const report = (
+    name: string,
+    formula: string,
+    detail: string,
+    error: number,
+    tolerance: number,
+  ) => {
+    const passed = Math.abs(error) <= tolerance;
+    if (!passed) failures += 1;
+    lines.push(
+      `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
+        `      ${formula}\n` +
+        `      ${detail}` +
+        `  ·  Δ ${(error * 100).toFixed(4)}%` +
+        `  ·  tolerance ±${(tolerance * 100).toFixed(1)}%`,
+    );
+  };
+
+  /* GW150914's published component masses, and the module's default distance. */
+  const m1 = 36 * M_SUN;
+  const m2 = 29 * M_SUN;
+  const distance = 1.26e25; // m, ≈410 Mpc
+  const mc = chirpMass(m1, m2);
+
+  /* 1 — chirp mass. */
+  report(
+    'Chirp mass of GW150914 (36 + 29 M_☉)',
+    'M_c = (m₁m₂)^(3/5) / (m₁+m₂)^(1/5)',
+    `computed ${significant(mc / M_SUN)} M_☉  ·  expected 28.1 M_☉`,
+    relativeError(mc / M_SUN, 28.1),
+    TIGHT * 10, // ±1%: the published figure is quoted to three figures
+  );
+
+  /* 2 — strain at 100 Hz, asserted as an order of magnitude. */
+  const h100 = strainAmplitude(mc, 100, distance);
+  const hExponent = Math.floor(Math.log10(h100));
+  const hOk = hExponent === -21;
+  if (!hOk) failures += 1;
+  lines.push(
+    `${hOk ? 'PASS' : 'FAIL'}  Strain of GW150914 at 410 Mpc, evaluated at 100 Hz\n` +
+      `      h = (4/d)(GM_c/c²)^(5/3)(πf/c)^(2/3)\n` +
+      `      computed ${significant(h100)} (10^${hExponent})  ·  expected order 10^-21` +
+      `  ·  sky- and orientation-averaged, so the order is the claim`,
+  );
+
+  /* 3 — time to merger from 30 Hz, asserted as a range. */
+  const tau30 = timeToMerger(mc, 30);
+  const tauOk = tau30 >= 0.1 && tau30 <= 1;
+  if (!tauOk) failures += 1;
+  lines.push(
+    `${tauOk ? 'PASS' : 'FAIL'}  Time to merger from 30 Hz at M_c = ${significant(mc / M_SUN)} M_☉\n` +
+      `      τ = (5/256)(πf)^(-8/3)(GM_c/c³)^(-5/3)\n` +
+      `      computed ${significant(tau30)} s  ·  accepted 0.1 – 1 s` +
+      `  ·  the observed GW150914 chirp ran ~0.2 s from 35 Hz`,
+  );
+
+  /* 4 — cutoff frequency against the closed form, worked out independently. */
+  const cutoff = fCutoff(m1, m2);
+  const cutoffClosedForm = C ** 3 / (6 ** 1.5 * Math.PI * G * (m1 + m2));
+  report(
+    'Cutoff frequency vs c³/(6^(3/2)πGM), computed independently',
+    'f_cut = f_GW(r_isco),  r_isco = 6GM/c²',
+    `via fGWAtSeparation ${significant(cutoff)} Hz  ·  ` +
+      `closed form ${significant(cutoffClosedForm)} Hz  ·  ` +
+      `a dropped factor of 2 would read ${significant(cutoffClosedForm / 2)} Hz`,
+    relativeError(cutoff, cutoffClosedForm),
+    0.2,
+  );
+
+  /* 5 — analytic phase against a numerical integration of 2πf dt. */
+  const tauEnd = timeToMerger(mc, cutoff);
+  const tauStart = timeToMerger(mc, cutoff / 2); // the last octave, ~7.7 cycles
+  const steps = 200_000;
+  const dTau = (tauStart - tauEnd) / steps;
+  let integrated = 0;
+  for (let i = 0; i < steps; i += 1) {
+    // Midpoint rule, integrating forward in time: dΦ = 2πf dt = −2πf dτ.
+    const tau = tauStart - (i + 0.5) * dTau;
+    integrated += 2 * Math.PI * fOfTimeToMerger(mc, tau) * dTau;
+  }
+  const analytic = inspiralPhase(mc, tauEnd) - inspiralPhase(mc, tauStart);
+  report(
+    'Waveform phase: closed form vs numerical ∫2πf dt',
+    'Φ(t) = −2[(t_c − t)/(5GM_c/c³)]^(5/8)',
+    `closed form ${significant(analytic)} rad  ·  integrated ${significant(integrated)} rad  ·  ` +
+      `${significant(analytic / (2 * Math.PI))} cycles over the last octave`,
+    relativeError(integrated, analytic),
+    TIGHT,
+  );
+
+  const summary = `gravitational wave checks — ${lines.length - failures}/${lines.length} passed`;
 
   // eslint-disable-next-line no-console
   console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);

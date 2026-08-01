@@ -16,12 +16,14 @@ if (import.meta.env.DEV) {
       verifyKeplerModel,
       verifyScaleLadder,
       verifyBlackHoleModel,
+      verifyGravitationalWaveModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
       verifyKeplerModel();
       verifyScaleLadder();
       verifyBlackHoleModel();
+      verifyGravitationalWaveModel();
     },
   );
 }

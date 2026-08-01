@@ -9,6 +9,7 @@ import type { Module } from '@/content/types';
 import { moduleList } from '@/content/registry';
 import { TIERS } from '@/lib/layers';
 import { plainText } from '@/lib/plainText';
+import { isReaderVisible } from '@/lib/visibility';
 import { useAppStore } from '@/store/useAppStore';
 
 /**
@@ -40,13 +41,12 @@ export function ModuleListPage() {
     document.title = 'Lodestar — space, explained in layers you choose to open';
   }, []);
 
-  /* Drafts are visible while developing and never in a production build, where
-     `import.meta.env.DEV` is statically false and the whole filter folds away. */
+  /* Drafts are listed while developing and never in a production build. The
+     rule itself lives in `lib/visibility`, shared with the Connections layer,
+     so the index and the cross-links cannot disagree about what a reader may
+     reach. */
   const listed = useMemo(
-    () =>
-      moduleList
-        .filter((m) => m.status === 'published' || import.meta.env.DEV)
-        .sort((a, b) => orderFor(a.id) - orderFor(b.id)),
+    () => moduleList.filter(isReaderVisible).sort((a, b) => orderFor(a.id) - orderFor(b.id)),
     [],
   );
 
