@@ -77,10 +77,11 @@ export function unitToTex(unit: string): string {
  * Full LaTeX for a param's current value as substituted into an equation, e.g.
  * `5.97 \times 10^{24}\,\mathrm{kg}`.
  *
- * SI base units and scientific notation always, ignoring `displayUnit`: an
- * equation with its values filled in has to stay dimensionally consistent, and a
- * friendlier readout unit (v₀ as 8 km/s beside G in m³kg⁻¹s⁻²) would make the
- * arithmetic on the page wrong by a factor of a thousand.
+ * SI base units always, ignoring `displayUnit`: an equation with its values
+ * filled in has to stay dimensionally consistent, and a friendlier readout unit
+ * (v₀ as 8 km/s beside G in m³kg⁻¹s⁻²) would make the arithmetic on the page
+ * wrong by a factor of a thousand. Notation is scientific outside the skill's
+ * plain-decimal band and plain inside it; the two exemptions are below.
  */
 export function siValueToTex(param: Param, si: number): string {
   // A dimensionless param — eccentricity, an albedo, any pure ratio — is exempt
@@ -96,6 +97,24 @@ export function siValueToTex(param: Param, si: number): string {
     return param.format?.notation === 'fixed'
       ? si.toFixed(digits)
       : Number(si.toPrecision(digits)).toString();
+  }
+
+  // Inside the skill's own display band — "below 10 000 and above 0.01: plain
+  // decimal, sensible significant figures" — scientific notation is pure cost.
+  // A scale slider parked on a human reads 1.70 m, not 1.70 × 10⁰ m. Outside the
+  // band the exponent is the only thing keeping the number legible, so it stays.
+  const abs = Math.abs(si);
+  if (Number.isFinite(si) && abs >= 0.01 && abs < 1e4) {
+    const digits = param.format?.digits ?? DEFAULT_DIGITS;
+    // Round to significant digits first, then fix the decimal places, so the
+    // precision matches the scientific branch and `toPrecision` is never left to
+    // escalate to exponential form on its own (it does, at 1000 with 3 digits).
+    const rounded = Number(si.toPrecision(digits));
+    const decimals = Math.min(
+      20,
+      Math.max(0, digits - 1 - Math.floor(Math.log10(Math.abs(rounded)))),
+    );
+    return `${rounded.toFixed(decimals)}${unitToTex(param.unit)}`;
   }
 
   const text = formatNumber(si, { ...param.format, notation: 'scientific' });

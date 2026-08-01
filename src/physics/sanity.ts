@@ -14,8 +14,10 @@
  * Called once from `main.tsx` behind `import.meta.env.DEV`. Nothing here runs
  * in a production build.
  */
+import { scaleAnchors } from '@/content/modules/scale-of-the-universe';
 import { AU, C, G, M_EARTH, M_SUN, R_EARTH, R_SUN } from './constants';
 import { apexAltitude, integrateFlight, timestepFor } from './escape';
+import { decadesBetween, lightTravelTime } from './scale';
 import {
   apoapsisDistance,
   period,
@@ -293,6 +295,102 @@ export function verifyKeplerModel(): number {
   );
 
   const summary = `kepler orbit checks — ${lines.length - failures}/${lines.length} passed`;
+
+  // eslint-disable-next-line no-console
+  console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);
+
+  return failures;
+}
+
+/**
+ * Cross-validates the scale ladder.
+ *
+ * Also outside the five-check count. Three checks:
+ *
+ *   1. Light travel time from the Sun to Earth, through `scale.ts`. A deliberate
+ *      duplicate of check 5 above by a different route — that check computes
+ *      AU/C inline, this one goes through the function every readout in the
+ *      module calls, so the two agree only if the shared function is right.
+ *   2. The height of the ladder: proton to observable universe is ~41.7 decades.
+ *      One number that fails if any of the constants, the CODATA-cited literals,
+ *      or the arithmetic building either end anchor has slipped.
+ *   3. The ladder is a ladder: every rung finite, strictly positive, and
+ *      strictly larger than the one below it. The sim's zoom direction and the
+ *      "decades above the previous anchor" readout both assume monotonicity, so
+ *      an out-of-order anchor would render a transition that runs backwards.
+ */
+export function verifyScaleLadder(): number {
+  const lines: string[] = [];
+  let failures = 0;
+
+  const report = (
+    name: string,
+    formula: string,
+    detail: string,
+    error: number,
+    tolerance: number,
+  ) => {
+    const passed = Math.abs(error) <= tolerance;
+    if (!passed) failures += 1;
+    lines.push(
+      `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
+        `      ${formula}\n` +
+        `      ${detail}` +
+        `  ·  Δ ${(error * 100).toFixed(4)}%` +
+        `  ·  tolerance ±${(tolerance * 100).toFixed(1)}%`,
+    );
+  };
+
+  /* 1 — Sun to Earth, via scale.ts rather than inline arithmetic. */
+  const sunToEarth = lightTravelTime(AU);
+  report(
+    'Light travel time, Sun to Earth, via lightTravelTime()',
+    't = d / c',
+    `computed ${significant(sunToEarth)} s ` +
+      `(${Math.floor(sunToEarth / 60)} min ${(sunToEarth % 60).toFixed(1)} s)  ·  expected 500 s`,
+    relativeError(sunToEarth, 500),
+    // The skill states this one as "about 8 minutes 20 seconds", so the same
+    // relaxed tolerance check 5 uses applies here for the same reason.
+    LOOSE,
+  );
+
+  /* 2 — the height of the ladder. */
+  const first = scaleAnchors[0];
+  const last = scaleAnchors[scaleAnchors.length - 1];
+  const height = first && last ? decadesBetween(first.size, last.size) : NaN;
+  report(
+    'Ladder height: proton to observable universe',
+    'n = log₁₀(b / a)',
+    `computed ${significant(height)} decades  ·  expected 41.7 decades`,
+    relativeError(height, 41.7),
+    TIGHT,
+  );
+
+  /* 3 — every rung finite, positive, and strictly above the one below. */
+  let broken = 0;
+  const detail: string[] = [];
+  scaleAnchors.forEach((anchor, i) => {
+    const below = i > 0 ? scaleAnchors[i - 1] : undefined;
+    const ok =
+      Number.isFinite(anchor.size) &&
+      anchor.size > 0 &&
+      (below === undefined || anchor.size > below.size);
+    if (!ok) {
+      broken += 1;
+      detail.push(`${anchor.id}=${anchor.size}`);
+    }
+  });
+  const ordered = broken === 0;
+  if (!ordered) failures += 1;
+  lines.push(
+    `${ordered ? 'PASS' : 'FAIL'}  Anchors finite, positive and strictly increasing\n` +
+      `      s₀ < s₁ < … < s₉,  all finite and > 0\n` +
+      `      ${scaleAnchors.length} anchors, ${broken} broken` +
+      `${detail.length > 0 ? ` (${detail.join(', ')})` : ''}` +
+      `  ·  span ${significant(first?.size ?? NaN)} m → ${significant(last?.size ?? NaN)} m`,
+  );
+
+  const summary = `scale ladder checks — ${lines.length - failures}/${lines.length} passed`;
 
   // eslint-disable-next-line no-console
   console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);
