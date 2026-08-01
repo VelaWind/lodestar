@@ -157,7 +157,8 @@ export const scaleAnchors: ScaleAnchor[] = [
     sizeNote:
       'Diameter of the stellar disc, about 100,000 light-years. The edge is a convention: the disc thins out gradually rather than ending, and the stellar halo reaches much further, so published diameters run from roughly 100,000 to 200,000 light-years depending on where the count stops.',
     comparison: 'About 23,500 trips to Proxima Centauri across the galaxy.',
-    source: 'Review estimates; the figure is convention-dependent',
+    source:
+      'Bland-Hawthorn & Gerhard 2016 (ARA&A 54); the disk edge is convention-dependent and estimates vary.',
   },
   {
     id: 'observable-universe',

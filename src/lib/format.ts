@@ -34,9 +34,12 @@ function formatNumber(value: number, fmt: ParamFormat | undefined): string {
     notation === 'scientific' || (notation === 'auto' && (abs >= 1e5 || abs < 1e-3));
 
   if (useScientific) {
-    const exp = Math.floor(Math.log10(abs));
-    const mantissa = value / 10 ** exp;
-    return `${mantissa.toFixed(Math.max(0, digits - 1))}e${exp}`;
+    let exp = Math.floor(Math.log10(abs));
+    const places = Math.max(0, digits - 1);
+    // Rounding the mantissa can carry it up to 10 — 9999 at three figures — and
+    // "10.00e3" is not scientific notation. Renormalize when that happens.
+    if (Math.abs(Number((value / 10 ** exp).toFixed(places))) >= 10) exp += 1;
+    return `${(value / 10 ** exp).toFixed(places)}e${exp}`;
   }
   if (notation === 'fixed') return value.toFixed(digits);
   // 'auto' in the human range: significant digits, trailing zeros trimmed.
@@ -103,17 +106,21 @@ export function siValueToTex(param: Param, si: number): string {
   // decimal, sensible significant figures" — scientific notation is pure cost.
   // A scale slider parked on a human reads 1.70 m, not 1.70 × 10⁰ m. Outside the
   // band the exponent is the only thing keeping the number legible, so it stays.
-  const abs = Math.abs(si);
-  if (Number.isFinite(si) && abs >= 0.01 && abs < 1e4) {
-    const digits = param.format?.digits ?? DEFAULT_DIGITS;
-    // Round to significant digits first, then fix the decimal places, so the
-    // precision matches the scientific branch and `toPrecision` is never left to
-    // escalate to exponential form on its own (it does, at 1000 with 3 digits).
-    const rounded = Number(si.toPrecision(digits));
-    const decimals = Math.min(
-      20,
-      Math.max(0, digits - 1 - Math.floor(Math.log10(Math.abs(rounded)))),
-    );
+  //
+  // The band is tested against the value *after* significant-figure rounding,
+  // because that is the only number the reader ever sees. At three figures
+  // 9999 m displays as 10000 m, so it takes the scientific branch and renders
+  // 1.00 × 10⁴ m alongside its neighbours, rather than being the one plain
+  // 10000 m on a page where every other 10000 m is an exponent. The lower edge
+  // works the same way: 0.009999 rounds to 0.0100 and prints plainly.
+  const digits = param.format?.digits ?? DEFAULT_DIGITS;
+  // Round first, then fix the decimal places, so the precision matches the
+  // scientific branch and `toPrecision` is never left to escalate to exponential
+  // form on its own (it does, at 1000 with 3 digits).
+  const rounded = Number.isFinite(si) ? Number(si.toPrecision(digits)) : si;
+  const abs = Math.abs(rounded);
+  if (Number.isFinite(rounded) && abs >= 0.01 && abs < 1e4) {
+    const decimals = Math.min(20, Math.max(0, digits - 1 - Math.floor(Math.log10(abs))));
     return `${rounded.toFixed(decimals)}${unitToTex(param.unit)}`;
   }
 

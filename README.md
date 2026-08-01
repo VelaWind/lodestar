@@ -1,58 +1,43 @@
 # Lodestar
 
-Space, in layers you choose to open.
+**Space, explained in layers you choose to open.**
 
-Every topic is a **module**: one typed data file that renders as seven
-progressive-disclosure layers — Hook, Intuition, Play with it, Real picture, The
-math, Going deeper, Connections. A global depth setting (Curious / Student /
-Deep) controls which layers are *expanded by default*. It never hides, removes,
-or rewrites content — every layer is present and manually expandable at every
-tier.
+Live: https://lodestar-nu-six.vercel.app
 
-Simulations run on real physical parameters in SI units. The math layer and the
-simulation read the same `Param` objects, so there is never a second copy of a
-constant that can drift.
+Lodestar is an interactive astrophysics education site. Every topic is a *module* that unfolds one concept in seven layers — from a one-sentence hook, through an everyday analogy and a live simulation, down to the derivation and the open research questions. A persistent depth setting (Curious / Student / Deep) controls which layers open by default. It never changes the text: there is one module per topic, written once, serving readers from "never studied physics" to "works in the field."
 
-## Running it
+## The rule that governs everything
+
+Every simulation runs on real physical values in SI units. Slider labels are friendly at lower depth tiers, but the parameter underneath is always a real quantity with a unit and a symbol — and the math layer reads **the same parameter objects** the visualization does. Drag the mass slider and the equation updates with your value; the number in the formula is the number in the physics loop. Nothing is faked for the sake of a visual.
+
+Every approximation a simulation makes is disclosed beside the sim, not buried in prose. Every module cites primary sources. A dev-time sanity suite recomputes known quantities (Earth's orbital period, escape velocity, the Schwarzschild radius of the Sun, light travel times) through the same code paths the sims use — if a check fails, the sim is wrong, not the constants.
+
+## Architecture
+
+- **A module is data, not code.** Each topic is one typed data file (prose as a serializable AST, params, equations, references) plus one sim component. The registry discovers both via glob — adding a module requires zero shell changes, which is verified on every module added.
+- **One source of truth per quantity.** Physics lives in `src/physics/`, shared by the animation loop, the readouts, and the equation renderer. Constants are defined once, cited to CODATA/IAU, and never inlined.
+- **Sims are canvas-first.** rAF loops draw from refs without per-frame React renders; `prefers-reduced-motion` gets static renderings with the same information.
+
+## Stack
+
+Vite · React 18 · React Router · TypeScript (strict) · Tailwind · Zustand · Framer Motion · KaTeX · Canvas 2D
+
+## Modules
+
+| Module | The one idea |
+|---|---|
+| Escape velocity | The speed at which a thrown stone never comes back |
+| Kepler orbits | Speed and distance trade exactly; the period fits on one line |
+| Scale of the universe | Forty-two factors of ten, from a proton to the horizon |
+
+More are planned; each module's Connections layer links onward, including to modules that don't exist yet — that's the backlog, in public.
+
+## Development
 
 ```bash
 npm install
-npm run dev
+npm run dev        # sanity suite runs in the browser console
+npm run build      # typecheck + production build
 ```
 
-`npm run build` typechecks then builds to `dist/`. Deploys to Vercel as a static
-site (`vercel.json` handles the SPA rewrite).
-
-## Adding a module
-
-Two files, no shell edits. The registry is built with `import.meta.glob`, so
-nothing needs registering by hand.
-
-1. **`src/content/modules/<id>.ts`** — default-exports a `Module`. The filename
-   must match the `id` field; that id is the URL (`/m/<id>`).
-2. **`src/sims/<simKey>.tsx`** — default-exports a component taking `SimProps`.
-   The filename is the `simKey` referenced from the module's `play` layer.
-
-Copy `src/content/modules/escape-velocity.ts` as a starting point. Authoring
-helpers for the rich-text AST live in `src/content/rich.ts`.
-
-A sim never renders its own sliders — the shell owns parameter controls, so
-every module gets log-aware, LaTeX-labelled, SI-correct inputs for free. A sim
-receives already-clamped values and draws.
-
-## Layout
-
-```
-src/
-  content/     types, authoring helpers, registry, module data files
-  sims/        one lazy-loaded component per simulation
-  components/  shell + layer renderers
-  pages/       / and /m/:id
-  store/       zustand (depth tier persisted; param values are not)
-  lib/         layer order + tier policy, SI formatting
-```
-
-Key decisions are documented as comments at the top of the file they affect —
-`content/types.ts` for the content model, `content/registry.ts` for the
-zero-edit wiring, `components/Tex.tsx` for the KaTeX choice, `lib/layers.ts` for
-the depth policy.
+The `.claude/skills/` directory contains the project's authoring standards — the seven-layer module format and the physics-accuracy rules — written as [Claude Code skills](https://docs.anthropic.com/en/docs/claude-code) so they are enforced during AI-assisted development. This project is built solo with Claude Code; the skills are how editorial and physical consistency survive that.
