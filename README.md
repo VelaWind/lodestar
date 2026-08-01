@@ -26,6 +26,7 @@ Vite · React 18 · React Router · TypeScript (strict) · Tailwind · Zustand �
 
 | Module | The one idea |
 |---|---|
+| Black holes | The bigger the hole, the gentler its doorstep |
 | Escape velocity | The speed at which a thrown stone never comes back |
 | Kepler orbits | Speed and distance trade exactly; the period fits on one line |
 | Scale of the universe | Forty-two factors of ten, from a proton to the horizon |

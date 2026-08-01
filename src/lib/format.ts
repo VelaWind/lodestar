@@ -8,6 +8,32 @@ import type { DepthTier } from '@/lib/layers';
 const DEFAULT_DIGITS = 3;
 
 /**
+ * The skill's plain-decimal display band, in one place: "below 10 000 and above
+ * 0.01: plain decimal, sensible significant figures." Returns the plain
+ * rendering, or `null` when the value is outside the band and the exponent is
+ * the only thing keeping it legible.
+ *
+ * The band is tested against the value *after* significant-figure rounding,
+ * because that is the only number the reader ever sees. At three figures 9999
+ * displays as 10000, so it falls outside and renders as 1.00 × 10⁴ alongside its
+ * neighbours, rather than being the one plain 10000 on a page where every other
+ * one is an exponent. The lower edge works the same way: 0.009999 rounds to
+ * 0.0100 and prints plainly.
+ *
+ * Rounding first and fixing the decimal places second keeps the precision
+ * identical to the scientific branch, and stops `toPrecision` escalating to
+ * exponential form on its own (it does, at 1000 with 3 digits).
+ */
+function plainDecimalInBand(value: number, digits: number): string | null {
+  if (!Number.isFinite(value)) return null;
+  const rounded = Number(value.toPrecision(digits));
+  const abs = Math.abs(rounded);
+  if (!(abs >= 0.01 && abs < 1e4)) return null;
+  const decimals = Math.min(20, Math.max(0, digits - 1 - Math.floor(Math.log10(abs))));
+  return rounded.toFixed(decimals);
+}
+
+/**
  * The label a slider shows at a given tier. Curious and Student readers get the
  * plain-language phrasing; Deep readers get the textbook term, rendered next to
  * the symbol by the caller.
@@ -34,6 +60,14 @@ function formatNumber(value: number, fmt: ParamFormat | undefined): string {
     notation === 'scientific' || (notation === 'auto' && (abs >= 1e5 || abs < 1e-3));
 
   if (useScientific) {
+    // Inside the band, an exponent is pure cost: a scale slider parked on a
+    // human reads 1.70 m, not 1.70e0 m. This is the same rule `siValueToTex`
+    // applies to a substituted equation value, so a slider readout, a bind chip
+    // and the number in the formula can no longer disagree about whether a
+    // metre-sized quantity needs an exponent. Outside the band nothing changes.
+    const plain = plainDecimalInBand(value, digits);
+    if (plain !== null) return plain;
+
     let exp = Math.floor(Math.log10(abs));
     const places = Math.max(0, digits - 1);
     // Rounding the mantissa can carry it up to 10 — 9999 at three figures — and
@@ -106,23 +140,11 @@ export function siValueToTex(param: Param, si: number): string {
   // decimal, sensible significant figures" — scientific notation is pure cost.
   // A scale slider parked on a human reads 1.70 m, not 1.70 × 10⁰ m. Outside the
   // band the exponent is the only thing keeping the number legible, so it stays.
-  //
-  // The band is tested against the value *after* significant-figure rounding,
-  // because that is the only number the reader ever sees. At three figures
-  // 9999 m displays as 10000 m, so it takes the scientific branch and renders
-  // 1.00 × 10⁴ m alongside its neighbours, rather than being the one plain
-  // 10000 m on a page where every other 10000 m is an exponent. The lower edge
-  // works the same way: 0.009999 rounds to 0.0100 and prints plainly.
+  // `plainDecimalInBand` owns that rule for the whole file; `formatNumber`
+  // applies the identical test, so the equation and its slider agree.
   const digits = param.format?.digits ?? DEFAULT_DIGITS;
-  // Round first, then fix the decimal places, so the precision matches the
-  // scientific branch and `toPrecision` is never left to escalate to exponential
-  // form on its own (it does, at 1000 with 3 digits).
-  const rounded = Number.isFinite(si) ? Number(si.toPrecision(digits)) : si;
-  const abs = Math.abs(rounded);
-  if (Number.isFinite(rounded) && abs >= 0.01 && abs < 1e4) {
-    const decimals = Math.min(20, Math.max(0, digits - 1 - Math.floor(Math.log10(abs))));
-    return `${rounded.toFixed(decimals)}${unitToTex(param.unit)}`;
-  }
+  const plain = plainDecimalInBand(si, digits);
+  if (plain !== null) return `${plain}${unitToTex(param.unit)}`;
 
   const text = formatNumber(si, { ...param.format, notation: 'scientific' });
   return `${numberToTex(text)}${unitToTex(param.unit)}`;

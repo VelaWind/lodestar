@@ -10,11 +10,18 @@ import App from './App';
 // is dropped.
 if (import.meta.env.DEV) {
   void import('./physics/sanity').then(
-    ({ runSanityChecks, verifyEscapeIntegrator, verifyKeplerModel, verifyScaleLadder }) => {
+    ({
+      runSanityChecks,
+      verifyEscapeIntegrator,
+      verifyKeplerModel,
+      verifyScaleLadder,
+      verifyBlackHoleModel,
+    }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
       verifyKeplerModel();
       verifyScaleLadder();
+      verifyBlackHoleModel();
     },
   );
 }

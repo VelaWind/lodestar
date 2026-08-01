@@ -24,6 +24,12 @@ export const AU = 1.495_978_707e11; // m
 export const LIGHT_YEAR = 9.460_730_472_5808e15; // m (c × Julian year)
 export const JULIAN_YEAR = 3.155_76e7; // s
 export const H = 6.626_070_15e-34; // J·s, Planck
+/**
+ * Reduced Planck constant, J·s. Derived from `H`, not pasted in: ħ = h/2π is a
+ * definition, so writing 1.054_571_817e-34 here would be hardcoding a derived
+ * number — and would leave two values that could disagree in the last digits.
+ */
+export const H_BAR = H / (2 * Math.PI);
 export const K_B = 1.380_649e-23; // J/K, Boltzmann
 
 // Measured
