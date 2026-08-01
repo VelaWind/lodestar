@@ -32,10 +32,12 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
         <h4 className="font-ui text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">
           Parameters
         </h4>
+        {/* -my-3 keeps the row's visual rhythm while the padding grows the tap
+            target to 44px — a 16px-tall text link is not a mobile control. */}
         <button
           type="button"
           onClick={onReset}
-          className="font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
+          className="-my-3 py-3 font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
         >
           Reset
         </button>
@@ -61,7 +63,10 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
             <input
               id={`p-${param.id}`}
               type="range"
-              className="lodestar-slider mt-2 w-full"
+              // The control is a 44px touch target with a 4px track drawn down
+              // its middle; the negative margins pull the empty space back out
+              // so the visual spacing matches what a 4px input would give.
+              className="lodestar-slider -mb-4 -mt-3 w-full"
               min={bounds.min}
               max={bounds.max}
               step={bounds.step}

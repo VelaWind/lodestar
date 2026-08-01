@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Lodestar">
+  <!-- Two colours: the void the site is set on, and the one star-blue accent.
+       The mark is the four-pointed star the wordmark uses, drawn with concave
+       edges so it still reads as a star at 16px. -->
+  <rect width="32" height="32" rx="7" fill="#06080d" />
+  <path d="M16 3 Q17 13 29 16 Q17 19 16 29 Q15 19 3 16 Q15 13 16 3 Z" fill="#9db4ff" />
+</svg>

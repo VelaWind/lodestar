@@ -73,9 +73,11 @@ function ModuleView({ module }: { module: Module }) {
   return (
     <article>
       <header className="mb-10">
+        {/* -my-2/py-2 here and below: the padding is the tap target, the
+            negative margin keeps the layout identical. */}
         <Link
           to="/"
-          className="font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
+          className="-my-2 inline-block py-2 font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
         >
           ← All modules
         </Link>
@@ -95,11 +97,11 @@ function ModuleView({ module }: { module: Module }) {
         </p>
       </header>
 
-      <div className="mb-1 flex justify-end">
+      <div className="mb-2 flex justify-end">
         <button
           type="button"
           onClick={toggleAll}
-          className="font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
+          className="-my-2 py-2 font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
         >
           {allOpen ? 'Collapse all' : 'Expand all'}
         </button>

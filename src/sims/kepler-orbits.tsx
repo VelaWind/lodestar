@@ -202,13 +202,21 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
       ctx.stroke();
     });
 
+    // Longest caption that fits the frame. There is only one text line's worth
+    // of room above the plot, so a caption too wide for a phone cannot wrap —
+    // it drops to a shorter phrasing that still carries both facts.
+    const captions = [
+      'equal areas, equal times — each wedge is one twelfth of the period',
+      'equal areas, equal times — a twelfth each',
+      'equal areas, equal times',
+    ];
+    const caption =
+      captions.find((text) => ctx.measureText(text).width <= plotW) ??
+      captions[captions.length - 1]!;
+
     ctx.textAlign = 'left';
     ctx.fillStyle = COLORS.inkFaint;
-    ctx.fillText(
-      `equal areas, equal times — each wedge is one twelfth of the period`,
-      plotLeft,
-      plotTop - 12,
-    );
+    ctx.fillText(caption, plotLeft, plotTop - 12);
   }
 
   /* --- the major axis, apsis to apsis --- */
@@ -238,8 +246,19 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.beginPath();
     ctx.arc(px, Y(0), 2, 0, TAU);
     ctx.fill();
-    ctx.textAlign = apsis.align;
-    ctx.fillText(apsis.label, px + apsis.dx, Y(0) - 12);
+
+    // Each label sits outboard of its marker, which is where the room is on a
+    // wide frame. The ellipse is auto-scaled to fill 90% of the plot, so on a
+    // phone both markers sit within a few pixels of the frame edge and the
+    // outboard label runs off it — flip inboard when it will not fit.
+    const width = ctx.measureText(apsis.label).width;
+    const fitsOutboard =
+      apsis.align === 'left'
+        ? px + apsis.dx + width <= plotLeft + plotW
+        : px + apsis.dx - width >= plotLeft;
+
+    ctx.textAlign = fitsOutboard ? apsis.align : apsis.align === 'left' ? 'right' : 'left';
+    ctx.fillText(apsis.label, px + (fitsOutboard ? apsis.dx : -apsis.dx), Y(0) - 12);
   }
 
   /* --- the star, at the focus --- */

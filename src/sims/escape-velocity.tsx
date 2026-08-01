@@ -179,7 +179,8 @@ const COLORS = {
   ember: '#e8bd7d',
 };
 
-const PAD = { left: 62, right: 14, top: 20, bottom: 30 };
+/** `left` is the *minimum* gutter; the real one is measured from the tick labels. */
+const PAD = { left: 62, right: 14, top: 20, bottom: 30, gutterGap: 14 };
 
 /**
  * Draws the whole scene. Pure function of `scene` plus the canvas size — the
@@ -189,7 +190,18 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   const { axis } = scene;
   ctx.clearRect(0, 0, w, h);
 
-  const plotLeft = PAD.left;
+  ctx.font = '11px Inter, system-ui, -apple-system, sans-serif';
+  ctx.textBaseline = 'middle';
+
+  /* The gutter is measured, not assumed. `PAD.left` is a floor: the tick labels
+     run from "surface" to "100,000 km", and a fixed 62 px gutter clipped the
+     widest of them off the left edge of the canvas at every width — invisible on
+     a desktop-sized frame only because nobody looked at the pixel column. */
+  const ticks = axisTicks(axis);
+  const labelOf = (tick: Tick) => (tick.h === 0 ? 'surface' : formatAltitude(tick.h));
+  const widestLabel = ticks.reduce((max, t) => Math.max(max, ctx.measureText(labelOf(t)).width), 0);
+
+  const plotLeft = Math.max(PAD.left, Math.ceil(widestLabel) + PAD.gutterGap);
   const plotRight = w - PAD.right;
   const plotW = plotRight - plotLeft;
   const ySurface = h - PAD.bottom;
@@ -199,9 +211,6 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
 
   const cx = plotLeft + plotW / 2;
   const yFor = (altitude: number) => ySurface - axisFrac(axis, altitude) * plotH;
-
-  ctx.font = '11px Inter, system-ui, -apple-system, sans-serif';
-  ctx.textBaseline = 'middle';
 
   /* --- body: an arc across the bottom, curvature suggesting a sphere --- */
   const bodyRadius = plotW * 1.35;
@@ -224,7 +233,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   ctx.lineWidth = 1;
   ctx.textAlign = 'right';
 
-  for (const tick of axisTicks(axis)) {
+  for (const tick of ticks) {
     const y = yFor(tick.h);
     if (y < yTop - 2 || y > ySurface + 2) continue;
 
@@ -242,7 +251,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.setLineDash([]);
 
     ctx.fillStyle = tick.boundary ? COLORS.star : COLORS.inkFaint;
-    ctx.fillText(tick.h === 0 ? 'surface' : formatAltitude(tick.h), plotLeft - 8, y);
+    ctx.fillText(labelOf(tick), plotLeft - 8, y);
   }
 
   // Say plainly what the axis is doing. An expert reads a log axis instantly,

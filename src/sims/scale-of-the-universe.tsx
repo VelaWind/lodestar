@@ -317,6 +317,39 @@ function drawIcon(
   ctx.restore();
 }
 
+/**
+ * Greedy word wrap to at most `maxLines` lines. Canvas has no line breaking of
+ * its own, so a comparison sentence — "About 930,000 Milky Ways across the
+ * observable universe." — ran off both edges of a phone-width frame. Anything
+ * still too long after `maxLines` keeps its last line long rather than dropping
+ * words: a clipped sentence is a bug, a truncated one is a lie.
+ */
+function wrapLines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number,
+): string[] {
+  if (maxWidth <= 0 || ctx.measureText(text).width <= maxWidth) return [text];
+
+  const lines: string[] = [];
+  let current = '';
+  for (const word of text.split(' ')) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (current && ctx.measureText(candidate).width > maxWidth && lines.length < maxLines - 1) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
+/** Vertical step between wrapped comparison lines, px. */
+const COMPARISON_LINE_HEIGHT = 14;
+
 function drawLabels(
   ctx: CanvasRenderingContext2D,
   anchor: ScaleAnchor,
@@ -324,6 +357,7 @@ function drawLabels(
   yName: number,
   yFoot: number,
   alpha: number,
+  maxWidth: number,
 ): void {
   if (alpha <= 0.001) return;
   ctx.save();
@@ -341,7 +375,12 @@ function drawLabels(
   if (anchor.comparison) {
     ctx.font = '12px Inter, system-ui, -apple-system, sans-serif';
     ctx.fillStyle = COLORS.inkDim;
-    ctx.fillText(anchor.comparison, cx, yFoot);
+    // The block grows upward from `yFoot`, into the empty band above it, so the
+    // bottom of the caption stays put and never reaches the ladder strip.
+    const lines = wrapLines(ctx, anchor.comparison, maxWidth, 2);
+    lines.forEach((line, i) => {
+      ctx.fillText(line, cx, yFoot - (lines.length - 1 - i) * COMPARISON_LINE_HEIGHT);
+    });
   }
   ctx.restore();
 }
@@ -442,11 +481,11 @@ function drawScene(
 
     drawIcon(ctx, from, cx, cy, radius * outgoing, 1 - p);
     drawIcon(ctx, to, cx, cy, radius * incoming, p);
-    drawLabels(ctx, from, cx, yName, yFoot, Math.max(0, 1 - raw * 2));
-    drawLabels(ctx, to, cx, yName, yFoot, Math.max(0, raw * 2 - 1));
+    drawLabels(ctx, from, cx, yName, yFoot, Math.max(0, 1 - raw * 2), right - left);
+    drawLabels(ctx, to, cx, yName, yFoot, Math.max(0, raw * 2 - 1), right - left);
   } else if (to) {
     drawIcon(ctx, to, cx, cy, radius, 1);
-    drawLabels(ctx, to, cx, yName, yFoot, 1);
+    drawLabels(ctx, to, cx, yName, yFoot, 1, right - left);
   }
 
   drawLadder(ctx, scene, left, right, h - 18, param);

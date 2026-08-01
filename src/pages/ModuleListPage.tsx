@@ -1,67 +1,133 @@
 /**
- * The index. Reads the registry, so a new data file appears here automatically.
+ * The front door. Reads the registry, so a new data file appears here
+ * automatically — the only thing this page hard-codes about any module is the
+ * running order below.
  */
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import type { Module } from '@/content/types';
 import { moduleList } from '@/content/registry';
 import { TIERS } from '@/lib/layers';
+import { plainText } from '@/lib/plainText';
 import { useAppStore } from '@/store/useAppStore';
+
+/**
+ * The running order of the front page, and the one place it is decided.
+ *
+ * Alphabetical would open on Black Holes, which is the wrong first impression:
+ * escape velocity is the module that teaches the reader how the seven layers
+ * work, and every other module's hook lands harder once they have seen one. Any
+ * module not named here keeps its registry position, behind these — so adding a
+ * module still takes no edit to this file, it just arrives at the end.
+ */
+const FEATURED: readonly string[] = [
+  'escape-velocity',
+  'kepler-orbits',
+  'scale-of-the-universe',
+  'black-holes',
+];
+
+function orderFor(id: string): number {
+  const index = FEATURED.indexOf(id);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
 
 export function ModuleListPage() {
   const tier = useAppStore((s) => s.tier);
-  const blurb = TIERS.find((t) => t.id === tier)?.blurb;
+  const tierLabel = TIERS.find((t) => t.id === tier)?.label ?? '';
 
   useEffect(() => {
-    document.title = 'Lodestar';
+    document.title = 'Lodestar — space, explained in layers you choose to open';
   }, []);
+
+  /* Drafts are visible while developing and never in a production build, where
+     `import.meta.env.DEV` is statically false and the whole filter folds away. */
+  const listed = useMemo(
+    () =>
+      moduleList
+        .filter((m) => m.status === 'published' || import.meta.env.DEV)
+        .sort((a, b) => orderFor(a.id) - orderFor(b.id)),
+    [],
+  );
 
   return (
     <div>
-      <header className="mb-12 max-w-measure">
-        <h1 className="font-prose text-4xl leading-tight tracking-tight text-ink sm:text-5xl">
-          Space, in layers you choose to open.
+      <header className="mb-14 max-w-measure">
+        <p className="font-ui text-xs uppercase tracking-[0.22em] text-star/70">Lodestar</p>
+        <h1 className="mt-4 font-prose text-4xl leading-[1.15] tracking-tight text-ink sm:text-5xl">
+          Space, explained in layers you choose to open.
         </h1>
-        <p className="mt-4 font-prose text-lg leading-relaxed text-ink-dim">
-          Every topic is one page with seven layers, from a hook to the full derivation. The
-          simulations run on real physical quantities in SI units — the same numbers the equations
-          use.
+        <p className="mt-5 font-prose text-lg leading-relaxed text-ink-dim">
+          Every topic is one page of seven layers, from a one-sentence hook down to the
+          derivation and the open questions. The simulations run on real physical quantities in
+          SI units — the same numbers the equations use.
         </p>
-        <p className="mt-4 font-ui text-sm text-ink-faint">
-          Reading at <span className="text-star">{TIERS.find((t) => t.id === tier)?.label}</span>{' '}
-          depth — {blurb} Nothing is ever hidden; depth only decides where you land.
+        <p className="mt-4 font-ui text-sm leading-relaxed text-ink-faint">
+          The depth control in the header — you are reading at{' '}
+          <span className="text-star">{tierLabel}</span> — decides which layers are open when a
+          page loads; it never changes a word of the text, and nothing is ever hidden.
         </p>
       </header>
 
-      {moduleList.length === 0 ? (
+      {listed.length === 0 ? (
         <p className="font-prose text-ink-faint">
-          No modules yet. Drop a data file in <code className="font-mono">src/content/modules/</code>.
+          No modules yet. Drop a data file in{' '}
+          <code className="font-mono">src/content/modules/</code>.
         </p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
-          {moduleList.map((m) => (
+          {listed.map((m) => (
             <li key={m.id}>
-              <Link
-                to={`/m/${m.id}`}
-                className="group block h-full rounded-xl border border-edge-soft bg-void-800/40 p-6 transition-all hover:border-star-dim/60 hover:bg-void-700/50"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="font-prose text-xl text-ink transition-colors group-hover:text-star">
-                    {m.title}
-                  </h2>
-                  {m.status === 'draft' && (
-                    <span className="mt-1 shrink-0 rounded-full border border-ember/40 px-2 py-0.5 font-ui text-[0.6rem] uppercase tracking-wider text-ember">
-                      draft
-                    </span>
-                  )}
-                </div>
-                <p className="mt-2 font-prose text-sm leading-relaxed text-ink-faint">
-                  {m.tagline}
-                </p>
-              </Link>
+              <ModuleCard module={m} />
             </li>
           ))}
         </ul>
       )}
     </div>
+  );
+}
+
+function ModuleCard({ module }: { module: Module }) {
+  const teaser = plainText(module.layers.hook.body);
+  const params = module.layers.play.params.length;
+
+  return (
+    <Link
+      to={`/m/${module.id}`}
+      className="group flex h-full flex-col rounded-xl border border-edge-soft bg-void-800/40 p-6 transition-all hover:border-star-dim/60 hover:bg-void-700/50"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="font-prose text-xl text-ink transition-colors group-hover:text-star">
+          {module.title}
+        </h2>
+        {module.status === 'draft' && (
+          <span className="mt-1 shrink-0 rounded-full border border-ember/40 px-2 py-0.5 font-ui text-[0.6rem] uppercase tracking-wider text-ember">
+            draft
+          </span>
+        )}
+      </div>
+
+      <p className="mt-2 font-prose text-sm leading-relaxed text-ink-dim">{module.tagline}</p>
+
+      {/* The hook, verbatim from layer 1 — the module's own first sentence is a
+          better teaser than anything written twice. */}
+      {teaser && (
+        <p className="mt-3.5 border-l border-edge-soft pl-3.5 font-prose text-sm leading-relaxed text-ink-faint">
+          {teaser}
+        </p>
+      )}
+
+      <div className="mt-5 flex items-center gap-2 pt-1 font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">
+        <span
+          aria-hidden
+          className="h-1 w-1 rounded-full bg-star/70 transition-colors group-hover:bg-star"
+        />
+        interactive
+        <span aria-hidden className="text-ink-faint/40">
+          ·
+        </span>
+        {params} {params === 1 ? 'parameter' : 'parameters'}
+      </div>
+    </Link>
   );
 }

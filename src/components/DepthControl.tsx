@@ -34,7 +34,10 @@ export function DepthControl() {
               aria-checked={active}
               title={t.blurb}
               onClick={() => setTier(t.id)}
-              className={`relative rounded-full px-3.5 py-1.5 font-ui text-xs transition-colors sm:px-4 ${
+              // px-3 at base buys the ~20px the header needs to fit a 375px
+              // phone; py-2.5 takes the pill to 36px, the most a 64px header can
+              // give a tap target without the chrome growing.
+              className={`relative rounded-full px-3 py-2.5 font-ui text-xs transition-colors sm:px-4 sm:py-1.5 ${
                 active ? 'text-void-900' : 'text-ink-faint hover:text-ink-dim'
               }`}
             >

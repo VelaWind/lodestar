@@ -43,13 +43,26 @@
 
 @layer components {
   /* Range inputs get no useful default styling in a dark theme, and the
-     appearance properties can't be expressed as Tailwind utilities. */
+     appearance properties can't be expressed as Tailwind utilities.
+
+     The element is 44px tall and transparent; the visible 4px track is drawn on
+     the *track* pseudo-element inside it. A slider is the primary control on
+     every module page and a 4px-tall hit area is unusable with a thumb — 44px is
+     the WCAG 2.5.5 / iOS target size. The height is absorbed by negative margins
+     at the call site, so the layout is unchanged. */
   .lodestar-slider {
-    @apply h-1 cursor-pointer appearance-none rounded-full bg-void-500;
+    @apply w-full cursor-pointer appearance-none bg-transparent;
+    height: 44px;
+    touch-action: manipulation;
+  }
+  .lodestar-slider::-webkit-slider-runnable-track {
+    @apply h-1 rounded-full bg-void-500;
   }
   .lodestar-slider::-webkit-slider-thumb {
     @apply h-3.5 w-3.5 appearance-none rounded-full bg-star transition-transform;
     box-shadow: 0 0 0 3px rgb(6 8 13 / 0.9);
+    /* Webkit aligns the thumb to the top of the track: (track − thumb) / 2. */
+    margin-top: -5px;
   }
   .lodestar-slider::-webkit-slider-thumb:hover {
     transform: scale(1.15);
@@ -63,6 +76,22 @@
   }
 }
 
+/* A finger cannot aim at a 14px dot the way a cursor can.
+   Deliberately outside `@layer components`: Tailwind's layer engine flattens a
+   nested `@media` inside a component layer, which silently applied the larger
+   coarse-pointer thumb to every pointer — verified in the built stylesheet. */
+@media (pointer: coarse) {
+  .lodestar-slider::-webkit-slider-thumb {
+    height: 1.125rem;
+    width: 1.125rem;
+    margin-top: -7px;
+  }
+  .lodestar-slider::-moz-range-thumb {
+    height: 1.125rem;
+    width: 1.125rem;
+  }
+}
+
 /* KaTeX sits inside prose set in a serif at ~17px; the default 1.21em is too
    loud next to it. Display math keeps a little more room to breathe. */
 .katex {
@@ -73,4 +102,16 @@
 }
 .katex-display > .katex {
   font-size: 1.15em;
+  /* Display math lives inside an `overflow-x-auto` box. KaTeX centres it with
+     `text-align: center` on a block as wide as that box, so an equation wider
+     than the box overflows *both* edges — and the left overflow is unreachable,
+     because scrolling cannot go negative. On a phone that silently cuts the left
+     of every long equation off.
+
+     Sizing to the content instead makes the overflow one-sided and scrollable,
+     while `margin-inline: auto` keeps anything that fits centred exactly as
+     before. No `max-width`: capping the width here would re-create the
+     two-sided overflow this fixes. */
+  width: max-content;
+  margin-inline: auto;
 }
