@@ -41,10 +41,24 @@ export const link = (href: string, ...children: Inline[]): Inline => ({
   href,
   children,
 });
-/** Inline math. Tagged template so backslashes survive: m`\sqrt{2GM/R}` */
+/**
+ * Inline math. Tagged template so backslashes survive: m`\sqrt{2GM/R}`
+ *
+ * `String.raw(strings, ...)`, not `String.raw({ raw: strings }, ...)`. The
+ * second form looks equivalent and is the reason this file shipped broken for
+ * five module passes: a TemplateStringsArray holds the *cooked* strings, with
+ * `.raw` alongside them, so wrapping it as `{ raw: strings }` hands String.raw
+ * the cooked ones. JavaScript had already eaten every escape by then — `\text`
+ * arrived as a tab followed by "ext", `\sqrt` as the bare word "sqrt" — and
+ * KaTeX rendered the wreckage as italic prose on every published page.
+ *
+ * `tests/equations.test.ts` now snapshots every one of these strings and fails
+ * on a control character or a bare macro name, which is the check that was
+ * missing rather than the knowledge.
+ */
 export const m = (strings: TemplateStringsArray, ...subs: unknown[]): Inline => ({
   k: 'math',
-  tex: String.raw({ raw: strings }, ...subs),
+  tex: String.raw(strings, ...subs),
 });
 
 /** Convenience for the common single-paragraph body. */

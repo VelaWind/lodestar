@@ -452,6 +452,17 @@ test('equation toggle substitutes live values', async ({ page }) => {
     '5.97',
   );
 
+  // Inline math in the note, not just the equation above it. These four are the
+  // damage signatures of the String.raw bug that shipped for five passes: `\text{esc}`
+  // rendering as "extesc", `\varepsilon` as "arepsilon", `\infty` as "infty",
+  // `\sqrt{` as "sqrt{". One cheap assertion, and the site says so directly.
+  const note = (await page.locator('figcaption').first().textContent()) ?? '';
+  expect(
+    note,
+    'inline math is rendering LaTeX macro names as literal text — see rich.ts and String.raw',
+  ).not.toMatch(/extesc|arepsilon|infty|sqrt\{/);
+  expect(note, 'the first note should render v_esc').toContain('esc');
+
   await assertNoOverflow(page, 'escape-velocity math layer in numbers mode');
   await shot(page, '11-equation-numbers');
   assertClean(w, 'equation toggle');

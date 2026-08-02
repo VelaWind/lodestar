@@ -20,6 +20,7 @@ import { __internals } from '@/components/EquationBlock';
 import { moduleList } from '@/content/registry';
 import type { ParamValues } from '@/content/types';
 import { formatWithUnit, siValueToTex } from '@/lib/format';
+import { damageReason, mathNodesOf } from './helpers/mathNodes';
 
 const { substitute } = __internals;
 const published = moduleList.filter((m) => m.status === 'published');
@@ -61,6 +62,46 @@ describe('published equations', () => {
         }
       }
     }
+  });
+});
+
+/**
+ * The gap that let a live defect ship for five passes.
+ *
+ * The block above pins layer 5's display equations, which are authored as plain
+ * strings. Inline math in prose goes through the `m` tag instead, and nothing
+ * ever looked at what came out of it — so when that tag handed String.raw the
+ * cooked template strings, twenty-eight LaTeX fragments across four published
+ * modules turned into italic garbage on the site and every test stayed green.
+ *
+ * Two checks now, deliberately different in kind: a snapshot, so any change to
+ * rendered math has to be read by a human; and a structural assertion, so this
+ * particular failure class fails on its own without anyone reading anything.
+ */
+describe('inline math in prose', () => {
+  const nodes = published.flatMap(mathNodesOf);
+
+  it('finds math in every published module', () => {
+    for (const module of published) {
+      expect(mathNodesOf(module).length, `${module.id} has no inline math`).toBeGreaterThan(0);
+    }
+    // A walker that silently returned nothing would make both checks below pass.
+    expect(nodes.length).toBeGreaterThan(50);
+  });
+
+  it('carries every inline-math and mathBlock tex, unchanged', () => {
+    const byPath: Record<string, string> = {};
+    for (const node of nodes) byPath[node.path] = node.tex;
+    expect(byPath).toMatchSnapshot();
+  });
+
+  it('has no escape eaten by the template-literal cooker', () => {
+    const damaged = nodes
+      .map((node) => ({ node, why: damageReason(node.tex) }))
+      .filter((entry) => entry.why !== null)
+      .map((entry) => `${entry.node.path}: ${entry.why} — ${JSON.stringify(entry.node.tex)}`);
+
+    expect(damaged, `${damaged.length}/${nodes.length} math nodes damaged`).toEqual([]);
   });
 });
 
