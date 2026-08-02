@@ -527,6 +527,75 @@ test('gravitational-waves audio schedules without throwing', async ({ page }) =>
 });
 
 /* ------------------------------------------------------------------ */
+/* About page and social preview                                       */
+/* ------------------------------------------------------------------ */
+
+test('about page is reachable and renders', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await settle(page, 600);
+
+  // The header link is hidden below the sm breakpoint, where 375px leaves it
+  // 2px of room; the footer carries it at every width. Either route works, and
+  // at least one has to be visible wherever the test is running.
+  const header = page.locator('header a[href="/about"]');
+  const footer = page.locator('footer a[href="/about"]');
+  const viaHeader = await header.isVisible();
+  const viaFooter = await footer.isVisible();
+  expect(viaHeader || viaFooter, 'no reachable About link at this viewport').toBe(true);
+  expect(viaFooter, 'the footer link should be present at every width').toBe(true);
+
+  await (viaHeader ? header : footer).click();
+  await expect(page).toHaveURL(/\/about$/);
+
+  await expect(page.getByRole('heading', { level: 1, name: 'How Lodestar is built' })).toBeVisible();
+  for (const heading of [
+    'One module, three readers',
+    'The honesty rule',
+    'Built solo, with an AI pair',
+    'The stack',
+  ]) {
+    await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+  }
+
+  await assertNoOverflow(page, 'about page');
+  await settle(page, 300);
+  await shot(page, '15-about');
+  assertClean(w, 'about page');
+});
+
+test('social preview image is declared absolutely and resolves', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+  const image = await page.locator('meta[property="og:image"]').getAttribute('content');
+  const url = await page.locator('meta[property="og:url"]').getAttribute('content');
+  const card = await page.locator('meta[name="twitter:card"]').getAttribute('content');
+  const twitterImage = await page.locator('meta[name="twitter:image"]').getAttribute('content');
+
+  // A relative og:image is the classic reason a shared link renders blank: the
+  // crawler has no page to resolve it against.
+  expect(image, 'og:image must be an absolute URL').toMatch(/^https:\/\//);
+  expect(url, 'og:url must be an absolute URL').toMatch(/^https:\/\//);
+  expect(twitterImage).toBe(image);
+  expect(card).toBe('summary_large_image');
+
+  const response = await page.request.get(image!);
+  expect(response.status(), `${image} did not return 200`).toBe(200);
+  expect(
+    response.headers()['content-type'],
+    `${image} is not served as a PNG`,
+  ).toContain('image/png');
+
+  const bytes = (await response.body()).length;
+  // eslint-disable-next-line no-console
+  console.log(`  og:image ${image} — ${response.status()}, ${(bytes / 1024).toFixed(1)} kB`);
+  expect(bytes, 'og:image looks empty').toBeGreaterThan(5_000);
+
+  assertClean(w, 'social preview');
+});
+
+/* ------------------------------------------------------------------ */
 /* Reduced motion                                                      */
 /* ------------------------------------------------------------------ */
 

@@ -13,12 +13,26 @@
       content="Interactive astrophysics in seven layers: a hook, an analogy, a simulation running on real SI quantities, the real picture, the math, the derivation, and where it leads. Pick your depth; nothing is hidden."
     />
 
+    <!-- Absolute URLs throughout: a crawler fetching these has no page context to
+         resolve a relative path against, and a relative og:image is the single
+         most common reason a preview card renders blank. -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Lodestar" />
+    <meta property="og:url" content="https://lodestar-nu-six.vercel.app/" />
     <meta property="og:title" content="Lodestar — space, explained in layers you choose to open" />
     <meta
       property="og:description"
       content="Interactive astrophysics in seven layers. Every simulation runs on real SI quantities — the same numbers the equations use — and every figure is cited."
     />
+    <meta property="og:image" content="https://lodestar-nu-six.vercel.app/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Lodestar — space, explained in layers you choose to open" />
+
+    <!-- Title and description fall back to the og:* tags above; the card type and
+         the image are what X needs stated for itself. -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://lodestar-nu-six.vercel.app/og.png" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
