@@ -126,38 +126,95 @@ function significant(value: number): string {
   return Number(value.toPrecision(6)).toString();
 }
 
+/* ------------------------------------------------------------------ */
+/* Results                                                             */
+/* ------------------------------------------------------------------ */
+
 /**
- * Runs the five sanity checks and logs computed vs expected for each. Returns
- * the number of failures so a caller could escalate; nothing does today.
+ * One check's outcome.
+ *
+ * `line` is the exact string the dev console prints, carried on the result
+ * rather than rebuilt by the caller. The browser output and the committed test
+ * suite therefore read the same characters, and a check cannot pass in one place
+ * while reporting something else in the other.
  */
-export function runSanityChecks(): number {
-  const lines: string[] = [];
-  let failures = 0;
+export interface CheckResult {
+  name: string;
+  passed: boolean;
+  /** Computed against expected, without the PASS/FAIL prefix. */
+  detail: string;
+  /** The console line, verbatim. */
+  line: string;
+}
 
-  for (const check of CHECKS) {
-    const error = relativeError(check.computed, check.expected);
-    const passed = Math.abs(error) <= check.tolerance;
-    if (!passed) failures += 1;
+/** A group of checks that logs as a single console message. */
+export interface CheckBlock {
+  title: string;
+  results: CheckResult[];
+  failures: number;
+}
 
-    const gloss = check.gloss ? ` (${check.gloss(check.computed)})` : '';
-    lines.push(
-      `${passed ? 'PASS' : 'FAIL'}  ${check.name}\n` +
-        `      ${check.formula}\n` +
-        `      computed ${significant(check.computed)} ${check.unit}${gloss}` +
-        `  ·  expected ${check.expected} ${check.unit}` +
-        `  ·  Δ ${(error * 100).toFixed(4)}%` +
-        `  ·  tolerance ±${(check.tolerance * 100).toFixed(1)}%`,
-    );
-  }
+function head(name: string, formula: string, detail: string, passed: boolean): string {
+  return `${passed ? 'PASS' : 'FAIL'}  ${name}\n      ${formula}\n      ${detail}`;
+}
 
-  const summary = `physics sanity checks — ${CHECKS.length - failures}/${CHECKS.length} passed`;
+/** A check stated as a tolerance on a relative error. */
+function toleranced(
+  name: string,
+  formula: string,
+  detail: string,
+  error: number,
+  tolerance: number,
+): CheckResult {
+  const passed = Math.abs(error) <= tolerance;
+  return {
+    name,
+    passed,
+    detail,
+    line:
+      `${head(name, formula, detail, passed)}` +
+      `  ·  Δ ${(error * 100).toFixed(4)}%` +
+      `  ·  tolerance ±${(tolerance * 100).toFixed(1)}%`,
+  };
+}
+
+/** A check stated as a plain predicate: an order of magnitude, a range, an ordering. */
+function asserted(name: string, formula: string, detail: string, passed: boolean): CheckResult {
+  return { name, passed, detail, line: head(name, formula, detail, passed) };
+}
+
+/** Logs a block exactly as it has always been logged, and returns it. */
+function emit(title: string, results: CheckResult[]): CheckBlock {
+  const failures = results.reduce((n, r) => n + (r.passed ? 0 : 1), 0);
+  const summary = `${title} — ${results.length - failures}/${results.length} passed`;
 
   // eslint-disable-next-line no-console
   console[failures > 0 ? 'warn' : 'info'](
-    `[lodestar] ${summary}\n${lines.join('\n')}`,
+    `[lodestar] ${summary}\n${results.map((r) => r.line).join('\n')}`,
   );
 
-  return failures;
+  return { title, results, failures };
+}
+
+/**
+ * Runs the five sanity checks and logs computed vs expected for each. Returns
+ * the block so a caller can escalate — `main.tsx` only wants the console output,
+ * `tests/physics.test.ts` asserts on every result.
+ */
+export function runSanityChecks(): CheckBlock {
+  const results = CHECKS.map((check) => {
+    const gloss = check.gloss ? ` (${check.gloss(check.computed)})` : '';
+    return toleranced(
+      check.name,
+      check.formula,
+      `computed ${significant(check.computed)} ${check.unit}${gloss}` +
+        `  ·  expected ${check.expected} ${check.unit}`,
+      relativeError(check.computed, check.expected),
+      check.tolerance,
+    );
+  });
+
+  return emit('physics sanity checks', results);
 }
 
 /**
@@ -172,7 +229,7 @@ export function runSanityChecks(): number {
  * Kept out of the five-check count above: that list is the skill's, this is
  * ours. Tolerance is 1%, comfortably tighter than any visible discrepancy.
  */
-export function verifyEscapeIntegrator(): number {
+export function verifyEscapeIntegrator(): CheckBlock {
   const v0 = 8000; // m/s — below Earth's threshold, so there is an apex to find
   const closedForm = apexAltitude(M_EARTH, R_EARTH, v0);
   const dt = timestepFor(M_EARTH, R_EARTH);
@@ -182,18 +239,24 @@ export function verifyEscapeIntegrator(): number {
 
   const error = relativeError(integrated, closedForm);
   const passed = Math.abs(error) <= 0.01;
+  const name = 'apex altitude: closed form vs integrator';
+  const detail =
+    `closed form ${significant(closedForm / 1000)} km` +
+    `  ·  integrated ${significant(integrated / 1000)} km`;
+
+  // The one block that is a single check, so it logs as one line without a
+  // summary header — and carries a second body line naming the conditions.
+  const line =
+    `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
+    `      r_max = 1 / (1/R − v₀²/2GM),  against semi-implicit Euler on dv/dt = −GM/r²\n` +
+    `      Earth M/R, v₀ = ${v0 / 1000} km/s, dt = ${significant(dt)} s\n` +
+    `      ${detail}` +
+    `  ·  Δ ${(error * 100).toFixed(4)}%  ·  tolerance ±1.0%`;
 
   // eslint-disable-next-line no-console
-  console[passed ? 'info' : 'warn'](
-    `[lodestar] ${passed ? 'PASS' : 'FAIL'}  apex altitude: closed form vs integrator\n` +
-      `      r_max = 1 / (1/R − v₀²/2GM),  against semi-implicit Euler on dv/dt = −GM/r²\n` +
-      `      Earth M/R, v₀ = ${v0 / 1000} km/s, dt = ${significant(dt)} s\n` +
-      `      closed form ${significant(closedForm / 1000)} km` +
-      `  ·  integrated ${significant(integrated / 1000)} km` +
-      `  ·  Δ ${(error * 100).toFixed(4)}%  ·  tolerance ±1.0%`,
-  );
+  console[passed ? 'info' : 'warn'](`[lodestar] ${line}`);
 
-  return passed ? 0 : 1;
+  return { title: name, results: [{ name, passed, detail, line }], failures: passed ? 0 : 1 };
 }
 
 /**
@@ -220,10 +283,9 @@ export function verifyEscapeIntegrator(): number {
  *      v·r there is exactly h. Two independent formulas — one from energy, one
  *      from angular momentum — that must agree.
  */
-export function verifyKeplerModel(): number {
+export function verifyKeplerModel(): CheckBlock {
   const TAU = 2 * Math.PI;
-  const lines: string[] = [];
-  let failures = 0;
+  const results: CheckResult[] = [];
 
   const report = (
     name: string,
@@ -232,15 +294,7 @@ export function verifyKeplerModel(): number {
     error: number,
     tolerance: number,
   ) => {
-    const passed = Math.abs(error) <= tolerance;
-    if (!passed) failures += 1;
-    lines.push(
-      `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
-        `      ${formula}\n` +
-        `      ${detail}` +
-        `  ·  Δ ${(error * 100).toFixed(4)}%` +
-        `  ·  tolerance ±${(tolerance * 100).toFixed(1)}%`,
-    );
+    results.push(toleranced(name, formula, detail, error, tolerance));
   };
 
   /* 1 — Earth's period, via kepler.ts rather than inline arithmetic. */
@@ -309,12 +363,7 @@ export function verifyKeplerModel(): number {
     TIGHT,
   );
 
-  const summary = `kepler orbit checks — ${lines.length - failures}/${lines.length} passed`;
-
-  // eslint-disable-next-line no-console
-  console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);
-
-  return failures;
+  return emit('kepler orbit checks', results);
 }
 
 /**
@@ -346,9 +395,8 @@ export function verifyKeplerModel(): number {
  *      module makes: at a supermassive horizon the stretch is weaker than
  *      standing on Earth.
  */
-export function verifyBlackHoleModel(): number {
-  const lines: string[] = [];
-  let failures = 0;
+export function verifyBlackHoleModel(): CheckBlock {
+  const results: CheckResult[] = [];
 
   const report = (
     name: string,
@@ -357,15 +405,7 @@ export function verifyBlackHoleModel(): number {
     error: number,
     tolerance: number,
   ) => {
-    const passed = Math.abs(error) <= tolerance;
-    if (!passed) failures += 1;
-    lines.push(
-      `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
-        `      ${formula}\n` +
-        `      ${detail}` +
-        `  ·  Δ ${(error * 100).toFixed(4)}%` +
-        `  ·  tolerance ±${(tolerance * 100).toFixed(1)}%`,
-    );
+    results.push(toleranced(name, formula, detail, error, tolerance));
   };
 
   /* 1 — r_s of the Sun, via blackhole.ts rather than inline arithmetic. */
@@ -394,13 +434,15 @@ export function verifyBlackHoleModel(): number {
   const evapYears = evaporationTime(M_SUN) / JULIAN_YEAR;
   const evapExponent = Math.floor(Math.log10(evapYears));
   const evapOk = evapExponent >= 66 && evapExponent <= 68;
-  if (!evapOk) failures += 1;
-  lines.push(
-    `${evapOk ? 'PASS' : 'FAIL'}  Evaporation time of one solar mass\n` +
-      `      t = 5120π G²M³ / (ħc⁴)\n` +
-      `      computed ${significant(evapYears)} yr (10^${evapExponent})  ·  ` +
-      `expected order 10^67 yr  ·  accepted 10^66 – 10^68` +
-      `  ·  photons-only estimate, good to a factor of a few`,
+  results.push(
+    asserted(
+      'Evaporation time of one solar mass',
+      't = 5120π G²M³ / (ħc⁴)',
+      `computed ${significant(evapYears)} yr (10^${evapExponent})  ·  ` +
+        `expected order 10^67 yr  ·  accepted 10^66 – 10^68` +
+        `  ·  photons-only estimate, good to a factor of a few`,
+      evapOk,
+    ),
   );
 
   /* 4 — tidal acceleration at the horizon: the 1/M² scaling, and the verdict. */
@@ -423,20 +465,17 @@ export function verifyBlackHoleModel(): number {
   );
 
   const gentle = tidalSupermassive < 9.80665;
-  if (!gentle) failures += 1;
-  lines.push(
-    `${gentle ? 'PASS' : 'FAIL'}  A supermassive horizon stretches you less than Earth's surface pulls\n` +
-      `      Δa(4.15e6 M_☉, h = ${PERSON_HEIGHT} m)  <  g₀ = 9.80665 m/s²\n` +
-      `      computed ${significant(tidalSupermassive)} m/s²  ·  ` +
-      `${significant(tidalSupermassive / 9.80665)} g`,
+  results.push(
+    asserted(
+      "A supermassive horizon stretches you less than Earth's surface pulls",
+      `Δa(4.15e6 M_☉, h = ${PERSON_HEIGHT} m)  <  g₀ = 9.80665 m/s²`,
+      `computed ${significant(tidalSupermassive)} m/s²  ·  ` +
+        `${significant(tidalSupermassive / 9.80665)} g`,
+      gentle,
+    ),
   );
 
-  const summary = `black hole checks — ${lines.length - failures}/${lines.length} passed`;
-
-  // eslint-disable-next-line no-console
-  console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);
-
-  return failures;
+  return emit('black hole checks', results);
 }
 
 /**
@@ -467,9 +506,8 @@ export function verifyBlackHoleModel(): number {
  *      direct transcription of a standard result, and it is what the waveform's
  *      every cycle depends on.
  */
-export function verifyGravitationalWaveModel(): number {
-  const lines: string[] = [];
-  let failures = 0;
+export function verifyGravitationalWaveModel(): CheckBlock {
+  const results: CheckResult[] = [];
 
   const report = (
     name: string,
@@ -478,15 +516,7 @@ export function verifyGravitationalWaveModel(): number {
     error: number,
     tolerance: number,
   ) => {
-    const passed = Math.abs(error) <= tolerance;
-    if (!passed) failures += 1;
-    lines.push(
-      `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
-        `      ${formula}\n` +
-        `      ${detail}` +
-        `  ·  Δ ${(error * 100).toFixed(4)}%` +
-        `  ·  tolerance ±${(tolerance * 100).toFixed(1)}%`,
-    );
+    results.push(toleranced(name, formula, detail, error, tolerance));
   };
 
   /* GW150914's published component masses, and the module's default distance. */
@@ -508,23 +538,27 @@ export function verifyGravitationalWaveModel(): number {
   const h100 = strainAmplitude(mc, 100, distance);
   const hExponent = Math.floor(Math.log10(h100));
   const hOk = hExponent === -21;
-  if (!hOk) failures += 1;
-  lines.push(
-    `${hOk ? 'PASS' : 'FAIL'}  Strain of GW150914 at 410 Mpc, evaluated at 100 Hz\n` +
-      `      h = (4/d)(GM_c/c²)^(5/3)(πf/c)^(2/3)\n` +
-      `      computed ${significant(h100)} (10^${hExponent})  ·  expected order 10^-21` +
-      `  ·  sky- and orientation-averaged, so the order is the claim`,
+  results.push(
+    asserted(
+      'Strain of GW150914 at 410 Mpc, evaluated at 100 Hz',
+      'h = (4/d)(GM_c/c²)^(5/3)(πf/c)^(2/3)',
+      `computed ${significant(h100)} (10^${hExponent})  ·  expected order 10^-21` +
+        `  ·  sky- and orientation-averaged, so the order is the claim`,
+      hOk,
+    ),
   );
 
   /* 3 — time to merger from 30 Hz, asserted as a range. */
   const tau30 = timeToMerger(mc, 30);
   const tauOk = tau30 >= 0.1 && tau30 <= 1;
-  if (!tauOk) failures += 1;
-  lines.push(
-    `${tauOk ? 'PASS' : 'FAIL'}  Time to merger from 30 Hz at M_c = ${significant(mc / M_SUN)} M_☉\n` +
-      `      τ = (5/256)(πf)^(-8/3)(GM_c/c³)^(-5/3)\n` +
-      `      computed ${significant(tau30)} s  ·  accepted 0.1 – 1 s` +
-      `  ·  the observed GW150914 chirp ran ~0.2 s from 35 Hz`,
+  results.push(
+    asserted(
+      `Time to merger from 30 Hz at M_c = ${significant(mc / M_SUN)} M_☉`,
+      'τ = (5/256)(πf)^(-8/3)(GM_c/c³)^(-5/3)',
+      `computed ${significant(tau30)} s  ·  accepted 0.1 – 1 s` +
+        `  ·  the observed GW150914 chirp ran ~0.2 s from 35 Hz`,
+      tauOk,
+    ),
   );
 
   /* 4 — cutoff frequency against the closed form, worked out independently. */
@@ -561,12 +595,7 @@ export function verifyGravitationalWaveModel(): number {
     TIGHT,
   );
 
-  const summary = `gravitational wave checks — ${lines.length - failures}/${lines.length} passed`;
-
-  // eslint-disable-next-line no-console
-  console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);
-
-  return failures;
+  return emit('gravitational wave checks', results);
 }
 
 /**
@@ -586,9 +615,8 @@ export function verifyGravitationalWaveModel(): number {
  *      "decades above the previous anchor" readout both assume monotonicity, so
  *      an out-of-order anchor would render a transition that runs backwards.
  */
-export function verifyScaleLadder(): number {
-  const lines: string[] = [];
-  let failures = 0;
+export function verifyScaleLadder(): CheckBlock {
+  const results: CheckResult[] = [];
 
   const report = (
     name: string,
@@ -597,15 +625,7 @@ export function verifyScaleLadder(): number {
     error: number,
     tolerance: number,
   ) => {
-    const passed = Math.abs(error) <= tolerance;
-    if (!passed) failures += 1;
-    lines.push(
-      `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
-        `      ${formula}\n` +
-        `      ${detail}` +
-        `  ·  Δ ${(error * 100).toFixed(4)}%` +
-        `  ·  tolerance ±${(tolerance * 100).toFixed(1)}%`,
-    );
+    results.push(toleranced(name, formula, detail, error, tolerance));
   };
 
   /* 1 — Sun to Earth, via scale.ts rather than inline arithmetic. */
@@ -648,19 +668,16 @@ export function verifyScaleLadder(): number {
     }
   });
   const ordered = broken === 0;
-  if (!ordered) failures += 1;
-  lines.push(
-    `${ordered ? 'PASS' : 'FAIL'}  Anchors finite, positive and strictly increasing\n` +
-      `      s₀ < s₁ < … < s₉,  all finite and > 0\n` +
-      `      ${scaleAnchors.length} anchors, ${broken} broken` +
-      `${detail.length > 0 ? ` (${detail.join(', ')})` : ''}` +
-      `  ·  span ${significant(first?.size ?? NaN)} m → ${significant(last?.size ?? NaN)} m`,
+  results.push(
+    asserted(
+      'Anchors finite, positive and strictly increasing',
+      's₀ < s₁ < … < s₉,  all finite and > 0',
+      `${scaleAnchors.length} anchors, ${broken} broken` +
+        `${detail.length > 0 ? ` (${detail.join(', ')})` : ''}` +
+        `  ·  span ${significant(first?.size ?? NaN)} m → ${significant(last?.size ?? NaN)} m`,
+      ordered,
+    ),
   );
 
-  const summary = `scale ladder checks — ${lines.length - failures}/${lines.length} passed`;
-
-  // eslint-disable-next-line no-console
-  console[failures > 0 ? 'warn' : 'info'](`[lodestar] ${summary}\n${lines.join('\n')}`);
-
-  return failures;
+  return emit('scale ladder checks', results);
 }

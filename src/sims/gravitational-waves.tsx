@@ -646,3 +646,21 @@ function Readout({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Test surface                                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Internals exposed for `tests/canvas.test.ts`, and for nothing else.
+ *
+ * The canvas tests replay this file's drawing against a recording context at
+ * every width the shell can produce and at each parameter's extremes, checking
+ * that no label lands outside the frame and that no coordinate goes non-finite.
+ * That needs the drawing function and the trace window a scene is built around.
+ *
+ * They are exported behind one deliberately ugly name rather than individually,
+ * so the module's real surface stays what it has always been - a default export
+ * taking SimProps - and so nobody imports them by accident.
+ */
+export const __internals = { drawScene, windowFor };

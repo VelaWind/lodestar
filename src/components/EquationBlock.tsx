@@ -119,3 +119,13 @@ export function EquationBlock({ layer, params, values }: Props) {
     </div>
   );
 }
+
+/**
+ * Internals exposed for `tests/equations.test.ts`, and for nothing else.
+ *
+ * `substitute` is what turns an authored template into the LaTeX a reader sees,
+ * so it is the thing a committed snapshot has to be taken of: an accidental
+ * change to number formatting shows up there as a diff on every shipped
+ * equation rather than as a surprise on the page.
+ */
+export const __internals = { substitute };

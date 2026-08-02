@@ -1,0 +1,297 @@
+/**
+ * Every sim's drawing, replayed at every width the shell can produce and at each
+ * parameter's extremes.
+ *
+ * This is the harness that found four real defects during the mobile pass — a
+ * clipped axis label, two apsis labels off both edges, a caption wider than the
+ * frame — none of which a typecheck, a build or a screenshot at one width would
+ * have caught. It is committed here so those defects cannot come back, and so a
+ * new sim inherits the check for free.
+ *
+ * The widths are the canvas widths the layout actually yields: a 375 px phone
+ * gives the sim panel 301 px (viewport − main px-5 − panel p-4 − border), a
+ * 390 px phone 316, and so on up to a wide desktop. Heights are the fixed
+ * `h-[…]` on each sim's canvas box.
+ */
+import { describe, expect, it } from 'vitest';
+
+import blackHoles from '@/content/modules/black-holes';
+import escapeVelocity from '@/content/modules/escape-velocity';
+import gravitationalWaves from '@/content/modules/gravitational-waves';
+import keplerOrbits from '@/content/modules/kepler-orbits';
+import scaleOfTheUniverse, { scaleAnchors } from '@/content/modules/scale-of-the-universe';
+
+import { __internals as bh } from '@/sims/black-holes';
+import { __internals as ev } from '@/sims/escape-velocity';
+import { __internals as gw } from '@/sims/gravitational-waves';
+import { __internals as ko } from '@/sims/kepler-orbits';
+import { __internals as su } from '@/sims/scale-of-the-universe';
+
+import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
+import { chirpMass, fCutoff } from '@/physics/gw';
+import { orbitGeometry, period } from '@/physics/kepler';
+import {
+  iscoRadius,
+  photonSphereRadius,
+  schwarzschildRadius,
+} from '@/physics/blackhole';
+
+import type { Param } from '@/content/types';
+import {
+  describeRecord,
+  nonFiniteDraws,
+  recordingContext,
+  textOutsideFrame,
+} from './helpers/recordingContext';
+
+/** 246 and 301 are a 320 px and a 375 px phone; 900 is a wide desktop. */
+const WIDTHS = [246, 301, 316, 375, 660, 700, 900];
+
+/** One scene to draw, with a label that says which slider settings made it. */
+interface Case {
+  label: string;
+  draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void;
+}
+
+/** min, default and max for a param — the three settings most likely to break. */
+function extremes(param: Param): { stop: string; value: number }[] {
+  return [
+    { stop: 'min', value: param.min },
+    { stop: 'default', value: param.default },
+    { stop: 'max', value: param.max },
+  ];
+}
+
+function paramOf(params: Param[], id: string): Param {
+  const found = params.find((p) => p.id === id);
+  if (!found) throw new Error(`no param "${id}"`);
+  return found;
+}
+
+/* ------------------------------- escape velocity ------------------------------ */
+
+function escapeCases(): Case[] {
+  const params = escapeVelocity.layers.play.params;
+  const cases: Case[] = [];
+
+  for (const m of extremes(paramOf(params, 'M'))) {
+    for (const r of extremes(paramOf(params, 'R'))) {
+      for (const v of extremes(paramOf(params, 'v0'))) {
+        const apex = apexAltitude(m.value, r.value, v.value);
+        const escaping = v.value >= vEsc(m.value, r.value);
+        const axis = ev.makeAxis(r.value, apex, escaping);
+        // One integration per parameter combination, reused across widths.
+        const flight = integrateFlight(
+          m.value,
+          r.value,
+          v.value,
+          timestepFor(m.value, r.value),
+          axis.hTop,
+        );
+        const end = flight.samples[flight.samples.length - 1];
+        const stem = `M=${m.stop} R=${r.stop} v0=${v.stop}`;
+
+        cases.push({
+          label: `${stem} ready`,
+          draw: (ctx, w, h) =>
+            ev.drawScene(ctx, w, h, {
+              apex,
+              escaping,
+              axis,
+              flight: null,
+              cursor: 0,
+              altitude: 0,
+              phase: 'ready',
+              staticPath: false,
+            }),
+        });
+        cases.push({
+          label: `${stem} flown`,
+          draw: (ctx, w, h) =>
+            ev.drawScene(ctx, w, h, {
+              apex,
+              escaping,
+              axis,
+              flight,
+              cursor: flight.samples.length - 1,
+              altitude: end?.altitude ?? 0,
+              phase: escaping ? 'escaped' : flight.leftFrame ? 'offframe' : 'landed',
+              staticPath: true,
+            }),
+        });
+      }
+    }
+  }
+  return cases;
+}
+
+/* ---------------------------------- kepler ----------------------------------- */
+
+function keplerCases(): Case[] {
+  const params = keplerOrbits.layers.play.params;
+  const cases: Case[] = [];
+
+  for (const m of extremes(paramOf(params, 'M'))) {
+    for (const a of extremes(paramOf(params, 'a'))) {
+      for (const e of extremes(paramOf(params, 'e'))) {
+        const T = period(m.value, a.value);
+        const geom = orbitGeometry(a.value, e.value);
+        const wedges = ko.buildWedges(m.value, a.value, e.value, T);
+        const stem = `M=${m.stop} a=${a.stop} e=${e.stop}`;
+
+        for (const sweep of [false, true]) {
+          cases.push({
+            label: `${stem} sweep=${sweep}`,
+            draw: (ctx, w, h) =>
+              ko.drawScene(ctx, w, h, {
+                M: m.value,
+                a: a.value,
+                e: e.value,
+                T,
+                geom,
+                t: T * 0.37,
+                rate: T / 12,
+                wedges: sweep ? wedges : [],
+                sweep,
+                frozen: false,
+              }),
+          });
+        }
+      }
+    }
+  }
+  return cases;
+}
+
+/* ------------------------------- scale ladder -------------------------------- */
+
+function scaleCases(): Case[] {
+  const param = paramOf(scaleOfTheUniverse.layers.play.params, 's');
+  const cases: Case[] = [];
+
+  scaleAnchors.forEach((anchor, index) => {
+    // Resting on the rung, and halfway through the zoom onto it.
+    cases.push({
+      label: `${anchor.id} resting`,
+      draw: (ctx, w, h) =>
+        su.drawScene(ctx, w, h, { index, from: null, started: 0, s: anchor.size }, param, 0),
+    });
+    cases.push({
+      label: `${anchor.id} mid-transition`,
+      draw: (ctx, w, h) =>
+        su.drawScene(
+          ctx,
+          w,
+          h,
+          { index, from: Math.max(0, index - 1), started: 0, s: anchor.size },
+          param,
+          260,
+        ),
+    });
+  });
+  return cases;
+}
+
+/* -------------------------------- black holes -------------------------------- */
+
+function blackHoleCases(): Case[] {
+  const param = paramOf(blackHoles.layers.play.params, 'M');
+  // The three stops, plus four masses chosen to land on each comparison
+  // silhouette and on the crossovers between them.
+  const masses = [
+    { stop: 'min', value: param.min },
+    { stop: 'default', value: param.default },
+    { stop: '1e2 M_SUN', value: 1.9884e32 },
+    { stop: '2e4 M_SUN', value: 3.9768e34 },
+    { stop: '4.15e6 M_SUN', value: 8.2519e36 },
+    { stop: '6.5e9 M_SUN', value: 1.2925e40 },
+    { stop: 'max', value: param.max },
+  ];
+
+  return masses.map(({ stop, value }) => ({
+    label: `M=${stop}`,
+    draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => {
+      const rs = schwarzschildRadius(value);
+      bh.drawScene(ctx, w, h, {
+        rs,
+        rPhoton: photonSphereRadius(value),
+        rIsco: iscoRadius(value),
+        comparison: bh.chooseComparison(2 * rs),
+      });
+    },
+  }));
+}
+
+/* ---------------------------- gravitational waves ---------------------------- */
+
+function gravitationalWaveCases(): Case[] {
+  const params = gravitationalWaves.layers.play.params;
+  const cases: Case[] = [];
+
+  for (const a of extremes(paramOf(params, 'm1'))) {
+    for (const b of extremes(paramOf(params, 'm2'))) {
+      for (const d of extremes(paramOf(params, 'd'))) {
+        const mc = chirpMass(a.value, b.value);
+        const win = gw.windowFor(mc, d.value, fCutoff(a.value, b.value));
+        const stem = `m1=${a.stop} m2=${b.stop} d=${d.stop}`;
+
+        it(`${stem} has a drawable window`, () => {
+          expect(win, `${stem}: no trace window`).not.toBeNull();
+          expect(win && win.duration > 0).toBe(true);
+          expect(win && Number.isFinite(win.peak) && win.peak > 0).toBe(true);
+        });
+
+        if (!win) continue;
+        for (const progress of [0.5, 1]) {
+          cases.push({
+            label: `${stem} p=${progress}`,
+            draw: (ctx, w, h) =>
+              gw.drawScene(ctx, w, h, { mc, d: d.value, window: win, progress, samples: null }),
+          });
+        }
+      }
+    }
+  }
+  return cases;
+}
+
+/* ---------------------------------- the test --------------------------------- */
+
+const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
+  { name: 'escape-velocity', height: 352, cases: escapeCases },
+  { name: 'kepler-orbits', height: 384, cases: keplerCases },
+  { name: 'scale-of-the-universe', height: 384, cases: scaleCases },
+  { name: 'black-holes', height: 320, cases: blackHoleCases },
+  { name: 'gravitational-waves', height: 288, cases: gravitationalWaveCases },
+];
+
+for (const sim of SIMS) {
+  describe(sim.name, () => {
+    const cases = sim.cases();
+
+    it('has cases to draw', () => {
+      expect(cases.length).toBeGreaterThan(0);
+    });
+
+    for (const width of WIDTHS) {
+      it(`draws cleanly at ${width}×${sim.height}`, () => {
+        for (const testCase of cases) {
+          const { ctx, records } = recordingContext();
+          testCase.draw(ctx, width, sim.height);
+
+          const overflowing = textOutsideFrame(records, width, sim.height);
+          expect(
+            overflowing.map(describeRecord),
+            `${sim.name} · ${testCase.label} · ${width}×${sim.height}: text outside the frame`,
+          ).toEqual([]);
+
+          const broken = nonFiniteDraws(records);
+          expect(
+            broken.map(describeRecord),
+            `${sim.name} · ${testCase.label} · ${width}×${sim.height}: non-finite coordinates`,
+          ).toEqual([]);
+        }
+      });
+    }
+  });
+}
