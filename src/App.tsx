@@ -26,10 +26,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppShell>
-        {/* The fallback is deliberately empty rather than a spinner: these
-            chunks arrive in a few tens of milliseconds from the CDN, and a
-            flashed loading state costs more than it explains. */}
-        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+        {/* Empty rather than a spinner: these chunks arrive in tens of
+            milliseconds and a flashed loading state costs more than it explains.
+            But it reserves a full viewport, and that part is not cosmetic — at
+            60vh the footer sat on screen and was shoved down when the route
+            arrived, which Lighthouse measured as 0.156 of layout shift on a
+            module page. A screenful of placeholder puts it below the fold, so
+            nothing visible moves. */}
+        <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
           <Routes>
             <Route path="/" element={<ModuleListPage />} />
             <Route path="/m/:id" element={<ModulePage />} />
