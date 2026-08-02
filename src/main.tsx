@@ -17,6 +17,7 @@ if (import.meta.env.DEV) {
       verifyScaleLadder,
       verifyBlackHoleModel,
       verifyGravitationalWaveModel,
+      verifyTransitModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -24,6 +25,7 @@ if (import.meta.env.DEV) {
       verifyScaleLadder();
       verifyBlackHoleModel();
       verifyGravitationalWaveModel();
+      verifyTransitModel();
     },
   );
 }

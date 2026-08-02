@@ -28,7 +28,6 @@ const published = moduleList.filter((m) => m.status === 'published');
  */
 const KNOWN_BACKLOG = [
   'cosmic-distance-ladder',
-  'exoplanets',
   'expansion-of-the-universe',
   'planetary-atmospheres',
 ];

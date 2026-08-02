@@ -43,6 +43,21 @@ export const R_SUN = 6.957e8; // m
 export const L_SUN = 3.828e26; // W
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
+/**
+ * Jupiter's radius, m — the *volumetric mean*, matching how `R_EARTH` above is
+ * defined, so the two planetary radii in this file mean the same kind of thing.
+ *
+ * Not the IAU nominal equatorial radius, which is 7.149_2e7 m (2015 Resolution
+ * B3); Jupiter is oblate enough that the difference is 2.3%, and it shows up
+ * squared in a transit depth — 1.01% of the Sun's disc with this figure against
+ * 1.06% with the equatorial one. The exoplanet literature quotes planet radii in
+ * equatorial R_J, so a figure taken from a paper is on the other convention;
+ * `physics/transit.ts` says so where it matters.
+ *
+ * Source: NASA Jupiter Fact Sheet (D. R. Williams, NASA GSFC), volumetric mean
+ * radius 69 911 km.
+ */
+export const R_JUPITER = 6.991_1e7; // m, volumetric mean radius
 
 // Scale
 export const OBSERVABLE_UNIVERSE_RADIUS = 4.4e26; // m, ≈46.5 billion ly

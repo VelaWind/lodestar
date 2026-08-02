@@ -19,6 +19,7 @@ import {
   verifyGravitationalWaveModel,
   verifyKeplerModel,
   verifyScaleLadder,
+  verifyTransitModel,
   type CheckBlock,
 } from '@/physics/sanity';
 
@@ -37,6 +38,7 @@ const BLOCKS: { run: () => CheckBlock; checks: number }[] = [
   { run: verifyScaleLadder, checks: 3 },
   { run: verifyBlackHoleModel, checks: 5 },
   { run: verifyGravitationalWaveModel, checks: 5 },
+  { run: verifyTransitModel, checks: 6 },
 ];
 
 /** Runs a block without its console output, which CI does not need to read. */
@@ -71,9 +73,10 @@ for (const { run, checks } of BLOCKS) {
 }
 
 describe('suite integrity', () => {
-  it('has 22 checks across six blocks', () => {
+  it('has 28 checks across seven blocks', () => {
     const total = BLOCKS.reduce((n, b) => n + b.checks, 0);
-    expect(total).toBe(22);
+    expect(total).toBe(28);
+    expect(BLOCKS).toHaveLength(7);
   });
 
   it('still logs one console message per block', () => {

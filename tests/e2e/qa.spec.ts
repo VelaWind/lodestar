@@ -28,6 +28,7 @@ const MODULES = [
   'scale-of-the-universe',
   'black-holes',
   'gravitational-waves',
+  'exoplanets',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -223,7 +224,7 @@ test('landing page', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
   const cards = page.locator('main ul > li > a[href^="/m/"]');
-  await expect(cards).toHaveCount(5);
+  await expect(cards).toHaveCount(MODULES.length);
 
   // Every published module is linked, exactly once.
   const hrefs = await cards.evaluateAll((nodes) =>
@@ -336,7 +337,7 @@ test('escape-velocity launch below and above the threshold', async ({ page }) =>
     '∞',
   );
   await assertNoOverflow(page, 'escape-velocity after launch');
-  await shot(page, '07-escape-velocity-suborbital');
+  await shot(page, '08-escape-velocity-suborbital');
 
   // Above the threshold the same readout must say it escapes.
   await simButton(page, 'Reset').click();
@@ -347,7 +348,7 @@ test('escape-velocity launch below and above the threshold', async ({ page }) =>
   await simButton(page, 'Launch').click();
   await expect(simButton(page, 'Reset')).toBeVisible({ timeout: 20_000 });
   await settle(page, 4_000);
-  await shot(page, '08-escape-velocity-escaping');
+  await shot(page, '09-escape-velocity-escaping');
 
   await assertNoOverflow(page, 'escape-velocity escaping');
   assertClean(w, 'escape-velocity launch');
@@ -388,7 +389,7 @@ test('kepler sweep overlay changes the drawing', async ({ page }) => {
     `kepler: sweep overlay changed the canvas by ${sweepDelta}, animation alone drifts ${animationDrift}`,
   ).toBeGreaterThan(0);
 
-  await shot(page, '09-kepler-sweep');
+  await shot(page, '10-kepler-sweep');
   await assertNoOverflow(page, 'kepler with sweep');
   assertClean(w, 'kepler sweep');
 });
@@ -424,7 +425,7 @@ test('depth tiers change which layers are open', async ({ page }) => {
     await assertNoOverflow(page, `black-holes at ${tier}`);
   }
 
-  await shot(page, '10-depth-deep');
+  await shot(page, '11-depth-deep');
   assertClean(w, 'depth control');
 });
 
@@ -464,7 +465,7 @@ test('equation toggle substitutes live values', async ({ page }) => {
   expect(note, 'the first note should render v_esc').toContain('esc');
 
   await assertNoOverflow(page, 'escape-velocity math layer in numbers mode');
-  await shot(page, '11-equation-numbers');
+  await shot(page, '12-equation-numbers');
   assertClean(w, 'equation toggle');
 });
 
@@ -516,7 +517,7 @@ test('gravitational-waves audio schedules without throwing', async ({ page }) =>
   console.log(`  audio[neutron stars]: ${w.all.length === 0 ? 'silent' : w.all.join(' | ')}`);
   expect(w.pageErrors, 'exceptions from the Web Audio path (neutron stars)').toEqual([]);
 
-  await shot(page, '12-gravitational-waves-audio');
+  await shot(page, '13-gravitational-waves-audio');
   // Stop it rather than waiting out six seconds, which also exercises teardown.
   await page.getByRole('button', { name: 'Stop' }).click();
   await expect(page.getByRole('button', { name: 'Hear it' })).toBeVisible();

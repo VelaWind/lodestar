@@ -16,12 +16,14 @@
 import { describe, expect, it } from 'vitest';
 
 import blackHoles from '@/content/modules/black-holes';
+import exoplanets from '@/content/modules/exoplanets';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
 import scaleOfTheUniverse, { scaleAnchors } from '@/content/modules/scale-of-the-universe';
 
 import { __internals as bh } from '@/sims/black-holes';
+import { __internals as ep } from '@/sims/exoplanets';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as gw } from '@/sims/gravitational-waves';
 import { __internals as ko } from '@/sims/kepler-orbits';
@@ -30,6 +32,7 @@ import { __internals as su } from '@/sims/scale-of-the-universe';
 import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
 import { chirpMass, fCutoff } from '@/physics/gw';
 import { orbitGeometry, period } from '@/physics/kepler';
+import { transitShape } from '@/physics/transit';
 import {
   iscoRadius,
   photonSphereRadius,
@@ -255,6 +258,100 @@ function gravitationalWaveCases(): Case[] {
   return cases;
 }
 
+/* -------------------------------- exoplanets --------------------------------- */
+
+function exoplanetCases(): Case[] {
+  const params = exoplanets.layers.play.params;
+  const cases: Case[] = [];
+
+  const masses = extremes(paramOf(params, 'Mstar'));
+  const radii = extremes(paramOf(params, 'Rstar'));
+  const planets = extremes(paramOf(params, 'Rp'));
+  const distances = extremes(paramOf(params, 'a'));
+
+  // The full cartesian is 81 scenes per width, which is more than the check
+  // needs; sweeping each param against the others' defaults plus the two corners
+  // that matter covers the same ground.
+  const combinations: { label: string; ms: number; rs: number; rp: number; a: number }[] = [];
+  for (const ms of masses) {
+    for (const rs of radii) {
+      for (const rp of planets) {
+        for (const a of distances) {
+          const varied = [ms.stop, rs.stop, rp.stop, a.stop].filter((s) => s !== 'default').length;
+          if (varied > 2) continue;
+          combinations.push({
+            label: `M=${ms.stop} Rs=${rs.stop} Rp=${rp.stop} a=${a.stop}`,
+            ms: ms.value,
+            rs: rs.value,
+            rp: rp.value,
+            a: a.value,
+          });
+        }
+      }
+    }
+  }
+
+  // The degenerate corner the module documents: a planet twice Jupiter's radius
+  // around a tenth-solar-radius star, where the depth saturates at total.
+  combinations.push({
+    label: 'total eclipse (2 R_J around 0.1 R_sun at 0.01 AU)',
+    ms: paramOf(params, 'Mstar').default,
+    rs: paramOf(params, 'Rstar').min,
+    rp: paramOf(params, 'Rp').max,
+    a: paramOf(params, 'a').min,
+  });
+
+  // And the corner where there is no transit at all: the orbit lies inside the
+  // star, transitShape reports it, and the sim must draw a message rather than
+  // a NaN coordinate.
+  combinations.push({
+    label: 'no transit (orbit inside the star)',
+    ms: paramOf(params, 'Mstar').default,
+    rs: paramOf(params, 'Rstar').max,
+    rp: paramOf(params, 'Rp').default,
+    a: paramOf(params, 'a').min,
+  });
+
+  for (const combination of combinations) {
+    const shape = transitShape(combination.ms, combination.rs, combination.rp, combination.a);
+    for (const progress of [0, 0.5, 1]) {
+      cases.push({
+        label: `${combination.label} p=${progress}`,
+        draw: (ctx, w, h) =>
+          ep.drawScene(ctx, w, h, {
+            rs: combination.rs,
+            rp: combination.rp,
+            a: combination.a,
+            shape,
+            progress,
+          }),
+      });
+    }
+  }
+
+  it('reaches both documented corners', () => {
+    const total = transitShape(
+      paramOf(params, 'Mstar').default,
+      paramOf(params, 'Rstar').min,
+      paramOf(params, 'Rp').max,
+      paramOf(params, 'a').min,
+    );
+    expect(total.depth, 'depth should saturate at total eclipse').toBe(1);
+    expect(total.transits).toBe(true);
+
+    const none = transitShape(
+      paramOf(params, 'Mstar').default,
+      paramOf(params, 'Rstar').max,
+      paramOf(params, 'Rp').default,
+      paramOf(params, 'a').min,
+    );
+    expect(none.transits, 'orbit inside the star should report no transit').toBe(false);
+    expect(Number.isNaN(none.total)).toBe(true);
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -263,6 +360,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'scale-of-the-universe', height: 384, cases: scaleCases },
   { name: 'black-holes', height: 320, cases: blackHoleCases },
   { name: 'gravitational-waves', height: 288, cases: gravitationalWaveCases },
+  { name: 'exoplanets', height: 352, cases: exoplanetCases },
 ];
 
 for (const sim of SIMS) {

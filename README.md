@@ -28,6 +28,7 @@ Vite · React 18 · React Router · TypeScript (strict) · Tailwind · Zustand �
 |---|---|
 | Black holes | The bigger the hole, the gentler its doorstep |
 | Escape velocity | The speed at which a thrown stone never comes back |
+| Exoplanets | Six thousand worlds, found by watching stars blink |
 | Gravitational waves | A billion light-years away, two black holes rang space itself |
 | Kepler orbits | Speed and distance trade exactly; the period fits on one line |
 | Scale of the universe | Forty-two factors of ten, from a proton to the horizon |
