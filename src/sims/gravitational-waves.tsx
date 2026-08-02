@@ -33,6 +33,12 @@ import {
   strainAt,
   timeToMerger,
 } from '@/physics/gw';
+import {
+  AUDIBLE_FLOOR_HZ,
+  BAND_ENTRY_HZ,
+  audioPlanFor,
+  chirpCurves,
+} from '@/sims/gw-audio';
 
 /* ------------------------------------------------------------------ */
 /* Display helpers — formatting only, never used to compute            */
@@ -334,56 +340,11 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
 /* ------------------------------------------------------------------ */
 
 /**
- * A sonification, not a recording: a sine oscillator tracking the wave's own
- * frequency and amplitude. Gravitational waves are not sound, and there is
- * nothing to hear where they come from — what makes this honest rather than
- * decorative is that the frequencies are the true ones, unshifted, and a
- * stellar-mass inspiral happens to sweep through the range a human ear covers.
+ * The schedule itself lives in `@/sims/gw-audio`, so the audio tests can render
+ * the same two curves this component hands to the oscillator and measure the
+ * waveform they produce. What is asserted there is what plays here.
  */
-const AUDIBLE_FLOOR_HZ = 20;
-/** Longest stretch of inspiral to sonify, s. */
-const AUDIO_MAX_S = 6;
-/** Frequency a ground-based detector's band effectively opens at, Hz. */
-const BAND_ENTRY_HZ = 30;
-/** Peak gain. Well below 1: this plays on a single click, without warning. */
-const AUDIO_GAIN = 0.22;
-/** Points in the scheduled automation curves. */
-const CURVE_POINTS = 512;
-
 const AUDIO_SUPPORTED = typeof globalThis.AudioContext !== 'undefined';
-
-interface AudioPlan {
-  /** Time to merger where the sonification starts, s. */
-  tauStart: number;
-  tauEnd: number;
-  duration: number;
-  fStart: number;
-  fEnd: number;
-  /** True when part of the true band lies below the audible floor. */
-  clamped: boolean;
-}
-
-/**
- * What to play: the last `AUDIO_MAX_S` of inspiral before the cutoff, or the
- * stretch from the detector band's entry frequency if that is shorter — for the
- * default binary that is 0.25 s, which is the real length of the GW150914 chirp.
- * Very heavy pairs reach their cutoff below the band entry, so the drawn window
- * is the floor.
- */
-function audioPlanFor(mc: number, win: TraceWindow): AudioPlan {
-  const fromBandEntry = timeToMerger(mc, BAND_ENTRY_HZ) - win.tauEnd;
-  const duration = Math.max(win.duration, Math.min(AUDIO_MAX_S, fromBandEntry));
-  const tauStart = win.tauEnd + duration;
-  const fStart = fOfTimeToMerger(mc, tauStart);
-  return {
-    tauStart,
-    tauEnd: win.tauEnd,
-    duration,
-    fStart,
-    fEnd: win.fEnd,
-    clamped: fStart < AUDIBLE_FLOOR_HZ,
-  };
-}
 
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
@@ -548,22 +509,7 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
     const gain = ctx.createGain();
     osc.type = 'sine';
 
-    const frequencies = new Float32Array(CURVE_POINTS);
-    const gains = new Float32Array(CURVE_POINTS);
-    const peak = strainAmplitude(mc, plan.fEnd, d);
-
-    for (let i = 0; i < CURVE_POINTS; i += 1) {
-      const fraction = i / (CURVE_POINTS - 1);
-      const tau = Math.max(plan.tauEnd, plan.tauStart - fraction * plan.duration);
-      const f = fOfTimeToMerger(mc, tau);
-      // Clamped, not transposed: below the audible floor the pitch stops falling
-      // rather than being shifted, so every frequency you can hear is the real
-      // one. The note beside the button says when that has happened.
-      frequencies[i] = Math.min(20_000, Math.max(AUDIBLE_FLOOR_HZ, f));
-      // Ramp the first and last 3% to silence, or the edges click.
-      const fade = Math.min(1, fraction / 0.03, (1 - fraction) / 0.03);
-      gains[i] = AUDIO_GAIN * (strainAmplitude(mc, f, d) / peak) * Math.max(0, fade);
-    }
+    const { frequencies, gains } = chirpCurves(plan, mc, d);
 
     const t0 = ctx.currentTime + 0.05;
     osc.frequency.setValueCurveAtTime(frequencies, t0, plan.duration);
