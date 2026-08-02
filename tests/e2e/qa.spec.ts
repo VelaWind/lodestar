@@ -300,6 +300,102 @@ async function assertLogSliderKeys(page: Page, selector: string, name: string): 
   expect(await at(), `${name}: Home should return to the minimum`).toBeCloseTo(min, 3);
 }
 
+/**
+ * Writes a slider directly, the way a drag would leave it.
+ *
+ * The native setter plus an `input` event is the only way to move a controlled
+ * React range input from outside: assigning `.value` alone updates the DOM and
+ * leaves React's state behind it. Log sliders take a position in decades, which
+ * is what the element itself holds — see `sliderBounds`.
+ */
+/**
+ * Indexed access that fails where the mistake is, not three assertions later.
+ *
+ * `noUncheckedIndexedAccess` is on, so every array read is `T | undefined`. In
+ * product code that is answered with a fallback; in a test a missing element
+ * means the page is not what the test thought, and the useful behaviour is to
+ * say so at the read rather than to carry a zero forward into an assertion.
+ */
+function at<T>(items: ArrayLike<T>, index: number, what: string): T {
+  const value = items[index];
+  if (value === undefined) throw new Error(`${what}: nothing at index ${index}`);
+  return value;
+}
+
+async function setSlider(page: Page, id: string, value: number): Promise<void> {
+  await page.locator(`#p-${id}`).evaluate((el: HTMLInputElement, v: number) => {
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    set?.call(el, String(v));
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, value);
+}
+
+/**
+ * A sim's own control, found through its readouts.
+ *
+ * `simButton` matches by name and takes the first hit, which is ambiguous when
+ * the sim's button and the parameters panel's Reset share a word. Every sim puts
+ * its controls in the same flex row as its readout list, so a sibling of the
+ * readouts `dl` is unambiguously the sim's.
+ */
+function simControl(page: Page, module: string, index = 0): Locator {
+  return page.locator(`xpath=//dl[@id="${module}-readouts"]/following-sibling::button`).nth(index);
+}
+
+/** Readout values by their label, lowercased. */
+async function readouts(page: Page, module: string): Promise<Record<string, string>> {
+  return page.locator(`#${module}-readouts`).evaluate((dl) => {
+    const out: Record<string, string> = {};
+    const terms = [...dl.querySelectorAll('dt')];
+    const values = [...dl.querySelectorAll('dd')];
+    terms.forEach((dt, i) => {
+      out[(dt.textContent ?? '').trim().toLowerCase()] = (values[i]?.textContent ?? '').trim();
+    });
+    return out;
+  });
+}
+
+/**
+ * Remembers the sim canvas as it stands, for a later comparison.
+ *
+ * The frame is stashed on the page rather than returned. A mobile canvas is
+ * around a million numbers once it is serialised, and moving several of those
+ * across the bridge is the difference between a test that takes seconds and one
+ * that takes minutes — so every comparison below happens where the pixels
+ * already are, and only the answer travels.
+ */
+async function rememberFrame(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const canvas = document.querySelector('#layer-panel-play canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('no 2d context');
+    (window as unknown as { __frame: ImageData }).__frame = ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
+  });
+}
+
+/** Pixels that differ from the remembered frame. */
+async function pixelsChangedSince(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const canvas = document.querySelector('#layer-panel-play canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('no 2d context');
+    const before = (window as unknown as { __frame?: ImageData }).__frame;
+    if (!before) throw new Error('no remembered frame');
+    const after = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let changed = 0;
+    for (let i = 0; i < after.data.length; i += 4) {
+      if (Math.abs((after.data[i] ?? 0) - (before.data[i] ?? 0)) > 12) changed += 1;
+    }
+    (window as unknown as { __frame: ImageData }).__frame = after;
+    return changed;
+  });
+}
+
 async function shot(page: Page, name: string): Promise<string> {
   const project = test.info().project.name;
   const path = `qa-screenshots/${project}/${name}.png`;
@@ -914,6 +1010,779 @@ test('screen reader: canvases are labelled and described', async ({ page }) => {
   expect(math.visualHidden, 'the glyph layer should be hidden from assistive tech').toBe('true');
 
   assertClean(w, 'screen reader');
+});
+
+/* ------------------------------------------------------------------ */
+/* Behaviour                                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * What the sims actually do, rather than that they came up.
+ *
+ * Everything above this point asks whether the page works: it loaded, it did not
+ * overflow, axe is happy, the keyboard reaches the controls. None of it asks
+ * whether the physics on the screen is the physics the module claims. These do —
+ * a projectile below escape speed has to come back down, a wedge near periapsis
+ * has to match one near apoapsis, a tidal stretch has to stop being lethal
+ * somewhere specific. Where a threshold is checked it is computed here, from
+ * constants, rather than copied from the source it is checking.
+ */
+
+/* 1 ---------------------------------------------------------------- */
+
+test('behaviour: a projectile below escape speed comes back, above it leaves', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/escape-velocity', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  const status = page.locator('#layer-panel-play [role="status"]');
+  const launch = simControl(page, 'escape-velocity');
+
+  // 8 km/s against Earth's 11.2: a real apex, and a fall back to the surface.
+  await setSlider(page, 'v0', 8_000);
+  await expect(status).toHaveText('Ready to launch.');
+
+  const sub = await readouts(page, 'escape-velocity');
+  expect(sub['escape speed'], 'escape speed at Earth defaults').toMatch(/^11\.\d+ km\/s$/);
+  expect(sub['apex altitude'], 'a sub-escape launch must have a finite apex').toMatch(
+    /^[\d,]+(\.\d+)? (m|km)$/,
+  );
+  await expect(page.locator('#layer-panel-play')).toContainText('below escape speed');
+
+  await launch.click();
+  await expect(status, 'the flight should announce itself').toHaveText('In flight.');
+  await expect(status, 'a sub-escape projectile must fall back').toHaveText(
+    /falls back to the surface|apex is above the frame/,
+    { timeout: 30_000 },
+  );
+  // The end state is reachable again: the control returns to a launchable sim.
+  await expect(simControl(page, 'escape-velocity')).toHaveText('Reset');
+  await simControl(page, 'escape-velocity').click();
+  await expect(status).toHaveText('Ready to launch.');
+
+  // Above escape speed the apex stops being a number at all.
+  await setSlider(page, 'v0', 25_000);
+  const over = await readouts(page, 'escape-velocity');
+  expect(over['apex altitude'], 'above escape speed there is no apex').toContain('escapes');
+  await expect(page.locator('#layer-panel-play')).toContainText('at or above escape speed');
+
+  await simControl(page, 'escape-velocity').click();
+  await expect(status, 'an escaping projectile must never return').toHaveText(
+    'The projectile escapes and never returns.',
+    { timeout: 30_000 },
+  );
+
+  await assertNoOverflow(page, 'escape-velocity behaviour');
+  assertClean(w, 'escape-velocity behaviour');
+});
+
+/* 2 ---------------------------------------------------------------- */
+
+/**
+ * Kepler's second law, read off the canvas.
+ *
+ * Two independent readings of the same claim. The wedges are equal-*area*
+ * slices of equal time, so the overlay has to put shading on both sides of the
+ * focus — a sweep that only shaded the fast end would be drawing something
+ * else. And the planet itself has to move through those wedges non-uniformly:
+ * at e = 0.97 the angular rate at periapsis is ((1+e)/(1-e))^2 ~ 4300 times the
+ * rate at apoapsis, so sampling the position on a fixed clock must show steps
+ * that differ by orders of magnitude, not by noise.
+ */
+test('behaviour: kepler sweeps equal areas and moves non-uniformly', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/kepler-orbits', { waitUntil: 'domcontentloaded' });
+  await settle(page, 1_000);
+
+  // The equal-area half of this is checked at a middling eccentricity, not at
+  // the maximum. At e = 0.97 periapsis sits 0.03 AU from the focus against an
+  // apoapsis of 1.97, so the wedge covering the periapsis passage is about seven
+  // pixels wide and is drawn underneath the star's own disc — nothing is wrong
+  // with the drawing, there is simply nothing left to sample. The non-uniform
+  // motion below is then measured at the maximum, where it is most pronounced.
+  await setSlider(page, 'e', 0.6);
+  await settle(page, 500);
+
+  // The star is the only fully opaque patch of star-blue on the canvas: the
+  // orbit is stroked in grey and the wedges are painted at 4-30% alpha, so
+  // neither survives an alpha-255 test. That patch is the focus.
+  const focus = await page.evaluate(() => {
+    const canvas = document.querySelector('#layer-panel-play canvas') as HTMLCanvasElement;
+    const d = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+    let n = 0;
+    let sx = 0;
+    let sy = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if ((d[i + 3] ?? 0) < 250) continue;
+      const r = d[i] ?? 0;
+      const g = d[i + 1] ?? 0;
+      const b = d[i + 2] ?? 0;
+      if (Math.abs(r - 157) > 10 || Math.abs(g - 180) > 10 || Math.abs(b - 255) > 10) continue;
+      n += 1;
+      sx += (i / 4) % canvas.width;
+      sy += Math.floor(i / 4 / canvas.width);
+    }
+    return n > 0 ? { x: sx / n, y: sy / n, n } : null;
+  });
+  expect(focus, 'could not find the star on the canvas').not.toBeNull();
+  const star = focus as { x: number; y: number; n: number };
+  expect(star.n, 'the star should be a small disc, not a field of pixels').toBeLessThan(4_000);
+
+  const spread = await readouts(page, 'kepler-orbits');
+  // eslint-disable-next-line no-console
+  console.log(`  kepler: periapsis ${spread['periapsis']}, apoapsis ${spread['apoapsis']}`);
+
+  await rememberFrame(page);
+  await page.locator('#layer-panel-play').getByRole('button', { name: 'Sweep equal areas' }).click();
+  await expect(
+    page.locator('#layer-panel-play').getByRole('button', { name: 'Sweep equal areas' }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  await settle(page, 600);
+
+  // Everything the overlay added, split by side of the focus. Periapsis is the
+  // near side; the further side is apoapsis, and the reach of each is what the
+  // eccentricity is.
+  const { near, far, nearReach, farReach } = await page.evaluate((focusX: number) => {
+    const canvas = document.querySelector('#layer-panel-play canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+    const before = (window as unknown as { __frame: ImageData }).__frame;
+    const after = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let near = 0;
+    let far = 0;
+    let nearReach = 0;
+    let farReach = 0;
+    for (let i = 0; i < after.data.length; i += 4) {
+      const delta =
+        Math.abs((before.data[i] ?? 0) - (after.data[i] ?? 0)) +
+        Math.abs((before.data[i + 1] ?? 0) - (after.data[i + 1] ?? 0)) +
+        Math.abs((before.data[i + 2] ?? 0) - (after.data[i + 2] ?? 0));
+      if (delta <= 24) continue;
+      const x = (i / 4) % canvas.width;
+      if (x > focusX + 8) {
+        near += 1;
+        nearReach = Math.max(nearReach, x - focusX);
+      } else if (x < focusX - 8) {
+        far += 1;
+        farReach = Math.max(farReach, focusX - x);
+      }
+    }
+    return { near, far, nearReach, farReach };
+  }, star.x);
+  // eslint-disable-next-line no-console
+  console.log(`  kepler: wedge pixels near ${near} / far ${far}, reach ${nearReach.toFixed(0)} / ${farReach.toFixed(0)}`);
+  expect(near, 'no wedge shading on the periapsis side of the focus').toBeGreaterThan(200);
+  expect(far, 'no wedge shading on the apoapsis side of the focus').toBeGreaterThan(200);
+  expect(
+    farReach,
+    'the apoapsis side must reach further from the focus than the periapsis side',
+  ).toBeGreaterThan(nearReach * 1.8);
+
+  // Now the fast case, where the angular rate at periapsis is
+  // ((1+e)/(1-e))^2 ~ 4300 times the rate at apoapsis.
+  await page.locator('#p-e').focus();
+  await page.keyboard.press('End');
+  const e = Number(await page.locator('#p-e').inputValue());
+  expect(e, 'End should take eccentricity to its maximum').toBeGreaterThan(0.9);
+  await settle(page, 600);
+
+  // The star is redrawn wherever the new geometry puts it.
+  const movedFocus = await page.evaluate(() => {
+    const canvas = document.querySelector('#layer-panel-play canvas') as HTMLCanvasElement;
+    const d = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;
+    let n = 0;
+    let sx = 0;
+    let sy = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if ((d[i + 3] ?? 0) < 250) continue;
+      const r = d[i] ?? 0;
+      const g = d[i + 1] ?? 0;
+      const b = d[i + 2] ?? 0;
+      if (Math.abs(r - 157) > 10 || Math.abs(g - 180) > 10 || Math.abs(b - 255) > 10) continue;
+      n += 1;
+      sx += (i / 4) % canvas.width;
+      sy += Math.floor(i / 4 / canvas.width);
+    }
+    return n > 0 ? { x: sx / n, y: sy / n, n } : null;
+  });
+  expect(movedFocus, 'lost the star after changing eccentricity').not.toBeNull();
+  const centre = movedFocus as { x: number; y: number; n: number };
+
+  // The planet is the only opaque ember blob; the radius line to it is drawn at
+  // 35% alpha and the live wedge at 30%, so neither reaches alpha 255.
+  const track = await page.evaluate(async () => {
+    const canvas = document.querySelector('#layer-panel-play canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+    const find = (): { x: number; y: number } | null => {
+      const d = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let n = 0;
+      let sx = 0;
+      let sy = 0;
+      for (let i = 0; i < d.length; i += 4) {
+        if ((d[i + 3] ?? 0) < 250) continue;
+        const r = d[i] ?? 0;
+        const g = d[i + 1] ?? 0;
+        const b = d[i + 2] ?? 0;
+        if (r < 225 || g < 178 || g > 200 || b < 108 || b > 142) continue;
+        n += 1;
+        sx += (i / 4) % canvas.width;
+        sy += Math.floor(i / 4 / canvas.width);
+      }
+      return n > 0 ? { x: sx / n, y: sy / n } : null;
+    };
+    const points: ({ x: number; y: number } | null)[] = [];
+    // One orbit is 12 s on screen; 70 samples at 180 ms covers it with room over.
+    for (let i = 0; i < 70; i += 1) {
+      points.push(find());
+      await new Promise((resolve) => setTimeout(resolve, 180));
+    }
+    return points;
+  });
+
+  const found = track.filter((q): q is { x: number; y: number } => q !== null);
+  expect(found.length, 'lost the planet on the canvas').toBe(track.length);
+
+  const steps: number[] = [];
+  for (let i = 1; i < found.length; i += 1) {
+    const from = at(found, i - 1, 'planet track');
+    const to = at(found, i, 'planet track');
+    const a = Math.atan2(from.y - centre.y, from.x - centre.x);
+    const b = Math.atan2(to.y - centre.y, to.x - centre.x);
+    let d = Math.abs(b - a);
+    if (d > Math.PI) d = 2 * Math.PI - d;
+    steps.push(d);
+  }
+  const sorted = [...steps].sort((a, b) => a - b);
+  const median = at(sorted, Math.floor(sorted.length / 2), 'angular steps');
+  const largest = at(sorted, sorted.length - 1, 'angular steps');
+  // eslint-disable-next-line no-console
+  console.log(
+    `  kepler: angular step median ${median.toFixed(4)} rad, max ${largest.toFixed(4)} rad, ratio ${(largest / median).toFixed(0)}x`,
+  );
+  expect(median, 'the planet never moved').toBeGreaterThan(0);
+  expect(
+    largest / median,
+    'the planet swept the orbit at a near-constant angular rate — the second law is not being drawn',
+  ).toBeGreaterThan(20);
+
+  assertClean(w, 'kepler behaviour');
+});
+
+/* 3 ---------------------------------------------------------------- */
+
+/**
+ * The ten rungs of the ladder, in order.
+ *
+ * Walked with PageUp, one decade a press, which is not where the anchors are —
+ * they sit at the real sizes of real things. What the walk checks is that the
+ * scene the reader lands on is always the nearest rung and that the rungs come
+ * in size order with none skipped or repeated, which is the claim the ladder
+ * makes. The rung is identified by the readout naming the one below it.
+ */
+const LADDER = [
+  'decades below',
+  'decades above proton',
+  'decades above hydrogen atom',
+  'decades above red blood cell',
+  'decades above human',
+  'decades above earth',
+  'decades above sun',
+  'decades above neptune’s orbit',
+  'decades above distance to proxima centauri',
+  'decades above milky way disc',
+];
+
+/** Coarsest-to-finest, as the crossing time climbs. */
+const TIME_UNITS = ['ys', 'zs', 'as', 'fs', 'ps', 'ns', 'µs', 'ms', 's', 'min', 'hours', 'days', 'years'];
+
+test('behaviour: the scale ladder walks ten rungs in size order', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/scale-of-the-universe', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  await page.locator('#p-s').focus();
+  await page.keyboard.press('Home');
+  await settle(page, 400);
+
+  const rungs: { label: string; light: string }[] = [];
+  // 42 decades, one per press, plus enough overrun to land on the last rung.
+  for (let i = 0; i < 46; i += 1) {
+    const row = await page.evaluate(() => {
+      const dl = document.querySelector('#scale-of-the-universe-readouts')!;
+      const terms = [...dl.querySelectorAll('dt')].map((el) => (el.textContent ?? '').trim());
+      const values = [...dl.querySelectorAll('dd')].map((el) => (el.textContent ?? '').trim());
+      return { label: (terms[1] ?? '').toLowerCase(), light: values[0] ?? '' };
+    });
+    if (rungs.length === 0 || at(rungs, rungs.length - 1, 'rungs').label !== row.label) rungs.push(row);
+    await page.keyboard.press('PageUp');
+    await page.waitForTimeout(220);
+  }
+
+  expect(
+    rungs.map((r) => r.label),
+    'the ladder should pass through every rung once, in order',
+  ).toEqual(LADDER);
+  expect(rungs.length, 'exactly ten distinct scenes').toBe(10);
+
+  // Light takes longer to cross a bigger thing, and the unit has to climb with
+  // it: a rung whose crossing time reads in a smaller unit than the rung below
+  // is either mis-ordered or mis-formatted.
+  const classOf = (value: string): number => {
+    const unit = value.replace(/^[\d.,]+\s*/, '').replace(/^(billion|million) /, '');
+    const index = TIME_UNITS.indexOf(unit);
+    expect(index, `unrecognised crossing-time unit in "${value}"`).toBeGreaterThanOrEqual(0);
+    return /billion/.test(value) ? index + 2 : /million/.test(value) ? index + 1 : index;
+  };
+  const classes = rungs.map((r) => classOf(r.light));
+  const classAt = (i: number): number => at(classes, i, 'crossing-time classes');
+  // eslint-disable-next-line no-console
+  console.log(`  ladder: ${rungs.map((r) => r.light).join(' -> ')}`);
+  for (let i = 1; i < classes.length; i += 1) {
+    expect(
+      classAt(i),
+      `crossing time went backwards between rung ${i} and ${i + 1}: ` +
+        `${at(rungs, i - 1, 'rungs').light} then ${at(rungs, i, 'rungs').light}`,
+    ).toBeGreaterThan(classAt(i - 1));
+  }
+
+  assertClean(w, 'scale ladder');
+});
+
+/* 4 ---------------------------------------------------------------- */
+
+/**
+ * Where the tidal stretch stops killing you.
+ *
+ *     Δa = 2GMh / r_s³  and  r_s = 2GM/c²   ⟹   Δa = h c⁶ / (4 G² M²)
+ *
+ * so the stretch falls as M⁻², and the mass at which it drops through a given
+ * number of g is
+ *
+ *     M = √( h c⁶ / (4 G² · n · g₀) )
+ *
+ * Both the height and the threshold are read off the page rather than assumed:
+ * the height is in the readout's own label, and the threshold is whatever the
+ * last lethal reading and the first survivable one bracket. The test then checks
+ * the flip lands where that physics says it must.
+ */
+test('behaviour: the tidal verdict flips where the physics says it does', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  await page.locator('#p-M').focus();
+  await page.keyboard.press('Home');
+  await settle(page, 400);
+
+  const walk: { mass: number; g: number; verdict: string }[] = [];
+  for (let i = 0; i < 14; i += 1) {
+    const row = await page.evaluate(() => {
+      const dl = document.querySelector('#black-holes-readouts')!;
+      const term = [...dl.querySelectorAll('dt')][1]?.textContent ?? '';
+      const value = [...dl.querySelectorAll('dd')][1]?.textContent ?? '';
+      return { term, value };
+    });
+    const position = Number(await page.locator('#p-M').inputValue());
+    // "7.06 × 10⁹ g" / "70.6 g", then the verdict word run on to the unit.
+    const text = row.value.replace(/\s+/g, ' ');
+    const superscripts = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+    const exponent = /10([⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+)/.exec(text);
+    const mantissa = Number(/^[\d.,]+/.exec(text)?.[0].replace(/,/g, '') ?? 'NaN');
+    const digits = exponent?.[1] ?? '';
+    const power = digits
+      ? Number(
+          (digits.startsWith('⁻') ? '-' : '') +
+            [...digits.replace('⁻', '')].map((c) => superscripts.indexOf(c)).join(''),
+        )
+      : 0;
+    walk.push({
+      mass: 10 ** position,
+      g: mantissa * 10 ** power,
+      verdict: /survivable/.test(text) ? 'survivable' : 'lethal',
+    });
+    await page.keyboard.press('PageUp');
+    await page.waitForTimeout(170);
+  }
+
+  // textContent, not innerText: the label is uppercased in CSS and innerText
+  // reports the transformed text, which turns "1.7 m" into "1.7 M".
+  const height = Number(/\(([\d.]+) m\)/.exec(
+    await page.locator('#black-holes-readouts dt').nth(1).evaluate((el) => el.textContent ?? ''),
+  )?.[1] ?? 'NaN');
+  expect(height, 'the readout label should name the height it assumes').toBeGreaterThan(0.5);
+
+  const flip = walk.findIndex((r) => r.verdict === 'survivable');
+  expect(flip, 'the verdict never flipped across the mass range').toBeGreaterThan(0);
+  expect(
+    walk.slice(flip).every((r) => r.verdict === 'survivable'),
+    'the verdict flipped back — the stretch is not monotonic in mass',
+  ).toBe(true);
+
+  const lastLethal = at(walk, flip - 1, 'mass walk');
+  const firstSurvivable = at(walk, flip, 'mass walk');
+  expect(lastLethal.g, 'the last lethal reading should be the harsher one').toBeGreaterThan(
+    firstSurvivable.g,
+  );
+
+  const G = 6.674_30e-11;
+  const C = 299_792_458;
+  const G0 = 9.806_65;
+  const massAt = (g: number): number => Math.sqrt((height * C ** 6) / (4 * G ** 2 * g * G0));
+  // The threshold sits between the two readings that straddle the flip, so the
+  // mass it corresponds to sits between the masses those readings came from.
+  const expected = massAt(Math.sqrt(lastLethal.g * firstSurvivable.g));
+  // eslint-disable-next-line no-console
+  console.log(
+    `  black holes: flip between ${lastLethal.mass.toExponential(2)} kg (${lastLethal.g.toPrecision(3)} g) and ${firstSurvivable.mass.toExponential(2)} kg (${firstSurvivable.g.toPrecision(3)} g); tidal physics puts it at ${expected.toExponential(2)} kg`,
+  );
+  expect(expected, 'the flip is not where the tidal formula puts it').toBeGreaterThan(lastLethal.mass);
+  expect(expected, 'the flip is not where the tidal formula puts it').toBeLessThan(
+    firstSurvivable.mass,
+  );
+  // And it is the crossover the module is about: ten thousand solar masses or so.
+  expect(expected).toBeGreaterThan(1e34);
+  expect(expected).toBeLessThan(1e36);
+
+  assertClean(w, 'black holes behaviour');
+});
+
+/* 5 ---------------------------------------------------------------- */
+
+const M_SUN_KG = 1.988_4e30;
+const G_SI = 6.674_30e-11;
+const C_SI = 299_792_458;
+
+/**
+ *     τ = (5/256) · (GM_c/c³)^(-5/3) · (πf)^(-8/3)
+ *
+ * Time from a given frequency to merger for a circular inspiral at leading
+ * post-Newtonian order — the inverse of `fOfTimeToMerger`, written out here so
+ * the expected sonification length is derived rather than copied.
+ */
+function timeToMerger(chirpMass: number, frequency: number): number {
+  const m = (G_SI * chirpMass) / C_SI ** 3;
+  return (5 / 256) * m ** (-5 / 3) * (Math.PI * frequency) ** (-8 / 3);
+}
+
+function chirpMass(m1: number, m2: number): number {
+  return (m1 * m2) ** (3 / 5) / (m1 + m2) ** (1 / 5);
+}
+
+/** Seconds from a duration string: "254 ms", "6 s", "52.8 s". */
+function seconds(text: string): number {
+  const value = Number(/[\d.,]+/.exec(text)?.[0].replace(/,/g, '') ?? 'NaN');
+  if (/\bms\b/.test(text)) return value / 1000;
+  if (/\bmin\b/.test(text)) return value * 60;
+  return value;
+}
+
+test('behaviour: the chirp sonification runs and tears itself down', async ({ page }) => {
+  const w = watch(page);
+
+  // Records what the page builds without changing what it builds. No launch
+  // flag is needed for any of this: the context is created inside the click
+  // handler, so it starts from a real user gesture and headless Chromium lets
+  // it run against a null sink.
+  await page.addInitScript(() => {
+    interface AudioProbe {
+      contexts: number;
+      nodes: string[];
+      last: AudioContext | null;
+    }
+    const probe: AudioProbe = { contexts: 0, nodes: [], last: null };
+    (window as unknown as { __audio: AudioProbe }).__audio = probe;
+    const Native = window.AudioContext;
+    window.AudioContext = class extends Native {
+      constructor(...args: ConstructorParameters<typeof Native>) {
+        super(...args);
+        probe.contexts += 1;
+        probe.last = this;
+        for (const name of ['createOscillator', 'createGain'] as const) {
+          const original = this[name].bind(this);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (this as any)[name] = (...rest: unknown[]) => {
+            probe.nodes.push(name);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return (original as any)(...rest);
+          };
+        }
+      }
+    } as typeof Native;
+  });
+
+  await page.goto('/m/gravitational-waves', { waitUntil: 'domcontentloaded' });
+  await settle(page, 1_000);
+
+  const sentence = page.locator('#layer-panel-play p').last();
+  const hear = page.locator('#layer-panel-play').getByRole('button', { name: 'Hear it' });
+  await expect(hear, 'the sonification control should be present').toHaveCount(1);
+
+  const defaultText = await sentence.innerText();
+  const defaultLength = seconds(/over ([\d.,]+ ?(?:ms|s))/.exec(defaultText)?.[1] ?? '');
+  expect(defaultLength, 'no scheduled sweep length in the copy').toBeGreaterThan(0);
+
+  await hear.click();
+  const started = await page.evaluate(() => {
+    const probe = (window as unknown as { __audio: { contexts: number; nodes: string[]; last: AudioContext | null } }).__audio;
+    return { contexts: probe.contexts, nodes: probe.nodes, state: probe.last?.state };
+  });
+  expect(started.contexts, 'no AudioContext was created').toBe(1);
+  expect(started.state, 'the context should be running, not suspended').toBe('running');
+  expect(started.nodes, 'the graph should be an oscillator through a gain').toEqual([
+    'createOscillator',
+    'createGain',
+  ]);
+
+  // It closes itself when the chirp ends; an AudioContext left open holds a
+  // device. Allowed a second beyond the scheduled sweep.
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(
+          () =>
+            (window as unknown as { __audio: { last: AudioContext | null } }).__audio.last?.state,
+        ),
+      { timeout: (defaultLength + 1) * 1000, message: 'the AudioContext outlived the chirp' },
+    )
+    .toBe('closed');
+
+  // A neutron-star pair: four hundred times lighter, and a chirp that lasts.
+  const mc = chirpMass(1.4 * M_SUN_KG, 1.4 * M_SUN_KG);
+  await setSlider(page, 'm1', Math.log10(1.4 * M_SUN_KG));
+  await setSlider(page, 'm2', Math.log10(1.4 * M_SUN_KG));
+  await settle(page, 600);
+
+  const bnsReadouts = await readouts(page, 'gravitational-waves');
+  const inspiral = bnsReadouts['from 30 hz to merger'] ?? '';
+  const observed30 = seconds(inspiral);
+  const predicted30 = timeToMerger(mc, 30);
+  // eslint-disable-next-line no-console
+  console.log(
+    `  gravitational waves: 30 Hz to merger reads ${inspiral}, quadrupole formula gives ${predicted30.toFixed(1)} s`,
+  );
+  expect(
+    Math.abs(observed30 - predicted30) / predicted30,
+    'the inspiral time does not match the leading-order formula',
+  ).toBeLessThan(0.02);
+
+  const bnsText = await sentence.innerText();
+  const bnsLength = seconds(/over ([\d.,]+ ?(?:ms|s))/.exec(bnsText)?.[1] ?? '');
+  expect(
+    bnsLength,
+    'a binary with a fifty-second inspiral should not schedule the same sweep as one with a quarter-second inspiral',
+  ).toBeGreaterThan(defaultLength * 5);
+  // The band-entry-to-merger time is far longer than anything worth playing, so
+  // the sweep is the sim's own ceiling rather than the physics. Whatever that
+  // ceiling is, the scheduled sweep cannot exceed the inspiral it comes from.
+  expect(bnsLength).toBeLessThanOrEqual(predicted30);
+
+  // The clamp note is a claim about where the sweep starts, so it has to track
+  // the frequency the copy itself reports, in both directions.
+  const startsAt = (text: string): number =>
+    Number((/unshifted — ([\d.,]+) Hz/.exec(text)?.[1] ?? 'NaN').replace(/,/g, ''));
+  const CLAMP = /below about 20 Hz/;
+  expect(startsAt(bnsText), 'a neutron-star chirp starts well inside the audible band').toBeGreaterThan(20);
+  expect(CLAMP.test(bnsText), 'clamp note shown for a sweep that never leaves the audible band').toBe(false);
+
+  // A hundred solar masses each: the sweep starts below hearing and is held.
+  await setSlider(page, 'm1', Math.log10(100 * M_SUN_KG));
+  await setSlider(page, 'm2', Math.log10(100 * M_SUN_KG));
+  await settle(page, 600);
+  const heavyText = await sentence.innerText();
+  expect(startsAt(heavyText), 'the reported start should be the audible floor').toBe(20);
+  expect(CLAMP.test(heavyText), 'no clamp note on a sweep that runs below hearing').toBe(true);
+
+  assertClean(w, 'gravitational waves behaviour');
+});
+
+/* 6 ---------------------------------------------------------------- */
+
+test('behaviour: transit depth changes units and clamps at totality', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/exoplanets', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  const R_SUN_M = 6.957e8;
+  const AU_M = 1.495_978_707e11;
+
+  const start = await readouts(page, 'exoplanets');
+  expect(start['transit depth'], 'a Jupiter across a Sun is a per-cent transit').toMatch(/%$/);
+
+  // Half an Earth radius across a Sun is 21 parts per million: too small for
+  // per cent to say anything, which is what the format switch is for.
+  await page.locator('#p-Rp').focus();
+  await page.keyboard.press('Home');
+  await settle(page, 500);
+  const tiny = await readouts(page, 'exoplanets');
+  expect(tiny['transit depth'], 'a rocky planet needs ppm, not per cent').toMatch(/ ppm$/);
+  const ppm = Number((tiny['transit depth'] ?? '').replace(/[^\d.]/g, ''));
+  expect(ppm, 'depth should stay a real number in ppm').toBeGreaterThan(0);
+  expect(ppm).toBeLessThan(1_000);
+
+  // A planet wider than its star: the depth is a ratio of areas and cannot pass
+  // one, so it has to clamp rather than report a transit deeper than the star.
+  await page.keyboard.press('End');
+  await setSlider(page, 'Rstar', Math.log10(0.1 * R_SUN_M));
+  await settle(page, 600);
+  const clamped = await readouts(page, 'exoplanets');
+  expect(clamped['transit depth'], 'depth must clamp at totality').toBe('100%');
+  expect(clamped['duration'], 'a clamped transit still has a duration').not.toBe('—');
+
+  // The degenerate corner is a different one: an orbit inside the star, where
+  // there is no transit to describe and the sim says so instead of drawing one.
+  await setSlider(page, 'Rstar', Math.log10(10 * R_SUN_M));
+  await setSlider(page, 'a', Math.log10(0.01 * AU_M));
+  await settle(page, 600);
+  const degenerate = await readouts(page, 'exoplanets');
+  expect(degenerate['transit depth'], 'no transit, so no depth').toBe('—');
+  expect(degenerate['chance of alignment'], 'no transit, so no alignment figure').toBe('—');
+  await expect(
+    page.locator('#layer-panel-play'),
+    'the no-transit corner must explain itself',
+  ).toContainText('the orbit lies inside the star, so there is nothing to transit');
+
+  await assertNoOverflow(page, 'exoplanets degenerate');
+  assertClean(w, 'exoplanets behaviour');
+});
+
+/* 7 ---------------------------------------------------------------- */
+
+/**
+ * Every gas, and what Earth keeps.
+ *
+ * The verdicts are the module's whole argument, so they are checked against what
+ * Earth actually has: hydrogen gone, the heavy molecules kept. Helium is the
+ * interesting one and it is asserted as what it is — marginal, not lost. Earth
+ * does lose helium, continuously, and it is the only gas here that sits in the
+ * band where the rule stops answering.
+ */
+const GAS_VERDICTS: [string, string][] = [
+  ['H₂', 'lost'],
+  ['He', 'marginal'],
+  ['H₂O', 'retained'],
+  ['N₂', 'retained'],
+  ['O₂', 'retained'],
+  ['CO₂', 'retained'],
+];
+
+test('behaviour: every gas chip selects, redraws and keeps its verdict', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/planetary-atmospheres', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  const chips = page.locator('#layer-panel-play button[aria-pressed]');
+  await expect(chips, 'six gases').toHaveCount(6);
+
+  const labels = await chips.evaluateAll((els) =>
+    els.map((el) => (el.textContent ?? '').replace(/\s+/g, ' ').trim()),
+  );
+  expect(
+    labels.map((text) => {
+      const [gas, verdict] = text.split('—');
+      return [(gas ?? '').trim(), (verdict ?? '').trim()];
+    }),
+    'each chip should name its gas and, to a screen reader, its fate',
+  ).toEqual(GAS_VERDICTS);
+
+  await rememberFrame(page);
+  for (let i = 0; i < GAS_VERDICTS.length; i += 1) {
+    const [gas, verdict] = at(GAS_VERDICTS, i, 'gas verdicts');
+    await chips.nth(i).click();
+    await settle(page, 450);
+
+    const pressed = await chips.evaluateAll((els) =>
+      els.map((el) => el.getAttribute('aria-pressed')),
+    );
+    expect(
+      pressed,
+      `selecting ${gas} should press exactly that chip`,
+    ).toEqual(GAS_VERDICTS.map((_, j) => String(j === i)));
+
+    const moved = await pixelsChangedSince(page);
+    // The first click may land on the gas already selected, which redraws
+    // nothing — every later one changes the curve.
+    if (i > 0) {
+      expect(moved, `selecting ${gas} did not redraw the distribution`).toBeGreaterThan(100);
+    }
+
+    const values = await readouts(page, 'planetary-atmospheres');
+    expect(
+      values['over geologic time'],
+      `${gas}: the readout should agree with the chip`,
+    ).toBe(verdict);
+  }
+
+  assertClean(w, 'atmospheres behaviour');
+});
+
+/* 8 ---------------------------------------------------------------- */
+
+/**
+ * What the registry publishes, and what it does not.
+ *
+ * Three counts that are cheap to state and expensive to get wrong: the landing
+ * page shows every published module and nothing else, every connection to a
+ * module that is not published degrades to a chip rather than a dead link, and
+ * no draft is reachable from anywhere a reader looks.
+ *
+ * The planned chips are five, and it is worth writing down why, because the
+ * number moves when the backlog does: two of them point at
+ * `planetary-atmospheres`, which exists but is a draft, and three point at
+ * `cosmic-distance-ladder` and `expansion-of-the-universe`, which are backlog.
+ * Publishing the draft turns two chips into links and leaves three.
+ */
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'expansion-of-the-universe', 'planetary-atmospheres'];
+
+test('behaviour: the registry publishes six modules and leaks no drafts', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await settle(page, 700);
+
+  const cards = page.locator('a[href^="/m/"]');
+  const hrefs = await cards.evaluateAll((els) => els.map((el) => el.getAttribute('href') ?? ''));
+  expect(
+    [...hrefs].sort(),
+    'the landing page should link every published module, once',
+  ).toEqual(MODULES.map((id) => `/m/${id}`).sort());
+
+  let planned = 0;
+  for (const id of MODULES) {
+    await page.goto(`/m/${id}`, { waitUntil: 'domcontentloaded' });
+    await settle(page, 600);
+    await openLayer(page, 'connections');
+
+    const chips = page.locator('#layer-panel-connections li.border-dashed');
+    const count = await chips.count();
+    planned += count;
+
+    for (let i = 0; i < count; i += 1) {
+      const named = ((await chips.nth(i).innerText()).split('\n')[0] ?? '').trim();
+      expect(
+        PLANNED_TARGETS,
+        `${id}: "${named}" is a planned chip for a module nobody plans to write`,
+      ).toContain(named);
+    }
+
+    // Nothing anywhere on a reader's page may reach an unpublished module.
+    const leaks = await page.locator('a[href^="/m/"]').evaluateAll((els) =>
+      els.map((el) => el.getAttribute('href') ?? ''),
+    );
+    for (const href of leaks) {
+      expect(
+        MODULES.map((m) => `/m/${m}`),
+        `${id}: link to ${href}, which is not a published module`,
+      ).toContain(href);
+    }
+    await expect(
+      page.locator('#layer-panel-connections'),
+      `${id}: a draft badge is showing to readers`,
+    ).not.toContainText('draft');
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
+  expect(planned, 'planned-chip total across every published page').toBe(5);
+
+  assertClean(w, 'registry');
 });
 
 /* ------------------------------------------------------------------ */
