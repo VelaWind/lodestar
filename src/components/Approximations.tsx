@@ -29,7 +29,7 @@ export function Approximations({ items }: { items: string[] }) {
           <path d="M3 1l6 5-6 5z" />
         </motion.svg>
         <span className="flex-1">Approximations</span>
-        <span className="font-mono text-[0.7rem] text-ink-faint/70">{items.length}</span>
+        <span className="font-mono text-[0.7rem] text-ink-faint">{items.length}</span>
       </button>
 
       <AnimatePresence initial={false}>

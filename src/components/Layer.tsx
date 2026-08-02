@@ -32,7 +32,7 @@ export function Layer({ meta, open, onToggle, children }: Props) {
         >
           <span
             className={`w-6 shrink-0 font-mono text-xs tabular-nums transition-colors ${
-              open ? 'text-star' : 'text-ink-faint/60 group-hover:text-ink-faint'
+              open ? 'text-star' : 'text-ink-faint group-hover:text-ink-faint'
             }`}
           >
             {String(meta.index).padStart(2, '0')}
@@ -53,7 +53,7 @@ export function Layer({ meta, open, onToggle, children }: Props) {
             viewBox="0 0 14 14"
             aria-hidden
             className={`h-3 w-3 shrink-0 self-center stroke-current transition-colors ${
-              open ? 'text-star' : 'text-ink-faint/60 group-hover:text-ink-faint'
+              open ? 'text-star' : 'text-ink-faint group-hover:text-ink-faint'
             }`}
             animate={{ rotate: open ? 180 : 0 }}
             transition={reduced ? { duration: 0 } : { duration: 0.3, ease: [0.22, 1, 0.36, 1] }}

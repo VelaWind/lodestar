@@ -29,9 +29,11 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
   return (
     <div className="space-y-5">
       <div className="flex items-baseline justify-between">
-        <h4 className="font-ui text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">
+        {/* h3, not h4: this sits inside a layer whose header is an h2, and
+            skipping a level breaks the document outline a screen reader reads. */}
+        <h3 className="font-ui text-xs font-medium uppercase tracking-[0.14em] text-ink-faint">
           Parameters
-        </h4>
+        </h3>
         {/* -my-3 keeps the row's visual rhythm while the padding grows the tap
             target to 44px — a 16px-tall text link is not a mobile control. */}
         <button
@@ -76,7 +78,7 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
               aria-valuetext={formatWithUnit(param, value)}
             />
             {param.scale === 'log' && (
-              <div className="mt-1 text-right font-ui text-[0.65rem] uppercase tracking-wider text-ink-faint/70">
+              <div className="mt-1 text-right font-ui text-[0.65rem] uppercase tracking-wider text-ink-faint">
                 log scale
               </div>
             )}

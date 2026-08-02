@@ -106,7 +106,7 @@ function snapTarget(s: number): number | null {
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#6b7488',
+  inkFaint: '#767f93',
   edge: '#232b3b',
   star: '#9db4ff',
   ember: '#e8bd7d',
@@ -625,7 +625,13 @@ export default function ScaleOfTheUniverseSim({ params, values, setValue }: SimP
   return (
     <div className="flex min-h-[20rem] flex-col gap-4">
       <div className="relative h-[24rem] w-full">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          role="img"
+          aria-label="One rung of a size ladder, drawn as an icon with its size and a comparison to the rung below, and a strip marking where it sits across forty-two decades."
+          aria-describedby="scale-of-the-universe-readouts"
+        />
       </div>
 
       {anchor && (
@@ -637,7 +643,7 @@ export default function ScaleOfTheUniverseSim({ params, values, setValue }: SimP
         </div>
       )}
 
-      <dl className="flex flex-wrap gap-x-7 gap-y-2">
+      <dl id="scale-of-the-universe-readouts" className="flex flex-wrap gap-x-7 gap-y-2">
         <Readout label="light crosses it in" value={formatLightTravelTime(crossing)} />
         <Readout
           label={previous ? `decades above ${previous.name.toLowerCase()}` : 'decades below'}

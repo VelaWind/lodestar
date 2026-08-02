@@ -123,7 +123,7 @@ function ModuleCard({ module }: { module: Module }) {
           className="h-1 w-1 rounded-full bg-star/70 transition-colors group-hover:bg-star"
         />
         interactive
-        <span aria-hidden className="text-ink-faint/40">
+        <span aria-hidden className="text-ink-faint">
           ·
         </span>
         {params} {params === 1 ? 'parameter' : 'parameters'}

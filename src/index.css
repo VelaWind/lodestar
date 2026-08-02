@@ -91,27 +91,3 @@
     width: 1.125rem;
   }
 }
-
-/* KaTeX sits inside prose set in a serif at ~17px; the default 1.21em is too
-   loud next to it. Display math keeps a little more room to breathe. */
-.katex {
-  font-size: 1.05em;
-}
-.katex-display {
-  margin: 0;
-}
-.katex-display > .katex {
-  font-size: 1.15em;
-  /* Display math lives inside an `overflow-x-auto` box. KaTeX centres it with
-     `text-align: center` on a block as wide as that box, so an equation wider
-     than the box overflows *both* edges — and the left overflow is unreachable,
-     because scrolling cannot go negative. On a phone that silently cuts the left
-     of every long equation off.
-
-     Sizing to the content instead makes the overflow one-sided and scrollable,
-     while `margin-inline: auto` keeps anything that fits centred exactly as
-     before. No `max-width`: capping the width here would re-create the
-     two-sided overflow this fixes. */
-  width: max-content;
-  margin-inline: auto;
-}

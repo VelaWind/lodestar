@@ -169,7 +169,7 @@ function slowFactorFor(duration: number): number {
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#6b7488',
+  inkFaint: '#767f93',
   edge: '#232b3b',
   star: '#9db4ff',
   ember: '#e8bd7d',
@@ -325,7 +325,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
       right,
     );
   }
-  ctx.fillStyle = 'rgba(107,116,136,0.75)';
+  ctx.fillStyle = COLORS.inkFaint;
   fillTextClamped(ctx, 'time to merger', (left + right) / 2, bottom + 26, left, right);
 }
 
@@ -580,7 +580,13 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
   return (
     <div className="flex min-h-[20rem] flex-col gap-4">
       <div className="relative h-[18rem] w-full">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          role="img"
+          aria-label="The strain waveform of an inspiral’s last cycles before merger, frequency and amplitude climbing together into the cutoff."
+          aria-describedby="gravitational-waves-readouts"
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 font-ui text-[0.7rem] text-ink-faint">
@@ -612,7 +618,7 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
         )}
       </div>
 
-      <dl className="flex flex-wrap gap-x-7 gap-y-3 border-t border-edge-soft pt-4">
+      <dl id="gravitational-waves-readouts" className="flex flex-wrap gap-x-7 gap-y-3 border-t border-edge-soft pt-4">
         <Readout label="chirp mass" value={`${SIG3.format(mc / M_SUN)} M☉`} />
         <Readout label="frequency at cutoff" value={formatFrequency(cutoff)} />
         <Readout label="peak strain here" value={scientific(win ? win.peak : NaN)} />

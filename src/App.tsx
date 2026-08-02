@@ -1,8 +1,21 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
-import { AboutPage } from '@/pages/AboutPage';
 import { ModuleListPage } from '@/pages/ModuleListPage';
-import { ModulePage } from '@/pages/ModulePage';
+
+/**
+ * The index is the entry point and stays eager. The other two routes are split
+ * off it, and the reason is KaTeX: `RichText` pulls it in, it is a quarter of a
+ * megabyte, and a reader who lands on the front page and leaves never needed a
+ * single glyph of it. Lighthouse measured 57 kB of unused JavaScript on the
+ * landing page before this, which is exactly that.
+ */
+const ModulePage = lazy(() =>
+  import('@/pages/ModulePage').then((m) => ({ default: m.ModulePage })),
+);
+const AboutPage = lazy(() =>
+  import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })),
+);
 
 /**
  * Three routes, and depth is not one of them. Depth is a global setting rather
@@ -13,12 +26,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppShell>
-        <Routes>
-          <Route path="/" element={<ModuleListPage />} />
-          <Route path="/m/:id" element={<ModulePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        {/* The fallback is deliberately empty rather than a spinner: these
+            chunks arrive in a few tens of milliseconds from the CDN, and a
+            flashed loading state costs more than it explains. */}
+        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+          <Routes>
+            <Route path="/" element={<ModuleListPage />} />
+            <Route path="/m/:id" element={<ModulePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </AppShell>
     </BrowserRouter>
   );

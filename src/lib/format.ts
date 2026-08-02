@@ -194,13 +194,29 @@ export function positionToValue(param: Param, pos: number): number {
   return param.scale === 'log' ? 10 ** pos : pos;
 }
 
+/**
+ * The most keyboard steps a slider may take to cross its whole range.
+ *
+ * An arrow key moves a range input by exactly one `step`. The scale ladder spans
+ * 41.9 decades and authors its step as 0.01 decades, which is 4,194 presses from
+ * one end to the other — reachable in principle and unusable in practice, which
+ * is the same thing as not being operable. Two hundred steps is the granularity
+ * a native `0..100` slider has, and at any realistic track width it is still
+ * finer than one pixel of travel, so pointer users lose nothing: 200 steps over
+ * a 254px track is 1.3px per step.
+ */
+const MAX_KEYBOARD_STEPS = 200;
+
 export function sliderBounds(param: Param): { min: number; max: number; step: number } {
   if (param.scale === 'log') {
     const { lo, hi } = logDomain(param);
+    const min = Math.log10(lo);
+    const max = Math.log10(hi);
     return {
-      min: Math.log10(lo),
-      max: Math.log10(hi),
-      step: param.step, // in decades
+      min,
+      max,
+      // Authored in decades, floored at a step a keyboard can actually walk.
+      step: Math.max(param.step, (max - min) / MAX_KEYBOARD_STEPS),
     };
   }
   return { min: param.min, max: param.max, step: param.step };

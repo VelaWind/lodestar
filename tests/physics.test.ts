@@ -14,6 +14,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   runSanityChecks,
+  verifyAtmosphereModel,
   verifyBlackHoleModel,
   verifyEscapeIntegrator,
   verifyGravitationalWaveModel,
@@ -39,6 +40,7 @@ const BLOCKS: { run: () => CheckBlock; checks: number }[] = [
   { run: verifyBlackHoleModel, checks: 5 },
   { run: verifyGravitationalWaveModel, checks: 5 },
   { run: verifyTransitModel, checks: 6 },
+  { run: verifyAtmosphereModel, checks: 5 },
 ];
 
 /** Runs a block without its console output, which CI does not need to read. */
@@ -73,10 +75,10 @@ for (const { run, checks } of BLOCKS) {
 }
 
 describe('suite integrity', () => {
-  it('has 28 checks across seven blocks', () => {
+  it('has 33 checks across eight blocks', () => {
     const total = BLOCKS.reduce((n, b) => n + b.checks, 0);
-    expect(total).toBe(28);
-    expect(BLOCKS).toHaveLength(7);
+    expect(total).toBe(33);
+    expect(BLOCKS).toHaveLength(8);
   });
 
   it('still logs one console message per block', () => {

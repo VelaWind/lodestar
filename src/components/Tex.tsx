@@ -13,6 +13,9 @@
  */
 import { memo, useMemo } from 'react';
 import katex from 'katex';
+// Vendor sheet first, then our overrides — see src/styles/katex.css.
+import 'katex/dist/katex.min.css';
+import '@/styles/katex.css';
 
 interface TexProps {
   tex: string;

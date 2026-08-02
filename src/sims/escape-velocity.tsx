@@ -172,7 +172,7 @@ interface Scene {
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#6b7488',
+  inkFaint: '#767f93',
   edge: '#232b3b',
   body: '#151a25',
   star: '#9db4ff',
@@ -543,8 +543,29 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
 
   return (
     <div className="flex min-h-[20rem] flex-col gap-4">
+      {/* The flight's outcome is drawn on the canvas and nowhere else, so it is
+          announced here too. Tied to the phase, which changes at most four
+          times in a flight — never per frame. */}
+      <p className="sr-only" role="status">
+        {phase === 'ready'
+          ? 'Ready to launch.'
+          : phase === 'flying'
+            ? 'In flight.'
+            : phase === 'escaped'
+              ? 'The projectile escapes and never returns.'
+              : phase === 'offframe'
+                ? 'The apex is above the frame, but the projectile still falls back.'
+                : 'The projectile falls back to the surface.'}
+      </p>
+
       <div className="relative h-[22rem] w-full">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          role="img"
+          aria-label="Altitude against time for a projectile launched straight up from a planet: the trajectory, the apex it reaches, and whether it leaves the frame."
+          aria-describedby="escape-velocity-readouts"
+        />
       </div>
 
       {/* Launch speed against escape speed. This comparison belongs on the v0
@@ -577,7 +598,7 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
       </div>
 
       <div className="flex flex-wrap items-end justify-between gap-4 border-t border-edge-soft pt-4">
-        <dl className="flex flex-wrap gap-x-7 gap-y-2">
+        <dl id="escape-velocity-readouts" className="flex flex-wrap gap-x-7 gap-y-2">
           <Readout label="escape speed" value={formatSpeed(escapeSpeed)} />
           <Readout
             label="apex altitude"

@@ -31,6 +31,15 @@ export const H = 6.626_070_15e-34; // J·s, Planck
  */
 export const H_BAR = H / (2 * Math.PI);
 export const K_B = 1.380_649e-23; // J/K, Boltzmann
+/**
+ * Unified atomic mass unit, kg — one twelfth of a carbon-12 atom at rest.
+ *
+ * Molecular masses are given as a multiple of this so the count of nucleons
+ * stays visible at the point of use: nitrogen is 28.014 AMU, not 4.65e-26 kg.
+ *
+ * Source: CODATA 2018, m_u = 1.660 539 066 60(50) x 10^-27 kg.
+ */
+export const AMU = 1.660_539_066_60e-27;
 
 // Measured
 export const G = 6.674_30e-11; // m³ kg⁻¹ s⁻², gravitational
@@ -58,6 +67,16 @@ export const R_EARTH = 6.371e6; // m, mean radius
  * radius 69 911 km.
  */
 export const R_JUPITER = 6.991_1e7; // m, volumetric mean radius
+/**
+ * Jupiter's mass, kg.
+ *
+ * What is actually measured is the mass *parameter* GM, to far better precision
+ * than either factor alone: the IAU 2015 Resolution B3 nominal value is
+ * GM^N_J = 1.266_865_3e17 m^3 s^-2, and this is that divided by G. The division
+ * inherits G's uncertainty, which is why planetary dynamics is done in GM and
+ * why a mass in kilograms is the least precise form of this number.
+ */
+export const M_JUPITER = 1.898_13e27;
 
 // Scale
 export const OBSERVABLE_UNIVERSE_RADIUS = 4.4e26; // m, ≈46.5 billion ly

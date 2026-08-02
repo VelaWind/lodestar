@@ -15,7 +15,7 @@ export function References({ items }: { items: Reference[] }) {
       <ol className="mt-5 space-y-4">
         {items.map((ref, i) => (
           <li key={ref.url} className="flex gap-4 font-prose text-sm leading-relaxed">
-            <span className="w-5 shrink-0 pt-0.5 font-mono text-xs tabular-nums text-ink-faint/60">
+            <span className="w-5 shrink-0 pt-0.5 font-mono text-xs tabular-nums text-ink-faint">
               {i + 1}
             </span>
             <span className="text-ink-dim">

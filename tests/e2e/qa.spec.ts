@@ -20,7 +20,15 @@
  *     reference image: "is anything drawn" and "did this change" are the two
  *     questions, and both survive antialiasing differences between machines.
  */
-import { expect, test, type ConsoleMessage, type Locator, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import {
+  expect,
+  test,
+  type APIResponse,
+  type ConsoleMessage,
+  type Locator,
+  type Page,
+} from '@playwright/test';
 
 const MODULES = [
   'escape-velocity',
@@ -29,6 +37,7 @@ const MODULES = [
   'black-holes',
   'gravitational-waves',
   'exoplanets',
+  'planetary-atmospheres',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -215,6 +224,58 @@ async function settle(page: Page, ms = 900): Promise<void> {
   await page.waitForTimeout(ms);
 }
 
+/**
+ * Waits until a locator's count stops changing, rather than sleeping and hoping.
+ *
+ * The landing page renders its cards from an eagerly globbed registry, so they
+ * arrive with the first paint — but the fonts, the radial wash and the lazy
+ * chunks all settle around them, and a fixed wait before the screenshot is the
+ * kind of assertion that fails once a month on a slow network and reproduces for
+ * nobody. Two consecutive equal counts, 250ms apart, is the condition that
+ * actually matters.
+ */
+async function waitForStableCount(
+  locator: Locator,
+  label: string,
+  timeoutMs = 10_000,
+): Promise<number> {
+  const started = Date.now();
+  let previous = -1;
+
+  while (Date.now() - started < timeoutMs) {
+    const count = await locator.count();
+    if (count > 0 && count === previous) return count;
+    previous = count;
+    await locator.page().waitForTimeout(250);
+  }
+
+  throw new Error(`${label}: count never settled within ${timeoutMs}ms (last saw ${previous})`);
+}
+
+/**
+ * Fetches with three attempts and a widening gap between them.
+ *
+ * This suite runs against a real host over a real network. A single failed GET
+ * of the preview image says nothing about whether the image is broken, and a
+ * red build that goes green on a rerun teaches everyone to ignore red builds.
+ */
+async function fetchWithRetry(page: Page, url: string, attempts = 3): Promise<APIResponse> {
+  let lastProblem = 'no attempt made';
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await page.request.get(url, { timeout: 15_000 });
+      if (response.ok()) return response;
+      lastProblem = `status ${response.status()}`;
+    } catch (error) {
+      lastProblem = error instanceof Error ? error.message : String(error);
+    }
+    if (attempt < attempts) await page.waitForTimeout(500 * 2 ** (attempt - 1));
+  }
+
+  throw new Error(`${url}: ${attempts} attempts failed, last was ${lastProblem}`);
+}
+
 /* ------------------------------------------------------------------ */
 /* Landing page                                                        */
 /* ------------------------------------------------------------------ */
@@ -224,6 +285,8 @@ test('landing page', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
   const cards = page.locator('main ul > li > a[href^="/m/"]');
+  const settled = await waitForStableCount(cards, 'landing cards');
+  expect(settled, 'card count settled at the wrong number').toBe(MODULES.length);
   await expect(cards).toHaveCount(MODULES.length);
 
   // Every published module is linked, exactly once.
@@ -237,7 +300,6 @@ test('landing page', async ({ page }) => {
   ).toHaveCount(1);
 
   await assertNoOverflow(page, 'landing');
-  await settle(page);
   await shot(page, '01-landing');
   assertClean(w, 'landing');
 });
@@ -580,7 +642,7 @@ test('social preview image is declared absolutely and resolves', async ({ page }
   expect(twitterImage).toBe(image);
   expect(card).toBe('summary_large_image');
 
-  const response = await page.request.get(image!);
+  const response = await fetchWithRetry(page, image!);
   expect(response.status(), `${image} did not return 200`).toBe(200);
   expect(
     response.headers()['content-type'],
@@ -596,11 +658,150 @@ test('social preview image is declared absolutely and resolves', async ({ page }
 });
 
 /* ------------------------------------------------------------------ */
+/* Accessibility                                                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Every page, both viewports, zero serious or critical violations.
+ *
+ * The threshold is deliberate rather than "zero violations of any kind": axe's
+ * moderate and minor findings include judgement calls a rule cannot make, and a
+ * suite that fails on those gets muted. Serious and critical are the ones that
+ * stop somebody using the site, so they are the ones that fail the build.
+ * Anything moderate or minor is printed, so it is visible without being fatal.
+ */
+const A11Y_PAGES: [string, string][] = [
+  ['landing', '/'],
+  ['about', '/about'],
+  ...MODULES.map((id) => [id, `/m/${id}`] as [string, string]),
+];
+
+for (const [name, path] of A11Y_PAGES) {
+  test(`accessibility: ${name}`, async ({ page }) => {
+    await page.goto(path, { waitUntil: 'domcontentloaded' });
+    await settle(page, 1_200);
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+
+    const blocking = results.violations.filter(
+      (v) => v.impact === 'serious' || v.impact === 'critical',
+    );
+    const advisory = results.violations.filter(
+      (v) => v.impact !== 'serious' && v.impact !== 'critical',
+    );
+
+    if (advisory.length > 0) {
+      // eslint-disable-next-line no-console
+      console.log(
+        `  a11y[${name}] advisory: ` +
+          advisory.map((v) => `${v.impact}/${v.id} x${v.nodes.length}`).join(', '),
+      );
+    }
+
+    expect(
+      blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+      `${name}: serious or critical accessibility violations`,
+    ).toEqual([]);
+  });
+}
+
+test('keyboard: the whole sim is operable without a pointer', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/scale-of-the-universe', { waitUntil: 'domcontentloaded' });
+  await settle(page, 1_000);
+
+  // The skip link is the first thing focus reaches, and it goes somewhere.
+  await page.keyboard.press('Tab');
+  const first = page.locator(':focus');
+  await expect(first, 'first tab stop should be the skip link').toHaveText(/skip to content/i);
+  await first.press('Enter');
+  await expect(page.locator('#main')).toBeFocused();
+
+  // A log slider spans forty-two decades. One arrow press has to move it by
+  // something a person could walk the range with: 0.01 decades meant 4,194
+  // presses end to end, which is operable only in the sense that a keyboard can
+  // physically produce that many.
+  const slider = page.locator('#p-s');
+  await slider.focus();
+  const bounds = await slider.evaluate((el: HTMLInputElement) => ({
+    min: Number(el.min),
+    max: Number(el.max),
+    step: Number(el.step),
+  }));
+  const presses = (bounds.max - bounds.min) / bounds.step;
+  expect(presses, 'arrow-key presses to cross the range').toBeLessThanOrEqual(220);
+  expect(presses, 'so coarse that a press skips visible detail').toBeGreaterThanOrEqual(100);
+
+  const before = Number(await slider.inputValue());
+  await page.keyboard.press('ArrowRight');
+  const after = Number(await slider.inputValue());
+  expect(after, 'arrow key did not move the slider').toBeGreaterThan(before);
+
+  // Every stateful sim control reports its state, and every one is a real button.
+  await page.goto('/m/planetary-atmospheres', { waitUntil: 'domcontentloaded' });
+  await settle(page, 1_000);
+  const chips = page.locator('#layer-panel-play button[aria-pressed]');
+  expect(await chips.count(), 'gas chips should expose pressed state').toBeGreaterThanOrEqual(6);
+  await chips.nth(1).focus();
+  await page.keyboard.press('Enter');
+  await expect(chips.nth(1)).toHaveAttribute('aria-pressed', 'true');
+
+  assertClean(w, 'keyboard');
+});
+
+test('screen reader: canvases are labelled and described', async ({ page }) => {
+  const w = watch(page);
+
+  for (const id of MODULES) {
+    await page.goto(`/m/${id}`, { waitUntil: 'domcontentloaded' });
+    await settle(page, 900);
+
+    const described = await page.locator('canvas').first().evaluate((canvas) => {
+      const describedBy = canvas.getAttribute('aria-describedby');
+      const target = describedBy ? document.getElementById(describedBy) : null;
+      return {
+        role: canvas.getAttribute('role'),
+        label: (canvas.getAttribute('aria-label') ?? '').length,
+        describedBy,
+        describedText: (target?.textContent ?? '').trim().length,
+      };
+    });
+
+    expect(described.role, `${id}: canvas needs an image role`).toBe('img');
+    expect(described.label, `${id}: canvas needs a real label`).toBeGreaterThan(40);
+    expect(
+      described.describedText,
+      `${id}: aria-describedby should point at the readouts, which must have text`,
+    ).toBeGreaterThan(10);
+  }
+
+  // KaTeX has to keep emitting MathML, or every equation becomes a wall of
+  // meaningless glyph spans to a screen reader.
+  await page.goto('/m/escape-velocity', { waitUntil: 'domcontentloaded' });
+  await settle(page, 800);
+  await openLayer(page, 'math');
+  const math = await page.locator('.katex-display').first().evaluate((el) => ({
+    mathml: !!el.querySelector('math'),
+    annotation: el.querySelector('annotation')?.textContent?.length ?? 0,
+    visualHidden: el.querySelector('.katex-html')?.getAttribute('aria-hidden'),
+  }));
+  expect(math.mathml, 'KaTeX MathML annotation is missing').toBe(true);
+  expect(math.annotation).toBeGreaterThan(5);
+  expect(math.visualHidden, 'the glyph layer should be hidden from assistive tech').toBe('true');
+
+  assertClean(w, 'screen reader');
+});
+
+/* ------------------------------------------------------------------ */
 /* Reduced motion                                                      */
 /* ------------------------------------------------------------------ */
 
 test.describe('prefers-reduced-motion', () => {
-  for (const id of ['kepler-orbits', 'gravitational-waves'] as const) {
+  // Every sim, not a sample: the preference has to hold across all of them,
+  // and a new sim that animates through it should fail here.
+  for (const id of MODULES) {
     test(`${id} draws statically`, async ({ page }) => {
       const w = watch(page);
       // Emulated on the page rather than through `test.use`, so the media query

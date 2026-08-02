@@ -159,7 +159,7 @@ function chooseComparison(horizonDiameter: number): Comparison {
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#6b7488',
+  inkFaint: '#767f93',
   edge: '#232b3b',
   void: '#05070c',
   star: '#9db4ff',
@@ -533,10 +533,16 @@ export default function BlackHolesSim({ params, values }: SimProps) {
   return (
     <div className="flex min-h-[20rem] flex-col gap-4">
       <div className="relative h-[20rem] w-full">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          role="img"
+          aria-label="The three radii of a non-rotating black hole drawn to one scale — event horizon, photon sphere and innermost stable circular orbit — beside a familiar object of comparable size."
+          aria-describedby="black-holes-readouts"
+        />
       </div>
 
-      <dl className="flex flex-wrap gap-x-7 gap-y-3 border-t border-edge-soft pt-4">
+      <dl id="black-holes-readouts" className="flex flex-wrap gap-x-7 gap-y-3 border-t border-edge-soft pt-4">
         <Readout label="event horizon r_s" value={formatLength(rs)} />
         <Readout
           label={`head-to-foot stretch (${PERSON_HEIGHT} m)`}

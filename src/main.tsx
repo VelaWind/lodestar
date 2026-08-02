@@ -1,6 +1,5 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import 'katex/dist/katex.min.css';
 import './index.css';
 import App from './App';
 
@@ -18,6 +17,7 @@ if (import.meta.env.DEV) {
       verifyBlackHoleModel,
       verifyGravitationalWaveModel,
       verifyTransitModel,
+      verifyAtmosphereModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -26,6 +26,7 @@ if (import.meta.env.DEV) {
       verifyBlackHoleModel();
       verifyGravitationalWaveModel();
       verifyTransitModel();
+      verifyAtmosphereModel();
     },
   );
 }

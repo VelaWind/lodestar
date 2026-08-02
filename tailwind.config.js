@@ -20,7 +20,12 @@ export default {
         ink: {
           DEFAULT: '#d5dcea',
           dim: '#98a2b8',
-          faint: '#6b7488',
+          // Raised from #6b7488, which measured 4.27:1 on the page background
+          // and 4.20:1 inside a panel — under the 4.5:1 AA floor for body text,
+          // and this tone carries every caption, axis label and readout label on
+          // the site. #767f93 is the smallest step that clears 4.5 on all three
+          // real backgrounds with margin to spare: 4.99, 4.93, 4.90.
+          faint: '#767f93',
         },
         star: {
           DEFAULT: '#9db4ff',

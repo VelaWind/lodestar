@@ -16,6 +16,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(157,180,255,0.07),transparent_60%)]"
       />
 
+      {/* First thing in the tab order: seven layers of accordion headers sit
+          between the header and the prose, and a keyboard reader should not
+          have to walk them on every page. Visually hidden until focused. */}
+      <a
+        href="#main"
+        className="sr-only left-4 top-4 z-50 rounded-md border border-star/60 bg-void-800 px-4 py-2 font-ui text-sm text-ink focus:not-sr-only focus:absolute"
+      >
+        Skip to content
+      </a>
+
       <header className="sticky top-0 z-30 border-b border-edge-soft bg-void-900/85 backdrop-blur-md">
         {/* px-4 and gap-3 at base, not px-5/gap-4: the wordmark and the three
             depth pills together need 318 of the 343px a 375px phone leaves, and
@@ -46,7 +56,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-5xl px-5 pb-24 pt-10 sm:px-8">{children}</main>
+      <main
+        id="main"
+        tabIndex={-1}
+        className="relative mx-auto max-w-5xl px-5 pb-24 pt-10 focus:outline-none sm:px-8"
+      >
+        {children}
+      </main>
 
       <footer className="relative border-t border-edge-soft">
         <div className="mx-auto flex max-w-5xl flex-col gap-2 px-5 py-8 font-ui text-xs leading-relaxed text-ink-faint sm:flex-row sm:items-baseline sm:justify-between sm:gap-6 sm:px-8">

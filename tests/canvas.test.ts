@@ -20,6 +20,7 @@ import exoplanets from '@/content/modules/exoplanets';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
+import planetaryAtmospheres from '@/content/modules/planetary-atmospheres';
 import scaleOfTheUniverse, { scaleAnchors } from '@/content/modules/scale-of-the-universe';
 
 import { __internals as bh } from '@/sims/black-holes';
@@ -27,12 +28,14 @@ import { __internals as ep } from '@/sims/exoplanets';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as gw } from '@/sims/gravitational-waves';
 import { __internals as ko } from '@/sims/kepler-orbits';
+import { __internals as pa } from '@/sims/planetary-atmospheres';
 import { __internals as su } from '@/sims/scale-of-the-universe';
 
 import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
 import { chirpMass, fCutoff } from '@/physics/gw';
 import { orbitGeometry, period } from '@/physics/kepler';
 import { transitShape } from '@/physics/transit';
+import { GASES, retentionVerdict } from '@/physics/atmosphere';
 import {
   iscoRadius,
   photonSphereRadius,
@@ -352,6 +355,61 @@ function exoplanetCases(): Case[] {
   return cases;
 }
 
+/* --------------------------- planetary atmospheres --------------------------- */
+
+function atmosphereCases(): Case[] {
+  const params = planetaryAtmospheres.layers.play.params;
+  const masses = extremes(paramOf(params, 'M'));
+  const radii = extremes(paramOf(params, 'R'));
+  const temperatures = extremes(paramOf(params, 'T'));
+  const cases: Case[] = [];
+
+  const add = (label: string, m: number, r: number, t: number, gas: (typeof GASES)[number]) => {
+    const escapeSpeed = vEsc(m, r);
+    const verdict = retentionVerdict(m, r, t, gas.mass).verdict;
+    cases.push({
+      label: `${label} ${gas.id}`,
+      draw: (ctx, w, h) =>
+        pa.drawScene(ctx, w, h, { escapeSpeed, temperature: t, gas, verdict }),
+    });
+  };
+
+  // Every gas at the defaults, then each parameter swept against the others'
+  // defaults — the full cartesian across three sliders and six gases is 162
+  // scenes per width, and sweeping one at a time covers the same ground.
+  const dm = paramOf(params, 'M').default;
+  const dr = paramOf(params, 'R').default;
+  const dt = paramOf(params, 'T').default;
+
+  for (const gas of GASES) {
+    add('defaults', dm, dr, dt, gas);
+    for (const m of masses) add(`M=${m.stop}`, m.value, dr, dt, gas);
+    for (const r of radii) add(`R=${r.stop}`, dm, r.value, dt, gas);
+    for (const t of temperatures) add(`T=${t.stop}`, dm, dr, t.value, gas);
+  }
+
+  // The two corners the axis has to stretch hardest for: a wide, fast
+  // distribution against a near-origin escape line, and a spike against a line
+  // far to the right.
+  const h2 = GASES[0]!;
+  const co2 = GASES[GASES.length - 1]!;
+  add('lightest gas at max T on the smallest world', paramOf(params, 'M').min, paramOf(params, 'R').max, 2500, h2);
+  add('heaviest gas at min T on the largest world', paramOf(params, 'M').max, paramOf(params, 'R').min, 50, co2);
+
+  it('stretches the speed axis to hold both the curve and the threshold', () => {
+    // Hydrogen at 2500 K on a small world: the escape line sits left of the peak.
+    const wide = pa.speedAxisMax(vEsc(paramOf(params, 'M').min, paramOf(params, 'R').max), 4541);
+    expect(wide).toBeGreaterThan(4 * 4541 * 0.99);
+
+    // Carbon dioxide at 50 K on a heavy world: the line is far to the right, and
+    // the axis has to follow it rather than clipping it off the frame.
+    const narrow = pa.speedAxisMax(vEsc(paramOf(params, 'M').max, paramOf(params, 'R').min), 137);
+    expect(narrow).toBeGreaterThan(vEsc(paramOf(params, 'M').max, paramOf(params, 'R').min));
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -361,6 +419,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'black-holes', height: 320, cases: blackHoleCases },
   { name: 'gravitational-waves', height: 288, cases: gravitationalWaveCases },
   { name: 'exoplanets', height: 352, cases: exoplanetCases },
+  { name: 'planetary-atmospheres', height: 304, cases: atmosphereCases },
 ];
 
 for (const sim of SIMS) {

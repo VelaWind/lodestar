@@ -72,7 +72,7 @@ export function EquationBlock({ layer, params, values }: Props) {
             {m}
           </button>
         ))}
-        <span className="px-2 text-ink-faint/60">
+        <span className="px-2 text-ink-faint">
           {mode === 'numbers' ? 'live from the sliders above' : ''}
         </span>
       </div>

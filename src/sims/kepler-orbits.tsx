@@ -118,7 +118,7 @@ interface Scene {
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#6b7488',
+  inkFaint: '#767f93',
   edge: '#232b3b',
   star: '#9db4ff',
   ember: '#e8bd7d',
@@ -433,11 +433,17 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
   return (
     <div className="flex min-h-[20rem] flex-col gap-4">
       <div className="relative h-[24rem] w-full">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          role="img"
+          aria-label="An elliptical orbit with the star at one focus and the planet running along it, optionally divided into twelve equal-time wedges of equal area."
+          aria-describedby="kepler-orbits-readouts"
+        />
       </div>
 
       <div className="flex flex-wrap items-end justify-between gap-4 border-t border-edge-soft pt-4">
-        <dl className="flex flex-wrap gap-x-7 gap-y-2">
+        <dl id="kepler-orbits-readouts" className="flex flex-wrap gap-x-7 gap-y-2">
           <Readout label="period" value={formatDuration(T)} />
           <Readout label="periapsis" value={formatDistance(geom.periapsis)} />
           <Readout label="apoapsis" value={formatDistance(geom.apoapsis)} />
