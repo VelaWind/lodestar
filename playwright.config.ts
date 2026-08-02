@@ -10,6 +10,11 @@ import { defineConfig, devices } from '@playwright/test';
  * Vercel last built, and to real browser behaviour — which is the point.
  *
  * Run with: npx playwright test
+ *
+ * `E2E_BASE_URL` points it somewhere else — in practice `npm run build` followed
+ * by `npx vite preview`, so a change to the suite itself can be checked before
+ * it is pushed. The default stays the live site: a suite whose normal target is
+ * localhost would stop being the thing that tells us the deployment works.
  */
 export default defineConfig({
   testDir: './tests/e2e',
@@ -27,7 +32,7 @@ export default defineConfig({
   expect: { timeout: 15_000 },
 
   use: {
-    baseURL: 'https://lodestar-nu-six.vercel.app',
+    baseURL: process.env.E2E_BASE_URL ?? 'https://lodestar-nu-six.vercel.app',
     trace: 'off',
     video: 'off',
     screenshot: 'off',

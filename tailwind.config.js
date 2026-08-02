@@ -26,6 +26,8 @@ export default {
           // the site. #767f93 is the smallest step that clears 4.5 on all three
           // real backgrounds with margin to spare: 4.99, 4.93, 4.90.
           faint: '#767f93',
+          // Muted text on a raised surface — see --text-muted-elevated.
+          'muted-elevated': 'var(--text-muted-elevated)',
         },
         star: {
           DEFAULT: '#9db4ff',

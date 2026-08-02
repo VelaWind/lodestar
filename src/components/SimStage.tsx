@@ -4,7 +4,7 @@
  * registry by string key, so this file never learns any module's name.
  */
 import { Suspense } from 'react';
-import type { Param, ParamValues, SimLayer } from '@/content/types';
+import type { Param, ParamUpdate, ParamValues, SimLayer } from '@/content/types';
 import { getSim, simKeys } from '@/content/registry';
 import { ParamControls } from './ParamControls';
 import { Approximations } from './Approximations';
@@ -14,7 +14,7 @@ interface Props {
   moduleId: string;
   layer: SimLayer;
   values: ParamValues;
-  onChange: (param: Param, value: number) => void;
+  onChange: (param: Param, value: ParamUpdate) => void;
   onReset: () => void;
 }
 

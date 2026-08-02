@@ -8,7 +8,7 @@
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Param, ParamValues } from '@/content/types';
+import type { Param, ParamUpdate, ParamValues } from '@/content/types';
 import { clampToParam } from '@/lib/format';
 import type { DepthTier } from '@/lib/layers';
 
@@ -20,7 +20,8 @@ interface AppState {
   params: Record<string, ParamValues>;
   /** Idempotent: seeds any param not already present. Safe to call every render. */
   ensureModuleParams: (moduleId: string, params: Param[]) => void;
-  setParam: (moduleId: string, param: Param, value: number) => void;
+  /** The updater form is applied against current state — see `ParamUpdate`. */
+  setParam: (moduleId: string, param: Param, value: ParamUpdate) => void;
   resetModuleParams: (moduleId: string, params: Param[]) => void;
 }
 
@@ -49,15 +50,19 @@ export const useAppStore = create<AppState>()(
       },
 
       setParam: (moduleId, param, value) =>
-        set((s) => ({
-          params: {
-            ...s.params,
-            [moduleId]: {
-              ...s.params[moduleId],
-              [param.id]: clampToParam(param, value),
+        set((s) => {
+          const current = s.params[moduleId]?.[param.id] ?? param.default;
+          const next = typeof value === 'function' ? value(current) : value;
+          return {
+            params: {
+              ...s.params,
+              [moduleId]: {
+                ...s.params[moduleId],
+                [param.id]: clampToParam(param, next),
+              },
             },
-          },
-        })),
+          };
+        }),
 
       resetModuleParams: (moduleId, params) =>
         set((s) => ({ params: { ...s.params, [moduleId]: defaultsOf(params) } })),

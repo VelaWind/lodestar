@@ -44,6 +44,8 @@ npm test           # physics checks, equation snapshots, canvas replay, content 
 npm run build      # typecheck + production build
 ```
 
+Module pages carry KaTeX's full, unsubsetted font set: the glyphs a future module will need are not knowable in advance, and a subset would fail by silently rendering a blank box rather than by failing a build. Only the faces a page actually uses are fetched — one 79 kB file on the most equation-dense page — and mobile Lighthouse performance there measures 96–97, so the ceiling this imposes is accepted rather than engineered around.
+
 `npm test` runs the same physics sanity blocks the browser logs, asserts every published equation against a committed snapshot so a formatting change cannot quietly rewrite the math, replays each sim's drawing at phone-to-desktop widths against a recording canvas to catch labels drawn outside the frame, and checks every published module against the authoring standards. Typecheck, test and build run on every push and pull request to `main`.
 
 The `.claude/skills/` directory contains the project's authoring standards — the seven-layer module format and the physics-accuracy rules — written as [Claude Code skills](https://docs.anthropic.com/en/docs/claude-code) so they are enforced during AI-assisted development. This project is built solo with Claude Code; the skills are how editorial and physical consistency survive that.

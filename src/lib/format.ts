@@ -195,29 +195,39 @@ export function positionToValue(param: Param, pos: number): number {
 }
 
 /**
- * The most keyboard steps a slider may take to cross its whole range.
+ * One arrow press on a log slider, in decades.
  *
- * An arrow key moves a range input by exactly one `step`. The scale ladder spans
- * 41.9 decades and authors its step as 0.01 decades, which is 4,194 presses from
- * one end to the other — reachable in principle and unusable in practice, which
- * is the same thing as not being operable. Two hundred steps is the granularity
- * a native `0..100` slider has, and at any realistic track width it is still
- * finer than one pixel of travel, so pointer users lose nothing: 200 steps over
- * a 254px track is 1.3px per step.
+ * Uniform across every module rather than scaled to each slider's range, so the
+ * key means the same thing everywhere: a twentieth of a decade, about 12% of the
+ * value. Log ranges here run from 0.6 decades to 15, and an arrow that changed
+ * meaning with the range would make the keyboard unpredictable exactly where it
+ * is the only input available.
+ *
+ * `ParamControls` applies this in a key handler rather than through the input's
+ * `step`, because `step` also governs dragging: 0.05 decades on the 0.6-decade
+ * planet-radius slider would be twelve stops for the whole range, and pointer
+ * users would pay for a keyboard decision. The element keeps the authored step
+ * for the mouse; the keyboard gets its own, uniform one.
  */
-const MAX_KEYBOARD_STEPS = 200;
+export const LOG_ARROW_STEP = 0.05;
+
+/**
+ * Shift+arrow, PageUp and PageDown, in decades.
+ *
+ * Crossing the scale ladder with arrows alone is 306 presses. A whole decade is
+ * the coarse key, and it is the natural unit: log sliders are labelled and
+ * reasoned about in decades. Home and End reach the stops outright, natively.
+ */
+export const LOG_PAGE_STEP = 1;
 
 export function sliderBounds(param: Param): { min: number; max: number; step: number } {
   if (param.scale === 'log') {
     const { lo, hi } = logDomain(param);
     const min = Math.log10(lo);
     const max = Math.log10(hi);
-    return {
-      min,
-      max,
-      // Authored in decades, floored at a step a keyboard can actually walk.
-      step: Math.max(param.step, (max - min) / MAX_KEYBOARD_STEPS),
-    };
+    // Authored in decades. This is the *pointer* granularity — the keyboard's
+    // is LOG_ARROW_STEP, applied by ParamControls, uniform across modules.
+    return { min, max, step: param.step };
   }
   return { min: param.min, max: param.max, step: param.step };
 }

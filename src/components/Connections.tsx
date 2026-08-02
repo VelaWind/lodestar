@@ -24,21 +24,25 @@ export function Connections({ layer }: { layer: ConnectionsLayer }) {
         const target = getModule(moduleId);
 
         if (!isReaderVisible(target)) {
+          // No `opacity-60` here any more: dimming the whole chip composited its
+          // text toward the background and put it at 2.44:1 and 3.38:1. The
+          // quietness now comes from the tone and the dashed border, both of
+          // which keep their contrast.
           return (
             <li
               key={moduleId}
-              className="rounded-lg border border-dashed border-edge-soft px-4 py-3.5 opacity-60"
+              className="rounded-lg border border-dashed border-edge-soft px-4 py-3.5"
             >
               <div className="flex items-baseline justify-between gap-2">
                 {/* The id, not the title, when there is no module: a title would
                     be inventing one. A draft has a real title, but it is unwritten
                     work, so it reads the same as anything else not here yet. */}
-                <span className="font-prose text-ink-dim">{moduleId}</span>
-                <span className="font-ui text-[0.65rem] uppercase tracking-wider text-ink-faint">
+                <span className="font-prose text-ink-muted-elevated">{moduleId}</span>
+                <span className="font-ui text-[0.65rem] uppercase tracking-wider text-ink-muted-elevated">
                   planned
                 </span>
               </div>
-              <p className="mt-1 font-prose text-sm text-ink-faint">{reason}</p>
+              <p className="mt-1 font-prose text-sm text-ink-muted-elevated">{reason}</p>
             </li>
           );
         }

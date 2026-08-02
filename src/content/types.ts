@@ -72,6 +72,15 @@ export interface ParamFormat {
 /** Live values for a module, keyed by `Param.id`, always in SI units. */
 export type ParamValues = Record<string, number>;
 
+/**
+ * A new value for a param, or a function of its current one.
+ *
+ * The updater form is what the keyboard needs: a held arrow fires faster than
+ * React re-renders, and a handler computing from its rendered prop would apply
+ * the same move from the same stale start and drop presses.
+ */
+export type ParamUpdate = number | ((current: number) => number);
+
 /* ------------------------------------------------------------------ */
 /* Rich text                                                           */
 /* ------------------------------------------------------------------ */

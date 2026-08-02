@@ -13,6 +13,23 @@
  */
 import { memo, useMemo } from 'react';
 import katex from 'katex';
+/*
+ * KaTeX's full font set, deliberately not subsetted.
+ *
+ * Subsetting was considered and rejected. The risk it carries is silent: a
+ * subset is built from the glyphs the modules use *today*, and the next module
+ * to reach for a script capital, a vector arrow or an uncommon operator would
+ * render a blank box with nothing failing anywhere — no build error, no test
+ * failure, just a hole in an equation nobody was looking at. Modules are typed
+ * data files written by hand, so the glyph set is not knowable in advance.
+ *
+ * What it would buy is small. The vendor sheet declares every face, but a
+ * browser only fetches the ones the rendered glyphs actually reference: on the
+ * most equation-dense page in the site that is one file, 79 kB, and it is not on
+ * the critical path. Mobile Lighthouse on those pages measures 96–97.
+ *
+ * A page heavy enough to want this would be a page to reconsider, not to subset.
+ */
 // Vendor sheet first, then our overrides — see src/styles/katex.css.
 import 'katex/dist/katex.min.css';
 import '@/styles/katex.css';

@@ -7,7 +7,7 @@
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { LayerId, Module, Param } from '@/content/types';
+import type { LayerId, Module, Param, ParamUpdate } from '@/content/types';
 import { getModule } from '@/content/registry';
 import { LAYER_META, LAYER_ORDER, defaultOpenFor } from '@/lib/layers';
 import { defaultsOf, useAppStore } from '@/store/useAppStore';
@@ -133,7 +133,7 @@ function renderLayer(
   layerId: LayerId,
   module: Module,
   values: Record<string, number>,
-  setParam: (moduleId: string, param: Param, value: number) => void,
+  setParam: (moduleId: string, param: Param, value: ParamUpdate) => void,
   resetParams: (moduleId: string, params: Param[]) => void,
 ): ReactNode {
   const { layers } = module;

@@ -211,6 +211,95 @@ async function openLayer(page: Page, layer: string): Promise<void> {
   await expect(header).toHaveAttribute('aria-expanded', 'true');
 }
 
+/**
+ * The log-slider keyboard contract, identical on every module.
+ *
+ * Arrow moves a twentieth of a decade, Shift+arrow and PageUp/PageDown a whole
+ * one, Home and End reach the stops. The steps are applied in a key handler
+ * rather than through the input's `step` — `step` also governs dragging, and a
+ * keyboard-sized step would have made the 0.6-decade sliders twelve stops wide
+ * for pointer users — so nothing about this is guaranteed by the element and all
+ * of it has to be exercised through real key presses.
+ */
+async function assertLogSliderKeys(page: Page, selector: string, name: string): Promise<void> {
+  const slider = page.locator(selector);
+  const at = async (): Promise<number> => Number(await slider.inputValue());
+
+  await slider.focus();
+  await expect(slider, `${name}: not focusable`).toBeFocused();
+
+  // Start from a spot with a decade of room on both sides.
+  await page.keyboard.press('Home');
+  const min = await at();
+  await page.keyboard.press('End');
+  const max = await at();
+  expect(max, `${name}: Home and End should reach different stops`).toBeGreaterThan(min);
+
+  // Every check starts from the same place. On a 0.6-decade slider a coarse key
+  // lands on a stop, so without resetting, the next check would be measuring
+  // from wherever the last one clamped to.
+  const middle = (min + max) / 2;
+  const reset = async (): Promise<number> => {
+    await slider.evaluate((el: HTMLInputElement, v: number) => {
+      // Native setter, then an input event, so React's state follows the DOM.
+      const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+      set?.call(el, String(v));
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    }, middle);
+    return at();
+  };
+
+  let base = await reset();
+  await page.keyboard.press('ArrowRight');
+  expect((await at()) - base, `${name}: arrow should move a twentieth of a decade`).toBeCloseTo(
+    0.05,
+    3,
+  );
+  await page.keyboard.press('ArrowLeft');
+  expect(await at(), `${name}: arrow left should undo arrow right`).toBeCloseTo(base, 3);
+
+  base = await reset();
+  await page.keyboard.press('Shift+ArrowRight');
+  expect(await at(), `${name}: Shift+arrow should move a whole decade`).toBeCloseTo(
+    Math.min(max, base + 1),
+    3,
+  );
+
+  base = await reset();
+  await page.keyboard.press('PageUp');
+  expect(await at(), `${name}: PageUp should move a whole decade`).toBeCloseTo(
+    Math.min(max, base + 1),
+    3,
+  );
+
+  base = await reset();
+  await page.keyboard.press('PageDown');
+  expect(await at(), `${name}: PageDown should move a whole decade back`).toBeCloseTo(
+    Math.max(min, base - 1),
+    3,
+  );
+
+  // Key repeat delivers keydowns faster than React re-renders. Dispatching them
+  // in one task is that case at its worst: a handler reading its rendered prop
+  // would compute every one of these from the same starting point and move a
+  // single step for ten presses. Ten arrows are half a decade or nothing.
+  const base10 = await reset();
+  await slider.evaluate((el: HTMLInputElement) => {
+    for (let i = 0; i < 10; i += 1) {
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    }
+  });
+  expect((await at()) - base10, `${name}: a burst of arrows lost presses`).toBeCloseTo(0.5, 3);
+
+  // The coarse key stops at the stop rather than running past it or refusing.
+  await reset();
+  const toTheTop = Math.ceil(max - min) + 2;
+  for (let i = 0; i < toTheTop; i += 1) await page.keyboard.press('PageUp');
+  expect(await at(), `${name}: PageUp should clamp to the maximum`).toBeCloseTo(max, 3);
+  await page.keyboard.press('Home');
+  expect(await at(), `${name}: Home should return to the minimum`).toBeCloseTo(min, 3);
+}
+
 async function shot(page: Page, name: string): Promise<string> {
   const project = test.info().project.name;
   const path = `qa-screenshots/${project}/${name}.png`;
@@ -706,6 +795,50 @@ for (const [name, path] of A11Y_PAGES) {
   });
 }
 
+/**
+ * The same audit, on a page that has been opened up.
+ *
+ * The per-page pass above sees each page in its default state, which is most of
+ * it collapsed — and a collapsed layer is not in the DOM, so axe never looked at
+ * it. Two elements that only exist once a reader expands something were failing
+ * contrast the whole time the suite was green: the "planned" connection chip in
+ * layer 7, and the approximations summary beside the sim. Anything a reader can
+ * reveal by clicking has to be audited in the state they reveal it in.
+ */
+test('accessibility: a module page with every layer expanded', async ({ page }) => {
+  // This module links to `cosmic-distance-ladder`, which is backlog rather than
+  // draft, so the chip does not vanish the day another module is published.
+  await page.goto('/m/gravitational-waves', { waitUntil: 'domcontentloaded' });
+  await settle(page, 1_000);
+
+  await page.getByRole('button', { name: /expand all/i }).click();
+  await page.getByRole('button', { name: /^approximations/i }).click();
+  await settle(page, 700);
+
+  // Assert the two elements are actually here, or this test passes by auditing
+  // a page that happens not to contain what it was written for.
+  const planned = page.getByText('planned', { exact: true });
+  await expect(planned, 'no planned connection chip on this page').toBeVisible();
+  await expect(
+    page.getByRole('button', { name: /^approximations/i }),
+    'no approximations summary on this page',
+  ).toBeVisible();
+  await expect(page.locator('#layer-panel-deeper')).toBeVisible();
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+
+  expect(
+    blocking.flatMap((v) => v.nodes.map((n) => `${v.impact} ${v.id}: ${n.failureSummary ?? n.html}`)),
+    'expanded module page: serious or critical accessibility violations',
+  ).toEqual([]);
+});
+
 test('keyboard: the whole sim is operable without a pointer', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/scale-of-the-universe', { waitUntil: 'domcontentloaded' });
@@ -718,25 +851,15 @@ test('keyboard: the whole sim is operable without a pointer', async ({ page }) =
   await first.press('Enter');
   await expect(page.locator('#main')).toBeFocused();
 
-  // A log slider spans forty-two decades. One arrow press has to move it by
-  // something a person could walk the range with: 0.01 decades meant 4,194
-  // presses end to end, which is operable only in the sense that a keyboard can
-  // physically produce that many.
-  const slider = page.locator('#p-s');
-  await slider.focus();
-  const bounds = await slider.evaluate((el: HTMLInputElement) => ({
-    min: Number(el.min),
-    max: Number(el.max),
-    step: Number(el.step),
-  }));
-  const presses = (bounds.max - bounds.min) / bounds.step;
-  expect(presses, 'arrow-key presses to cross the range').toBeLessThanOrEqual(220);
-  expect(presses, 'so coarse that a press skips visible detail').toBeGreaterThanOrEqual(100);
+  // The log-slider keyboard contract, checked on the longest slider in the app
+  // and again below on the shortest, because the whole point of it is that the
+  // keys mean the same thing on both. Positions are decades.
+  await assertLogSliderKeys(page, '#p-s', 'scale-of-the-universe/s');
 
-  const before = Number(await slider.inputValue());
-  await page.keyboard.press('ArrowRight');
-  const after = Number(await slider.inputValue());
-  expect(after, 'arrow key did not move the slider').toBeGreaterThan(before);
+  // 0.6 decades end to end — a whole-decade key has to clamp here, not refuse.
+  await page.goto('/m/exoplanets', { waitUntil: 'domcontentloaded' });
+  await settle(page, 1_000);
+  await assertLogSliderKeys(page, '#p-Rp', 'exoplanets/Rp');
 
   // Every stateful sim control reports its state, and every one is a real button.
   await page.goto('/m/planetary-atmospheres', { waitUntil: 'domcontentloaded' });

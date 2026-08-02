@@ -14,6 +14,7 @@
 import { describe, expect, it } from 'vitest';
 import { moduleList, modules, simKeys } from '@/content/registry';
 import type { Module } from '@/content/types';
+import { LOG_ARROW_STEP, LOG_PAGE_STEP, sliderBounds } from '@/lib/format';
 import { plainText } from '@/lib/plainText';
 
 const published = moduleList.filter((m) => m.status === 'published');
@@ -86,6 +87,25 @@ for (const module of published) {
         expect(param.default, `${param.id}: default above max`).toBeLessThanOrEqual(param.max);
         // A log slider cannot include zero; the shell warns in dev and clamps.
         if (param.scale === 'log') expect(param.min, `${param.id}: log scale from ${param.min}`).toBeGreaterThan(0);
+      }
+    });
+
+    it('leaves every log slider draggable more finely than the keyboard steps', () => {
+      // The keyboard's step is uniform across modules and lives in
+      // ParamControls; the element's step is the authored one and governs
+      // dragging. If a module ever authors a step coarser than an arrow press,
+      // the pointer becomes the blunter instrument and the slider starts
+      // snapping past values the keyboard can reach.
+      for (const param of module.layers.play.params) {
+        if (param.scale !== 'log') continue;
+        const { min, max, step } = sliderBounds(param);
+        expect(step, `${param.id}: authored step is coarser than an arrow press`).toBeLessThanOrEqual(
+          LOG_ARROW_STEP,
+        );
+        expect(
+          max - min,
+          `${param.id}: range is under one decade, so the coarse key is the whole slider`,
+        ).toBeGreaterThan(LOG_PAGE_STEP / 2);
       }
     });
 

@@ -3,8 +3,10 @@
  * module gets identical, correct, log-aware controls with LaTeX symbols and SI
  * units for free, and a sim never has to think about UI.
  */
-import type { Param, ParamValues } from '@/content/types';
+import type { Param, ParamUpdate, ParamValues } from '@/content/types';
 import {
+  LOG_ARROW_STEP,
+  LOG_PAGE_STEP,
   formatWithUnit,
   paramLabel,
   positionToValue,
@@ -17,7 +19,7 @@ import { Tex } from './Tex';
 interface Props {
   params: Param[];
   values: ParamValues;
-  onChange: (param: Param, value: number) => void;
+  onChange: (param: Param, value: ParamUpdate) => void;
   onReset: () => void;
 }
 
@@ -74,6 +76,37 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
               step={bounds.step}
               value={valueToPosition(param, value)}
               onChange={(e) => onChange(param, positionToValue(param, Number(e.target.value)))}
+              onKeyDown={(e) => {
+                // Log sliders take their keys from here rather than from the
+                // element's `step`, so that the keyboard contract is the same on
+                // a 0.6-decade slider and a 15-decade one without dictating how
+                // finely either can be dragged. Arrow moves a twentieth of a
+                // decade, Shift+arrow and PageUp/PageDown a whole one; Home and
+                // End already reach the stops, so they are left to the browser.
+                if (param.scale !== 'log') return;
+                const back = e.key === 'ArrowLeft' || e.key === 'ArrowDown';
+                const forward = e.key === 'ArrowRight' || e.key === 'ArrowUp';
+                const page = e.key === 'PageUp' || e.key === 'PageDown';
+                if (!back && !forward && !page) return;
+
+                const size =
+                  page || e.shiftKey || e.metaKey ? LOG_PAGE_STEP : LOG_ARROW_STEP;
+                const delta = back || e.key === 'PageDown' ? -size : size;
+
+                e.preventDefault();
+                // From the current value rather than the rendered one: a held
+                // key outruns the re-render, and reading the prop would apply
+                // the same move over and over from the same starting point.
+                onChange(param, (current) =>
+                  positionToValue(
+                    param,
+                    Math.min(
+                      bounds.max,
+                      Math.max(bounds.min, valueToPosition(param, current) + delta),
+                    ),
+                  ),
+                );
+              }}
               aria-label={`${label} (${param.unit})`}
               aria-valuetext={formatWithUnit(param, value)}
             />
