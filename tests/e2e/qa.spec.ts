@@ -37,7 +37,6 @@ const MODULES = [
   'black-holes',
   'gravitational-waves',
   'exoplanets',
-  'planetary-atmospheres',
 ] as const;
 
 /* ------------------------------------------------------------------ */
