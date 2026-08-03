@@ -26,7 +26,7 @@ export const aboutSections: AboutSection[] = [
     heading: 'One module, three readers',
     body: prose(
       p(
-        'Every topic on this site is a single module that unfolds in seven layers — from a ',
+        'Every topic on this site is a single module that unfolds in seven layers: from a ',
         'one-sentence hook, through an analogy and a live simulation, down to the derivation and ',
         'the open research questions. A depth setting controls which layers open by default, and ',
         'nothing else: there are no beginner pages and no advanced pages, because parallel ',
@@ -40,7 +40,7 @@ export const aboutSections: AboutSection[] = [
     body: prose(
       p(
         'Every simulation runs on real physical values in SI units. The sliders wear friendly ',
-        'labels, but underneath each one is a real quantity with a unit and a symbol — and the ',
+        'labels, but underneath each one is a real quantity with a unit and a symbol. The ',
         'math layer reads the same parameter objects the animation does. Drag a mass slider and ',
         'the number that appears in the equation is the number in the physics loop. Nothing is ',
         'staged for the visual.',
@@ -70,7 +70,7 @@ export const aboutSections: AboutSection[] = [
       ),
       p(
         'Verification runs the same way it would on a team. A sanity suite recomputes known ',
-        'physics — Earth’s year, escape velocity, the Schwarzschild radius of the Sun — through ',
+        'physics (Earth’s year, escape velocity, the Schwarzschild radius of the Sun) through ',
         'the same code paths the simulations use, on every change. Unit tests snapshot every ',
         'published equation. An end-to-end suite drives the deployed site in a real browser, at ',
         'phone and desktop widths, and reads the pixels. It has caught real bugs the unit layer ',

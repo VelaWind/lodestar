@@ -580,7 +580,7 @@ export default function BlackHolesSim({ params, values }: SimProps) {
 
       <p className="font-ui text-[0.75rem] leading-relaxed text-ink-faint">
         “Survivable” means the stretch alone would not tear you apart at the moment you
-        cross — nothing beyond it. The temperature is far below the 2.725 K microwave
+        cross: nothing beyond it. The temperature is far below the 2.725 K microwave
         background at every mass this slider reaches, so a real hole here absorbs more than
         it radiates and the evaporation clock has not started.
       </p>

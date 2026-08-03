@@ -45,7 +45,7 @@ const planetaryAtmospheres: Module = {
       body: prose(
         p(
           'Every world is leaking. Earth loses about three kilograms of hydrogen to space each ',
-          'second — it is happening now, quietly, over your head.',
+          'second. It is happening now, quietly, over your head.',
         ),
       ),
     },
@@ -61,7 +61,7 @@ const planetaryAtmospheres: Module = {
         p(
           'An atmosphere is that box. The shaking is heat: the warmer the gas, the faster its ',
           'molecules dart about, and at any moment a few in the swarm are moving far faster than ',
-          'the rest. The rim is gravity — a world’s escape threshold. Molecules that happen to be ',
+          'the rest. The rim is gravity: a world’s escape threshold. Molecules that happen to be ',
           'in the fast few, headed upward, clear it and never return. Lighter balls bounce higher ',
           'for the same shake, which is the crucial part: light gases ride the shaking faster than ',
           'heavy ones, so a world can hold its heavy gases for eternity while its lightest ones ',
@@ -70,7 +70,7 @@ const planetaryAtmospheres: Module = {
         p(
           'The analogy breaks in one place: the box empties in minutes, because every ball takes ',
           'its turn near the rim. A planet’s air leaks only from its thin uppermost fringe, and ',
-          'only from the fastest sliver of molecules there — so the draining takes millions to ',
+          'only from the fastest sliver of molecules there, so the draining takes millions to ',
           'billions of years, a leak measured in geologic time.',
         ),
       ),
@@ -150,11 +150,11 @@ const planetaryAtmospheres: Module = {
         },
       ],
       approximations: [
-        'The verdict is a rule of thumb, not a flux. Real Jeans escape is a rate computed at the exobase — the altitude where a molecule stops colliding on its way out — and it depends *exponentially* on the escape parameter, so a planet does not flip from keeping a gas to losing it at a threshold; it loses it a thousand times faster per unit of λ. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.',
+        'The verdict is a rule of thumb, not a flux. Real Jeans escape is a rate computed at the exobase (the altitude where a molecule stops colliding on its way out) and it depends *exponentially* on the escape parameter, so a planet does not flip from keeping a gas to losing it at a threshold; it loses it a thousand times faster per unit of λ. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.',
         'One temperature stands for the whole exosphere. A real one varies with latitude, with local time, and by a factor of three over the solar cycle: Earth’s thermosphere runs about 500 K at solar minimum and 1500 K at maximum, so the same planet sits at different places on this chart depending on the decade.',
-        'Only thermal escape is modelled. The mechanisms that actually stripped Mars are missing: hydrodynamic outflow, in which an escaping light gas drags heavier ones with it; solar-wind stripping of an unmagnetised upper atmosphere; sputtering; and impact erosion. That is why a body can fail this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept — see Going deeper.',
-        'Each gas is judged on its own. In a real atmosphere the species interact: hydrogen escaping from a hydrogen-rich upper atmosphere carries heavier molecules along with it, and photochemistry converts one species into another — water is not lost as water, it is split, and the hydrogen leaves.',
-        'The planet’s radius is treated as the escape radius. The exobase sits above the surface — several hundred kilometres up on Earth — where gravity is slightly weaker, so a real escape velocity at the escape altitude is a few percent lower than the surface figure used here.',
+        'Only thermal escape is modelled. The mechanisms that actually stripped Mars are missing: hydrodynamic outflow, in which an escaping light gas drags heavier ones with it; solar-wind stripping of an unmagnetised upper atmosphere; sputtering; and impact erosion. That is why a body can fail this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept (see Going deeper).',
+        'Each gas is judged on its own. In a real atmosphere the species interact: hydrogen escaping from a hydrogen-rich upper atmosphere carries heavier molecules along with it, and photochemistry converts one species into another; water is not lost as water, it is split, and the hydrogen leaves.',
+        'The planet’s radius is treated as the escape radius. The exobase sits above the surface (several hundred kilometres up on Earth) where gravity is slightly weaker, so a real escape velocity at the escape altitude is a few percent lower than the surface figure used here.',
       ],
     },
 
@@ -172,7 +172,7 @@ const planetaryAtmospheres: Module = {
           'carbon-dioxide molecule, because it weighs a twenty-second as much.',
         ),
         p(
-          'Escape happens from the atmosphere’s top — the ',
+          'Escape happens from the atmosphere’s top: the ',
           em('exosphere'),
           ', the altitude where the air is so thin that a molecule flying upward will likely never ',
           'hit another. From there, any molecule in the distribution’s fast tail that exceeds the ',
@@ -186,7 +186,7 @@ const planetaryAtmospheres: Module = {
         ),
         p(
           'One number in this story is routinely misjudged: the temperature. What matters is not ',
-          'the weather at the surface but the temperature at the fringe where escape happens — and ',
+          'the weather at the surface but the temperature at the fringe where escape happens. ',
           'there, absorbed sunlight makes the thin gas ',
           em('hot'),
           '. Earth’s upper atmosphere runs near a thousand kelvin, hotter than a pizza oven, even ',
@@ -194,19 +194,19 @@ const planetaryAtmospheres: Module = {
         ),
         p(
           'The rule of thumb sorts most of the Solar System cleanly. Earth holds its nitrogen, ',
-          'oxygen, and carbon dioxide with room to spare — but hydrogen and helium sit below the ',
+          'oxygen, and carbon dioxide with room to spare. But hydrogen and helium sit below the ',
           'line, which is why our air has essentially none of the universe’s two most common gases. ',
           'The helium in a party balloon, once popped, is beginning a one-way trip off the planet. ',
           'Run the sliders at the Moon’s values and its daytime surface, and carbon dioxide narrowly ',
           'passes — yet the Moon is bare, a first warning that heat is not the only thief: the solar ',
           'wind, stripping molecules away one by one over billions of years, finishes off whatever ',
           'a small world’s gravity can technically hold. Titan, barely stronger than the Moon ',
-          'gravitationally but brutally cold, keeps a nitrogen atmosphere denser than ours — the ',
+          'gravitationally but brutally cold, keeps a nitrogen atmosphere denser than ours, the ',
           'pairing this site’s escape-velocity module promised. And Jupiter clears the bar even for ',
           'hydrogen itself, which is how it stayed a gas giant.',
         ),
         p(
-          'Then there is Mars — which the rule of thumb gets ',
+          'Then there is Mars, which the rule of thumb gets ',
           em('wrong'),
           ', and instructively. Run the sliders at Mars values and carbon dioxide reads as ',
           'marginal-to-retained; the real Mars is nearly airless. The gap is the fingerprint of ',
@@ -301,8 +301,9 @@ const planetaryAtmospheres: Module = {
           em('solar-wind stripping'),
           ', the mechanism MAVEN measured at Mars. And large impacts can blast off atmosphere ',
           'wholesale. Mars is the compound case: too small to hold interior heat, it lost its ',
-          'magnetic dynamo, and the wind plus its weak gravity did the rest — the evidence written ',
-          'in isotopes, where the heavy hydrogen left behind outnumbers its expected share several ',
+          'magnetic dynamo, and the wind plus its weak gravity did the rest. The evidence is ',
+          'written in isotopes, where the heavy hydrogen left behind outnumbers its expected ',
+          'share several ',
           'times over, the residue of oceans’ worth of departed water.',
         ),
         p(
@@ -324,12 +325,12 @@ const planetaryAtmospheres: Module = {
         {
           moduleId: 'escape-velocity',
           reason:
-            'The threshold in this module’s inequality is that module’s entire subject — same function, same number, now with a gas to test against it.',
+            'The threshold in this module’s inequality is that module’s entire subject: same function, same number, now with a gas to test against it.',
         },
         {
           moduleId: 'exoplanets',
           reason:
-            'The worlds being sorted by the shoreline are found by transits — and an escaping atmosphere was itself first seen as a deeper transit.',
+            'The worlds being sorted by the shoreline are found by transits. An escaping atmosphere was itself first seen as a deeper transit.',
         },
       ],
     },

@@ -182,7 +182,7 @@ const scaleOfTheUniverse: Module = {
     hook: {
       body: prose(
         p(
-          'From a proton to the edge of the visible universe is about forty-two steps — if ',
+          'From a proton to the edge of the visible universe is about forty-two steps, if ',
           'each step means “ten times bigger.” You are standing fifteen steps from the proton.',
         ),
       ),
@@ -205,7 +205,7 @@ const scaleOfTheUniverse: Module = {
         ),
         p(
           'The analogy breaks in one place: on the map, every zoom level is crowded with detail. ',
-          'In nature, almost every step of the ladder lands in emptiness — the interesting ',
+          'In nature, almost every step of the ladder lands in emptiness: the interesting ',
           'objects cluster on a few rungs, with vast stretches of nearly nothing between them.',
         ),
       ),
@@ -242,9 +242,9 @@ const scaleOfTheUniverse: Module = {
       ],
       approximations: [
         'The illustrations are icons, not scale drawings. A proton is a filled circle and a galaxy is an ellipse because the point of each rung is its size, not its appearance; nothing about the shapes carries information.',
-        'Two anchors are never shown to relative scale. They cannot be — at 63,000 to one, drawing a proton beside a hydrogen atom at the same magnification would put the proton below a single pixel. The ratio lives in the zoom transition between rungs, not in any one picture.',
+        'Two anchors are never shown to relative scale. They cannot be: at 63,000 to one, drawing a proton beside a hydrogen atom at the same magnification would put the proton below a single pixel. The ratio lives in the zoom transition between rungs, not in any one picture.',
         'Quantum objects have no sharp edge. The proton figure is twice a charge radius and the atom figure is twice an orbital expectation value; both are conventions about where a distribution has thinned out enough to stop counting, not measurements of a boundary.',
-        'The observable-universe figure is a comoving diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe — larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
+        'The observable-universe figure is a comoving diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
         'The galaxy’s edge is a convention. A disc that thins out gradually has no diameter until someone picks a surface-brightness cut, and published values for the Milky Way range over roughly a factor of two.',
       ],
     },
@@ -255,14 +255,14 @@ const scaleOfTheUniverse: Module = {
         p(
           'Each factor of ten in size is an ',
           em('order of magnitude'),
-          ' — one rung of the ladder you have been dragging. The ladder here runs about ',
+          ': one rung of the ladder you have been dragging. The ladder here runs about ',
           'forty-two of them, and the sizes on it deserve their fine print.',
         ),
         p(
           'At the bottom, “size” itself goes soft. A proton has no edge; the 1.7 femtometre ',
           'figure is twice its ',
           em('charge radius'),
-          ', the statistical spread of its electric charge. An atom is even fuzzier — quoted ',
+          ', the statistical spread of its electric charge. An atom is even fuzzier: quoted ',
           'diameters are twice the ',
           em('Bohr radius'),
           ', the most probable distance of the electron in hydrogen. These are definitions as ',
@@ -276,8 +276,8 @@ const scaleOfTheUniverse: Module = {
         p(
           'At the top, the natural ruler changes from metres to time. A ',
           em('light-year'),
-          ' is the distance light covers in a year — about nine and a half trillion kilometres ',
-          '— and it carries a built-in reminder: light from Proxima Centauri, 4.2 light-years ',
+          ' is the distance light covers in a year (about nine and a half trillion kilometres)',
+          ' and it carries a built-in reminder: light from Proxima Centauri, 4.2 light-years ',
           'out, shows you that star as it was 4.2 years ago. Every look outward is a look ',
           'backward.',
         ),
@@ -289,7 +289,7 @@ const scaleOfTheUniverse: Module = {
           'travelled: the galaxies whose ancient light reaches us today have been carried, by ',
           'that expansion, to some 46 billion light-years away by now. And the common ',
           'misconception is in the name: the observable universe is not the universe. It is the ',
-          'part from which light has had time to reach us — a horizon, not a wall. What lies ',
+          'part from which light has had time to reach us: a horizon, not a wall. What lies ',
           'beyond is larger, possibly without limit, and genuinely unknown.',
         ),
       ),
@@ -350,7 +350,7 @@ const scaleOfTheUniverse: Module = {
           ' diameter, and the distinction it rests on is the working vocabulary of cosmology. ',
           'The ',
           em('proper distance'),
-          ' to a galaxy — where it is “now” — stretches as space expands; the comoving distance ',
+          ' to a galaxy (where it is “now”) stretches as space expands; the comoving distance ',
           'factors that expansion out and stays fixed for objects riding the general flow. The ',
           'observable universe’s radius is the comoving distance light could have travelled ',
           'since the beginning: the ',
@@ -362,7 +362,7 @@ const scaleOfTheUniverse: Module = {
         ),
         p(
           'Note what the horizon is not. It is not an edge of anything physical, and nothing ',
-          'special sits there — an observer on a galaxy at our horizon sees their own ',
+          'special sits there: an observer on a galaxy at our horizon sees their own ',
           '93-billion-light-year sphere, with us near its rim. Whether the whole universe ',
           'extends far beyond, or infinitely, is open. Planck’s measurements find spatial ',
           'curvature indistinguishable from zero; if the universe does curve back on itself, ',
@@ -373,7 +373,7 @@ const scaleOfTheUniverse: Module = {
         p(
           'The bottom of the ladder has its own recent story. The proton’s charge radius was, ',
           'for a decade, the subject of a genuine crisis: measurements using muonic hydrogen in ',
-          '2010 came in four percent smaller than the accepted value — a gap of over five ',
+          '2010 came in four percent smaller than the accepted value, a gap of over five ',
           'standard deviations, spawning speculation about new physics. It resolved ',
           'undramatically: re-measurements of ordinary hydrogen converged on the smaller figure, ',
           'and CODATA adopted 0.841 femtometres in 2018. The episode is a working lesson in what ',
@@ -384,7 +384,7 @@ const scaleOfTheUniverse: Module = {
           'That the ladder’s rungs cluster where they do is not accident either. Atomic sizes ',
           'are set by the balance of electromagnetic attraction against quantum mechanics; ',
           'stellar sizes by gravity against pressure. The structure of the ladder is a map of ',
-          'which force wins at which scale — a question this module leaves open and its ',
+          'which force wins at which scale, a question this module leaves open and its ',
           'connections pick up.',
         ),
       ),
@@ -396,12 +396,12 @@ const scaleOfTheUniverse: Module = {
         {
           moduleId: 'kepler-orbits',
           reason:
-            'The Neptune rung is not an object but an orbit — this is the clockwork inside that dot.',
+            'The Neptune rung is an orbit, not an object; this is the clockwork inside that dot.',
         },
         {
           moduleId: 'expansion-of-the-universe',
           reason:
-            'Why the visible universe is seven times wider than its age suggests — the expansion that stretches the top rungs of the ladder.',
+            'Why the visible universe is seven times wider than its age suggests: the expansion that stretches the top rungs of the ladder.',
         },
         {
           moduleId: 'cosmic-distance-ladder',

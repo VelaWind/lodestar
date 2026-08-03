@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="relative border-t border-edge-soft">
         <div className="mx-auto flex max-w-5xl flex-col gap-2 px-5 py-8 font-ui text-xs leading-relaxed text-ink-faint sm:flex-row sm:items-baseline sm:justify-between sm:gap-6 sm:px-8">
           <p className="max-w-measure">
-            Every simulation runs on real SI quantities — the same numbers the equations use —
+            Every simulation runs on real SI quantities (the same numbers the equations use),
             and every figure is cited to its source.
           </p>
           <span className="flex shrink-0 flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -90,7 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               rel="noreferrer noopener"
               className="-my-2 py-2 text-ink-faint underline decoration-edge underline-offset-4 transition-colors hover:text-star hover:decoration-star"
             >
-              Built in the open — source &amp; authoring standards
+              Built in the open: source &amp; authoring standards
             </a>
           </span>
         </div>

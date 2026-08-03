@@ -192,7 +192,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.font = '11px Inter, system-ui, -apple-system, sans-serif';
     const body = wrapLines(
       ctx,
-      'The orbit lies inside the star — move the planet further out.',
+      'The orbit lies inside the star. Move the planet further out.',
       plotW,
       3,
     );

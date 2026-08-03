@@ -64,10 +64,10 @@ export function ModuleListPage() {
         <p className="mt-5 font-prose text-lg leading-relaxed text-ink-dim">
           Every topic is one page of seven layers, from a one-sentence hook down to the
           derivation and the open questions. The simulations run on real physical quantities in
-          SI units — the same numbers the equations use.
+          SI units (the same numbers the equations use).
         </p>
         <p className="mt-4 font-ui text-sm leading-relaxed text-ink-faint">
-          The depth control in the header — you are reading at{' '}
+          The depth control in the header (you are reading at{' '}
           {/* This word was coloured like a link and did nothing. Either the
               styling was wrong or the behaviour was missing; the behaviour was
               missing. It now sends focus to the control it names. */}
@@ -78,8 +78,8 @@ export function ModuleListPage() {
             className="rounded-sm text-star underline decoration-star/40 underline-offset-4 transition-colors hover:decoration-star"
           >
             {tierLabel}
-          </button>{' '}
-          — decides which layers are open when a page loads; it never changes a word of the
+          </button>
+          ) decides which layers are open when a page loads; it never changes a word of the
           text, and nothing is ever hidden.
         </p>
       </header>
