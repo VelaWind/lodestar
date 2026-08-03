@@ -72,7 +72,10 @@ function ModuleView({ module }: { module: Module }) {
 
   return (
     <article>
-      <header className="mb-10">
+      {/* `xl:px-10`: the title block reads as prose, so it sits on the prose
+          axis. Only the layer numbers stay out at the column's left edge — that
+          is what the hanging indent is for. */}
+      <header className="mb-10 xl:px-10">
         {/* -my-2/py-2 here and below: the padding is the tap target, the
             negative margin keeps the layout identical. */}
         <Link

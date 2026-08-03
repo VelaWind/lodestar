@@ -57,10 +57,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
+      {/* `xl:max-w-column`: above 1280px the window is wide enough that a
+          1024px column leaves the prose stranded on the left of it, so the
+          column narrows to the measure and the two elements that need the width
+          — the sim stage and the landing card grid — break out of it instead.
+          The header and footer keep `max-w-5xl`, which is exactly where the
+          card grid lands, so the chrome still bounds the widest content. */}
       <main
         id="main"
         tabIndex={-1}
-        className="relative mx-auto max-w-5xl px-5 pb-24 pt-10 focus:outline-none sm:px-8"
+        className="relative mx-auto max-w-5xl px-5 pb-24 pt-10 focus:outline-none sm:px-8 xl:max-w-column"
       >
         {children}
       </main>

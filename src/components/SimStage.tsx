@@ -33,7 +33,13 @@ export function SimStage({ moduleId, layer, values, onChange, onReset }: Props) 
     <div className="space-y-5">
       {layer.caption && <RichText content={layer.caption} />}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      {/* The stage breaks out of the reading column at `xl`; the caption above
+          it does not. They are siblings and only the stage carries `.breakout`,
+          so the caption stays in the measure — it is prose, and it introduces
+          the sim rather than labelling the box. The width is the one the stage
+          has always had, so the canvas panel and its 18rem control column are
+          unchanged to the pixel. */}
+      <div className="breakout grid gap-5 [--breakout:var(--stage)] lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0 rounded-lg border border-edge-soft bg-void-800/40 p-4">
           {Sim ? (
             <Suspense fallback={<SimFallback label="Loading simulation…" />}>

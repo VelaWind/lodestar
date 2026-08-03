@@ -17,7 +17,13 @@ export function AboutPage() {
   }, []);
 
   return (
-    <article>
+    /* `xl:px-10` puts this page on the same axis as a module's prose, and — the
+       reason it is here rather than only for tidiness — it caps the headings at
+       the measure. `max-w-measure` is 68ch, and `ch` scales with the element:
+       on a 48px display serif it is three times the reading measure, so the h1
+       and the section headings used to run the full width of the page while the
+       paragraphs under them stopped at 544px. The container settles all three. */
+    <article className="xl:px-10">
       <header className="mb-12">
         {/* Same affordance as a module page: a way back that is not the logo. */}
         <Link

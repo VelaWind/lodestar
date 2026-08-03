@@ -6,6 +6,19 @@
   :root {
     color-scheme: dark;
 
+    /* Page geometry, written down once.
+       Every wide element on the site is centred on the reading measure, and
+       `.breakout` below does that arithmetic from these three numbers alone.
+
+       `--measure` is 68ch of the prose serif at the root size, expressed in
+       rem: `ch` resolves against whatever font the element using it inherits,
+       and these widths land on containers set in the UI sans. It has to keep
+       agreeing with `maxWidth.measure` in tailwind.config.js — 68ch of the
+       serif stack measures 544px, because every face in it has half-em
+       digits. */
+    --measure: 34rem; /* 544px — the prose measure */
+    --stage: 57.5rem; /* 920px — layer 3's canvas panel plus its controls */
+    --cards: 60rem; /* 960px — the landing card grid */
   }
 
   html {
@@ -74,6 +87,26 @@
   }
   .lodestar-slider::-moz-range-track {
     @apply h-1 rounded-full bg-void-500;
+  }
+}
+
+/* An element wider than the measure, centred on it.
+   The reading column narrows to the measure at `xl`, and the sim stage and the
+   landing card grid keep their old widths by breaking out of it.
+
+   `100%` is the containing block's inline size, and the containing block is
+   always the measure itself — so the two overflows are equal by construction.
+   Nothing here needs to know where the column falls on the page, and the 40px
+   hanging indent cannot leak into the result and push a breakout 20px right of
+   the prose it belongs to.
+
+   Deliberately outside `@layer components`, for the same reason as the block
+   below: Tailwind's layer engine flattens a nested `@media` inside a component
+   layer, which would apply this at every width. */
+@media (min-width: 1280px) {
+  .breakout {
+    width: var(--breakout);
+    margin-inline: calc((100% - var(--breakout)) / 2);
   }
 }
 

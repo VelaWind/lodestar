@@ -47,6 +47,12 @@ export default {
       },
       maxWidth: {
         measure: '68ch',
+        // The reading column, as a border box: the page's own 2rem gutter, the
+        // 2.5rem hanging indent the layer numbers sit in, the 34rem measure,
+        // the indent mirrored so the measure is centred rather than pushed
+        // right, and the gutter again. 43rem = 688px, of which 624px is the
+        // column proper. Only applied at `xl` — see AppShell.
+        column: '43rem',
       },
       transitionTimingFunction: {
         'out-expo': 'cubic-bezier(0.22, 1, 0.36, 1)',

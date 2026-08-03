@@ -81,11 +81,25 @@ export function Layer({ meta, open, onToggle, children }: Props) {
                     opacity: { duration: 0.22, ease: 'linear' },
                   }
             }
-            className="overflow-hidden"
+            /* `overflow-hidden` is what makes the height animation read as a
+               collapse, and it clips horizontally too — so at `xl` this box is
+               widened to the sim stage, or layer 3's breakout would be cut off
+               at the column edge. Nothing paints in the extra width on the
+               other six layers. */
+            className="breakout overflow-hidden [--breakout:var(--stage)]"
           >
             {/* Inner wrapper: padding lives here so the animated height is
-                measured on a box whose height is purely content. */}
-            <div className="pb-9 pl-0 sm:pl-10">{children}</div>
+                measured on a box whose height is purely content.
+
+                At `xl` the indent stops being padding and becomes position:
+                the measure is centred inside the widened box, which lands it in
+                exactly the same place — 40px in from the column's left edge,
+                under the layer title — while leaving the containing block for
+                anything inside it equal to the measure, so `.breakout` centres
+                on the prose rather than 20px to the right of it. */}
+            <div className="pb-9 pl-0 sm:pl-10 xl:mx-auto xl:w-[var(--measure)] xl:pl-0">
+              {children}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

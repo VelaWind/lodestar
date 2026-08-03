@@ -52,7 +52,10 @@ export function ModuleListPage() {
   );
 
   return (
-    <div>
+    /* `xl:px-10` mirrors a module page's hanging indent, so the hero sits on
+       the same axis as prose everywhere else on the site and the card grid
+       below breaks out symmetrically around it. */
+    <div className="xl:px-10">
       <header className="mb-14 max-w-measure">
         <p className="font-ui text-xs uppercase tracking-[0.22em] text-star/70">Lodestar</p>
         <h1 className="mt-4 font-prose text-4xl leading-[1.15] tracking-tight text-ink sm:text-5xl">
@@ -87,7 +90,10 @@ export function ModuleListPage() {
           <code className="font-mono">src/content/modules/</code>.
         </p>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
+        /* Its width at `xl` is the one it has always had — the old column, to
+           the pixel — now reached by breaking out of the narrowed one rather
+           than by filling it. */
+        <ul className="breakout grid gap-4 [--breakout:var(--cards)] sm:grid-cols-2">
           {listed.map((m) => (
             <li key={m.id}>
               <ModuleCard module={m} />

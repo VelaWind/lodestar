@@ -885,6 +885,168 @@ test('social preview image is declared absolutely and resolves', async ({ page }
 });
 
 /* ------------------------------------------------------------------ */
+/* Layout: the reading column, and what breaks out of it               */
+/* ------------------------------------------------------------------ */
+
+/** Left, right, width and centre of the first match, to two decimals. */
+async function geometry(page: Page, selector: string): Promise<Box> {
+  const box = await page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return {
+      left: +r.left.toFixed(2),
+      right: +r.right.toFixed(2),
+      width: +r.width.toFixed(2),
+      centre: +((r.left + r.right) / 2).toFixed(2),
+    };
+  }, selector);
+  expect(box, `no element matching ${selector}`).not.toBeNull();
+  return box as Box;
+}
+
+interface Box {
+  left: number;
+  right: number;
+  width: number;
+  centre: number;
+}
+
+/**
+ * The column narrows to the measure above 1280px, and the two elements that
+ * need the width keep it by breaking out: layer 3's sim stage, and the landing
+ * card grid.
+ *
+ * The failure this is written against is a specific one. A layer panel is
+ * indented 40px so its prose starts under the layer title rather than under the
+ * layer number, and a breakout that takes that padded box as its containing
+ * block comes out 20px right of the text it belongs to — an offset small enough
+ * to survive a review and obvious once the column beside it is narrow. So what
+ * is asserted is not that the sim is wide. It is that the sim's centre line and
+ * the prose's centre line are the same line, at both of the widths where the
+ * column is narrowed.
+ *
+ * Layer 3's caption is checked alongside them in the other direction: it lives
+ * inside the sim's container but it is prose, so it belongs to the column and
+ * must not travel with the stage.
+ */
+test('layout: breakouts stay centred on the prose column', async ({ page }) => {
+  test.skip(
+    test.info().project.name.startsWith('mobile'),
+    'the column only narrows at desktop widths',
+  );
+
+  const w = watch(page);
+
+  for (const width of [1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/m/escape-velocity', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+    await settle(page);
+
+    // The breakpoint is a media query, and a viewport is not always a layout
+    // viewport — a classic scrollbar can put 1280 on the wrong side of it, in
+    // which case every assertion below would pass by measuring the old layout.
+    const narrowed = await page.evaluate(() => window.matchMedia('(min-width: 1280px)').matches);
+    expect(narrowed, `${width}: the column should be narrowed at this width`).toBe(true);
+
+    const prose = await geometry(page, '#layer-panel-hook p');
+    const caption = await geometry(page, '#layer-panel-play p');
+    const stage = await geometry(page, '#layer-panel-play .breakout');
+    const canvas = await geometry(page, '#layer-panel-play canvas');
+
+    // eslint-disable-next-line no-console
+    console.log(
+      `  layout[${width}] prose ${prose.left}..${prose.right} (c ${prose.centre}) · ` +
+        `stage ${stage.left}..${stage.right} (c ${stage.centre}) · canvas ${canvas.width}px`,
+    );
+
+    expect(
+      Math.abs(stage.centre - prose.centre),
+      `${width}: the sim stage is off the prose column's centre line — ` +
+        `stage ${stage.centre}, prose ${prose.centre}. The 40px hanging indent is leaking in.`,
+    ).toBeLessThanOrEqual(1);
+
+    expect(
+      stage.width,
+      `${width}: the stage should be wider than the prose it breaks out of`,
+    ).toBeGreaterThan(prose.width);
+
+    // Same box, both ends: a centred breakout overhangs equally, and asserting
+    // the edges as well as the centre catches a width that drifted with it.
+    expect(
+      Math.abs((prose.left - stage.left) - (stage.right - prose.right)),
+      `${width}: the stage overhangs the prose unequally`,
+    ).toBeLessThanOrEqual(1);
+
+    expect(
+      caption.centre,
+      `${width}: layer 3's caption travelled with the stage — it is prose, and belongs to the column`,
+    ).toBeCloseTo(prose.centre, 0);
+    expect(caption.width, `${width}: the caption should be set to the measure`).toBeCloseTo(
+      prose.width,
+      0,
+    );
+
+    await assertNoOverflow(page, `module at ${width}`);
+
+    // The landing grid is the other breakout, and the hero above it is the
+    // prose it has to agree with.
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await settle(page, 700);
+
+    const hero = await geometry(page, 'main header p');
+    const cards = await geometry(page, 'main ul.breakout');
+    // eslint-disable-next-line no-console
+    console.log(
+      `  layout[${width}] hero c ${hero.centre} · cards ${cards.left}..${cards.right} (c ${cards.centre})`,
+    );
+
+    expect(
+      Math.abs(cards.centre - hero.centre),
+      `${width}: the card grid is off the hero's centre line — cards ${cards.centre}, hero ${hero.centre}`,
+    ).toBeLessThanOrEqual(1);
+    expect(cards.width, `${width}: the card grid should break out of the column`).toBeGreaterThan(
+      hero.width,
+    );
+
+    await assertNoOverflow(page, `landing at ${width}`);
+  }
+
+  assertClean(w, 'layout');
+});
+
+/**
+ * Below the breakpoint there is nothing to break out of, and the elements that
+ * carry `.breakout` have to be inert — the class is scoped by a media query,
+ * and a media query is exactly the kind of thing that gets widened by accident.
+ */
+test('layout: nothing breaks out below the breakpoint', async ({ page }) => {
+  test.skip(
+    !test.info().project.name.startsWith('mobile'),
+    'this is the phone-width half of the contract',
+  );
+
+  await page.goto('/m/escape-velocity', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page);
+
+  const column = await geometry(page, '#main');
+  const stage = await geometry(page, '#layer-panel-play .breakout');
+  expect(stage.left, 'the stage should start inside the column').toBeGreaterThanOrEqual(column.left);
+  expect(stage.right, 'the stage should end inside the column').toBeLessThanOrEqual(column.right);
+  await assertNoOverflow(page, 'module at phone width');
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await settle(page, 700);
+  const cards = await geometry(page, 'main ul.breakout');
+  const main = await geometry(page, '#main');
+  expect(cards.left).toBeGreaterThanOrEqual(main.left);
+  expect(cards.right).toBeLessThanOrEqual(main.right);
+  await assertNoOverflow(page, 'landing at phone width');
+});
+
+/* ------------------------------------------------------------------ */
 /* Accessibility                                                       */
 /* ------------------------------------------------------------------ */
 

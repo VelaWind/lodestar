@@ -8,7 +8,10 @@ export function References({ items }: { items: Reference[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="mt-16 border-t border-edge-soft pt-8">
+    /* `xl:px-10` keeps the list itself in the prose column — the rule above it
+       still spans the full column, because it divides the page rather than
+       belonging to the text. */
+    <section className="mt-16 border-t border-edge-soft pt-8 xl:px-10">
       <h2 className="font-ui text-xs font-medium uppercase tracking-[0.16em] text-ink-faint">
         References
       </h2>
