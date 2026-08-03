@@ -182,10 +182,12 @@ function gridTimes(plan: AudioPlan, fade: number): Float64Array {
 export function chirpCurves(plan: AudioPlan, mc: number, d: number): ChirpCurves {
   const frequencies = new Float64Array(CURVE_POINTS);
   const gains = new Float64Array(CURVE_POINTS);
-  const peak = strainAmplitude(mc, plan.fEnd, d);
   const fade = fadeSeconds(plan.duration);
   const times = gridTimes(plan, fade);
 
+  /* Pass one: the envelope in its own units — strain, with the fades applied.
+     Nothing is scaled yet, so the shape here is the physics and only that. */
+  let loudest = 0;
   for (let i = 0; i < CURVE_POINTS; i += 1) {
     const t = times[i] ?? 0;
     const tau = Math.max(plan.tauEnd, plan.tauStart - t);
@@ -195,8 +197,40 @@ export function chirpCurves(plan: AudioPlan, mc: number, d: number): ChirpCurves
     // one. The note beside the button says when that has happened.
     frequencies[i] = Math.min(AUDIBLE_CEILING_HZ, Math.max(AUDIBLE_FLOOR_HZ, f));
     const ramp = Math.min(1, t / fade, (plan.duration - t) / fade);
-    gains[i] = AUDIO_GAIN * (strainAmplitude(mc, f, d) / peak) * Math.max(0, ramp);
+    const envelope = strainAmplitude(mc, f, d) * Math.max(0, ramp);
+    gains[i] = envelope;
+    if (envelope > loudest) loudest = envelope;
   }
+
+  /* Pass two: one number, applied to every point, putting the sweep's loudest
+     moment on the gain ceiling.
+
+     The divisor is the envelope's own maximum, not the strain at the cutoff.
+     Those are the same thing only when the fade-out is short against the time
+     still to run at the cutoff, and for a neutron-star pair it is not: the
+     cutoff is 1.4 ms from merger, a 10 ms fade-out reaches back to eight times
+     that, and dividing by the cutoff strain therefore left the loudest thing
+     that ever plays at 59% of the ceiling. That was an artifact of the choice of
+     divisor rather than anything about the source.
+
+     Nothing about the sweep's own dynamics moves: this is a single factor across
+     all 512 points, so the strain-law swell and both fades keep their shape
+     exactly. Nor does it discard information — the level was never a physical
+     quantity. Every render was already normalised by a number that depends on
+     the binary and the distance, so loudness has never encoded strain, and the
+     readouts are where the amplitude is actually reported.
+
+     The maximum is taken over the schedule's own points rather than solved for
+     analytically, and that is the stronger of the two. What plays is the linear
+     interpolation between these points, and a piecewise-linear function takes
+     its maximum at one of its nodes — so this is not an estimate of the played
+     peak that could fall between samples and under-resolve it, it is the played
+     peak. The continuous envelope does rise slightly higher, at the corner where
+     the fade-out begins, but that corner is not on the schedule and never
+     reaches the ear; normalising by it would leave the sweep a shade under the
+     ceiling for no reason a listener could hear. */
+  const scale = loudest > 0 ? AUDIO_GAIN / loudest : 0;
+  for (let i = 0; i < CURVE_POINTS; i += 1) gains[i] = (gains[i] ?? 0) * scale;
 
   return { times, frequencies, gains };
 }

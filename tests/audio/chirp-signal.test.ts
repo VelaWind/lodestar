@@ -400,41 +400,85 @@ describe.each(CASES)('chirp signal: $name', (subject) => {
       `peak ${peak.toFixed(4)} against a gain ceiling of ${AUDIO_GAIN}`,
     ).toBeLessThanOrEqual(AUDIO_GAIN + 1e-6);
 
-    /* How close a chirp gets to that ceiling is not a number to pick. The gain
-       curve is the strain curve with the fades multiplied into it, strain climbs
-       as τ^(-1/4), and the fade-out is a linear ramp over the last `fade`
-       seconds — so the product is highest at the moment the fade-out begins and
-       the reachable peak is
+    /* Every binary now reaches that ceiling, because the envelope is normalised
+       by its own maximum rather than by the strain at the cutoff. It used to be
+       the cutoff strain, and the two agree only when the fade-out is short
+       against the time still to run there — for the neutron stars it is not, so
+       the loudest thing that ever played sat at 59% of the ceiling.
 
-           peak / AUDIO_GAIN = (τ_end / (τ_end + fade))^(1/4)
+       So this is now the same two-sided check with the reachable peak equal to
+       AUDIO_GAIN for both binaries: above it means the normalisation is not a
+       normalisation, and materially below it means the envelope no longer peaks
+       where the physics puts its maximum. The remaining gap is crest alignment
+       and nothing else — |sin| has to land near the top of a maximum that is
+       broad on the scale of a cycle, and does, to within a couple of per cent. */
+    expect(
+      peak,
+      `peak ${peak.toFixed(4)} sits ${((100 * (AUDIO_GAIN - peak)) / AUDIO_GAIN).toFixed(1)}% ` +
+        `under the ${AUDIO_GAIN} ceiling the envelope is normalised to — more than crest ` +
+        `alignment can account for`,
+    ).toBeGreaterThan(AUDIO_GAIN * 0.95);
+  });
 
-       which is 95% of the ceiling for the default binary and 59% for the
-       neutron stars, whose cutoff is 1.4 ms from merger so that even a 10 ms
-       fade reaches back to eight times the time still to run. Reaching 90%
-       there would take a 0.7 ms ramp — a single cycle at 1570 Hz.
-
-       Asserted from both sides rather than as a floor. A floor only says the
-       chirp is audible; this says the envelope is exactly the one the strain
-       law and the fade imply, and it fails if either drifts in either
-       direction. Built from `fOfTimeToMerger` and `strainAmplitude` rather than
-       from the curve, so it is not the schedule checked against itself. */
+  /**
+   * The rescale is one number, and the shape underneath it is still the physics.
+   *
+   * Normalising by the envelope's maximum instead of the cutoff strain is a
+   * uniform factor per binary, and "uniform" is the whole claim: a divisor that
+   * varied along the sweep would flatten the strain-law swell into something
+   * louder and wrong, and the peak assertion above would not notice. So the
+   * envelope is checked against `strainAmplitude` evaluated at the frequency the
+   * schedule is playing — a ratio, so the unknown scale factor divides out, and
+   * read from the physics functions rather than from the curve.
+   *
+   * Sampled across the plateau between the two fades, where the ramp is 1 and
+   * the envelope is strain alone.
+   */
+  it('scales the envelope uniformly and leaves the strain law in it', () => {
     const fade = fadeSeconds(plan.duration);
-    const reachable =
-      AUDIO_GAIN *
-      (strainAmplitude(mc, fOfTimeToMerger(mc, plan.tauEnd + fade), DISTANCE) /
-        strainAmplitude(mc, plan.fEnd, DISTANCE));
+    const from = fade;
+    const to = plan.duration - fade;
 
+    const ratios: number[] = [];
+    for (let i = 0; i <= 20; i += 1) {
+      const t = from + ((to - from) * i) / 20;
+      const scheduled = sampleAt(curves.times, curves.gains, t);
+      const physics = strainAmplitude(
+        mc,
+        fOfTimeToMerger(mc, Math.max(plan.tauEnd, plan.tauStart - t)),
+        DISTANCE,
+      );
+      ratios.push(scheduled / physics);
+    }
+
+    const mean = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+    let worst = 0;
+    for (const r of ratios) worst = Math.max(worst, Math.abs(r - mean) / mean);
+    // The slack is the schedule's own resolution, not the scale: `sampleAt`
+    // reads a chord across a curve that is convex in time, so it sits a hair
+    // under the true value, by the same fraction the frequency spacing gives.
     expect(
-      peak,
-      `peak ${peak.toFixed(4)} is above the envelope's own maximum ${reachable.toFixed(4)}`,
-    ).toBeLessThanOrEqual(reachable * 1.001);
-    // The remaining gap is crest alignment and nothing else: |sin| has to land
-    // near the top of a maximum that is broad on the scale of a cycle, and does.
+      worst,
+      `the gain-to-strain ratio varies by ${(100 * worst).toFixed(3)}% across the sweep — ` +
+        `the normalisation is not a single factor`,
+    ).toBeLessThan(0.01);
+
+    // And the loudest scheduled point is where the fade-out starts, which is
+    // where strain × fade is maximised — not at the very end, where strain is
+    // highest but the fade has already taken it.
+    let at = 0;
+    for (let i = 0; i < curves.gains.length; i += 1) {
+      if ((curves.gains[i] ?? 0) > (curves.gains[at] ?? 0)) at = i;
+    }
     expect(
-      peak,
-      `peak ${peak.toFixed(4)} sits ${((100 * (reachable - peak)) / reachable).toFixed(1)}% under ` +
-        `the envelope maximum ${reachable.toFixed(4)} — more than crest alignment can account for`,
-    ).toBeGreaterThan(reachable * 0.95);
+      curves.gains[at],
+      'the loudest scheduled point is not on the ceiling',
+    ).toBeCloseTo(AUDIO_GAIN, 12);
+    expect(
+      Math.abs((curves.times[at] ?? 0) - (plan.duration - fade)),
+      `the envelope peaks at ${(curves.times[at] ?? 0).toFixed(4)} s, not at the ` +
+        `${(plan.duration - fade).toFixed(4)} s where the fade-out begins`,
+    ).toBeLessThan(0.02 * plan.duration);
   });
 });
 
@@ -471,13 +515,12 @@ describe('chirp signal: measured', () => {
           SAMPLE_RATE +
           AUDIO_GAIN / (fade * SAMPLE_RATE)) *
         1.05;
-      const reachable =
-        AUDIO_GAIN *
-        (strainAmplitude(mc, fOfTimeToMerger(mc, plan.tauEnd + fade), DISTANCE) /
-          strainAmplitude(mc, plan.fEnd, DISTANCE));
       // The schedule's frequency step, which the geometric spacing holds
       // constant from end to end — the number that replaced "duration / 511".
       const stepRatio = curves.frequencies[2]! / curves.frequencies[1]!;
+      // The envelope's own maximum, which the normalisation puts on the ceiling.
+      let scheduledPeak = 0;
+      for (const g of curves.gains) scheduledPeak = Math.max(scheduledPeak, g);
       const err = (i: number): string =>
         `${((100 * Math.abs(measured[i]! - physics[i]!)) / physics[i]!).toFixed(2)}%`;
 
@@ -489,8 +532,8 @@ describe('chirp signal: measured', () => {
           `    physics mean  ${physics[0]!.toFixed(2)} Hz -> ${physics[1]!.toFixed(2)} Hz   (error ${err(0)} -> ${err(1)})`,
           `    duration      rendered ${(buffer.length / SAMPLE_RATE).toFixed(4)} s against scheduled ${plan.duration.toFixed(4)} s`,
           `    max step      ${step.value.toFixed(6)} against a bound of ${bound.toFixed(6)} (${((100 * step.value) / bound).toFixed(1)}% of it)`,
-          `    peak          ${peak.toFixed(4)} against a ceiling of ${AUDIO_GAIN} (${((100 * peak) / AUDIO_GAIN).toFixed(0)}%)` +
-            `, and ${((100 * peak) / reachable).toFixed(1)}% of the ${reachable.toFixed(4)} the envelope allows`,
+          `    peak          ${peak.toFixed(4)} against a ceiling of ${AUDIO_GAIN} (${((100 * peak) / AUDIO_GAIN).toFixed(1)}%)` +
+            `  ·  envelope peaks at ${scheduledPeak.toFixed(6)}`,
           `    fade          ${(1000 * fade).toFixed(2)} ms each edge` +
             `  ·  step spacing ${((100 * (stepRatio - 1)).toFixed(2))}% in frequency`,
           `    file          ${OUT_DIR}/${subject.file}`,
