@@ -8,14 +8,18 @@
  * every temperature the slider reaches. The copy reads "about four and a half
  * times".
  *
- * The Moon's verdict was checked against the sim's own `retentionVerdict` at the
- * module's assigned exosphere temperature, the T slider's 1000 K default: escape
- * speed 2376 m/s against 6·v_th of 3688 m/s for CO2, a ratio of 3.87, which is
- * below the 4.5 floor. All six gases lose there, so "the Moon fails the test for
- * every gas" is what the sim says and the sentence stands as written. The margin
- * is temperature-dependent — the same body reads marginal below about 738 K and
- * retained below about 415 K — which is the point the following paragraph about
- * Mars goes on to make.
+ * The Moon's verdict is settled at 390 K, its dayside surface. A body with no
+ * atmosphere has no exosphere above it, so the surface is the exobase, and the
+ * 1000 K slider default — an Earth-thermosphere number — says nothing about the
+ * Moon. At 390 K `retentionVerdict` gives escape speed 2376 m/s against 6·v_th of
+ * 2303 m/s for CO2: a ratio of 6.19, retained, with N2 and O2 marginal behind it.
+ * So the Moon narrowly passes a test it visibly fails in reality, which is what
+ * the copy now says — and what `verifyAtmosphereModel` has asserted since the
+ * module was written: thermal escape is not why the Moon is airless.
+ *
+ * The margin is steeply temperature-dependent. The same body reads marginal above
+ * about 415 K and loses above about 738 K, so a verdict quoted without its
+ * temperature is not a verdict.
  *
  * Prose is the project author's, encoded here into the rich-text AST verbatim.
  * Emphasis and inline math in the source copy map to `em(...)` and m`...`
@@ -189,14 +193,17 @@ const planetaryAtmospheres: Module = {
           'while you need a coat below.',
         ),
         p(
-          'The rule of thumb sorts the Solar System cleanly. Earth holds its nitrogen, oxygen, and ',
-          'carbon dioxide with room to spare — but hydrogen and helium sit below the line, which is ',
-          'why our air has essentially none of the universe’s two most common gases. The helium in ',
-          'a party balloon, once popped, is beginning a one-way trip off the planet. The Moon fails ',
-          'the test for every gas and is bare. Titan, barely stronger than the Moon gravitationally ',
-          'but brutally cold, keeps a nitrogen atmosphere denser than ours — the pairing this ',
-          'site’s escape-velocity module promised. And Jupiter clears the bar even for hydrogen ',
-          'itself, which is how it stayed a gas giant.',
+          'The rule of thumb sorts most of the Solar System cleanly. Earth holds its nitrogen, ',
+          'oxygen, and carbon dioxide with room to spare — but hydrogen and helium sit below the ',
+          'line, which is why our air has essentially none of the universe’s two most common gases. ',
+          'The helium in a party balloon, once popped, is beginning a one-way trip off the planet. ',
+          'Run the sliders at the Moon’s values and its daytime surface, and carbon dioxide narrowly ',
+          'passes — yet the Moon is bare, a first warning that heat is not the only thief: the solar ',
+          'wind, stripping molecules away one by one over billions of years, finishes off whatever ',
+          'a small world’s gravity can technically hold. Titan, barely stronger than the Moon ',
+          'gravitationally but brutally cold, keeps a nitrogen atmosphere denser than ours — the ',
+          'pairing this site’s escape-velocity module promised. And Jupiter clears the bar even for ',
+          'hydrogen itself, which is how it stayed a gas giant.',
         ),
         p(
           'Then there is Mars — which the rule of thumb gets ',

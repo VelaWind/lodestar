@@ -53,6 +53,18 @@ export const L_SUN = 3.828e26; // W
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**
+ * The Moon, which the atmospheres module leans on twice: once for the retention
+ * criterion it narrowly passes, and once as Titan’s near-twin in gravity.
+ *
+ * Both were inlined in `physics/sanity.ts` until the copy started quoting the
+ * verdict they produce. A figure a reader can check has to come from one place.
+ *
+ * Source: NASA Moon Fact Sheet (D. R. Williams, NASA GSFC) — mass 7.346e22 kg,
+ * volumetric mean radius 1737.4 km.
+ */
+export const M_MOON = 7.346e22; // kg
+export const R_MOON = 1.737_4e6; // m, volumetric mean radius
+/**
  * Jupiter's radius, m — the *volumetric mean*, matching how `R_EARTH` above is
  * defined, so the two planetary radii in this file mean the same kind of thing.
  *

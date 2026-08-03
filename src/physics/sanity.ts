@@ -22,9 +22,11 @@ import {
   JULIAN_YEAR,
   M_EARTH,
   M_JUPITER,
+  M_MOON,
   M_SUN,
   R_EARTH,
   R_JUPITER,
+  R_MOON,
   R_SUN,
 } from './constants';
 import {
@@ -796,24 +798,29 @@ export function verifyAtmosphereModel(): CheckBlock {
     ),
   );
 
-  /* 2 - the Moon, dayside. */
-  const moonM = 7.342e22;
-  const moonR = 1.7374e6;
+  /* 2 - the Moon, dayside.
+
+     390 K is the dayside surface, and for the Moon that *is* the exobase: with
+     no atmosphere above it there is no exosphere to be hotter than the ground.
+     The number matters more here than anywhere else in this file, because the
+     module's layer 4 quotes the verdict it produces. */
   const moonT = 390;
   const moonSheds = ['H2', 'He', 'H2O'].every(
-    (id) => verdictOf(moonM, moonR, moonT, id).verdict === 'loses',
+    (id) => verdictOf(M_MOON, R_MOON, moonT, id).verdict === 'loses',
   );
   const moonNoHeavies = ['N2', 'O2'].every(
-    (id) => verdictOf(moonM, moonR, moonT, id).verdict !== 'retains',
+    (id) => verdictOf(M_MOON, R_MOON, moonT, id).verdict !== 'retains',
   );
+  // The claim the copy makes, asserted rather than left to the detail line.
+  const moonKeepsCo2 = verdictOf(M_MOON, R_MOON, moonT, 'CO2').verdict === 'retains';
   results.push(
     asserted(
-      'The Moon holds none of the light gases and does not clear the bar for N2 or O2',
+      'The Moon sheds the light gases, is marginal for N2 and O2, and narrowly keeps CO2',
       'v_esc / v_th  vs  6 (retains) and 4.5 (loses)',
-      `${ratios(moonM, moonR, moonT)}  ·  at T = ${moonT} K  ·  CO2 sits at ` +
-        `${significant(verdictOf(moonM, moonR, moonT, 'CO2').ratio)}, just over the ` +
-        `threshold: thermal escape is not why the Moon is airless`,
-      moonSheds && moonNoHeavies,
+      `${ratios(M_MOON, R_MOON, moonT)}  ·  at T = ${moonT} K, the dayside surface  ·  ` +
+        `CO2 sits at ${significant(verdictOf(M_MOON, R_MOON, moonT, 'CO2').ratio)}, just over ` +
+        `the threshold: thermal escape is not why the Moon is airless`,
+      moonSheds && moonNoHeavies && moonKeepsCo2,
     ),
   );
 
