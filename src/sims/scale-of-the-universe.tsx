@@ -646,7 +646,9 @@ export default function ScaleOfTheUniverseSim({ params, values, setValue }: SimP
       <dl id="scale-of-the-universe-readouts" className="flex flex-wrap gap-x-7 gap-y-2">
         <Readout label="light crosses it in" value={formatLightTravelTime(crossing)} />
         <Readout
-          label={previous ? `powers of 10 above ${previous.name.toLowerCase()}` : 'decades below'}
+          label={
+            previous ? `powers of 10 above ${previous.name.toLowerCase()}` : 'powers of 10 below'
+          }
           value={
             previous && Number.isFinite(decades)
               ? `${decades >= 0 ? '+' : ''}${decades.toFixed(2)}`

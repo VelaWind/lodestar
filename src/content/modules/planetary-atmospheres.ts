@@ -1,10 +1,21 @@
 /**
  * Planetary atmospheres — the seventh published Lodestar module.
  *
- * Two figures flagged during authoring are still open and were published on the
- * author's instruction rather than resolved: the H2/CO2 speed ratio, which is
- * sqrt(44.009/2.016) = 4.67 against copy reading "nearly four times", and the
- * Moon's CO2 verdict. Both are prose decisions, so they stay as written.
+ * The two figures flagged during authoring are resolved.
+ *
+ * The H2/CO2 thermal-speed ratio is 4.672, computed through `mostProbableSpeed`
+ * for both gases; it depends only on sqrt(44.009/2.016) and so is the same at
+ * every temperature the slider reaches. The copy reads "about four and a half
+ * times".
+ *
+ * The Moon's verdict was checked against the sim's own `retentionVerdict` at the
+ * module's assigned exosphere temperature, the T slider's 1000 K default: escape
+ * speed 2376 m/s against 6·v_th of 3688 m/s for CO2, a ratio of 3.87, which is
+ * below the 4.5 floor. All six gases lose there, so "the Moon fails the test for
+ * every gas" is what the sim says and the sentence stands as written. The margin
+ * is temperature-dependent — the same body reads marginal below about 738 K and
+ * retained below about 415 K — which is the point the following paragraph about
+ * Mars goes on to make.
  *
  * Prose is the project author's, encoded here into the rich-text AST verbatim.
  * Emphasis and inline math in the source copy map to `em(...)` and m`...`
@@ -153,7 +164,7 @@ const planetaryAtmospheres: Module = {
           em('Maxwell–Boltzmann distribution'),
           ', the curve in the simulation — and the spread’s location depends on two things: ',
           'temperature and the molecule’s mass. Hotter means faster; lighter means faster. A ',
-          'hydrogen molecule at a given temperature typically moves nearly four times as fast as a ',
+          'hydrogen molecule at a given temperature typically moves about four and a half times as fast as a ',
           'carbon-dioxide molecule, because it weighs a twenty-second as much.',
         ),
         p(

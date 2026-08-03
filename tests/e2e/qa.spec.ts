@@ -1280,7 +1280,7 @@ test('behaviour: kepler sweeps equal areas and moves non-uniformly', async ({ pa
  * makes. The rung is identified by the readout naming the one below it.
  */
 const LADDER = [
-  'decades below',
+  'powers of 10 below',
   'powers of 10 above proton',
   'powers of 10 above hydrogen atom',
   'powers of 10 above red blood cell',

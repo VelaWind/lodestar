@@ -31,7 +31,7 @@ Vite · React 18 · React Router · TypeScript (strict) · Tailwind · Zustand �
 | Exoplanets | Six thousand worlds, found by watching stars blink |
 | Gravitational waves | A billion light-years away, two black holes rang space itself |
 | Kepler orbits | Speed and distance trade exactly; the period fits on one line |
-| Planetary atmospheres | Whether a world keeps its air is a race between gravity and heat |
+| Planetary atmospheres | Why Titan keeps a thick atmosphere while the Moon, nearly its match in gravity, is bare |
 | Scale of the universe | Forty-two factors of ten, from a proton to the horizon |
 
 More are planned; each module's Connections layer links onward, including to modules that don't exist yet — that's the backlog, in public.

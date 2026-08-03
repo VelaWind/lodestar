@@ -40,8 +40,10 @@ Write them in order. Each must stand alone — a reader who stops after layer 2
 should still have learned something true.
 
 ### 1. Hook
-One or two sentences plus one striking visual. No jargon, no exponents, no
-definitions. The job is to make someone want the next paragraph.
+One or two sentences. No jargon, no exponents, no definitions. The job is
+to make someone want the next paragraph with words alone — the module's first
+visual is the simulation in layer 3. A hook-level image is optional and rare,
+used only when a real photograph does work that words cannot.
 
 Good: "Light from the nearest star has been travelling for four years. You are
 always looking at the past."
