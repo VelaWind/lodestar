@@ -2,4 +2,6 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lodestar-nu-six.vercel.app/sitemap.xml
+# No Sitemap line: there is no sitemap.xml, and the SPA rewrite means a crawler
+# asking for one gets index.html with a 200 rather than a 404 — a declared
+# sitemap that silently resolves to a page of HTML is worse than none.
