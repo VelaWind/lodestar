@@ -132,7 +132,7 @@ const LOOP_SECONDS = 8;
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#767f93',
+  inkFaint: '#858ea2',
   edge: '#232b3b',
   star: '#9db4ff',
   ember: '#e8bd7d',

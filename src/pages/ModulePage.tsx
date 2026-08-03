@@ -98,10 +98,15 @@ function ModuleView({ module }: { module: Module }) {
       </header>
 
       <div className="mb-2 flex justify-end">
+        {/* A bordered pill rather than a bare word. It was styled as body text
+            and only became a control on hover, which is no affordance at all for
+            a pointer that never rests and none whatsoever for touch. The height
+            matches the depth pills so the site has one control size. */}
         <button
           type="button"
           onClick={toggleAll}
-          className="-my-2 py-2 font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
+          aria-expanded={allOpen}
+          className="inline-flex h-9 items-center rounded-full border border-edge-soft bg-void-800/60 px-3.5 font-ui text-xs text-ink-faint transition-colors hover:border-star-dim/60 hover:bg-void-700/60 hover:text-star sm:h-7"
         >
           {allOpen ? 'Collapse all' : 'Expand all'}
         </button>

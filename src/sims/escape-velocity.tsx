@@ -173,7 +173,7 @@ interface Scene {
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#767f93',
+  inkFaint: '#858ea2',
   edge: '#232b3b',
   body: '#151a25',
   star: '#9db4ff',

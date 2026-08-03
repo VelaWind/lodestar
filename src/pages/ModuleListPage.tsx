@@ -6,6 +6,7 @@
 import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import type { Module } from '@/content/types';
+import { requestDepthFocus } from '@/components/DepthControl';
 import { moduleList } from '@/content/registry';
 import { TIERS } from '@/lib/layers';
 import { plainText } from '@/lib/plainText';
@@ -64,8 +65,19 @@ export function ModuleListPage() {
         </p>
         <p className="mt-4 font-ui text-sm leading-relaxed text-ink-faint">
           The depth control in the header — you are reading at{' '}
-          <span className="text-star">{tierLabel}</span> — decides which layers are open when a
-          page loads; it never changes a word of the text, and nothing is ever hidden.
+          {/* This word was coloured like a link and did nothing. Either the
+              styling was wrong or the behaviour was missing; the behaviour was
+              missing. It now sends focus to the control it names. */}
+          <button
+            type="button"
+            onClick={requestDepthFocus}
+            aria-label={`You are reading at ${tierLabel}. Go to the reading depth control.`}
+            className="rounded-sm text-star underline decoration-star/40 underline-offset-4 transition-colors hover:decoration-star"
+          >
+            {tierLabel}
+          </button>{' '}
+          — decides which layers are open when a page loads; it never changes a word of the
+          text, and nothing is ever hidden.
         </p>
       </header>
 
@@ -94,7 +106,7 @@ function ModuleCard({ module }: { module: Module }) {
   return (
     <Link
       to={`/m/${module.id}`}
-      className="group flex h-full flex-col rounded-xl border border-edge-soft bg-void-800/40 p-6 transition-all hover:border-star-dim/60 hover:bg-void-700/50"
+      className="group flex h-full flex-col rounded-xl border border-edge-soft bg-void-800/40 p-6 transition-colors hover:border-star-dim/60 hover:bg-void-700/50"
     >
       <div className="flex items-start justify-between gap-3">
         <h2 className="font-prose text-xl text-ink transition-colors group-hover:text-star">
@@ -111,22 +123,37 @@ function ModuleCard({ module }: { module: Module }) {
 
       {/* The hook, verbatim from layer 1 — the module's own first sentence is a
           better teaser than anything written twice. */}
+      {/* The module's own first sentence, at the same weight as the tagline
+          above it. It used to be a step dimmer than the meta row beneath, which
+          put the most persuasive line on the card in the quietest tone on it. */}
       {teaser && (
-        <p className="mt-3.5 border-l border-edge-soft pl-3.5 font-prose text-sm leading-relaxed text-ink-faint">
+        <p className="mt-3.5 border-l border-edge-soft pl-3.5 font-prose text-sm leading-relaxed text-ink-dim">
           {teaser}
         </p>
       )}
 
-      <div className="mt-5 flex items-center gap-2 pt-1 font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">
+      {/* mt-auto, not mt-5: hooks and taglines differ in length by a couple of
+          lines, and without this the meta rows sit at whatever height their own
+          card's prose ended at, so a two-column grid reads as ragged. */}
+      <div className="mt-auto flex items-center gap-2 pt-5 font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">
         <span
           aria-hidden
           className="h-1 w-1 rounded-full bg-star/70 transition-colors group-hover:bg-star"
         />
         interactive
-        <span aria-hidden className="text-ink-faint">
-          ·
-        </span>
+        <span aria-hidden>·</span>
         {params} {params === 1 ? 'parameter' : 'parameters'}
+        {/* The card is a link and nothing at rest said so — the whole surface is
+            the target, which is exactly what makes it invisible. An arrow at the
+            end of the meta row is the smallest mark that reads as "this goes
+            somewhere", and it moves on hover so the affordance is confirmed
+            rather than only implied. */}
+        <span
+          aria-hidden
+          className="ml-auto text-sm leading-none text-ink-faint transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-star"
+        >
+          →
+        </span>
       </div>
     </Link>
   );

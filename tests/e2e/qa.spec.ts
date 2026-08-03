@@ -777,22 +777,64 @@ test('gravitational-waves audio schedules without throwing', async ({ page }) =>
 /* About page and social preview                                       */
 /* ------------------------------------------------------------------ */
 
+/**
+ * The header's two halves, and the line between them.
+ *
+ * "Depth" sat loose in the header at the same size and tone as "About" beside
+ * it, so the row read as three nav links and a pill group rather than a link and
+ * a labelled control. The label now lives inside the control's own border, which
+ * is the whole of the fix and the thing worth asserting: the word is inside the
+ * box, and About is outside it.
+ */
+test('the depth label belongs to the depth control, and About does not', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await settle(page, 600);
+
+  const group = page.locator('header [role="radiogroup"]');
+  await expect(group).toHaveAttribute('aria-labelledby', 'depth-control-label');
+
+  const box = await page.evaluate(() => {
+    const label = document.getElementById('depth-control-label');
+    const radios = document.querySelector('header [role="radiogroup"]');
+    const about = document.querySelector('header a[href="/about"]');
+    if (!radios || !about) return null;
+    // The bordered container is the nearest ancestor the label and the pills
+    // share; About must not be inside it.
+    const container = radios.parentElement;
+    return {
+      labelInside: !!(label && container?.contains(label)),
+      aboutInside: !!container?.contains(about),
+      bordered: container ? getComputedStyle(container).borderTopWidth !== '0px' : false,
+      // Below `sm` the label is hidden, so its absence there is not a failure.
+      labelVisible: !!label && label.getClientRects().length > 0,
+    };
+  });
+
+  expect(box, 'no depth control in the header').not.toBeNull();
+  expect(box!.bordered, 'the depth group should be visibly one container').toBe(true);
+  expect(box!.aboutInside, 'About is inside the depth control group').toBe(false);
+  if (box!.labelVisible) {
+    expect(box!.labelInside, 'the Depth label sits outside the control it names').toBe(true);
+  }
+
+  assertClean(w, 'header grouping');
+});
+
 test('about page is reachable and renders', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 600);
 
-  // The header link is hidden below the sm breakpoint, where 375px leaves it
-  // 2px of room; the footer carries it at every width. Either route works, and
-  // at least one has to be visible wherever the test is running.
+  // Both routes, at every width. The header link used to disappear below the
+  // sm breakpoint, which put the only page about the project behind a scroll to
+  // the footer on the devices most readers arrive on.
   const header = page.locator('header a[href="/about"]');
   const footer = page.locator('footer a[href="/about"]');
-  const viaHeader = await header.isVisible();
-  const viaFooter = await footer.isVisible();
-  expect(viaHeader || viaFooter, 'no reachable About link at this viewport').toBe(true);
-  expect(viaFooter, 'the footer link should be present at every width').toBe(true);
+  await expect(header, 'the header link should be visible at every width').toBeVisible();
+  await expect(footer, 'the footer link should be present at every width').toBeVisible();
 
-  await (viaHeader ? header : footer).click();
+  await header.click();
   await expect(page).toHaveURL(/\/about$/);
 
   await expect(page.getByRole('heading', { level: 1, name: 'How Lodestar is built' })).toBeVisible();
@@ -908,7 +950,23 @@ test('accessibility: a module page with every layer expanded', async ({ page }) 
   await page.goto('/m/gravitational-waves', { waitUntil: 'domcontentloaded' });
   await settle(page, 1_000);
 
-  await page.getByRole('button', { name: /expand all/i }).click();
+  // A real affordance at rest, not on hover: same height as a depth pill, with
+  // its own border. A control that only looks like one under a cursor is
+  // invisible to touch.
+  const expandAll = page.getByRole('button', { name: /expand all/i });
+  const shape = await expandAll.evaluate((el) => {
+    const style = getComputedStyle(el);
+    const pill = document.querySelector('header [role="radio"]');
+    return {
+      border: style.borderTopWidth,
+      height: Math.round(el.getBoundingClientRect().height),
+      pillHeight: pill ? Math.round(pill.getBoundingClientRect().height) : null,
+    };
+  });
+  expect(shape.border, 'Expand all has no resting affordance').not.toBe('0px');
+  expect(shape.height, 'Expand all should match the depth pills').toBe(shape.pillHeight);
+
+  await expandAll.click();
   await page.getByRole('button', { name: /^approximations/i }).click();
   await settle(page, 700);
 
@@ -957,6 +1015,28 @@ test('keyboard: the whole sim is operable without a pointer', async ({ page }) =
   await page.goto('/m/exoplanets', { waitUntil: 'domcontentloaded' });
   await settle(page, 1_000);
   await assertLogSliderKeys(page, '#p-Rp', 'exoplanets/Rp');
+
+  // The hero's tier word is styled as interactive, so it has to be reachable and
+  // it has to do something. It sends focus to the control it names — which is
+  // the only reason for a word in a paragraph to be a button at all.
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await settle(page, 700);
+  const tierWord = page.getByRole('button', { name: /Go to the reading depth control/ });
+  await expect(tierWord, 'the hero tier word should be a real control').toHaveCount(1);
+  await tierWord.focus();
+  await expect(tierWord).toBeFocused();
+  await page.keyboard.press('Enter');
+  const landed = await page.evaluate(() => {
+    const el = document.activeElement;
+    return {
+      role: el?.getAttribute('role'),
+      checked: el?.getAttribute('aria-checked'),
+      inHeader: !!el?.closest('header'),
+    };
+  });
+  expect(landed.inHeader, 'focus should move into the header').toBe(true);
+  expect(landed.role, 'focus should land on a depth radio').toBe('radio');
+  expect(landed.checked, 'focus should land on the selected tier').toBe('true');
 
   // Every stateful sim control reports its state, and every one is a real button.
   await page.goto('/m/planetary-atmospheres', { waitUntil: 'domcontentloaded' });

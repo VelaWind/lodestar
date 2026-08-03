@@ -6,22 +6,6 @@
   :root {
     color-scheme: dark;
 
-    /*
-     * Muted text that has to survive on a raised surface.
-     *
-     * `ink-faint` is tuned against the page background and clears 4.5:1 there
-     * (4.99) and on the card and panel tints (4.93, 4.90). It does not clear it
-     * on `void-500`, the lightest surface in the system, where it measures 3.91
-     * — a lighter background needs lighter text to hold the same ratio, which is
-     * the whole reason this is a second token rather than an opacity on the
-     * first. #858ea2 measures 4.78 on void-500, 5.99 on the panel tint where the
-     * approximations summary sits, and 6.09 on the page.
-     *
-     * Opacity is not an alternative here: dimming text composites it toward the
-     * background, and the "planned" connection chip proved it — `opacity-60`
-     * over correct tokens rendered at 2.44:1 and 3.38:1.
-     */
-    --text-muted-elevated: #858ea2;
   }
 
   html {

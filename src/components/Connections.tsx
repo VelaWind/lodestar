@@ -31,8 +31,8 @@ export function Connections({ layer }: { layer: ConnectionsLayer }) {
         if (!isReaderVisible(target)) {
           // No `opacity-60` here any more: dimming the whole chip composited its
           // text toward the background and put it at 2.44:1 and 3.38:1. The
-          // quietness now comes from the tone and the dashed border, both of
-          // which keep their contrast.
+          // quietness comes from the tone and the dashed border, both of which
+          // keep their contrast.
           return (
             <li
               key={moduleId}
@@ -44,12 +44,12 @@ export function Connections({ layer }: { layer: ConnectionsLayer }) {
                     built from its id, because a reader meeting
                     "cosmic-distance-ladder" in a list of written English is
                     reading a filename. */}
-                <span className="font-prose text-ink-muted-elevated">{plannedTitle}</span>
-                <span className="font-ui text-[0.65rem] uppercase tracking-wider text-ink-muted-elevated">
+                <span className="font-prose text-ink-faint">{plannedTitle}</span>
+                <span className="font-ui text-[0.65rem] uppercase tracking-wider text-ink-faint">
                   planned
                 </span>
               </div>
-              <p className="mt-1 font-prose text-sm text-ink-muted-elevated">{reason}</p>
+              <p className="mt-1 font-prose text-sm text-ink-faint">{reason}</p>
             </li>
           );
         }

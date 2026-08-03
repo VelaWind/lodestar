@@ -41,13 +41,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="truncate font-prose text-lg tracking-wide text-ink">Lodestar</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Measured at 390px: the wordmark and the depth pills leave 62px of
-                the 358px content box, and this link wants about 45 — it fits,
-                but at 375px that margin falls to 2px. So it appears from the sm
-                breakpoint up, and the footer carries it at every width. */}
+            {/* Visible at every width now. It is the only route to the page
+                besides the footer, and a link that disappears on the devices
+                most people arrive on is not really in the header. It fits
+                because the depth group's label is still hidden below `sm` — the
+                pills and this link together leave room at 375px. */}
             <Link
               to="/about"
-              className="hidden font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline sm:inline"
+              className="shrink-0 font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
             >
               About
             </Link>

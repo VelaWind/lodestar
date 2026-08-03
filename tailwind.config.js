@@ -20,14 +20,15 @@ export default {
         ink: {
           DEFAULT: '#d5dcea',
           dim: '#98a2b8',
-          // Raised from #6b7488, which measured 4.27:1 on the page background
-          // and 4.20:1 inside a panel — under the 4.5:1 AA floor for body text,
-          // and this tone carries every caption, axis label and readout label on
-          // the site. #767f93 is the smallest step that clears 4.5 on all three
-          // real backgrounds with margin to spare: 4.99, 4.93, 4.90.
-          faint: '#767f93',
-          // Muted text on a raised surface — see --text-muted-elevated.
-          'muted-elevated': 'var(--text-muted-elevated)',
+          // The one muted tone. It was #767f93, which cleared 4.5:1 on the page
+          // and the panel tints but not on void-500, the lightest surface — so a
+          // second token existed for raised surfaces alone, and the two of them
+          // plus `dim` made three greys competing to signal hierarchy. This is
+          // that second token's value, promoted: it clears AA everywhere,
+          // including 4.78 on void-500, so one tone now does the whole job.
+          //
+          // Against the page background: 6.09, up from 4.99.
+          faint: '#858ea2',
         },
         star: {
           DEFAULT: '#9db4ff',

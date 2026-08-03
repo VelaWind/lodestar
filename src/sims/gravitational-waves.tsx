@@ -176,7 +176,7 @@ function slowFactorFor(duration: number): number {
 const COLORS = {
   ink: '#d5dcea',
   inkDim: '#98a2b8',
-  inkFaint: '#767f93',
+  inkFaint: '#858ea2',
   edge: '#232b3b',
   star: '#9db4ff',
   ember: '#e8bd7d',
@@ -584,7 +584,13 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
         )}
       </div>
 
-      <dl id="gravitational-waves-readouts" className="flex flex-wrap gap-x-7 gap-y-3 border-t border-edge-soft pt-4">
+      {/* Two columns at narrow width, not a wrapping row: four tiles of unequal
+          label length wrapped 3 + 1, which reads as a dropped tile rather than a
+          grid. Above `sm` there is room for the row again. */}
+      <dl
+        id="gravitational-waves-readouts"
+        className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-edge-soft pt-4 sm:flex sm:flex-wrap sm:gap-x-7"
+      >
         <Readout label="chirp mass" value={`${SIG3.format(mc / M_SUN)} M☉`} />
         <Readout label="frequency at cutoff" value={formatFrequency(cutoff)} />
         <Readout label="peak strain here" value={scientific(win ? win.peak : NaN)} />

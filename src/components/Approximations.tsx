@@ -18,7 +18,7 @@ export function Approximations({ items }: { items: string[] }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 px-4 py-3 text-left font-ui text-xs font-medium uppercase tracking-[0.12em] text-ink-muted-elevated transition-colors hover:text-ink-dim"
+        className="flex w-full items-center gap-2 px-4 py-3 text-left font-ui text-xs font-medium uppercase tracking-[0.12em] text-ink-faint transition-colors hover:text-ink-dim"
       >
         <motion.svg
           viewBox="0 0 12 12"
@@ -29,7 +29,7 @@ export function Approximations({ items }: { items: string[] }) {
           <path d="M3 1l6 5-6 5z" />
         </motion.svg>
         <span className="flex-1">Approximations</span>
-        <span className="font-mono text-[0.7rem] text-ink-muted-elevated">{items.length}</span>
+        <span className="font-mono text-[0.7rem] text-ink-faint">{items.length}</span>
       </button>
 
       <AnimatePresence initial={false}>
