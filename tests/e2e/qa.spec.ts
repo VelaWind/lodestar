@@ -37,6 +37,7 @@ const MODULES = [
   'black-holes',
   'gravitational-waves',
   'exoplanets',
+  'planetary-atmospheres',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -1280,15 +1281,15 @@ test('behaviour: kepler sweeps equal areas and moves non-uniformly', async ({ pa
  */
 const LADDER = [
   'decades below',
-  'decades above proton',
-  'decades above hydrogen atom',
-  'decades above red blood cell',
-  'decades above human',
-  'decades above earth',
-  'decades above sun',
-  'decades above neptune’s orbit',
-  'decades above distance to proxima centauri',
-  'decades above milky way disc',
+  'powers of 10 above proton',
+  'powers of 10 above hydrogen atom',
+  'powers of 10 above red blood cell',
+  'powers of 10 above human',
+  'powers of 10 above earth',
+  'powers of 10 above sun',
+  'powers of 10 above neptune’s orbit',
+  'powers of 10 above distance to proxima centauri',
+  'powers of 10 above milky way disc',
 ];
 
 /** Coarsest-to-finest, as the crossing time climbs. */
@@ -1724,15 +1725,30 @@ test('behaviour: every gas chip selects, redraws and keeps its verdict', async (
  * module that is not published degrades to a chip rather than a dead link, and
  * no draft is reachable from anywhere a reader looks.
  *
- * The planned chips are five, and it is worth writing down why, because the
- * number moves when the backlog does: two of them point at
- * `planetary-atmospheres`, which exists but is a draft, and three point at
- * `cosmic-distance-ladder` and `expansion-of-the-universe`, which are backlog.
- * Publishing the draft turns two chips into links and leaves three.
+ * The planned chips are three, and it is worth writing down why, because the
+ * number moves when the backlog does: they point at `cosmic-distance-ladder`
+ * twice and `expansion-of-the-universe` once, neither of which is written. Two
+ * further chips existed until `planetary-atmospheres` was published — a module
+ * that was finished and registered but still carried a draft flag, so the index
+ * hid it and every link to it degraded to a chip.
+ *
+ * Every target here is a module nobody has written. A chip pointing at a module
+ * that *exists* is the failure this pairs with `tests/content.test.ts`, which
+ * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'expansion-of-the-universe', 'planetary-atmospheres'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'expansion-of-the-universe'];
 
-test('behaviour: the registry publishes six modules and leaks no drafts', async ({ page }) => {
+/** The same rule `src/lib/titles.ts` applies, restated so the page is checked
+ *  against an expectation rather than against its own implementation. */
+const MINOR_WORDS = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'nor', 'of', 'on', 'or', 'the', 'to', 'with']);
+function titleCase(slug: string): string {
+  return slug
+    .split('-')
+    .map((word, i) => (i > 0 && MINOR_WORDS.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+    .join(' ');
+}
+
+test('behaviour: the registry publishes seven modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -1756,8 +1772,13 @@ test('behaviour: the registry publishes six modules and leaks no drafts', async 
 
     for (let i = 0; i < count; i += 1) {
       const named = ((await chips.nth(i).innerText()).split('\n')[0] ?? '').trim();
+      // A title, never the id it was built from: "Cosmic Distance Ladder", not
+      // "cosmic-distance-ladder". A reader should never meet a filename.
+      expect(named, `${id}: planned chip shows a raw slug — "${named}"`).not.toMatch(
+        /^[a-z0-9]+(-[a-z0-9]+)+$/,
+      );
       expect(
-        PLANNED_TARGETS,
+        PLANNED_TARGETS.map(titleCase),
         `${id}: "${named}" is a planned chip for a module nobody plans to write`,
       ).toContain(named);
     }
@@ -1780,7 +1801,7 @@ test('behaviour: the registry publishes six modules and leaks no drafts', async 
 
   // eslint-disable-next-line no-console
   console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
-  expect(planned, 'planned-chip total across every published page').toBe(5);
+  expect(planned, 'planned-chip total across every published page').toBe(3);
 
   assertClean(w, 'registry');
 });

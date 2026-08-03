@@ -11,6 +11,7 @@
 import { Link } from 'react-router-dom';
 import { getModule } from '@/content/registry';
 import type { ConnectionsLayer } from '@/content/types';
+import { titleFromSlug } from '@/lib/titles';
 import { isReaderVisible } from '@/lib/visibility';
 
 export function Connections({ layer }: { layer: ConnectionsLayer }) {
@@ -22,6 +23,10 @@ export function Connections({ layer }: { layer: ConnectionsLayer }) {
     <ul className="grid gap-3 sm:grid-cols-2">
       {layer.links.map(({ moduleId, reason }) => {
         const target = getModule(moduleId);
+        // Read before the visibility narrowing below: `isReaderVisible` is a
+        // type predicate, so its false branch types as `undefined` and forgets
+        // that a draft module is both invisible and titled.
+        const plannedTitle = target?.title ?? titleFromSlug(moduleId);
 
         if (!isReaderVisible(target)) {
           // No `opacity-60` here any more: dimming the whole chip composited its
@@ -34,10 +39,12 @@ export function Connections({ layer }: { layer: ConnectionsLayer }) {
               className="rounded-lg border border-dashed border-edge-soft px-4 py-3.5"
             >
               <div className="flex items-baseline justify-between gap-2">
-                {/* The id, not the title, when there is no module: a title would
-                    be inventing one. A draft has a real title, but it is unwritten
-                    work, so it reads the same as anything else not here yet. */}
-                <span className="font-prose text-ink-muted-elevated">{moduleId}</span>
+                {/* Never the raw id. A module that exists has a real title even
+                    while it is a draft; one that does not yet exist gets a title
+                    built from its id, because a reader meeting
+                    "cosmic-distance-ladder" in a list of written English is
+                    reading a filename. */}
+                <span className="font-prose text-ink-muted-elevated">{plannedTitle}</span>
                 <span className="font-ui text-[0.65rem] uppercase tracking-wider text-ink-muted-elevated">
                   planned
                 </span>

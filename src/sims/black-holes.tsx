@@ -30,6 +30,7 @@ import {
   schwarzschildRadius,
   tidalAccelerationAtHorizon,
 } from '@/physics/blackhole';
+import { layOutRow } from './labels';
 
 /* ------------------------------------------------------------------ */
 /* Display helpers — formatting only, never used to compute            */
@@ -399,13 +400,36 @@ function drawComparison(
   ctx.textAlign = 'center';
   ctx.font = '10px Inter, system-ui, -apple-system, sans-serif';
   const yLabel = cy + Math.max(horizonPx, extentPx) / 2 + 16;
-  ctx.fillStyle = COLORS.ink;
-  fillTextClamped(ctx, 'event horizon', horizonCx, yLabel, left, right);
-  ctx.fillStyle = COLORS.inkDim;
-  fillTextClamped(ctx, view.comparison.name, comparisonCx, yLabel, left, right);
+
+  // Both captions want to sit under the thing they name, and the two things can
+  // be almost on top of each other: at a stellar mass the hole is a dot beside
+  // Earth, and the gap between their centres is smaller than either caption.
+  // Clamping each into the panel independently was what produced the overprint
+  // — two labels clamped toward the same middle land in the same place. Laying
+  // the row out from the measured widths separates them, and stacks them when
+  // the panel is too narrow to hold both.
+  const lineHeight = 13;
+  const placed = layOutRow(
+    ctx,
+    [
+      { text: 'event horizon', cx: horizonCx },
+      { text: view.comparison.name, cx: comparisonCx },
+    ],
+    left,
+    right,
+    yLabel,
+    lineHeight,
+  );
+  const colours = [COLORS.ink, COLORS.inkDim];
+  let lastRow = yLabel;
+  placed.forEach((label, i) => {
+    ctx.fillStyle = colours[i] ?? COLORS.ink;
+    fillTextClamped(ctx, label.text, label.cx, label.y, left, right);
+    lastRow = Math.max(lastRow, label.y);
+  });
 
   ctx.fillStyle = COLORS.inkFaint;
-  fillTextClamped(ctx, 'size — these two to one scale', (left + right) / 2, yLabel + 16, left, right);
+  fillTextClamped(ctx, 'size — these two to one scale', (left + right) / 2, lastRow + 16, left, right);
   ctx.restore();
 }
 

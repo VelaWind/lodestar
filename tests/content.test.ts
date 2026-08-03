@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest';
 import { moduleList, modules, simKeys } from '@/content/registry';
 import type { Module } from '@/content/types';
 import { LOG_ARROW_STEP, LOG_PAGE_STEP, sliderBounds } from '@/lib/format';
+import { titleFromSlug } from '@/lib/titles';
 import { plainText } from '@/lib/plainText';
 
 const published = moduleList.filter((m) => m.status === 'published');
@@ -63,6 +64,99 @@ describe('the registry', () => {
     for (const id of KNOWN_BACKLOG) {
       expect(modules[id], `"${id}" exists now — take it out of KNOWN_BACKLOG`).toBeUndefined();
     }
+  });
+});
+
+/**
+ * Modules deliberately withheld from readers.
+ *
+ * Empty is the normal state. A module sitting at `status: 'draft'` is invisible
+ * on the index *and* degrades to a planned chip wherever another module links to
+ * it — which is how a finished, registered, routable module went missing from a
+ * seven-module site and turned up in escape-velocity's Connections as a grey
+ * chip. Nothing else in the suite could see it, because every other content test
+ * iterates the published set and a draft is simply absent from what they check.
+ *
+ * So the withheld set is written down. Holding a module back stays a one-line
+ * change; forgetting to publish one again does not stay silent.
+ */
+const INTENTIONAL_DRAFTS: readonly string[] = [];
+
+describe('what readers can reach', () => {
+  it('publishes every module that is not deliberately held back', () => {
+    const withheld = moduleList
+      .filter((m) => m.status !== 'published')
+      .map((m) => m.id)
+      .sort();
+    expect(withheld, 'a module is a draft without being listed as one').toEqual(
+      [...INTENTIONAL_DRAFTS].sort(),
+    );
+  });
+
+  it('lists every published module on the index', () => {
+    // The index renders `moduleList` filtered by `isReaderVisible`, which in a
+    // production build is exactly the published set. Asserted against the same
+    // list the page maps over, so a module missing from the registry glob fails
+    // here too.
+    const onIndex = moduleList.filter((m) => m.status === 'published').map((m) => m.id);
+    for (const module of published) {
+      expect(onIndex, `${module.id} is published but not on the index`).toContain(module.id);
+    }
+    expect(onIndex.length, 'the index should show every published module').toBe(published.length);
+  });
+
+  it('never renders a published module as a planned chip', () => {
+    // A connection degrades to a planned chip whenever its target is not
+    // reader-visible. A target that exists and is published must therefore
+    // resolve to a live link on every page that mentions it.
+    for (const module of published) {
+      for (const { moduleId } of module.layers.connections.links) {
+        const target = modules[moduleId];
+        if (!target) continue;
+        expect(
+          target.status,
+          `${module.id} links to ${moduleId}, which exists but would render as a planned chip`,
+        ).toBe('published');
+      }
+    }
+  });
+
+  it('gives every planned chip a readable title rather than a slug', () => {
+    // The chip shows the target's own title when the module exists, and a title
+    // built from the id when it does not. Either way it must not be the id.
+    for (const module of published) {
+      for (const { moduleId } of module.layers.connections.links) {
+        const shown = modules[moduleId]?.title ?? titleFromSlug(moduleId);
+        expect(shown, `${module.id} -> ${moduleId}: chip would show the raw slug`).not.toBe(
+          moduleId,
+        );
+        expect(shown, `${module.id} -> ${moduleId}: chip title contains a hyphen-slug`).not.toMatch(
+          /^[a-z0-9]+(-[a-z0-9]+)+$/,
+        );
+        expect(shown.trim().length, `${module.id} -> ${moduleId}: empty chip title`).toBeGreaterThan(
+          0,
+        );
+      }
+    }
+  });
+});
+
+describe('titleFromSlug', () => {
+  it('title-cases a slug and leaves the joining words alone', () => {
+    expect(titleFromSlug('cosmic-distance-ladder')).toBe('Cosmic Distance Ladder');
+    expect(titleFromSlug('expansion-of-the-universe')).toBe('Expansion of the Universe');
+    expect(titleFromSlug('scale-of-the-universe')).toBe('Scale of the Universe');
+    expect(titleFromSlug('black-holes')).toBe('Black Holes');
+  });
+
+  it('capitalises the first word even when it is a joining word', () => {
+    expect(titleFromSlug('the-cosmic-web')).toBe('The Cosmic Web');
+  });
+
+  it('survives a degenerate id rather than returning nothing', () => {
+    expect(titleFromSlug('')).toBe('');
+    expect(titleFromSlug('proton')).toBe('Proton');
+    expect(titleFromSlug('a--b')).toBe('A B');
   });
 });
 

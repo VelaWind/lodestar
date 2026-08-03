@@ -143,6 +143,33 @@ export function textOutsideFrame(records: DrawRecord[], w: number, h: number): D
   );
 }
 
+/**
+ * Pairs of labels that share screen area.
+ *
+ * Canvas has no layout: a label goes where it is told and paints over whatever
+ * is already there, so two captions can merge into one unreadable run — "strain
+ * h" and "35.1 Hz" arriving as `strai35.1 Hz` — with nothing outside the frame
+ * and nothing non-finite. The only way to see it without eyes on the picture is
+ * to compare the rectangles.
+ *
+ * A pixel of slack in each axis: glyph boxes include side bearing, so labels
+ * that merely sit next to each other should not read as a collision.
+ */
+export function textCollisions(records: DrawRecord[]): [DrawRecord, DrawRecord][] {
+  const texts = records.filter((r) => r.kind === 'text');
+  const pairs: [DrawRecord, DrawRecord][] = [];
+  for (let i = 0; i < texts.length; i += 1) {
+    for (let j = i + 1; j < texts.length; j += 1) {
+      const a = texts[i]!;
+      const b = texts[j]!;
+      const overlapX = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0);
+      const overlapY = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+      if (overlapX > 1 && overlapY > 1) pairs.push([a, b]);
+    }
+  }
+  return pairs;
+}
+
 /** Anything drawn with a NaN or an Infinity in it. */
 export function nonFiniteDraws(records: DrawRecord[]): DrawRecord[] {
   return records.filter((r) => !r.finite);

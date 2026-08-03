@@ -39,6 +39,7 @@ import {
   audioPlanFor,
   chirpCurves,
 } from '@/sims/gw-audio';
+import { labelBox } from './labels';
 
 /* ------------------------------------------------------------------ */
 /* Display helpers — formatting only, never used to compute            */
@@ -266,7 +267,11 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
 
   ctx.textAlign = 'left';
   ctx.fillStyle = COLORS.inkFaint;
-  ctx.fillText('strain h', left, top - 8);
+  const strainLabelY = top - 8;
+  ctx.fillText('strain h', left, strainLabelY);
+  // Remembered so the live readout below can be kept off it. The axis label is
+  // static and the readout moves, so the readout is the one that gives way.
+  const strainLabel = labelBox(ctx, 'strain h', left, strainLabelY, 'left');
 
   /* --- envelope: ±A(t), the amplitude the cycles ride inside --- */
   ctx.fillStyle = 'rgba(157,180,255,0.10)';
@@ -312,7 +317,22 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
 
     ctx.font = '600 11px Inter, system-ui, sans-serif';
     ctx.textAlign = 'center';
-    fillTextClamped(ctx, formatFrequency(fOfTimeToMerger(scene.mc, tau)), x, top - 8, left, right);
+    // At the start of a sweep the leading edge is at the left of the plot, and a
+    // readout centred there clamps to the same corner the axis label occupies —
+    // which is how "strain h" and "35.1 Hz" came out as "strai35.1 Hz". The
+    // readout keeps its place above the leading edge wherever there is room, and
+    // is held clear of the axis label where there is not.
+    const readout = formatFrequency(fOfTimeToMerger(scene.mc, tau));
+    const readoutHalf = ctx.measureText(readout).width / 2;
+    const clearOfAxis = strainLabel.x1 + 8 + readoutHalf;
+    const rightStop = right - readoutHalf;
+    const readoutX =
+      clearOfAxis <= rightStop
+        ? Math.min(rightStop, Math.max(clearOfAxis, x))
+        : // Narrower than both labels together: the readout takes the right-hand
+          // end, which is as far from the axis label as the plot allows.
+          rightStop;
+    fillTextClamped(ctx, readout, readoutX, top - 8, left, right);
     ctx.font = '10px Inter, system-ui, -apple-system, sans-serif';
   }
 

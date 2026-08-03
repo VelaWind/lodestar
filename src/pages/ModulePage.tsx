@@ -107,7 +107,10 @@ function ModuleView({ module }: { module: Module }) {
         </button>
       </div>
 
-      <div className="border-b border-edge-soft">
+      {/* No bottom rule: References opens with its own, and the two of them
+          four rem apart read as a divider with an empty band inside it. The
+          layer list ends where its last panel ends. */}
+      <div>
         {LAYER_ORDER.map((layerId) => (
           <Layer
             key={layerId}

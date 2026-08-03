@@ -47,6 +47,7 @@ import {
   describeRecord,
   nonFiniteDraws,
   recordingContext,
+  textCollisions,
   textOutsideFrame,
 } from './helpers/recordingContext';
 
@@ -248,7 +249,7 @@ function gravitationalWaveCases(): Case[] {
         });
 
         if (!win) continue;
-        for (const progress of [0.5, 1]) {
+        for (const progress of [0.01, 0.08, 0.5, 1]) {
           cases.push({
             label: `${stem} p=${progress}`,
             draw: (ctx, w, h) =>
@@ -422,6 +423,30 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'planetary-atmospheres', height: 304, cases: atmosphereCases },
 ];
 
+/**
+ * Widths for the collision pass: a phone and a wide desktop.
+ *
+ * Both matter and they fail differently. Narrow is where two captions get
+ * squeezed into the same place; wide is where a label anchored to the right edge
+ * meets one anchored to a value — escape-velocity's apex annotation rides on a
+ * line whose height is a slider reading, and at a high apex it arrives exactly
+ * where the axis note sits, at any width.
+ */
+const COLLISION_WIDTHS = [390, 900];
+
+/**
+ * Sims whose labels are placed by measurement rather than by fixed offsets.
+ *
+ * Scoped rather than universal on purpose: this asserts a property the three
+ * sims below were changed to hold, and listing a sim here is the claim that its
+ * placement is measured. Adding the rest means fixing them first.
+ */
+const MEASURED_PLACEMENT = new Set([
+  'escape-velocity',
+  'black-holes',
+  'gravitational-waves',
+]);
+
 for (const sim of SIMS) {
   describe(sim.name, () => {
     const cases = sim.cases();
@@ -449,6 +474,25 @@ for (const sim of SIMS) {
           ).toEqual([]);
         }
       });
+    }
+
+    if (MEASURED_PLACEMENT.has(sim.name)) {
+      for (const width of COLLISION_WIDTHS) {
+        it(`keeps its labels off each other at ${width}×${sim.height}`, () => {
+          for (const testCase of cases) {
+            const { ctx, records } = recordingContext();
+            testCase.draw(ctx, width, sim.height);
+
+            const collisions = textCollisions(records);
+            expect(
+              collisions.map(
+                ([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`,
+              ),
+              `${sim.name} · ${testCase.label} · ${width}×${sim.height}: labels overlap`,
+            ).toEqual([]);
+          }
+        });
+      }
     }
   });
 }

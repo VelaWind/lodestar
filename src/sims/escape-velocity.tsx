@@ -23,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
+import { firstClearPlacement, labelBox, type LabelBox } from './labels';
 import type { Flight } from '@/physics/escape';
 
 /* ------------------------------------------------------------------ */
@@ -259,10 +260,32 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   ctx.textAlign = 'left';
   ctx.fillStyle = COLORS.inkFaint;
   ctx.fillText('altitude', plotLeft, yTop - 8);
+  // Collected as obstacles rather than merely drawn: the apex annotation below
+  // is placed against them, and it rides on a line whose height is a slider
+  // reading — at a high apex it arrives exactly where these sit.
+  const fixedLabels: LabelBox[] = [labelBox(ctx, 'altitude', plotLeft, yTop - 8, 'left')];
   if (axis.hasLog) {
     ctx.textAlign = 'right';
     ctx.fillStyle = 'rgba(157,180,255,0.7)';
     ctx.fillText('log above · linear below', plotRight, yTop - 8);
+    fixedLabels.push(labelBox(ctx, 'log above · linear below', plotRight, yTop - 8, 'right'));
+  }
+
+  // The status line is drawn last but occupies its space from the start, so its
+  // box is measured here — placing the apex label against where the status text
+  // *will* be is the only way to avoid it.
+  const status: Partial<Record<Phase, { text: string; color: string }>> = {
+    escaped: { text: 'escapes — never returns', color: COLORS.star },
+    offframe: { text: 'apex is above the frame — it still falls back', color: COLORS.ember },
+    landed: { text: 'falls back', color: COLORS.ember },
+  };
+  const shown = status[scene.phase];
+  if (shown) {
+    ctx.save();
+    ctx.font = '600 12px Inter, system-ui, sans-serif';
+    fixedLabels.push(labelBox(ctx, shown.text, cx, yTop + 22, 'center'));
+    ctx.restore();
+    ctx.font = '10px Inter, system-ui, -apple-system, sans-serif';
   }
 
   /* --- apex marker: only when it is actually inside the frame --- */
@@ -281,9 +304,25 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.textAlign = 'right';
+    const apexLabel = `apex ${formatAltitude(scene.apex)}`;
     ctx.fillStyle = COLORS.ember;
-    ctx.fillText(`apex ${formatAltitude(scene.apex)}`, plotRight, y - 10);
+    // Above the line by preference — that is where an annotation on a horizontal
+    // rule belongs. A high apex puts that row on top of the axis note, so the
+    // label drops below its own line instead, and failing that moves in from the
+    // right-hand edge. All three read as belonging to the line they sit on.
+    const spot = firstClearPlacement(
+      ctx,
+      apexLabel,
+      [
+        { x: plotRight, y: y - 10, align: 'right' },
+        { x: plotRight, y: y + 14, align: 'right' },
+        { x: plotLeft, y: y - 10, align: 'left' },
+      ],
+      fixedLabels,
+    );
+    ctx.textAlign = spot.align;
+    ctx.fillText(apexLabel, spot.x, spot.y);
+    ctx.textAlign = 'right';
   }
 
   /* --- trajectory --- */
@@ -333,13 +372,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.fill();
   }
 
-  /* --- status --- */
-  const status: Partial<Record<Phase, { text: string; color: string }>> = {
-    escaped: { text: 'escapes — never returns', color: COLORS.star },
-    offframe: { text: 'apex is above the frame — it still falls back', color: COLORS.ember },
-    landed: { text: 'falls back', color: COLORS.ember },
-  };
-  const shown = status[scene.phase];
+  /* --- status: measured above, drawn here, on top of the trajectory --- */
   if (shown) {
     ctx.textAlign = 'center';
     ctx.font = '600 12px Inter, system-ui, sans-serif';

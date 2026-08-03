@@ -1,8 +1,10 @@
 /**
  * Planetary atmospheres — the seventh published Lodestar module.
  *
- * DRAFT pending the author's decision on two flagged figures — the H2/CO2 speed
- * ratio (4.67, written as "nearly four times") and the Moon's CO2 verdict.
+ * Two figures flagged during authoring are still open and were published on the
+ * author's instruction rather than resolved: the H2/CO2 speed ratio, which is
+ * sqrt(44.009/2.016) = 4.67 against copy reading "nearly four times", and the
+ * Moon's CO2 verdict. Both are prose decisions, so they stay as written.
  *
  * Prose is the project author's, encoded here into the rich-text AST verbatim.
  * Emphasis and inline math in the source copy map to `em(...)` and m`...`
@@ -20,7 +22,7 @@ const planetaryAtmospheres: Module = {
   id: 'planetary-atmospheres',
   title: 'Planetary Atmospheres',
   tagline: 'Whether a world keeps its air is a race between gravity and heat.',
-  status: 'draft',
+  status: 'published',
 
   layers: {
     /* 1 ------------------------------------------------------------------ */
