@@ -529,11 +529,21 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
     const gain = ctx.createGain();
     osc.type = 'sine';
 
-    const { frequencies, gains } = chirpCurves(plan, mc, d);
+    const { times, frequencies, gains } = chirpCurves(plan, mc, d);
 
     const t0 = ctx.currentTime + 0.05;
-    osc.frequency.setValueCurveAtTime(frequencies, t0, plan.duration);
-    gain.gain.setValueCurveAtTime(gains, t0, plan.duration);
+    // A ramp chain, not `setValueCurveAtTime`: a curve's points are spread over
+    // evenly spaced times by the spec, and this schedule's whole point is that
+    // they are not evenly spaced — they follow the sweep, which covers its last
+    // octave in milliseconds. The interpolation is linear either way, so what
+    // reaches the oscillator between two points is unchanged.
+    osc.frequency.setValueAtTime(frequencies[0] ?? 0, t0);
+    gain.gain.setValueAtTime(gains[0] ?? 0, t0);
+    for (let i = 1; i < times.length; i += 1) {
+      const at = t0 + (times[i] ?? 0);
+      osc.frequency.linearRampToValueAtTime(frequencies[i] ?? 0, at);
+      gain.gain.linearRampToValueAtTime(gains[i] ?? 0, at);
+    }
     osc.connect(gain).connect(ctx.destination);
     osc.start(t0);
     osc.stop(t0 + plan.duration);

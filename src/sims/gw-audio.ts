@@ -34,14 +34,38 @@ export const AUDIO_GAIN = 0.22;
 export const CURVE_POINTS = 512;
 
 /**
- * Fraction of the sweep spent ramping in, and again ramping out.
+ * Fraction of the sweep spent ramping in, and again ramping out — the first of
+ * the two rules in `fadeSeconds`, and the one that governs short sweeps.
  *
- * Without it the oscillator starts and stops at full amplitude and the edges
+ * Without a fade the oscillator starts and stops at full amplitude and the edges
  * click — a discontinuity of a tenth of full scale in one sample, which is
  * audible as a tick and measurable as a sample-to-sample delta far above
  * anything a sine at these frequencies can produce.
  */
 export const FADE_FRACTION = 0.03;
+
+/**
+ * Ceiling on that ramp, s.
+ *
+ * A fraction alone scales the wrong way. A fade only has to be long enough that
+ * the edge is not a step, which is a fixed number of milliseconds, but a
+ * fraction makes it proportional to the sweep — so the six-second neutron-star
+ * chirp was fading out over 180 ms, and strain climbs as τ^(-1/4), so those
+ * 180 ms are where almost all of the amplitude climb happens. The fade was
+ * removing the climax it was there to protect.
+ */
+export const FADE_MAX_S = 0.01;
+
+/**
+ * Seconds of ramp at each edge of a sweep of this length.
+ *
+ * The fraction still governs anything short enough that 10 ms would be a
+ * noticeable slice of it — the default binary's quarter-second chirp fades over
+ * 7.6 ms, unchanged — and the ceiling governs everything longer.
+ */
+export function fadeSeconds(duration: number): number {
+  return Math.min(FADE_MAX_S, FADE_FRACTION * duration);
+}
 
 /** Just enough of the drawn window for the sonification to be planned from it. */
 export interface ChirpWindow {
@@ -87,57 +111,126 @@ export function audioPlanFor(mc: number, win: ChirpWindow): AudioPlan {
 }
 
 export interface ChirpCurves {
-  /** Oscillator frequency at each curve point, Hz. */
-  frequencies: Float32Array;
-  /** Gain at each curve point, 0 to `AUDIO_GAIN`. */
-  gains: Float32Array;
+  /** Seconds from the start of the sweep at each point. Strictly increasing. */
+  times: Float64Array;
+  /** Oscillator frequency at each point, Hz. */
+  frequencies: Float64Array;
+  /** Gain at each point, 0 to `AUDIO_GAIN`. */
+  gains: Float64Array;
 }
 
 /**
- * The two automation curves, sampled evenly across the plan's duration.
+ * When the schedule is sampled — the answer to "where do the points go".
  *
- * Both are read by `setValueCurveAtTime`, which interpolates linearly between
- * adjacent points over the duration — so a curve is a piecewise-linear function
- * of time, and `sampleCurve` below is the same reading of it.
+ * Not evenly. A binary's frequency runs as τ^(-3/8), so a sweep spends most of
+ * its length crossing its first octave and covers the last one in milliseconds.
+ * Spacing 512 points evenly in time therefore puts almost all of them where
+ * nothing is happening and leaves one segment to cover the end: on the
+ * neutron-star sweep the final even segment was 11.7 ms long and the true
+ * frequency crossed it from 678 Hz to 1570 Hz, which a straight line between two
+ * points cannot follow. The last cycles played 8.3% sharp.
+ *
+ * So the points are geometric in time-to-merger instead: τ falls by the same
+ * *ratio* at every step. Because f ∝ τ^(-3/8), that is the same thing as
+ * geometric in frequency — every segment spans the same musical interval, which
+ * is the spacing a pitch sweep wants, and the resolution follows the sweep's
+ * steepness automatically. On the neutron stars it is 0.62% per step end to
+ * end (about 11 cents); on the default binary, 0.16%.
+ *
+ * The one exception is the first point. Geometric spacing is sparse where τ is
+ * large, and on a six-second sweep the opening step would be 98 ms — longer than
+ * the fade-in it has to describe, which would silently stretch a 10 ms fade into
+ * a 98 ms one. So point 0 opens the sweep, point 1 closes the fade-in, and the
+ * remaining 510 are geometric from there. A linear fade needs exactly two points
+ * and gets exactly two; the frequency it costs is a 0.06% linear span across an
+ * interval where the sweep is at its flattest.
+ */
+function gridTimes(plan: AudioPlan, fade: number): Float64Array {
+  const times = new Float64Array(CURVE_POINTS);
+  const last = CURVE_POINTS - 1;
+  const tauFade = plan.tauStart - fade;
+  const ratio = plan.tauEnd / tauFade;
+
+  times[0] = 0;
+  for (let i = 1; i < last; i += 1) {
+    times[i] = plan.tauStart - tauFade * ratio ** ((i - 1) / (last - 1));
+  }
+  // Written rather than computed: the sweep has to end exactly where the
+  // oscillator is stopped, and `tauStart - tauEnd` is only `duration` to within
+  // a float.
+  times[last] = plan.duration;
+
+  return times;
+}
+
+/**
+ * The schedule: a time, a frequency and a gain at each of `CURVE_POINTS` points.
+ *
+ * Read as a piecewise-linear function of time — the sim plays it as a chain of
+ * `linearRampToValueAtTime`, and `sampleAt` below is the same reading of it.
+ *
+ * Ramps rather than `setValueCurveAtTime`, which was what this used to be: a
+ * curve's points are pinned to *evenly spaced* times by the spec, so a curve
+ * cannot express the spacing `gridTimes` chooses. The interpolation either way
+ * is linear between neighbouring points, so nothing about how a segment is read
+ * has changed — only where the segments start and end.
  *
  * @param plan what to play, from `audioPlanFor`
  * @param mc   chirp mass, kg
  * @param d    luminosity distance, m
  */
 export function chirpCurves(plan: AudioPlan, mc: number, d: number): ChirpCurves {
-  const frequencies = new Float32Array(CURVE_POINTS);
-  const gains = new Float32Array(CURVE_POINTS);
+  const frequencies = new Float64Array(CURVE_POINTS);
+  const gains = new Float64Array(CURVE_POINTS);
   const peak = strainAmplitude(mc, plan.fEnd, d);
+  const fade = fadeSeconds(plan.duration);
+  const times = gridTimes(plan, fade);
 
   for (let i = 0; i < CURVE_POINTS; i += 1) {
-    const fraction = i / (CURVE_POINTS - 1);
-    const tau = Math.max(plan.tauEnd, plan.tauStart - fraction * plan.duration);
+    const t = times[i] ?? 0;
+    const tau = Math.max(plan.tauEnd, plan.tauStart - t);
     const f = fOfTimeToMerger(mc, tau);
     // Clamped, not transposed: below the audible floor the pitch stops falling
     // rather than being shifted, so every frequency you can hear is the real
     // one. The note beside the button says when that has happened.
     frequencies[i] = Math.min(AUDIBLE_CEILING_HZ, Math.max(AUDIBLE_FLOOR_HZ, f));
-    const fade = Math.min(1, fraction / FADE_FRACTION, (1 - fraction) / FADE_FRACTION);
-    gains[i] = AUDIO_GAIN * (strainAmplitude(mc, f, d) / peak) * Math.max(0, fade);
+    const ramp = Math.min(1, t / fade, (plan.duration - t) / fade);
+    gains[i] = AUDIO_GAIN * (strainAmplitude(mc, f, d) / peak) * Math.max(0, ramp);
   }
 
-  return { frequencies, gains };
+  return { times, frequencies, gains };
 }
 
 /**
- * A curve read at a fraction of its duration, the way Web Audio reads it.
+ * The schedule read at a time, the way Web Audio reads it.
  *
- * The spec has `setValueCurveAtTime` interpolate linearly between the two
- * nearest points, so anything rendering these curves offline has to do the same
- * or it is measuring a different signal from the one that plays.
+ * `linearRampToValueAtTime` interpolates linearly from the previous scheduled
+ * point to this one, so anything rendering this offline has to do the same or it
+ * is measuring a different signal from the one that plays. The points are no
+ * longer evenly spaced, so finding the segment is a search rather than a
+ * multiplication.
+ *
+ * @param times   the schedule's own time grid, seconds, strictly increasing
+ * @param values  frequencies or gains, one per time
+ * @param seconds where to read, seconds from the start of the sweep
  */
-export function sampleCurve(curve: Float32Array, fraction: number): number {
-  const last = curve.length - 1;
-  const position = Math.min(last, Math.max(0, fraction * last));
-  const lower = Math.floor(position);
-  const upper = Math.min(last, lower + 1);
-  const between = position - lower;
-  const a = curve[lower] ?? 0;
-  const b = curve[upper] ?? a;
-  return a + (b - a) * between;
+export function sampleAt(times: Float64Array, values: Float64Array, seconds: number): number {
+  const last = times.length - 1;
+  if (last < 0) return 0;
+  if (!(seconds > (times[0] ?? 0))) return values[0] ?? 0;
+  if (seconds >= (times[last] ?? 0)) return values[last] ?? 0;
+
+  let lower = 0;
+  let upper = last;
+  while (upper - lower > 1) {
+    const middle = (lower + upper) >> 1;
+    if ((times[middle] ?? 0) <= seconds) lower = middle;
+    else upper = middle;
+  }
+
+  const from = times[lower] ?? 0;
+  const span = (times[upper] ?? 0) - from;
+  const a = values[lower] ?? 0;
+  const b = values[upper] ?? a;
+  return span > 0 ? a + (b - a) * ((seconds - from) / span) : a;
 }

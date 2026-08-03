@@ -513,10 +513,14 @@ export function verifyBlackHoleModel(): CheckBlock {
  *      Asserted as an exponent rather than a value — the amplitude formula is
  *      sky- and orientation-averaged, so demanding better than an order of
  *      magnitude would be testing an average against a specific.
- *   3. Time to merger from 30 Hz for a 28 M_☉ chirp mass is a fraction of a
- *      second. LIGO's observed GW150914 chirp lasted about 0.2 s from 35 Hz, so
- *      anything outside 0.1–1 s from 30 Hz means the f^(-8/3) scaling or the
- *      (GM_c/c³) factor is wrong.
+ *   3. Time to merger for a 28 M_☉ chirp mass, against the published length of
+ *      the chirp this is modelled on: LIGO's observed GW150914 signal ran about
+ *      0.2 s from 35 Hz. Asserted at that frequency and against that number,
+ *      0.15–0.3 s, rather than the order-of-magnitude 0.1–1 s from 30 Hz it used
+ *      to be — the point of the check is the f^(-8/3) scaling and the (GM_c/c³)
+ *      factor, and a decade-wide window would pass with either of them wrong by
+ *      a factor of three. One check, not two: the same claim at 30 Hz adds a
+ *      second reading of one number rather than a second thing that can fail.
  *   4. The cutoff frequency against c³/(6^(3/2)πGM) worked out inline. `fCutoff`
  *      reaches its answer through `fGWAtSeparation`, which is where the factor
  *      of two between orbital and wave frequency lives; computing the closed
@@ -569,14 +573,14 @@ export function verifyGravitationalWaveModel(): CheckBlock {
     ),
   );
 
-  /* 3 — time to merger from 30 Hz, asserted as a range. */
-  const tau30 = timeToMerger(mc, 30);
-  const tauOk = tau30 >= 0.1 && tau30 <= 1;
+  /* 3 — time to merger from 35 Hz, against the observed chirp. */
+  const tau35 = timeToMerger(mc, 35);
+  const tauOk = tau35 >= 0.15 && tau35 <= 0.3;
   results.push(
     asserted(
-      `Time to merger from 30 Hz at M_c = ${significant(mc / M_SUN)} M_☉`,
+      `Time to merger from 35 Hz at M_c = ${significant(mc / M_SUN)} M_☉`,
       'τ = (5/256)(πf)^(-8/3)(GM_c/c³)^(-5/3)',
-      `computed ${significant(tau30)} s  ·  accepted 0.1 – 1 s` +
+      `computed ${significant(tau35)} s  ·  accepted 0.15 – 0.3 s` +
         `  ·  the observed GW150914 chirp ran ~0.2 s from 35 Hz`,
       tauOk,
     ),

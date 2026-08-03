@@ -23,16 +23,16 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import { M_SUN } from '@/physics/constants';
-import { chirpMass, fCutoff, fOfTimeToMerger, timeToMerger } from '@/physics/gw';
+import { chirpMass, fCutoff, fOfTimeToMerger, strainAmplitude, timeToMerger } from '@/physics/gw';
 import {
   AUDIBLE_FLOOR_HZ,
   AUDIO_GAIN,
   AUDIO_MAX_S,
   BAND_ENTRY_HZ,
-  FADE_FRACTION,
   audioPlanFor,
   chirpCurves,
-  sampleCurve,
+  fadeSeconds,
+  sampleAt,
   type AudioPlan,
   type ChirpCurves,
 } from '@/sims/gw-audio';
@@ -60,9 +60,9 @@ function render(curves: ChirpCurves, duration: number, sampleRate = SAMPLE_RATE)
   const out = new Float32Array(count);
   let phase = 0;
   for (let i = 0; i < count; i += 1) {
-    const fraction = i / (count - 1);
-    const f = sampleCurve(curves.frequencies, fraction);
-    const g = sampleCurve(curves.gains, fraction);
+    const t = (i / (count - 1)) * duration;
+    const f = sampleAt(curves.times, curves.frequencies, t);
+    const g = sampleAt(curves.times, curves.gains, t);
     out[i] = Math.sin(phase) * g;
     phase += (2 * Math.PI * f) / sampleRate;
   }
@@ -194,19 +194,13 @@ interface Case {
   /**
    * How far the last measured window may sit from the true inspiral frequency.
    *
-   * The automation curve is 512 points across the whole sweep, so its final
-   * segment is duration/511 long, and inside that segment Web Audio interpolates
-   * linearly between the two endpoints. For the default binary that segment is
-   * half a millisecond and the true frequency crosses it from 67 to 68 Hz —
-   * nothing is lost. For the neutron stars the same segment is 11.7 ms and the
-   * true frequency crosses it from 678 Hz to 1570 Hz, which a straight line
-   * cannot follow: the played sweep runs ahead of the physics over those last
-   * few cycles.
-   *
-   * The number is what that costs, measured, and it is asserted rather than
-   * waived so it cannot quietly get worse. Closing it means more curve points,
-   * or points spaced in time-to-merger rather than evenly — a change to what
-   * plays, which is the author's call and not this pass's.
+   * One number for both binaries, which is the point of it. It was 0.1 for the
+   * neutron stars while the schedule's 512 points were spread evenly in time:
+   * the final even segment was 11.7 ms long, the true frequency crossed it from
+   * 678 Hz to 1570 Hz, and a straight line between two points cannot follow
+   * that, so the last cycles played 8.3% sharp. Spacing the points geometrically
+   * in time-to-merger puts the resolution where the sweep is steep and closes
+   * that gap, so the looser tolerance the defect needed is gone.
    */
   endTolerance: number;
 }
@@ -224,7 +218,7 @@ const CASES: Case[] = [
     file: 'chirp-bns-1.4-1.4.wav',
     m1: 1.4 * M_SUN,
     m2: 1.4 * M_SUN,
-    endTolerance: 0.1,
+    endTolerance: 0.05,
   },
 ];
 
@@ -334,7 +328,7 @@ describe.each(CASES)('chirp signal: $name', (subject) => {
     // cent whatever the schedule happens to be.
     for (const { span, hz, what } of edges()) {
       const scheduled = meanBetween(span[0], span[1], (t) =>
-        sampleCurve(curves.frequencies, t / plan.duration),
+        sampleAt(curves.times, curves.frequencies, t),
       );
       expect(
         Math.abs(hz - scheduled) / scheduled,
@@ -357,22 +351,26 @@ describe.each(CASES)('chirp signal: $name', (subject) => {
     }
 
     // And the band itself is the physics band, post-clamp, at both ends.
-    expect(sampleCurve(curves.frequencies, 0)).toBeCloseTo(audible(plan.fStart), 4);
-    expect(sampleCurve(curves.frequencies, 1)).toBeCloseTo(audible(plan.fEnd), 4);
+    expect(sampleAt(curves.times, curves.frequencies, 0)).toBeCloseTo(audible(plan.fStart), 4);
+    expect(sampleAt(curves.times, curves.frequencies, plan.duration)).toBeCloseTo(
+      audible(plan.fEnd),
+      4,
+    );
   });
 
   it('has no discontinuity a sine at these frequencies could not produce', () => {
     // One sample of a sine of amplitude A at frequency f moves at most
     // A·2π·f/sr. The envelope adds its own slope: it climbs from nothing to the
-    // ceiling across FADE_FRACTION of the sweep.
+    // ceiling across the fade, which is now a fixed 10 ms on anything long
+    // enough for that to be the shorter of the two rules.
     // Bounded by the amplitude the signal actually reaches rather than by the
     // gain ceiling: a looser bound would pass a chirp that clicked. A click
     // between two samples of a signal peaking at A is a step of order A, which
     // is tens of times this bound at any frequency the ear can hear.
-    const topFrequency = sampleCurve(curves.frequencies, 1);
+    const topFrequency = sampleAt(curves.times, curves.frequencies, plan.duration);
     const peak = peakOf(buffer);
     const oscillator = (peak * 2 * Math.PI * topFrequency) / SAMPLE_RATE;
-    const envelope = AUDIO_GAIN / (FADE_FRACTION * plan.duration * SAMPLE_RATE);
+    const envelope = AUDIO_GAIN / (fadeSeconds(plan.duration) * SAMPLE_RATE);
     const bound = (oscillator + envelope) * 1.05;
 
     const step = maxStep(buffer);
@@ -385,8 +383,11 @@ describe.each(CASES)('chirp signal: $name', (subject) => {
     // magnitude above the bound rather than a few per cent.
     expect(buffer[0], 'the first sample is not silent — that is a click').toBe(0);
     expect(Math.abs(buffer[buffer.length - 1]!), 'the last sample is not silent').toBeLessThan(1e-6);
-    expect(sampleCurve(curves.gains, 0), 'the envelope does not open at zero').toBe(0);
-    expect(sampleCurve(curves.gains, 1), 'the envelope does not close at zero').toBe(0);
+    expect(sampleAt(curves.times, curves.gains, 0), 'the envelope does not open at zero').toBe(0);
+    expect(
+      sampleAt(curves.times, curves.gains, plan.duration),
+      'the envelope does not close at zero',
+    ).toBe(0);
   });
 
   it('stays inside its level ceiling and never clips', () => {
@@ -399,15 +400,41 @@ describe.each(CASES)('chirp signal: $name', (subject) => {
       `peak ${peak.toFixed(4)} against a gain ceiling of ${AUDIO_GAIN}`,
     ).toBeLessThanOrEqual(AUDIO_GAIN + 1e-6);
 
-    // How close a chirp gets to that ceiling is not the same for every binary,
-    // and the gap is real rather than slack in the test. The gain curve tracks
-    // strain, which climbs as f^(2/3) and so does most of its climbing in the
-    // last few per cent of the sweep — where the fade-out is already pulling it
-    // down. A long sweep therefore peaks well below a short one: the neutron
-    // stars reach about 29% of the ceiling against the default's 92%, and their
-    // loudest moment is the one the fade is cutting. Bounded here so it is
-    // recorded and cannot drift further without the suite noticing.
-    expect(peak, 'the chirp barely rises above silence').toBeGreaterThan(AUDIO_GAIN * 0.25);
+    /* How close a chirp gets to that ceiling is not a number to pick. The gain
+       curve is the strain curve with the fades multiplied into it, strain climbs
+       as τ^(-1/4), and the fade-out is a linear ramp over the last `fade`
+       seconds — so the product is highest at the moment the fade-out begins and
+       the reachable peak is
+
+           peak / AUDIO_GAIN = (τ_end / (τ_end + fade))^(1/4)
+
+       which is 95% of the ceiling for the default binary and 59% for the
+       neutron stars, whose cutoff is 1.4 ms from merger so that even a 10 ms
+       fade reaches back to eight times the time still to run. Reaching 90%
+       there would take a 0.7 ms ramp — a single cycle at 1570 Hz.
+
+       Asserted from both sides rather than as a floor. A floor only says the
+       chirp is audible; this says the envelope is exactly the one the strain
+       law and the fade imply, and it fails if either drifts in either
+       direction. Built from `fOfTimeToMerger` and `strainAmplitude` rather than
+       from the curve, so it is not the schedule checked against itself. */
+    const fade = fadeSeconds(plan.duration);
+    const reachable =
+      AUDIO_GAIN *
+      (strainAmplitude(mc, fOfTimeToMerger(mc, plan.tauEnd + fade), DISTANCE) /
+        strainAmplitude(mc, plan.fEnd, DISTANCE));
+
+    expect(
+      peak,
+      `peak ${peak.toFixed(4)} is above the envelope's own maximum ${reachable.toFixed(4)}`,
+    ).toBeLessThanOrEqual(reachable * 1.001);
+    // The remaining gap is crest alignment and nothing else: |sin| has to land
+    // near the top of a maximum that is broad on the scale of a cycle, and does.
+    expect(
+      peak,
+      `peak ${peak.toFixed(4)} sits ${((100 * (reachable - peak)) / reachable).toFixed(1)}% under ` +
+        `the envelope maximum ${reachable.toFixed(4)} — more than crest alignment can account for`,
+    ).toBeGreaterThan(reachable * 0.95);
   });
 });
 
@@ -438,10 +465,19 @@ describe('chirp signal: measured', () => {
       const physics = spans.map(([a, b]) => meanBetween(a, b, trueAt));
       const step = maxStep(buffer);
       const peak = peakOf(buffer);
+      const fade = fadeSeconds(plan.duration);
       const bound =
-        ((peak * 2 * Math.PI * sampleCurve(curves.frequencies, 1)) / SAMPLE_RATE +
-          AUDIO_GAIN / (FADE_FRACTION * plan.duration * SAMPLE_RATE)) *
+        ((peak * 2 * Math.PI * sampleAt(curves.times, curves.frequencies, plan.duration)) /
+          SAMPLE_RATE +
+          AUDIO_GAIN / (fade * SAMPLE_RATE)) *
         1.05;
+      const reachable =
+        AUDIO_GAIN *
+        (strainAmplitude(mc, fOfTimeToMerger(mc, plan.tauEnd + fade), DISTANCE) /
+          strainAmplitude(mc, plan.fEnd, DISTANCE));
+      // The schedule's frequency step, which the geometric spacing holds
+      // constant from end to end — the number that replaced "duration / 511".
+      const stepRatio = curves.frequencies[2]! / curves.frequencies[1]!;
       const err = (i: number): string =>
         `${((100 * Math.abs(measured[i]! - physics[i]!)) / physics[i]!).toFixed(2)}%`;
 
@@ -453,7 +489,10 @@ describe('chirp signal: measured', () => {
           `    physics mean  ${physics[0]!.toFixed(2)} Hz -> ${physics[1]!.toFixed(2)} Hz   (error ${err(0)} -> ${err(1)})`,
           `    duration      rendered ${(buffer.length / SAMPLE_RATE).toFixed(4)} s against scheduled ${plan.duration.toFixed(4)} s`,
           `    max step      ${step.value.toFixed(6)} against a bound of ${bound.toFixed(6)} (${((100 * step.value) / bound).toFixed(1)}% of it)`,
-          `    peak          ${peak.toFixed(4)} against a ceiling of ${AUDIO_GAIN} (${((100 * peak) / AUDIO_GAIN).toFixed(0)}%)`,
+          `    peak          ${peak.toFixed(4)} against a ceiling of ${AUDIO_GAIN} (${((100 * peak) / AUDIO_GAIN).toFixed(0)}%)` +
+            `, and ${((100 * peak) / reachable).toFixed(1)}% of the ${reachable.toFixed(4)} the envelope allows`,
+          `    fade          ${(1000 * fade).toFixed(2)} ms each edge` +
+            `  ·  step spacing ${((100 * (stepRatio - 1)).toFixed(2))}% in frequency`,
           `    file          ${OUT_DIR}/${subject.file}`,
         ].join('\n'),
       );
@@ -500,11 +539,14 @@ describe('chirp signal: the two binaries against each other', () => {
   it('puts the lighter binary higher at the top of its sweep', () => {
     // f_cut ∝ 1/M: the lighter pair merges at a higher frequency, and the whole
     // point of the sonification is that both land inside human hearing.
-    const top = (state: Rendered): number => sampleCurve(state.curves.frequencies, 1);
+    const top = (state: Rendered): number =>
+      sampleAt(state.curves.times, state.curves.frequencies, state.plan.duration);
     expect(top(light)).toBeGreaterThan(top(heavy));
     for (const state of [light, heavy]) {
       expect(top(state), 'the sweep ends outside human hearing').toBeLessThan(20_000);
-      expect(sampleCurve(state.curves.frequencies, 0)).toBeGreaterThanOrEqual(AUDIBLE_FLOOR_HZ);
+      expect(sampleAt(state.curves.times, state.curves.frequencies, 0)).toBeGreaterThanOrEqual(
+        AUDIBLE_FLOOR_HZ,
+      );
     }
   });
 });
