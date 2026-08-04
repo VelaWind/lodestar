@@ -139,17 +139,22 @@ export function routeHeadsPlugin(): Plugin {
       const outDir = 'dist';
       const shell = readFileSync(join(outDir, 'index.html'), 'utf8');
 
+      let written = 0;
       for (const route of routes) {
-        const target = join(outDir, route.file);
-        mkdirSync(dirname(target), { recursive: true });
-        writeFileSync(target, headFor(shell, route));
+        const html = headFor(shell, route);
+        for (const file of route.files) {
+          const target = join(outDir, file);
+          mkdirSync(dirname(target), { recursive: true });
+          writeFileSync(target, html);
+          written += 1;
+        }
       }
 
       writeFileSync(join(outDir, 'sitemap.xml'), sitemapXml(routes));
 
       // eslint-disable-next-line no-console
       console.log(
-        `\nroute heads: ${routes.length} shells + sitemap.xml ` +
+        `\nroute heads: ${routes.length} routes, ${written} files + sitemap.xml ` +
           `(${routes.map((r) => r.path || '/').join(', ')})`,
       );
     },

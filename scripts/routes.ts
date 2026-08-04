@@ -20,17 +20,24 @@ export interface RouteHead {
   /** Site-root-absolute path, no trailing slash. The root is `''`. */
   path: string;
   /**
-   * Where the file goes under `dist/`, relative.
+   * Where the file goes under `dist/`. Both forms, and both are load-bearing.
    *
-   * Flat `about.html`, not `about/index.html`. Both work on Vercel, but only
-   * the flat form also works under `vite preview`: sirv resolves an
-   * extensionless request against its `extensions: ['html']` list before
-   * falling back to the SPA shell, and resolves a directory index only for a
-   * path that already ends in a slash. With directories, `/about` served the
-   * front page locally and the right page in production — the worst possible
-   * split, since the gate that would catch a regression is the local one.
+   * `about.html` is what `vite preview` resolves: sirv tries its
+   * `extensions: ['html']` list for an extensionless request before falling
+   * back to the SPA shell, but resolves a directory index only for a path that
+   * already ends in a slash.
+   *
+   * `about/index.html` is what Vercel resolves, because serving a directory's
+   * index is universal static behaviour while stripping `.html` is not — that
+   * needs `cleanUrls`, and `cleanUrls` turned out to take the catch-all rewrite
+   * out of the routing, so every address that matched no file stopped reaching
+   * the app at all and returned a plain-text 404 instead of the not-found page.
+   * The production curl matrix caught it; the fix is to need neither setting.
+   *
+   * Two copies of an 8 kB shell, and they carry the same canonical, so the
+   * duplicate address resolves to one page of record either way.
    */
-  file: string;
+  files: string[];
   title: string;
   description: string;
   canonical: string;
@@ -62,7 +69,7 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
   return [
     {
       path: '',
-      file: 'index.html',
+      files: ['index.html'],
       // The root's title and description are authored in `index.html` and left
       // exactly as they are; it appears here so it gets a canonical like every
       // other route, and so the sitemap and the tests have one list to read.
@@ -72,14 +79,14 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
     },
     {
       path: '/about',
-      file: 'about.html',
+      files: ['about.html', 'about/index.html'],
       title: 'How Lodestar is built · Lodestar',
       description: ABOUT_DESCRIPTION,
       canonical: absoluteUrl('/about'),
     },
     ...published.map((module) => ({
       path: `/m/${module.id}`,
-      file: `m/${module.id}.html`,
+      files: [`m/${module.id}.html`, `m/${module.id}/index.html`],
       // Matches the convention `ModulePage` already sets at runtime, so the
       // served title and the hydrated one are the same string.
       title: `${module.title} · Lodestar`,
