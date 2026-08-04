@@ -22,7 +22,7 @@ import {
   R_EARTH,
   R_SUN,
 } from '@/physics/constants';
-import { em, m, p, prose } from '../rich';
+import { em, m, p, prose, term } from '../rich';
 
 /* ------------------------------------------------------------------ */
 /* Cited inputs                                                        */
@@ -241,11 +241,33 @@ const scaleOfTheUniverse: Module = {
         },
       ],
       approximations: [
-        'The illustrations are icons, not scale drawings. A proton is a filled circle and a galaxy is an ellipse because the point of each rung is its size, not its appearance; nothing about the shapes carries information.',
-        'Two anchors are never shown to relative scale. They cannot be: at 63,000 to one, drawing a proton beside a hydrogen atom at the same magnification would put the proton below a single pixel. The ratio lives in the zoom transition between rungs, not in any one picture.',
-        'Quantum objects have no sharp edge. The proton figure is twice a charge radius and the atom figure is twice an orbital expectation value; both are conventions about where a distribution has thinned out enough to stop counting, not measurements of a boundary.',
-        'The observable-universe figure is a comoving diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
-        'The galaxy’s edge is a convention. A disc that thins out gradually has no diameter until someone picks a surface-brightness cut, and published values for the Milky Way range over roughly a factor of two.',
+        prose(
+          p(
+            'The illustrations are icons, not scale drawings. A proton is a filled circle and a galaxy is an ellipse because the point of each rung is its size, not its appearance; nothing about the shapes carries information.',
+          ),
+        ),
+        prose(
+          p(
+            'Two anchors are never shown to relative scale. They cannot be: at 63,000 to one, drawing a proton beside a hydrogen atom at the same magnification would put the proton below a single pixel. The ratio lives in the zoom transition between rungs, not in any one picture.',
+          ),
+        ),
+        prose(
+          p(
+            'Quantum objects have no sharp edge. The proton figure is twice a charge radius and the atom figure is twice an orbital expectation value; both are conventions about where a distribution has thinned out enough to stop counting, not measurements of a boundary.',
+          ),
+        ),
+        prose(
+          p(
+            'The observable-universe figure is a ',
+            term('comoving', 'comoving'),
+            ' diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
+          ),
+        ),
+        prose(
+          p(
+            'The galaxy’s edge is a convention. A disc that thins out gradually has no diameter until someone picks a surface-brightness cut, and published values for the Milky Way range over roughly a factor of two.',
+          ),
+        ),
       ],
     },
 
@@ -259,7 +281,9 @@ const scaleOfTheUniverse: Module = {
           'forty-two of them, and the sizes on it deserve their fine print.',
         ),
         p(
-          'At the bottom, “size” itself goes soft. A proton has no edge; the 1.7 femtometre ',
+          'At the bottom, “size” itself goes soft. A proton has no edge; the 1.7 ',
+          term('femtometre', 'femtometre'),
+          ' ',
           'figure is twice its ',
           em('charge radius'),
           ', the statistical spread of its electric charge. An atom is even fuzzier: quoted ',
@@ -372,9 +396,12 @@ const scaleOfTheUniverse: Module = {
         ),
         p(
           'The bottom of the ladder has its own recent story. The proton’s charge radius was, ',
-          'for a decade, the subject of a genuine crisis: measurements using muonic hydrogen in ',
+          'for a decade, the subject of a genuine crisis: measurements using ',
+          term('muonic hydrogen', 'muonic-hydrogen'),
+          ' in ',
           '2010 came in four percent smaller than the accepted value, a gap of over five ',
-          'standard deviations, spawning speculation about new physics. It resolved ',
+          term('standard deviations', 'standard-deviation'),
+          ', spawning speculation about new physics. It resolved ',
           'undramatically: re-measurements of ordinary hydrogen converged on the smaller figure, ',
           'and CODATA adopted 0.841 femtometres in 2018. The episode is a working lesson in what ',
           '“the size of the proton” means: not a property read off an object, but the output of ',

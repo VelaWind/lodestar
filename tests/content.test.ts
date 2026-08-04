@@ -12,11 +12,13 @@
  * test failing is the prompt to think about it rather than a verdict.
  */
 import { describe, expect, it } from 'vitest';
+import { glossary } from '@/content/glossary';
 import { moduleList, modules, simKeys } from '@/content/registry';
 import type { Module } from '@/content/types';
 import { LOG_ARROW_STEP, LOG_PAGE_STEP, sliderBounds } from '@/lib/format';
 import { titleFromSlug } from '@/lib/titles';
 import { plainText } from '@/lib/plainText';
+import { termMarksOf } from './helpers/termNodes';
 
 const published = moduleList.filter((m) => m.status === 'published');
 
@@ -41,7 +43,7 @@ function readableText(module: Module): string {
     plainText(layers.real.body),
     plainText(layers.deeper.body),
     layers.play.caption ? plainText(layers.play.caption) : '',
-    ...layers.play.approximations,
+    ...layers.play.approximations.map(plainText),
     ...(layers.math.intro ? [plainText(layers.math.intro)] : []),
     ...layers.math.equations.map((e) => (e.note ? plainText(e.note) : '')),
     ...layers.connections.links.map((l) => l.reason),
@@ -141,6 +143,93 @@ describe('what readers can reach', () => {
   });
 });
 
+/**
+ * The glossary and the marks that reach it.
+ *
+ * Two failure modes, both silent on the page and both cheap to catch here. A
+ * `ref` that resolves to nothing renders as bare text — the reader never learns
+ * the tooltip was meant to be there, and neither does anyone reviewing the diff.
+ * An entry nobody marks is a definition written and then orphaned by a later
+ * rewrite of the prose it belonged to; it costs nothing at runtime, which is
+ * exactly why it would sit there forever.
+ *
+ * The duplicate check is the third: a term marked twice in one module gives a
+ * reader the same tooltip twice in one page, and the second is noise. The rule
+ * is one mark per id per module, and the *first* occurrence in reading order —
+ * which is why `termMarksOf` walks the layers in the order they render.
+ */
+describe('the glossary', () => {
+  const marks = published.flatMap((module) => termMarksOf(module).map((mark) => ({ module, mark })));
+
+  it('marks terms at all', () => {
+    // A walker that returned nothing would make every check below vacuous.
+    expect(marks.length, 'no glossary terms are marked anywhere').toBeGreaterThan(40);
+  });
+
+  it('resolves every marked ref to a glossary entry', () => {
+    for (const { module, mark } of marks) {
+      expect(
+        glossary[mark.ref],
+        `${mark.path}: "${mark.text}" points at "${mark.ref}", which is not in the glossary` +
+          ` (module ${module.id})`,
+      ).toBeDefined();
+    }
+  });
+
+  it('leaves no glossary entry unmarked', () => {
+    const used = new Set(marks.map(({ mark }) => mark.ref));
+    const orphans = Object.keys(glossary).filter((id) => !used.has(id));
+    expect(orphans, 'glossary entries nothing links to — mark them or delete them').toEqual([]);
+  });
+
+  it('marks each ref at most once per module', () => {
+    for (const module of published) {
+      const seen = new Map<string, string>();
+      for (const mark of termMarksOf(module)) {
+        const first = seen.get(mark.ref);
+        expect(
+          first,
+          `${module.id}: "${mark.ref}" is marked twice — at ${first} and again at ${mark.path}`,
+        ).toBeUndefined();
+        seen.set(mark.ref, mark.path);
+      }
+    }
+  });
+
+  it('keeps every term node a leaf', () => {
+    for (const { mark } of marks) {
+      // The type says so; this says so at runtime, because a term that grew
+      // children would put a link or an equation inside a <button>.
+      expect(Object.keys(mark.node).sort(), `${mark.path}: term node has extra keys`).toEqual([
+        'k',
+        'ref',
+        'text',
+      ]);
+      expect(mark.node, `${mark.path}: term node has children`).not.toHaveProperty('children');
+      expect(typeof mark.node.text, `${mark.path}: term text is not a string`).toBe('string');
+      expect(mark.node.text.trim().length, `${mark.path}: term with no visible text`).toBeGreaterThan(
+        0,
+      );
+    }
+  });
+
+  it('gives every entry a title and a definition', () => {
+    for (const [id, entry] of Object.entries(glossary)) {
+      expect(id, `"${id}" is not a kebab-case id`).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(entry.title.trim().length, `${id}: no title`).toBeGreaterThan(0);
+      expect(entry.body.trim().length, `${id}: no body`).toBeGreaterThan(0);
+      // A tooltip is a small panel, and one that needs scrolling has stopped
+      // being a tooltip. Two sentences is the brief.
+      expect(entry.body.length, `${id}: definition is too long for a tooltip`).toBeLessThan(220);
+      // "Post-Newtonian" and "N-body" are hyphenated words, not slugs — what
+      // must never head the panel is the id itself, unchanged.
+      expect(entry.title, `${id}: title is the raw slug, not a display form`).not.toMatch(
+        /^[a-z0-9]+(-[a-z0-9]+)+$/,
+      );
+    }
+  });
+});
+
 describe('titleFromSlug', () => {
   it('title-cases a slug and leaves the joining words alone', () => {
     expect(titleFromSlug('cosmic-distance-ladder')).toBe('Cosmic Distance Ladder');
@@ -212,7 +301,13 @@ for (const module of published) {
     it('discloses at least one approximation', () => {
       const items = module.layers.play.approximations;
       expect(items.length).toBeGreaterThan(0);
-      for (const item of items) expect(item.trim().length).toBeGreaterThan(0);
+      for (const [i, item] of items.entries()) {
+        // Rich text now, so "not empty" means blocks that flatten to words —
+        // an item authored as `prose()` would satisfy a length check on the
+        // array and render as an empty bullet.
+        expect(item.length, `approximation ${i} has no blocks`).toBeGreaterThan(0);
+        expect(plainText(item).trim().length, `approximation ${i} is empty`).toBeGreaterThan(0);
+      }
     });
 
     it('has 1 to 3 equations', () => {

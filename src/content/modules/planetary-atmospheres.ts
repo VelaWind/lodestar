@@ -31,7 +31,7 @@
  */
 import type { Module } from '../types';
 import { M_EARTH, R_EARTH } from '@/physics/constants';
-import { em, m, p, prose } from '../rich';
+import { em, m, p, prose, term } from '../rich';
 
 const planetaryAtmospheres: Module = {
   id: 'planetary-atmospheres',
@@ -150,11 +150,37 @@ const planetaryAtmospheres: Module = {
         },
       ],
       approximations: [
-        'The verdict is a rule of thumb, not a flux. Real Jeans escape is a rate computed at the exobase (the altitude where a molecule stops colliding on its way out) and it depends *exponentially* on the escape parameter, so a planet does not flip from keeping a gas to losing it at a threshold; it loses it a thousand times faster per unit of λ. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.',
-        'One temperature stands for the whole exosphere. A real one varies with latitude, with local time, and by a factor of three over the solar cycle: Earth’s thermosphere runs about 500 K at solar minimum and 1500 K at maximum, so the same planet sits at different places on this chart depending on the decade.',
-        'Only thermal escape is modelled. The mechanisms that actually stripped Mars are missing: hydrodynamic outflow, in which an escaping light gas drags heavier ones with it; solar-wind stripping of an unmagnetised upper atmosphere; sputtering; and impact erosion. That is why a body can fail this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept (see Going deeper).',
-        'Each gas is judged on its own. In a real atmosphere the species interact: hydrogen escaping from a hydrogen-rich upper atmosphere carries heavier molecules along with it, and photochemistry converts one species into another; water is not lost as water, it is split, and the hydrogen leaves.',
-        'The planet’s radius is treated as the escape radius. The exobase sits above the surface (several hundred kilometres up on Earth) where gravity is slightly weaker, so a real escape velocity at the escape altitude is a few percent lower than the surface figure used here.',
+        prose(
+          p(
+            'The verdict is a rule of thumb, not a flux. Real Jeans escape is a rate computed at the exobase (the altitude where a molecule stops colliding on its way out) and it depends *exponentially* on the ',
+            term('escape parameter', 'escape-parameter'),
+            ', so a planet does not flip from keeping a gas to losing it at a threshold; it loses it a thousand times faster per unit of λ. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.',
+          ),
+        ),
+        prose(
+          p(
+            'One temperature stands for the whole exosphere. A real one varies with latitude, with local time, and by a factor of three over the solar cycle: Earth’s thermosphere runs about 500 K at solar minimum and 1500 K at maximum, so the same planet sits at different places on this chart depending on the decade.',
+          ),
+        ),
+        prose(
+          p(
+            'Only thermal escape is modelled. The mechanisms that actually stripped Mars are missing: hydrodynamic outflow, in which an escaping light gas drags heavier ones with it; solar-wind stripping of an unmagnetised upper atmosphere; ',
+            term('sputtering', 'sputtering'),
+            '; and impact erosion. That is why a body can fail this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept (see Going deeper).',
+          ),
+        ),
+        prose(
+          p(
+            'Each gas is judged on its own. In a real atmosphere the species interact: hydrogen escaping from a hydrogen-rich upper atmosphere carries heavier molecules along with it, and ',
+            term('photochemistry', 'photochemistry'),
+            ' converts one species into another; water is not lost as water, it is split, and the hydrogen leaves.',
+          ),
+        ),
+        prose(
+          p(
+            'The planet’s radius is treated as the escape radius. The exobase sits above the surface (several hundred kilometres up on Earth) where gravity is slightly weaker, so a real escape velocity at the escape altitude is a few percent lower than the surface figure used here.',
+          ),
+        ),
       ],
     },
 
@@ -165,7 +191,7 @@ const planetaryAtmospheres: Module = {
           'Gas molecules at temperature ',
           m`T`,
           ' move with a spread of speeds — the ',
-          em('Maxwell–Boltzmann distribution'),
+          em(term('Maxwell–Boltzmann distribution', 'maxwell-boltzmann')),
           ', the curve in the simulation — and the spread’s location depends on two things: ',
           'temperature and the molecule’s mass. Hotter means faster; lighter means faster. A ',
           'hydrogen molecule at a given temperature typically moves about four and a half times as fast as a ',
@@ -301,7 +327,8 @@ const planetaryAtmospheres: Module = {
           em('solar-wind stripping'),
           ', the mechanism MAVEN measured at Mars. And large impacts can blast off atmosphere ',
           'wholesale. Mars is the compound case: too small to hold interior heat, it lost its ',
-          'magnetic dynamo, and the wind plus its weak gravity did the rest. The evidence is ',
+          term('magnetic dynamo', 'magnetic-dynamo'),
+          ', and the wind plus its weak gravity did the rest. The evidence is ',
           'written in isotopes, where the heavy hydrogen left behind outnumbers its expected ',
           'share several ',
           'times over, the residue of oceans’ worth of departed water.',
@@ -312,7 +339,9 @@ const planetaryAtmospheres: Module = {
           ': plot worlds by escape velocity against the stellar radiation they endure, and the ',
           'airless ones separate from the air-bearing ones along a rough empirical line. This ',
           'module’s sliders move a world across that plane. The live question is which side of ',
-          'the line the galaxy’s most common temperate rocky worlds — those around red dwarfs, ',
+          'the line the galaxy’s most common temperate rocky worlds — those around ',
+          term('red dwarfs', 'red-dwarf'),
+          ', ',
           'whose flaring youth batters young atmospheres — actually fall on; the early JWST ',
           'verdicts on the TRAPPIST-1 planets lean airless, and the census has just begun.',
         ),

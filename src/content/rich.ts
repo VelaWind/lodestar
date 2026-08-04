@@ -61,5 +61,33 @@ export const m = (strings: TemplateStringsArray, ...subs: unknown[]): Inline => 
   tex: String.raw(strings, ...subs),
 });
 
+/**
+ * A glossary term: the words as the page says them, and the entry they point at.
+ *
+ * `text` is authored verbatim — "solar masses", "Mpc", "N-body problem" — so
+ * marking a term never rewrites the sentence around it. `ref` defaults to a
+ * kebab-cased `text`, which is right for the plain cases (`term('ringdown')`)
+ * and wrong the moment the surface form is a plural, an abbreviation or a
+ * variant spelling, which is most of them: pass the id explicitly there.
+ *
+ * The id is checked against `content/glossary.ts` by `tests/content.test.ts`
+ * rather than by tsc — a `Record<string, …>` keyed by a union would make adding
+ * a glossary entry a two-file edit, and the test failure is as loud.
+ */
+export const term = (text: string, ref?: string): Inline => ({
+  k: 'term',
+  text,
+  ref: ref ?? kebab(text),
+});
+
+/** "Innermost Stable Orbit" → "innermost-stable-orbit". Diacritics survive. */
+function kebab(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[’']/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 /** Convenience for the common single-paragraph body. */
 export const prose = (...blocks: Block[]): RichText => blocks;

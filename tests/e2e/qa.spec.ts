@@ -2049,6 +2049,286 @@ test('behaviour: the registry publishes seven modules and leaks no drafts', asyn
 });
 
 /* ------------------------------------------------------------------ */
+/* Glossary tooltips                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The term tooltip, once per viewport, end to end.
+ *
+ * Three things this can see that nothing else can. The panel is portalled to
+ * `document.body` and positioned `fixed` precisely because both of its
+ * ancestors clip — the layer accordion and the approximations disclosure are
+ * `overflow-hidden`, and an in-tree panel would be sliced off at whichever edge
+ * it crossed — so the assertion that matters is not "the panel exists" but "the
+ * panel's box is inside the viewport and outside the clipping box". Second, the
+ * trigger must not read as a link: links here are star-blue and solid-
+ * underlined, and a dotted underline in the prose colour is the whole of the
+ * distinction. Third, axe with a panel open, which the per-page audit cannot
+ * reach because nothing is open when it runs.
+ */
+
+/** Tabs until focus lands on a glossary trigger, and says which one. */
+async function tabToTerm(page: Page, limit = 60): Promise<string> {
+  for (let i = 0; i < limit; i += 1) {
+    await page.keyboard.press('Tab');
+    const ref = await page.evaluate(
+      () => (document.activeElement as HTMLElement | null)?.dataset.glossaryTerm ?? null,
+    );
+    if (ref) return ref;
+  }
+  throw new Error(`no glossary trigger reached in ${limit} tab presses`);
+}
+
+test('glossary: a term opens, reads, and closes', async ({ page }) => {
+  const w = watch(page);
+  const mobile = test.info().project.name.startsWith('mobile');
+
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  // Layer 3's caption is open at the default tier, and carries one mark.
+  const trigger = page.locator('[data-glossary-term="isco"]').first();
+  await expect(trigger, 'no ISCO term marked in the black-holes caption').toHaveCount(1);
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  // A button, and visibly not a link.
+  const looks = await trigger.evaluate((el) => {
+    const style = getComputedStyle(el);
+    const link = document.querySelector('#main a[href]');
+    return {
+      tag: el.tagName,
+      href: el.getAttribute('href'),
+      style: style.textDecorationStyle,
+      line: style.textDecorationLine,
+      linkStyle: link ? getComputedStyle(link).textDecorationStyle : null,
+    };
+  });
+  expect(looks.tag, 'a term trigger must be a real button').toBe('BUTTON');
+  expect(looks.href, 'a term must not be a link').toBeNull();
+  expect(looks.line).toContain('underline');
+  expect(looks.style, 'a term is dotted-underlined; a link is solid').toBe('dotted');
+  if (looks.linkStyle) {
+    expect(looks.linkStyle, 'links should stay solid-underlined').toBe('solid');
+  }
+
+  /* --- opened by keyboard ------------------------------------------ */
+
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first glossary trigger in tab order should be the caption term').toBe('isco');
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+
+  const panel = page.locator('[data-glossary-panel="isco"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('ISCO');
+  await expect(panel).toContainText('steadily orbit a black hole');
+
+  // aria-controls has to name the thing that appeared, and the panel has to be
+  // named by the word that opened it.
+  const wiring = await page.evaluate(() => {
+    const button = document.querySelector('[data-glossary-term="isco"]') as HTMLElement;
+    const controls = button.getAttribute('aria-controls') ?? '';
+    const target = document.getElementById(controls);
+    const labelledBy = target?.getAttribute('aria-labelledby') ?? '';
+    return {
+      resolves: !!target,
+      inBody: target?.parentElement === document.body,
+      label: document.getElementById(labelledBy)?.textContent?.trim() ?? null,
+      role: target?.getAttribute('role'),
+    };
+  });
+  expect(wiring.resolves, 'aria-controls points at nothing').toBe(true);
+  expect(wiring.inBody, 'the panel should be portalled out of the clipping ancestors').toBe(true);
+  expect(wiring.label, 'the panel should be labelled by the term').toBe('innermost stable orbit');
+  expect(wiring.role).toBe('note');
+
+  // Inside the viewport, on all four sides. A panel clipped by the accordion or
+  // hanging off a 390px screen is the failure the portal exists to prevent.
+  //
+  // Measured with `getBoundingClientRect` rather than Playwright's
+  // `boundingBox()`: the latter reports document coordinates, so on a page
+  // scrolled 400px down a perfectly placed fixed panel reads as 400px past the
+  // bottom of the window. The first run of this test said exactly that.
+  //
+  // And measured after the page has stopped moving. Tab scrolled the term into
+  // view, `scroll-behavior: smooth` means that scroll is still running, and the
+  // panel follows it — so a reading taken mid-flight is of a position neither
+  // the code nor the reader ever settles on.
+  await settle(page, 700);
+  const box = await panel.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return {
+      top: r.top,
+      left: r.left,
+      bottom: r.bottom,
+      right: r.right,
+      width: r.width,
+      height: r.height,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  expect(box.width, 'the panel has no width').toBeGreaterThan(100);
+  expect(box.height, 'the panel has no height').toBeGreaterThan(20);
+  expect(box.left, 'panel off the left edge').toBeGreaterThanOrEqual(0);
+  expect(box.top, 'panel off the top edge').toBeGreaterThanOrEqual(0);
+  expect(box.right, 'panel off the right edge').toBeLessThanOrEqual(box.viewportWidth);
+  expect(box.bottom, 'panel off the bottom edge').toBeLessThanOrEqual(box.viewportHeight);
+  await assertNoOverflow(page, 'black-holes with a tooltip open');
+
+  /* --- read by axe ------------------------------------------------- */
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.flatMap((v) => v.nodes.map((n) => `${v.impact} ${v.id}: ${n.failureSummary ?? n.html}`)),
+    'open tooltip: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, `20-glossary-${mobile ? 'mobile' : 'desktop'}`);
+
+  /* --- closed by Escape -------------------------------------------- */
+
+  await page.keyboard.press('Escape');
+  await expect(panel, 'Escape should dismiss the panel').toHaveCount(0);
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(trigger, 'Escape should return focus to the word').toBeFocused();
+
+  /* --- tap toggles, on the viewport that has a finger --------------- */
+
+  if (mobile) {
+    await trigger.scrollIntoViewIfNeeded();
+    const spot = await trigger.boundingBox();
+    expect(spot, 'the term has no tappable box').not.toBeNull();
+    const tap = async (): Promise<void> => {
+      await page.touchscreen.tap(spot!.x + spot!.width / 2, spot!.y + spot!.height / 2);
+    };
+
+    await tap();
+    await expect(panel, 'a tap should open the definition').toBeVisible();
+    await tap();
+    await expect(panel, 'a second tap should close it').toHaveCount(0);
+
+    // And a tap anywhere else dismisses it rather than leaving it stranded.
+    await tap();
+    await expect(panel).toBeVisible();
+    await page.touchscreen.tap(5, 5);
+    await expect(panel, 'a tap outside should dismiss the panel').toHaveCount(0);
+    await assertNoOverflow(page, 'black-holes after tapping a term');
+  }
+
+  assertClean(w, 'glossary tooltip');
+});
+
+/**
+ * Two terms, one panel.
+ *
+ * Both of these live inside the approximations disclosure — a second
+ * `overflow-hidden` box nested in the first — which makes this the strictest
+ * test of the portal, and the only place two triggers sit close enough together
+ * for "one open at a time" to be a visible property rather than a claim.
+ */
+test('glossary: only one definition is open at a time', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  await page.getByRole('button', { name: /^approximations/i }).click();
+  await settle(page, 500);
+
+  const kerr = page.locator('[data-glossary-term="kerr"]');
+  const disc = page.locator('[data-glossary-term="accretion-disc"]');
+  await expect(kerr, 'no Kerr term in the approximations').toHaveCount(1);
+  await expect(disc, 'no accretion-disc term in the approximations').toHaveCount(1);
+
+  /**
+   * Both terms parked in the clear first, then clicked where they sit.
+   *
+   * `locator.click()` scrolls its target into view, and a scroll is a
+   * dismissal — so a test that let it scroll would be watching the first panel
+   * close because the page moved, not because the second term claimed it, and
+   * would keep passing if "one at a time" were removed entirely.
+   *
+   * "In the clear" is stricter than "in the viewport", and the difference cost
+   * a debugging round: scrolled to put the second term mid-screen, the first
+   * sat 28px from the top of the window — inside it, and underneath the sticky
+   * header, so the click went to a depth radio. So the scroll leaves room for
+   * the header, and both points are hit-tested before either is clicked.
+   */
+  await page.evaluate(() => {
+    const first = document.querySelector('[data-glossary-term="kerr"]')!;
+    const header = document.querySelector('header');
+    const headroom = (header?.getBoundingClientRect().height ?? 0) + 32;
+    window.scrollBy({ top: first.getBoundingClientRect().top - headroom, behavior: 'auto' });
+  });
+  await settle(page, 600);
+
+  const centres = await page.evaluate(() => {
+    const at = (ref: string) => {
+      const el = document.querySelector(`[data-glossary-term="${ref}"]`)!;
+      const r = el.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+      return { x, y, hits: document.elementFromPoint(x, y) === el };
+    };
+    return { kerr: at('kerr'), disc: at('accretion-disc') };
+  });
+  expect(centres.kerr.hits, 'the Kerr term is covered by something').toBe(true);
+  expect(centres.disc.hits, 'the accretion-disc term is covered by something').toBe(true);
+
+  await page.mouse.click(centres.kerr.x, centres.kerr.y);
+  await expect(page.locator('[data-glossary-panel="kerr"]')).toBeVisible();
+
+  await page.mouse.click(centres.disc.x, centres.disc.y);
+  await expect(
+    page.locator('[data-glossary-panel="kerr"]'),
+    'opening a second term should close the first',
+  ).toHaveCount(0);
+  await expect(page.locator('[data-glossary-panel="accretion-disc"]')).toBeVisible();
+  await expect(kerr).toHaveAttribute('aria-expanded', 'false');
+  await expect(disc).toHaveAttribute('aria-expanded', 'true');
+
+  // The definition escapes both clipping boxes: it is wider or taller than the
+  // 18rem sidebar it was triggered from would allow, and fully on screen.
+  const escaped = await page.evaluate(() => {
+    const panel = document.querySelector('[data-glossary-panel="accretion-disc"]') as HTMLElement;
+    const rect = panel.getBoundingClientRect();
+    return {
+      visible: rect.width > 0 && rect.height > 0,
+      inViewport:
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.right <= window.innerWidth,
+      position: getComputedStyle(panel).position,
+    };
+  });
+  expect(escaped.visible, 'the panel was clipped to nothing').toBe(true);
+  expect(escaped.inViewport, 'the panel is not fully on screen').toBe(true);
+  expect(escaped.position).toBe('fixed');
+
+  // Scrolling dismisses rather than leaving a panel behind where its word was.
+  // Driven from the page rather than with `mouse.wheel`, which does nothing on
+  // the touch project — the behaviour under test is the scroll, not the input
+  // device that caused one.
+  await settle(page, 400);
+  await page.evaluate(() => window.scrollBy(0, 240));
+  await expect(
+    page.locator('[data-glossary-panel="accretion-disc"]'),
+    'a scroll should dismiss the panel',
+  ).toHaveCount(0);
+
+  await assertNoOverflow(page, 'black-holes approximations with a tooltip');
+  assertClean(w, 'glossary one-at-a-time');
+});
+
+/* ------------------------------------------------------------------ */
 /* Reduced motion                                                      */
 /* ------------------------------------------------------------------ */
 

@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { AU, M_SUN } from '@/physics/constants';
-import { em, m, p, prose } from '../rich';
+import { em, m, p, prose, term } from '../rich';
 
 const keplerOrbits: Module = {
   id: 'kepler-orbits',
@@ -118,13 +118,47 @@ const keplerOrbits: Module = {
         },
       ],
       approximations: [
-        'Two bodies and nothing else. No other planet pulls on this one, so the orbit closes exactly and repeats forever. Real multi-planet systems perturb each other continuously: it is those perturbations that turned up Neptune, and that make the Solar System’s long-term evolution a numerical question rather than a formula.',
-        'The planet is a test particle: it has no mass of its own. A real pair orbits their common barycentre, and both move. The error is of order m/M: negligible for a planet around a star, not negligible for Jupiter and the Sun (the Sun’s wobble about the barycentre is what most exoplanet detections actually measure), and outright wrong for a binary star.',
-        'Both bodies are point masses. Nothing here has a radius, so the smallest orbits the sliders allow would lie inside a real star, and no tidal distortion or oblateness is modelled.',
-        'Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 arcseconds per century for Mercury, the discrepancy that made GR famous. The orbit drawn here never precesses.',
-        'The ellipse is fixed in space and traced repeatedly. With no perturbations and no relativity, periapsis stays put; the animation loops the same closed path indefinitely.',
-        'Playback is time-accelerated, and by a different factor for every orbit: one full period is compressed to a fixed number of seconds of wall time, so the acceleration factor is shown on the readout and changes as you drag. Relative timing within an orbit is exact: the planet genuinely dawdles near apoapsis, which is the second law and not a rendering artifact.',
-        'The orbit is scaled to fit the frame and drawn face-on, looking straight down on the orbital plane. Distances within one orbit are therefore comparable to each other but not across slider settings: the ellipse is redrawn to the same size whether it is 0.007 AU or 67 AU across. Real orbits are also inclined to the line of sight, which is why an observed orbit is a projection of the one shown here.',
+        prose(
+          p(
+            'Two bodies and nothing else. No other planet pulls on this one, so the orbit closes exactly and repeats forever. Real multi-planet systems perturb each other continuously: it is those perturbations that turned up Neptune, and that make the Solar System’s long-term evolution a numerical question rather than a formula.',
+          ),
+        ),
+        prose(
+          p(
+            'The planet is a ',
+            term('test particle', 'test-particle'),
+            ': it has no mass of its own. A real pair orbits their common ',
+            term('barycentre', 'barycentre'),
+            ', and both move. The error is of order m/M: negligible for a planet around a star, not negligible for Jupiter and the Sun (the Sun’s wobble about the barycentre is what most exoplanet detections actually measure), and outright wrong for a binary star.',
+          ),
+        ),
+        prose(
+          p(
+            'Both bodies are point masses. Nothing here has a radius, so the smallest orbits the sliders allow would lie inside a real star, and no tidal distortion or oblateness is modelled.',
+          ),
+        ),
+        prose(
+          p(
+            'Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 ',
+            term('arcseconds', 'arcsecond'),
+            ' per century for Mercury, the discrepancy that made GR famous. The orbit drawn here never precesses.',
+          ),
+        ),
+        prose(
+          p(
+            'The ellipse is fixed in space and traced repeatedly. With no perturbations and no relativity, periapsis stays put; the animation loops the same closed path indefinitely.',
+          ),
+        ),
+        prose(
+          p(
+            'Playback is time-accelerated, and by a different factor for every orbit: one full period is compressed to a fixed number of seconds of wall time, so the acceleration factor is shown on the readout and changes as you drag. Relative timing within an orbit is exact: the planet genuinely dawdles near apoapsis, which is the second law and not a rendering artifact.',
+          ),
+        ),
+        prose(
+          p(
+            'The orbit is scaled to fit the frame and drawn face-on, looking straight down on the orbital plane. Distances within one orbit are therefore comparable to each other but not across slider settings: the ellipse is redrawn to the same size whether it is 0.007 AU or 67 AU across. Real orbits are also inclined to the line of sight, which is why an observed orbit is a projection of the one shown here.',
+          ),
+        ),
       ],
     },
 
@@ -256,7 +290,9 @@ const keplerOrbits: Module = {
         p(
           'All three laws follow from ',
           m`F = -GMm/r^2`,
-          ' in a few moves. A central force exerts no torque, so specific angular momentum ',
+          ' in a few moves. A central force exerts no torque, so specific ',
+          term('angular momentum', 'angular-momentum'),
+          ' ',
           m`h = r^2\dot{\nu}`,
           ' is conserved, and since the areal rate is ',
           m`dA/dt = h/2`,
@@ -283,14 +319,17 @@ const keplerOrbits: Module = {
           'display precision, far above modern measurement precision. The system is two bodies: ',
           'real systems are not, and the deviations are the signal; perturbations of Uranus’s ',
           'orbit located Neptune on paper before any telescope found it. Over long spans the ',
-          'N-body problem turns chaotic: Laskar’s integrations put the inner solar system’s ',
+          term('N-body problem', 'n-body'),
+          ' turns chaotic: Laskar’s integrations put the inner solar system’s ',
           'predictability horizon near five million years, after which trajectories — not the ',
           'planets themselves — dissolve into uncertainty. The bodies are points: real oblateness ',
           'makes satellite orbits precess, which sun-synchronous spacecraft exploit deliberately. ',
           'And gravity is Newtonian: Mercury’s perihelion creeps forward 43 arcseconds per ',
           'century beyond what Newton can book-keep, the first confirmed prediction of general ',
           'relativity. In 2020 the GRAVITY collaboration watched the star S2 trace the same ',
-          'relativistic precession around the galaxy’s central black hole, at four million solar ',
+          'relativistic ',
+          term('precession', 'precession'),
+          ' around the galaxy’s central black hole, at four million solar ',
           'masses instead of one.',
         ),
         p(

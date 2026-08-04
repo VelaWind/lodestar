@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { M_SUN } from '@/physics/constants';
-import { em, m, p, prose } from '../rich';
+import { em, m, p, prose, term } from '../rich';
 
 const blackHoles: Module = {
   id: 'black-holes',
@@ -62,7 +62,8 @@ const blackHoles: Module = {
         p(
           'One slider: mass. Sweep it from collapsed stars to the giants in galactic centres and ',
           'watch the anatomy rescale: the horizon, the ring where light itself can orbit, the ',
-          'innermost stable orbit. Then check the readout that says whether arriving would kill ',
+          term('innermost stable orbit', 'isco'),
+          '. Then check the readout that says whether arriving would kill ',
           'you.',
         ),
       ),
@@ -87,13 +88,45 @@ const blackHoles: Module = {
         },
       ],
       approximations: [
-        'The hole does not rotate. Real ones do, often near the maximum allowed, and spin is not a small correction: for a maximally rotating Kerr hole the prograde innermost stable orbit falls from 3 r_s to 0.5 r_s and the prograde photon orbit with it, the horizon itself becomes oblate, and the energy released by matter falling in rises from 5.7% of its rest mass to 42%. Everything drawn here is the non-rotating limit.',
-        'The hole carries no charge. This one costs almost nothing: any net charge attracts the opposite sign out of the surrounding plasma and neutralises quickly, so astrophysical holes are uncharged to excellent accuracy.',
-        'There is no accretion disc, no jet, and nothing else nearby. A real hole of any of these masses is drawn as an isolated vacuum solution here, and everything that makes one visible — the disc, the ring of lensed light, the outflow — is absent.',
-        'The picture is a plan view of coordinate radii, not a photograph. r_s, 1.5 r_s and 3 r_s are Schwarzschild radial coordinates plotted as if space were flat; the geometry they describe is curved, so the drawn separations are labels rather than distances a ruler would measure. Nor is this what a camera would see: the hole’s own lensing would wrap the far side of the disc into view and swell the dark patch from the horizon’s r_s to a shadow of radius √27 GM/c² ≈ 2.6 r_s, about 5.2 r_s across.',
-        'The tidal number is a static, radial estimate. It is the head-to-foot stretch on a rigid 1.7 m person falling feet-first, evaluated exactly at the horizon, with the person short compared with r_s. The coefficient is exact for Schwarzschild (the relativistic answer for radial separations is the Newtonian one) but the body is not rigid, does not stay radial, and the figure says nothing about what happens on the way down.',
-        'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: including other massless species and the particles a shrinking hole becomes hot enough to emit shortens it by a factor of a few. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
-        'The two panels carry two different scales, each labelled on the canvas. The three radii are drawn to one scale within the geometry panel; the horizon and the comparison object share a separate scale in the size panel. A single scale across both would collapse one panel or the other into a dot.',
+        prose(
+          p(
+            'The hole does not rotate. Real ones do, often near the maximum allowed, and spin is not a small correction: for a maximally rotating ',
+            term('Kerr', 'kerr'),
+            ' hole the prograde innermost stable orbit falls from 3 r_s to 0.5 r_s and the prograde photon orbit with it, the horizon itself becomes oblate, and the energy released by matter falling in rises from 5.7% of its rest mass to 42%. Everything drawn here is the non-rotating limit.',
+          ),
+        ),
+        prose(
+          p(
+            'The hole carries no charge. This one costs almost nothing: any net charge attracts the opposite sign out of the surrounding plasma and neutralises quickly, so astrophysical holes are uncharged to excellent accuracy.',
+          ),
+        ),
+        prose(
+          p(
+            'There is no ',
+            term('accretion disc', 'accretion-disc'),
+            ', no jet, and nothing else nearby. A real hole of any of these masses is drawn as an isolated vacuum solution here, and everything that makes one visible — the disc, the ring of lensed light, the outflow — is absent.',
+          ),
+        ),
+        prose(
+          p(
+            'The picture is a plan view of coordinate radii, not a photograph. r_s, 1.5 r_s and 3 r_s are Schwarzschild radial coordinates plotted as if space were flat; the geometry they describe is curved, so the drawn separations are labels rather than distances a ruler would measure. Nor is this what a camera would see: the hole’s own lensing would wrap the far side of the disc into view and swell the dark patch from the horizon’s r_s to a shadow of radius √27 GM/c² ≈ 2.6 r_s, about 5.2 r_s across.',
+          ),
+        ),
+        prose(
+          p(
+            'The tidal number is a static, radial estimate. It is the head-to-foot stretch on a rigid 1.7 m person falling feet-first, evaluated exactly at the horizon, with the person short compared with r_s. The coefficient is exact for Schwarzschild (the relativistic answer for radial separations is the Newtonian one) but the body is not rigid, does not stay radial, and the figure says nothing about what happens on the way down.',
+          ),
+        ),
+        prose(
+          p(
+            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: including other massless species and the particles a shrinking hole becomes hot enough to emit shortens it by a factor of a few. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
+          ),
+        ),
+        prose(
+          p(
+            'The two panels carry two different scales, each labelled on the canvas. The three radii are drawn to one scale within the geometry panel; the horizon and the comparison object share a separate scale in the size panel. A single scale across both would collapse one panel or the other into a dot.',
+          ),
+        ),
       ],
     },
 
@@ -106,10 +139,12 @@ const blackHoles: Module = {
           ' is a region where gravity has won outright, wrapped in an ',
           em('event horizon'),
           ': the surface of no return, with radius named the ',
-          em('Schwarzschild radius'),
+          em(term('Schwarzschild radius', 'schwarzschild-radius')),
           ' after the physicist who found it within weeks of Einstein publishing general ',
           'relativity. There is no material surface there, and it is startlingly small: the ',
-          'Sun’s works out to three kilometres, and the ten-solar-mass hole the slider starts on ',
+          'Sun’s works out to three kilometres, and the ten-',
+          term('solar-mass', 'solar-mass'),
+          ' hole the slider starts on ',
           'spans a city, 29.5 kilometres in radius. Outside it sit two more landmarks. ',
           'At one and a half horizon radii lies the ',
           em('photon sphere'),
@@ -126,7 +161,9 @@ const blackHoles: Module = {
           ' holes sit in galactic centres: our own galaxy’s, Sagittarius A*, weighs 4.15 million ',
           'Suns (its horizon would sit nine Suns deep) and M87’s giant reaches 6.5 billion, a ',
           'horizon four times wider than Neptune’s whole distance from our Sun. Both have been ',
-          'photographed by the Event Horizon Telescope: the images show a bright ring of hot ',
+          'photographed by the ',
+          term('Event Horizon Telescope', 'eht'),
+          ': the images show a bright ring of hot ',
           'orbiting gas around a central shadow roughly two and a half times the horizon’s width.',
         ),
         p(
@@ -137,7 +174,7 @@ const blackHoles: Module = {
         ),
         p(
           'What would kill you is more particular: ',
-          em('tidal force'),
+          em(term('tidal force', 'tidal-force')),
           ', the difference between the pull on your head and the pull on your feet. Near a ',
           'stellar-mass hole that difference reaches millions of g far outside the horizon: ',
           'lethal long before arrival. At Sagittarius A*’s horizon it is a ten-thousandth of a g: ',
@@ -205,7 +242,9 @@ const blackHoles: Module = {
       body: prose(
         p(
           'The horizon carries no local physics. Spacetime there is smooth, curvature is modest ',
-          'for large holes, and an infalling observer crosses in finite proper time having ',
+          'for large holes, and an infalling observer crosses in finite ',
+          term('proper time', 'proper-time'),
+          ' having ',
           'measured nothing special: the horizon is a globally defined surface (the boundary of ',
           'what can ever send light to infinity), not a place with properties. The ',
           'escape-velocity framing from this module’s sibling gets the radius right while ',
@@ -223,7 +262,7 @@ const blackHoles: Module = {
           ' to ',
           m`0.5 r_s`,
           ', photon orbits split by direction, and an ',
-          em('ergosphere'),
+          em(term('ergosphere', 'ergosphere')),
           ' appears from which orbital energy can be extracted. Accretion-disc spectra and the ',
           'EHT ring shapes are read against Kerr, not Schwarzschild, templates.',
         ),

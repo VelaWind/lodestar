@@ -21,6 +21,15 @@ function fromInline(node: Inline): string {
     // honest fallback: it is what the author wrote, unrendered, not a guess.
     case 'math':
       return node.tex;
+    // A term is a leaf holding exactly the words the page shows, so flattening
+    // it is the whole of the work. The definition is chrome, not prose, and has
+    // no business in a teaser or a placeholder scan.
+    case 'term':
+      return node.text;
+    default: {
+      const _exhaustive: never = node;
+      return _exhaustive;
+    }
   }
 }
 
@@ -37,6 +46,10 @@ function fromBlock(node: Block): string {
       return node.children.map(fromBlock).join(' ');
     case 'mathBlock':
       return node.tex;
+    default: {
+      const _exhaustive: never = node;
+      return _exhaustive;
+    }
   }
 }
 

@@ -98,9 +98,9 @@ export type ParamUpdate = number | ((current: number) => number);
  *    a malformed link here doesn't build.
  *
  * The cost is verbosity when authoring, which `rich.ts` helpers absorb.
- * Deliberately minimal: emphasis, code, links, math. Add node kinds when a
- * module actually needs them — every kind added is a case the renderer must
- * handle forever.
+ * Deliberately minimal: emphasis, code, links, math, glossary terms. Add node
+ * kinds when a module actually needs them — every kind added is a case the
+ * renderer must handle forever.
  */
 export type Inline =
   | string
@@ -109,7 +109,24 @@ export type Inline =
   | { k: 'code'; text: string }
   | { k: 'link'; href: string; children: Inline[] }
   /** Inline KaTeX. `tex` is the body only — no `$` delimiters. */
-  | { k: 'math'; tex: string };
+  | { k: 'math'; tex: string }
+  /**
+   * A word or phrase the reader can ask about, resolved against
+   * `content/glossary.ts` at render time.
+   *
+   * Deliberately a *leaf*: `text` is the visible words, not children. A term
+   * cannot contain emphasis, math or another term. The reason is the tooltip —
+   * the trigger is a `<button>`, and a button holding arbitrary inline content
+   * is how you end up with a link, an equation or a second trigger nested
+   * inside an interactive element. It also keeps the invariant every walker
+   * wants: one node, one string, no descent. Emphasis around a term still
+   * works, because the term goes *inside* the `em`, never the other way round.
+   *
+   * `ref` is a glossary id rather than the text itself, so the same definition
+   * can be reached from "solar masses", "solar-mass" and "Solar Mass" without
+   * the glossary carrying three copies of it.
+   */
+  | { k: 'term'; text: string; ref: string };
 
 export type Block =
   | { k: 'p'; children: Inline[] }
@@ -159,8 +176,15 @@ export interface SimLayer {
    * sim so the simplification is visible rather than implied — required, not
    * optional, because every sim makes approximations and pretending otherwise
    * is the failure mode this app exists to avoid.
+   *
+   * One `RichText` per item, not one string: these are the densest technical
+   * prose on the page — an expert reads them first — and they were the one
+   * place a reader could meet `ergosphere`, `sputtering` or `post-Newtonian`
+   * with no way to ask what it meant, because a plain string cannot carry a
+   * `term` node. Same AST as every other layer, so the same renderer and the
+   * same walkers apply.
    */
-  approximations: string[];
+  approximations: RichText[];
   /** Optional framing above the sim: what to try, what to notice. */
   caption?: RichText;
 }

@@ -5,6 +5,7 @@
  */
 import { Fragment, type ReactNode } from 'react';
 import type { Block, Inline, RichText as RichTextAst } from '@/content/types';
+import { GlossaryTerm } from './GlossaryTerm';
 import { Tex } from './Tex';
 
 function inline(node: Inline, key: number): ReactNode {
@@ -42,6 +43,17 @@ function inline(node: Inline, key: number): ReactNode {
       );
     case 'math':
       return <Tex key={key} tex={node.tex} />;
+    case 'term':
+      return <GlossaryTerm key={key} text={node.text} termRef={node.ref} />;
+    default: {
+      // Not decoration. The `term` node was added to `Inline` before this
+      // switch handled it, and without a guard the only symptom would have been
+      // a word silently missing from a paragraph — the renderer returning
+      // `undefined` for a case it had never heard of. tsc now refuses the
+      // commit instead.
+      const _exhaustive: never = node;
+      return _exhaustive;
+    }
   }
 }
 
@@ -112,6 +124,10 @@ function block(node: Block, key: number): ReactNode {
           )}
         </figure>
       );
+    default: {
+      const _exhaustive: never = node;
+      return _exhaustive;
+    }
   }
 }
 

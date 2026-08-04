@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { AU, M_SUN, R_EARTH, R_JUPITER, R_SUN } from '@/physics/constants';
-import { em, m, p, prose } from '../rich';
+import { em, m, p, prose, term } from '../rich';
 
 const exoplanets: Module = {
   id: 'exoplanets',
@@ -150,13 +150,49 @@ const exoplanets: Module = {
         },
       ],
       approximations: [
-        'The stellar disc is uniformly bright. It is not: a star is limb-darkened, dimmer at the edge than at the centre, because looking at the limb you see higher and cooler layers. So a real light curve has no corners: the planet blocks less light as it first crosses the dim limb, and the shoulders of this trapezoid are rounded off. Fitting that curvature is how limb-darkening coefficients are measured, and getting it wrong biases the planet radius by a few percent.',
-        'The transit is central: the planet crosses the middle of the disc, impact parameter zero. Almost none are. A real transit is a chord, and a shorter one: a planet crossing near the limb takes less time and gives a V-shaped curve with barely any flat bottom. Duration and impact parameter are degenerate in a single light curve, which is why a measured planet radius always comes with a fitted impact parameter beside it.',
-        'The orbit is circular and edge-on. Eccentricity changes the transit duration through the planet’s speed at conjunction (a planet transiting near periapsis crosses faster) and the "chance of alignment" readout is the geometric probability for a circular orbit only.',
-        'The planet is opaque, spherical and contributes no light of its own. Real hot Jupiters emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are oblate enough to matter.',
-        'One planet, one star. Multi-planet systems perturb each other, and those perturbations shift transit times by minutes: transit timing variations, which is how several planets have been found without ever seeing their own transit.',
-        'The frame shows the transit and half again either side, not the whole orbit. At the default settings the transit is 3% of the period, and for an Earth around a Sun it is 0.15%: an axis spanning one orbit would draw the dip a pixel wide. What is inside the frame is to scale (the planet against the star, and its speed across the disc); the axis simply stops at the edges of the event.',
-        'Depth is capped at total. The sliders reach a planet larger than its star, which is a real configuration for a 2 R_J planet around a 0.1 R_☉ dwarf; there the "transit" is a total eclipse and the flux goes to zero rather than the formula’s negative.',
+        prose(
+          p(
+            'The stellar disc is uniformly bright. It is not: a star is limb-darkened, dimmer at the edge than at the centre, because looking at the ',
+            term('limb', 'limb'),
+            ' you see higher and cooler layers. So a real ',
+            term('light curve', 'light-curve'),
+            ' has no corners: the planet blocks less light as it first crosses the dim limb, and the shoulders of this trapezoid are rounded off. Fitting that curvature is how limb-darkening coefficients are measured, and getting it wrong biases the planet radius by a few percent.',
+          ),
+        ),
+        prose(
+          p(
+            'The transit is central: the planet crosses the middle of the disc, ',
+            term('impact parameter', 'impact-parameter'),
+            ' zero. Almost none are. A real transit is a chord, and a shorter one: a planet crossing near the limb takes less time and gives a V-shaped curve with barely any flat bottom. Duration and impact parameter are degenerate in a single light curve, which is why a measured planet radius always comes with a fitted impact parameter beside it.',
+          ),
+        ),
+        prose(
+          p(
+            'The orbit is circular and edge-on. Eccentricity changes the transit duration through the planet’s speed at conjunction (a planet transiting near periapsis crosses faster) and the "chance of alignment" readout is the geometric probability for a circular orbit only.',
+          ),
+        ),
+        prose(
+          p(
+            'The planet is opaque, spherical and contributes no light of its own. Real ',
+            term('hot Jupiters', 'hot-jupiter'),
+            ' emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are oblate enough to matter.',
+          ),
+        ),
+        prose(
+          p(
+            'One planet, one star. Multi-planet systems perturb each other, and those perturbations shift transit times by minutes: transit timing variations, which is how several planets have been found without ever seeing their own transit.',
+          ),
+        ),
+        prose(
+          p(
+            'The frame shows the transit and half again either side, not the whole orbit. At the default settings the transit is 3% of the period, and for an Earth around a Sun it is 0.15%: an axis spanning one orbit would draw the dip a pixel wide. What is inside the frame is to scale (the planet against the star, and its speed across the disc); the axis simply stops at the edges of the event.',
+          ),
+        ),
+        prose(
+          p(
+            'Depth is capped at total. The sliders reach a planet larger than its star, which is a real configuration for a 2 R_J planet around a 0.1 R_☉ dwarf; there the "transit" is a total eclipse and the flux goes to zero rather than the formula’s negative.',
+          ),
+        ),
       ],
     },
 
@@ -284,7 +320,9 @@ const exoplanets: Module = {
           'module’s trapezoid is the zeroth-order sketch of a subtler profile.',
         ),
         p(
-          'The dip also has to earn belief. A background eclipsing binary blended into the same ',
+          'The dip also has to earn belief. A background ',
+          term('eclipsing binary', 'eclipsing-binary'),
+          ' blended into the same ',
           'pixel fakes a transit convincingly, and early surveys drowned in such impostors: ',
           'Kepler’s candidates outnumber its confirmed planets still. Vetting is statistical ',
           'and multi-instrument: the odd-even depth test (a binary’s alternating eclipses ',

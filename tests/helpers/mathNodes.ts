@@ -34,6 +34,18 @@ function fromInline(node: Inline, out: string[]): void {
       return;
     case 'code':
       return;
+    // A leaf, and carrying no LaTeX by construction: there is nothing to
+    // descend into and nothing to collect.
+    case 'term':
+      return;
+    default: {
+      // A new inline kind must not slip past this walker the way `term` could
+      // have. Without the guard a kind carrying math would simply be skipped,
+      // and the snapshot would go quiet rather than red — which is the exact
+      // shape of the defect this file was written for.
+      const _exhaustive: never = node;
+      return _exhaustive;
+    }
   }
 }
 
@@ -56,6 +68,10 @@ function fromBlock(node: Block, out: string[]): void {
       // authoring path, same exposure to the bug above.
       out.push(node.tex);
       return;
+    default: {
+      const _exhaustive: never = node;
+      return _exhaustive;
+    }
   }
 }
 
@@ -74,6 +90,13 @@ export function mathNodesOf(module: Module): MathNode[] {
   collect(layers.hook.body, `${module.id}/hook`, out);
   collect(layers.intuition.body, `${module.id}/intuition`, out);
   collect(layers.play.caption, `${module.id}/play.caption`, out);
+  // The approximations became rich text when glossary terms needed to reach
+  // them. Nothing there carries LaTeX today, so this adds no snapshot entries —
+  // it is here so that the day one does, it is covered like every other layer
+  // rather than being the one authoring path nothing looks at.
+  layers.play.approximations.forEach((item, i) => {
+    collect(item, `${module.id}/play.approximations[${i}]`, out);
+  });
   collect(layers.real.body, `${module.id}/real`, out);
   collect(layers.math.intro, `${module.id}/math.intro`, out);
   for (const equation of layers.math.equations) {

@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { M_EARTH, R_EARTH } from '@/physics/constants';
-import { em, m, p, prose } from '../rich';
+import { em, m, p, prose, term } from '../rich';
 
 const escapeVelocity: Module = {
   id: 'escape-velocity',
@@ -106,14 +106,52 @@ const escapeVelocity: Module = {
         },
       ],
       approximations: [
-        'No atmosphere: no drag, no heating. This is the largest omission near the surface: a real projectile leaving the ground at 11 km/s does not reach space, it burns up like a meteor in reverse. The vacuum result is only honest above roughly 100 km, which is why real launches are powered rather than ballistic.',
-        'The body is perfectly spherical and does not rotate. Sphericity costs almost nothing (a uniform sphere pulls exactly as a point mass would, so the formula is exact for one) but rotation does: launching eastward from Earth’s equator is worth about 0.47 km/s of free speed, and the equatorial bulge shifts surface gravity by roughly 0.5%.',
-        'The launch is purely radial: straight up, along the line to the centre. Escape speed itself is direction-independent for an unpowered object, so the threshold shown is correct for any angle that misses the surface; what changes is the path. An angled launch traces a conic section, not the vertical line drawn here.',
-        'Newtonian gravity only. Above roughly 0.3c the relativistic result departs from this one. At the Schwarzschild radius the Newtonian formula returns exactly c, which is a coincidence of the algebra rather than a derivation (see Going deeper).',
-        'Two bodies, one of them negligible. The projectile does not recoil the planet, and nothing else pulls on it. Escaping Earth is not escaping the Sun: that needs a further 12.3 km/s from Earth’s orbital position.',
-        'Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 40 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the apex, where it is slowest.',
-        'The altitude axis is linear near the surface and logarithmic above, with the switchover marked on the axis. Without it, a 100 km hop and a 10⁶ km escape cannot share a frame. Vertical distances are therefore not comparable across the boundary: the trajectory’s shape is distorted, though every altitude it reads off is exact.',
-        'Trajectories are integrated with semi-implicit Euler at a fixed timestep, not solved in closed form. The scheme is symplectic, so energy error stays bounded rather than drifting, and the apex it produces agrees with the exact energy-conservation result to well under 1%. The apex altitude reported in the readout is the closed-form value, not the integrated one.',
+        prose(
+          p(
+            'No atmosphere: no drag, no heating. This is the largest omission near the surface: a real projectile leaving the ground at 11 km/s does not reach space, it burns up like a meteor in reverse. The vacuum result is only honest above roughly 100 km, which is why real launches are powered rather than ',
+            term('ballistic', 'ballistic'),
+            '.',
+          ),
+        ),
+        prose(
+          p(
+            'The body is perfectly spherical and does not rotate. Sphericity costs almost nothing (a uniform sphere pulls exactly as a point mass would, so the formula is exact for one) but rotation does: launching eastward from Earth’s equator is worth about 0.47 km/s of free speed, and the equatorial bulge shifts surface gravity by roughly 0.5%.',
+          ),
+        ),
+        prose(
+          p(
+            'The launch is purely radial: straight up, along the line to the centre. Escape speed itself is direction-independent for an unpowered object, so the threshold shown is correct for any angle that misses the surface; what changes is the path. An angled launch traces a conic section, not the vertical line drawn here.',
+          ),
+        ),
+        prose(
+          p(
+            'Newtonian gravity only. Above roughly 0.3c the relativistic result departs from this one. At the ',
+            term('Schwarzschild radius', 'schwarzschild-radius'),
+            ' the Newtonian formula returns exactly c, which is a coincidence of the algebra rather than a derivation (see Going deeper).',
+          ),
+        ),
+        prose(
+          p(
+            'Two bodies, one of them negligible. The projectile does not recoil the planet, and nothing else pulls on it. Escaping Earth is not escaping the Sun: that needs a further 12.3 km/s from Earth’s orbital position.',
+          ),
+        ),
+        prose(
+          p(
+            'Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 40 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the ',
+            term('apex', 'apex'),
+            ', where it is slowest.',
+          ),
+        ),
+        prose(
+          p(
+            'The altitude axis is linear near the surface and logarithmic above, with the switchover marked on the axis. Without it, a 100 km hop and a 10⁶ km escape cannot share a frame. Vertical distances are therefore not comparable across the boundary: the trajectory’s shape is distorted, though every altitude it reads off is exact.',
+          ),
+        ),
+        prose(
+          p(
+            'Trajectories are integrated with semi-implicit Euler at a fixed timestep, not solved in closed form. The scheme is symplectic, so energy error stays bounded rather than drifting, and the apex it produces agrees with the exact energy-conservation result to well under 1%. The apex altitude reported in the readout is the closed-form value, not the integrated one.',
+          ),
+        ),
       ],
     },
 
@@ -144,7 +182,8 @@ const escapeVelocity: Module = {
           'of Manhattan every two seconds. The Moon’s is 2.4 km/s, Mars sits at 5.0, Jupiter ',
           'demands 59.5, and the Sun 618. None of these were measured by launching anything. A ',
           'body’s mass comes from watching how things orbit it, its radius from imaging and ',
-          'occultations, and escape velocity follows from the two.',
+          term('occultations', 'occultation'),
+          ', and escape velocity follows from the two.',
         ),
         p(
           'The most common misconception about it: that rockets must reach escape velocity. They ',
@@ -248,7 +287,9 @@ const escapeVelocity: Module = {
           'velocity” is a serviceable rule of thumb for leaving from orbit.',
         ),
         p(
-          'The assumptions, stated as assumptions. Spherical symmetry, so the shell theorem ',
+          'The assumptions, stated as assumptions. Spherical symmetry, so the ',
+          term('shell theorem', 'shell-theorem'),
+          ' ',
           'reduces the body to a point mass, degraded for oblate or irregular bodies at low ',
           'altitude. An isolated two-body system: in reality, escaping Earth’s well only delivers ',
           'you into the Sun’s; leaving the Solar System from Earth’s surface takes about 16.6 km/s ',
@@ -270,9 +311,13 @@ const escapeVelocity: Module = {
           'the horizon there are no outgoing paths at all.',
         ),
         p(
-          'Atmospheric escape, by contrast, is a live research field. The mechanisms — Jeans ',
-          'escape from the thermal tail, hydrodynamic outflow, solar-wind stripping and ',
-          'sputtering — operate at rates MAVEN has now measured at Mars: roughly 100 grams per ',
+          'Atmospheric escape, by contrast, is a live research field. The mechanisms — ',
+          term('Jeans escape', 'jeans-escape'),
+          ' from the thermal tail, ',
+          term('hydrodynamic outflow', 'hydrodynamic-escape'),
+          ', solar-wind stripping and ',
+          term('sputtering', 'sputtering'),
+          ' — operate at rates MAVEN has now measured at Mars: roughly 100 grams per ',
           'second lost to solar-wind stripping today, a few kilograms per second in total, ',
           'spiking during solar storms, and integrating to most of Mars’s original atmosphere ',
           'over four billion years. Zahnle and Catling’s “cosmic shoreline” — an empirical line ',

@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { M_SUN, PARSEC } from '@/physics/constants';
-import { em, m, p, prose } from '../rich';
+import { em, m, p, prose, term } from '../rich';
 
 /** Megaparsec in metres — the natural unit for a source at this distance. */
 const MEGAPARSEC = 1e6 * PARSEC;
@@ -132,13 +132,59 @@ const gravitationalWaves: Module = {
         },
       ],
       approximations: [
-        'Newtonian quadrupole only: the leading-order waveform, with no post-Newtonian corrections. The error grows as the bodies speed up, which is exactly where the signal is loudest: by the last few cycles the orbital velocity is a third of the speed of light and the leading-order phase has drifted measurably from the real one. Real searches match against waveforms carrying corrections to 3.5 post-Newtonian order and beyond, precisely because the phase has to stay right for hundreds of cycles.',
-        'The waveform stops at the innermost stable circular orbit and there is no merger or ringdown. Everything after that cutoff is numerical relativity rather than algebra: the two bodies plunge together, merge, and the remnant rings down, radiating past the cutoff frequency at amplitudes larger than anything the inspiral formula predicts. GW150914 crosses this model’s cutoff around 68 Hz; the real signal ran on to about 250 Hz, and most of its energy came out after this trace ends. The cutoff itself uses the Schwarzschild ISCO of the combined mass, which is a conventional marker rather than a derived boundary for a two-body system.',
-        'The orbit is circular, and the bodies are point masses with no spin. Circularity is the mildest assumption here: gravitational radiation itself circularises an eccentric orbit long before it reaches a detector’s band, so it is good late in the inspiral and poor early. Spin is not so mild: it shifts both the cutoff and the phase, and measuring it is one of the things a real detection is for.',
-        'The amplitude is averaged over sky position and orientation. A real detector measures F₊h₊ + F×h×: what gets through depends on where the source sits in the antenna pattern and how the orbital plane is tilted to the line of sight, varying the strain by a factor of a few either way. The readout is an order-of-magnitude figure, not a prediction of what a particular instrument would record.',
-        'Nothing here is redshifted. The masses are source-frame and the distance is treated as a simple luminosity distance; a real signal from 410 Mpc arrives with every frequency lowered by (1+z) ≈ 1.09, which is why the mass a detector measures directly — the redshifted, detector-frame chirp mass — is about 30.5 M_☉ for GW150914 while the source-frame value is 28.1.',
-        'The trace covers the final octave of frequency, and it is played slowly. Choosing an octave rather than a fixed duration keeps the picture honest across the slider’s range (every binary shows the same 7.7 cycles) but the durations differ enormously: 175 ms for the default pair, 7 ms for two neutron stars. Playback is slowed by the factor shown beside it, because at true speed the whole trace would flick past in under a fifth of a second.',
-        'The sound is a sonification, not a recording. A gravitational wave is a stretching of space, not a pressure wave, and there is nothing to hear where it comes from; the tone is an oscillator driven at the wave’s own frequency and amplitude. The frequencies are true and unshifted (which is possible only because a stellar-mass inspiral happens to sweep through the range human hearing covers) and where the true band falls below about 20 Hz the pitch is held there rather than transposed.',
+        prose(
+          p(
+            'Newtonian ',
+            term('quadrupole', 'quadrupole'),
+            ' only: the leading-order waveform, with no ',
+            term('post-Newtonian', 'post-newtonian'),
+            ' corrections. The error grows as the bodies speed up, which is exactly where the signal is loudest: by the last few cycles the orbital velocity is a third of the speed of light and the leading-order phase has drifted measurably from the real one. Real searches match against waveforms carrying corrections to 3.5 post-Newtonian order and beyond, precisely because the phase has to stay right for hundreds of cycles.',
+          ),
+        ),
+        prose(
+          p(
+            'The waveform stops at the innermost stable circular orbit and there is no ',
+            term('merger', 'merger'),
+            ' or ',
+            term('ringdown', 'ringdown'),
+            '. Everything after that cutoff is numerical relativity rather than algebra: the two bodies plunge together, merge, and the remnant rings down, radiating past the ',
+            term('cutoff frequency', 'cutoff-frequency'),
+            ' at amplitudes larger than anything the ',
+            term('inspiral', 'inspiral'),
+            ' formula predicts. GW150914 crosses this model’s cutoff around 68 Hz; the real signal ran on to about 250 Hz, and most of its energy came out after this trace ends. The cutoff itself uses the Schwarzschild ISCO of the combined mass, which is a conventional marker rather than a derived boundary for a two-body system.',
+          ),
+        ),
+        prose(
+          p(
+            'The orbit is circular, and the bodies are point masses with no spin. Circularity is the mildest assumption here: gravitational radiation itself circularises an eccentric orbit long before it reaches a detector’s band, so it is good late in the inspiral and poor early. Spin is not so mild: it shifts both the cutoff and the phase, and measuring it is one of the things a real detection is for.',
+          ),
+        ),
+        prose(
+          p(
+            'The amplitude is averaged over sky position and orientation. A real detector measures F₊h₊ + F×h×: what gets through depends on where the source sits in the antenna pattern and how the orbital plane is tilted to the line of sight, varying the ',
+            term('strain', 'strain'),
+            ' by a factor of a few either way. The readout is an order-of-magnitude figure, not a prediction of what a particular instrument would record.',
+          ),
+        ),
+        prose(
+          p(
+            'Nothing here is redshifted. The masses are source-frame and the distance is treated as a simple ',
+            term('luminosity distance', 'luminosity-distance'),
+            '; a real signal from 410 ',
+            term('Mpc', 'megaparsec'),
+            ' arrives with every frequency lowered by (1+z) ≈ 1.09, which is why the mass a detector measures directly — the redshifted, detector-frame chirp mass — is about 30.5 M_☉ for GW150914 while the source-frame value is 28.1.',
+          ),
+        ),
+        prose(
+          p(
+            'The trace covers the final octave of frequency, and it is played slowly. Choosing an octave rather than a fixed duration keeps the picture honest across the slider’s range (every binary shows the same 7.7 cycles) but the durations differ enormously: 175 ms for the default pair, 7 ms for two neutron stars. Playback is slowed by the factor shown beside it, because at true speed the whole trace would flick past in under a fifth of a second.',
+          ),
+        ),
+        prose(
+          p(
+            'The sound is a sonification, not a recording. A gravitational wave is a stretching of space, not a pressure wave, and there is nothing to hear where it comes from; the tone is an oscillator driven at the wave’s own frequency and amplitude. The frequencies are true and unshifted (which is possible only because a stellar-mass inspiral happens to sweep through the range human hearing covers) and where the true band falls below about 20 Hz the pitch is held there rather than transposed.',
+          ),
+        ),
       ],
     },
 
@@ -313,7 +359,9 @@ const gravitationalWaves: Module = {
           '. GW170817, with its optical counterpart pinning the host galaxy, gave an independent ',
           'measurement of the universe’s expansion rate; with enough such events, sirens could ',
           'arbitrate the current tension between competing expansion-rate measurements. And the ',
-          'band is widening at both ends: pulsar timing arrays reported evidence in 2023 of a ',
+          'band is widening at both ends: ',
+          term('pulsar timing arrays', 'pulsar-timing-array'),
+          ' reported evidence in 2023 of a ',
           'nanohertz background (plausibly the murmur of supermassive pairs across cosmic ',
           'history) while the space interferometer LISA is being built for the millihertz ',
           'decades between, where a million-solar-mass merger rings for hours instead of ',
