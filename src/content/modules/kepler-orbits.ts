@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { AU, M_SUN } from '@/physics/constants';
-import { em, m, p, prose, term } from '../rich';
+import { em, figure, m, p, prose, term } from '../rich';
 
 const keplerOrbits: Module = {
   id: 'kepler-orbits',
@@ -224,6 +224,38 @@ const keplerOrbits: Module = {
           'you have weighed what it orbits: the Sun, other stars, and the four-million-solar-mass ',
           'black hole at the centre of our galaxy, weighed by the stars whipping around it.',
         ),
+        /*
+         * Source: https://www.aanda.org/articles/aa/full_html/2024/12/aa52274-24/aa52274-24.html
+         *         (GRAVITY Collaboration, A&A 692, A242, 17 December 2024)
+         * Licence, from the article page itself: "© The Authors 2024. Open
+         * Access article, published by EDP Sciences, under the terms of the
+         * Creative Commons Attribution License
+         * (https://creativecommons.org/licenses/by/4.0), which permits
+         * unrestricted use, distribution, and reproduction in any medium,
+         * provided the original work is properly cited." No figure in the paper
+         * is credited to a third party, so the article's own licence covers it.
+         *
+         * Cropped to the upper panel of Fig. 2; the published figure carries a
+         * residuals panel beneath it. CC BY permits adaptation provided the
+         * change is indicated, which is why the credit line says so as well as
+         * this comment. The cut is vertical only, at the midpoint of the 42px
+         * band of white between the panels: it keeps the whole "RA [mas]" axis
+         * label and takes none of the residuals frame.
+         *
+         * The other six figures are resize-and-re-encode only. This one is the
+         * exception, authored deliberately, and the reason it is worth stating
+         * twice: a reader should be able to tell from the page that what they
+         * are looking at is part of a published figure rather than all of it.
+         */
+        figure({
+          src: '/figures/kepler-orbits.webp',
+          width: 1200,
+          height: 962,
+          alt: 'Measured positions of the star S2 tracing a long ellipse around the position of Sagittarius A*, with an inset comparing its track in 2005 and in 2021–2022, the two offset by the precession of the orbit.',
+          caption:
+            'The star S2, tracked for three decades as it loops around Sagittarius A*, the four-million-solar-mass black hole at the centre of the Galaxy. Its sixteen-year orbit is Kepler’s first law drawn by a real star; at closest approach it moves at nearly three percent of the speed of light, and its ellipse precesses just as general relativity predicts.',
+          credit: 'GRAVITY Collaboration, A&A 692, A242 (2024), CC BY 4.0 (Fig. 2, upper panel)',
+        }),
       ),
     },
 

@@ -248,18 +248,19 @@ const FIGURE_MAX_BYTES = 500 * 1024;
 /**
  * Modules deliberately without a figure.
  *
- * `kepler-orbits` wants a measured astrometry plot of S2's orbit around
- * Sagittarius A*. ESO's release for that result carries only artist's
- * impressions; the Max Planck page hosting the real plot is © Max-Planck-
- * Gesellschaft with the figures taken from a Nature paper; and the A&A papers
- * are marked "© ESO" and "Free Access" with no Creative Commons wording — free
- * to read is not free to reuse. Nothing else may be substituted, so the module
- * ships without one until a properly licensed plot exists.
+ * Empty, and worth keeping empty. `kepler-orbits` was the one entry: it wanted
+ * a measured astrometry plot of S2's orbit, and the first two searches turned
+ * up only artist's impressions, a Nature figure behind © Max-Planck-
+ * Gesellschaft, and A&A papers marked "© ESO / Free Access" — free to read is
+ * not free to reuse. It resolved once A&A's cutoff came to light: articles
+ * accepted from 4 April 2022 publish under CC BY 4.0, and A&A 692, A242 (2024)
+ * is one of them.
  *
- * Listing it here rather than skipping silently is the point: a module losing
- * its figure has to show up in a diff.
+ * The mechanism stays because the next module may not be so lucky. Listing an
+ * exception rather than skipping silently is the point: a module losing its
+ * figure has to show up in a diff.
  */
-const WITHOUT_FIGURE: readonly string[] = ['kepler-orbits'];
+const WITHOUT_FIGURE: readonly string[] = [];
 
 describe('the layer-4 photograph', () => {
   it('lists no module that in fact has a figure', () => {

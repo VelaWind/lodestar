@@ -2581,9 +2581,12 @@ test('glossary: only one definition is open at a time', async ({ page }) => {
  *
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
+ *
+ * All seven modules now, with no exception branch. `kepler-orbits` carried one
+ * while its figure was unlicensable; it has one, so the branch is gone rather
+ * than left standing with an empty list — a skip nothing can reach is a skip
+ * nobody notices has stopped meaning anything.
  */
-const WITHOUT_FIGURE = ['kepler-orbits'];
-
 test('every module shows its layer-4 photograph', async ({ page }) => {
   const w = watch(page);
 
@@ -2594,13 +2597,6 @@ test('every module shows its layer-4 photograph', async ({ page }) => {
     await settle(page, 500);
 
     const figures = page.locator('#layer-panel-real figure img');
-
-    if (WITHOUT_FIGURE.includes(id)) {
-      await expect(figures, `${id} is meant to ship without a figure`).toHaveCount(0);
-      // eslint-disable-next-line no-console
-      console.log(`  figure[${id}]: none, by design`);
-      continue;
-    }
 
     await expect(figures, `${id}: expected exactly one figure in layer 4`).toHaveCount(1);
     const image = figures.first();
