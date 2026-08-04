@@ -336,7 +336,7 @@ exports[`reader-visible copy > the About page, word for word 1`] = `
 {
   "sections": [
     {
-      "body": "Every topic on this site is a single module that unfolds in seven layers: from a one-sentence hook, through an analogy and a live simulation, down to the derivation and the open research questions. A depth setting controls which layers open by default, and nothing else: there are no beginner pages and no advanced pages, because parallel versions of the same idea drift apart and quietly start contradicting each other. One text, written once, read at the depth you choose.",
+      "body": "Every topic on this site is a single module that unfolds in seven layers: from a one-sentence hook, through an analogy, a live simulation, and the evidence itself, down to the derivation and the open research questions. Technical terms are dotted-underlined at first meeting, each one tap from a plain-language definition. A depth setting controls which layers open by default, and nothing else: there are no beginner pages and no advanced pages, because parallel versions of the same idea drift apart and quietly start contradicting each other. One text, written once, read at the depth you choose.",
       "heading": "One module, three readers",
     },
     {
