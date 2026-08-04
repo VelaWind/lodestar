@@ -2747,6 +2747,28 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
     // `loading="lazy"` means the bytes only start once it is near the viewport.
     await expect(image).toBeVisible();
 
+    /*
+     * And then wait for them to arrive.
+     *
+     * `toBeVisible` is a layout question — the element has a box — and says
+     * nothing about whether a lazy image has finished decoding. Chromium
+     * happened to be done by the next round trip and Firefox was not, so
+     * `naturalWidth` came back 0 for black-holes and the test reported the file
+     * as missing from the build when it was served fine. The engine did not
+     * find a bug in the site; it found one here, which is the whole reason for
+     * running on more than one.
+     */
+    await expect
+      .poll(
+        async () =>
+          image.evaluate((el) => {
+            const img = el as HTMLImageElement;
+            return img.complete && img.naturalWidth > 0;
+          }),
+        { message: `${id}: the figure never finished loading` },
+      )
+      .toBe(true);
+
     const shown = await image.evaluate((el) => {
       const img = el as HTMLImageElement;
       const figureEl = img.closest('figure')!;
