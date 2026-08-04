@@ -2566,6 +2566,111 @@ test('glossary: only one definition is open at a time', async ({ page }) => {
 });
 
 /* ------------------------------------------------------------------ */
+/* Layer 4's photograph                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Every module's figure, on the page rather than in the data file.
+ *
+ * The unit suite checks that the module points at a file of the right size and
+ * shape. What it cannot see is whether the file is actually served: a figure
+ * under `public/` that never made it into the build, or a path that is right
+ * relative to the source tree and wrong relative to the site root, renders as a
+ * broken image and passes every check that only reads the AST. `naturalWidth`
+ * is the assertion that the bytes arrived and decoded.
+ *
+ * `width` and `height` are asserted as present because they are the whole
+ * reason the caption does not jump when the image lands.
+ */
+const WITHOUT_FIGURE = ['kepler-orbits'];
+
+test('every module shows its layer-4 photograph', async ({ page }) => {
+  const w = watch(page);
+
+  for (const id of MODULES) {
+    await page.goto(`/m/${id}`, { waitUntil: 'domcontentloaded' });
+    await settle(page, 700);
+    await openLayer(page, 'real');
+    await settle(page, 500);
+
+    const figures = page.locator('#layer-panel-real figure img');
+
+    if (WITHOUT_FIGURE.includes(id)) {
+      await expect(figures, `${id} is meant to ship without a figure`).toHaveCount(0);
+      // eslint-disable-next-line no-console
+      console.log(`  figure[${id}]: none, by design`);
+      continue;
+    }
+
+    await expect(figures, `${id}: expected exactly one figure in layer 4`).toHaveCount(1);
+    const image = figures.first();
+    await image.scrollIntoViewIfNeeded();
+    // `loading="lazy"` means the bytes only start once it is near the viewport.
+    await expect(image).toBeVisible();
+
+    const shown = await image.evaluate((el) => {
+      const img = el as HTMLImageElement;
+      const figureEl = img.closest('figure')!;
+      const caption = figureEl.querySelector('figcaption');
+      return {
+        src: img.getAttribute('src'),
+        widthAttr: img.getAttribute('width'),
+        heightAttr: img.getAttribute('height'),
+        loading: img.getAttribute('loading'),
+        decoding: img.getAttribute('decoding'),
+        alt: img.getAttribute('alt') ?? '',
+        naturalWidth: img.naturalWidth,
+        naturalHeight: img.naturalHeight,
+        renderedWidth: Math.round(img.getBoundingClientRect().width),
+        captionText: (caption?.textContent ?? '').trim(),
+        // The figure belongs to the reading column, not to the breakout the sim
+        // stage uses.
+        breakout: figureEl.classList.contains('breakout'),
+      };
+    });
+
+    expect(shown.src, `${id}: figure src`).toBe(`/figures/${id}.webp`);
+    expect(
+      shown.naturalWidth,
+      `${id}: the image did not load — ${shown.src} is missing from the build`,
+    ).toBeGreaterThan(0);
+    expect(shown.naturalHeight, `${id}: the image decoded to nothing`).toBeGreaterThan(0);
+    // The attributes have to match the file, or the reserved box is the wrong
+    // shape and the page shifts when the image lands.
+    expect(Number(shown.widthAttr), `${id}: width attribute missing or wrong`).toBe(
+      shown.naturalWidth,
+    );
+    expect(Number(shown.heightAttr), `${id}: height attribute missing or wrong`).toBe(
+      shown.naturalHeight,
+    );
+    expect(shown.loading, `${id}: figure should be lazy`).toBe('lazy');
+    expect(shown.decoding, `${id}: figure should decode async`).toBe('async');
+    expect(shown.alt.length, `${id}: figure has no alt text`).toBeGreaterThan(20);
+    expect(shown.breakout, `${id}: the figure should stay in the reading column`).toBe(false);
+
+    // The credit is visible, not merely present in the markup.
+    const credit = page.locator('#layer-panel-real figure figcaption').getByText(/^Credit: /);
+    await expect(credit, `${id}: no visible credit line`).toBeVisible();
+    const creditText = ((await credit.textContent()) ?? '').trim();
+    expect(creditText.length, `${id}: empty credit`).toBeGreaterThan('Credit: '.length);
+    expect(
+      shown.captionText,
+      `${id}: the caption should carry prose as well as the credit`,
+    ).not.toBe(creditText);
+
+    // eslint-disable-next-line no-console
+    console.log(
+      `  figure[${id}]: ${shown.naturalWidth}x${shown.naturalHeight} natural, ` +
+        `${shown.renderedWidth}px rendered — ${creditText}`,
+    );
+
+    await assertNoOverflow(page, `${id} with layer 4 open`);
+  }
+
+  assertClean(w, 'figures');
+});
+
+/* ------------------------------------------------------------------ */
 /* Reduced motion                                                      */
 /* ------------------------------------------------------------------ */
 

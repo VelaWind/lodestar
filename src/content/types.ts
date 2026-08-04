@@ -138,7 +138,41 @@ export type Block =
   /** Set-aside callout: a tangent that shouldn't break the main thread. */
   | { k: 'aside'; title?: string; children: Block[] }
   /** Display math that is *prose*, not a bound equation — see EquationLayer. */
-  | { k: 'mathBlock'; tex: string; caption?: Inline[] };
+  | { k: 'mathBlock'; tex: string; caption?: Inline[] }
+  /**
+   * A real photograph or measured plot, with its attribution.
+   *
+   * A leaf, like `term`, and for a related reason: `caption` and `credit` are
+   * plain strings rather than `Inline[]`, so a figure can carry no emphasis, no
+   * math, no links and no glossary marks. That is a restriction worth having.
+   * A caption is a self-contained sentence about the picture, and the moment it
+   * can hold marked-up prose it starts competing with the layer it sits in —
+   * a term marked in a caption would be a definition a reader meets in the
+   * furniture rather than in the argument.
+   *
+   * `width` and `height` are the file's *intrinsic* pixel dimensions, not a
+   * display size. They go on the `<img>` so the browser can reserve the right
+   * box before the bytes arrive; getting them wrong is a layout shift, so the
+   * content test reads them back off the file with sharp rather than trusting
+   * the number written here.
+   *
+   * `credit` is the attribution line, rendered after "Credit: ". Where a source
+   * mandates particular wording, that wording goes here verbatim — it is a
+   * licence condition, not a house style choice.
+   */
+  | {
+      k: 'figure';
+      /** Absolute path from the site root, e.g. `/figures/black-holes.webp`. */
+      src: string;
+      width: number;
+      height: number;
+      /** What the image shows, for a reader who cannot see it. Never the caption. */
+      alt: string;
+      /** The prose voice: what this is, and why it belongs in this layer. */
+      caption: string;
+      /** Attribution, rendered as "Credit: …". */
+      credit: string;
+    };
 
 export type RichText = Block[];
 

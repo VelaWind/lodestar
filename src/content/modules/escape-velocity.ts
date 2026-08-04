@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { M_EARTH, R_EARTH } from '@/physics/constants';
-import { em, m, p, prose, term } from '../rich';
+import { em, figure, m, p, prose, term } from '../rich';
 
 const escapeVelocity: Module = {
   id: 'escape-velocity',
@@ -201,6 +201,25 @@ const escapeVelocity: Module = {
           'so its molecules are slow. Temperature and escape velocity set the boundary together; ',
           'gravity alone does not decide.',
         ),
+        /*
+         * Source: https://www.nasa.gov/image-article/apollo-8-earthrise/
+         * Asset:  https://images-assets.nasa.gov/image/as08-14-2383/as08-14-2383~orig.jpg
+         * Licence, from NASA's media usage guidelines
+         * (https://www.nasa.gov/nasa-brand-center/images-and-media/): "NASA
+         * content – images, audio, video, and media files … generally are not
+         * subject to copyright in the United States", usable for educational
+         * purposes provided NASA is acknowledged as the source. No specific
+         * credit line is mandated beyond that acknowledgement.
+         */
+        figure({
+          src: '/figures/escape-velocity.webp',
+          width: 1280,
+          height: 1280,
+          alt: 'The Earth, half in shadow, rising above the grey cratered horizon of the Moon.',
+          caption:
+            'Earthrise, photographed by Bill Anders from Apollo 8 lunar orbit on 24 December 1968. Getting there took nearly the whole escape budget: the translunar burn left Earth at about 10.8 kilometres per second, within four percent of the escape speed this module computes.',
+          credit: 'NASA / Bill Anders, Apollo 8 (AS8-14-2383)',
+        }),
       ),
     },
 

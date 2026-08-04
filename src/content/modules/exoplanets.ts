@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { AU, M_SUN, R_EARTH, R_JUPITER, R_SUN } from '@/physics/constants';
-import { em, m, p, prose, term } from '../rich';
+import { em, figure, m, p, prose, term } from '../rich';
 
 const exoplanets: Module = {
   id: 'exoplanets',
@@ -236,6 +236,28 @@ const exoplanets: Module = {
           'against time. That a dip in a graph can weigh in as discovery of a world is the ',
           'method’s actual magic.',
         ),
+        /*
+         * Source: https://www.nasa.gov/image-article/hat-p7b-light-curves/
+         * Asset:  https://www.nasa.gov/wp-content/uploads/2023/03/376622main_GroundKepler1_428.jpg
+         * Licence, from NASA's media usage guidelines: "NASA content – images,
+         * audio, video, and media files … generally are not subject to
+         * copyright in the United States", usable for educational purposes
+         * provided NASA is acknowledged as the source. No credit line is
+         * mandated, so the authored one stands.
+         *
+         * 428×321 is the only resolution NASA publishes; it is shipped at that
+         * size rather than upscaled, so the browser is doing the enlarging
+         * rather than the encoder pretending to detail that was never there.
+         */
+        figure({
+          src: '/figures/exoplanets.webp',
+          width: 428,
+          height: 321,
+          alt: 'A graph of measured stellar brightness dipping sharply and briefly at each transit of the planet.',
+          caption:
+            'A real transit: the Kepler space telescope watching the hot Jupiter HAT-P-7b cross its star, the mission’s first published light curve. The dip is under one percent, and where the sim draws a trapezoid, nature rounds the corners.',
+          credit: 'NASA / Kepler mission',
+        }),
       ),
     },
 

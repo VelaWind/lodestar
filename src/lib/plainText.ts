@@ -46,6 +46,12 @@ function fromBlock(node: Block): string {
       return node.children.map(fromBlock).join(' ');
     case 'mathBlock':
       return node.tex;
+    // The caption and credit are the only text a figure contributes; `alt`
+    // deliberately is not. Alt text is a substitute for the image for readers
+    // who cannot see it, not prose the page says twice — flattening it in would
+    // put it into landing-page teasers and placeholder scans as duplicate copy.
+    case 'figure':
+      return `${node.caption} ${node.credit}`;
     default: {
       const _exhaustive: never = node;
       return _exhaustive;

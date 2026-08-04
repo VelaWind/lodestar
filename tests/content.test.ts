@@ -11,6 +11,8 @@
  * limits here: a module outside them usually has a structural problem, and the
  * test failing is the prompt to think about it rather than a verdict.
  */
+import { readFileSync, statSync } from 'node:fs';
+import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { glossary } from '@/content/glossary';
 import { moduleList, modules, simKeys } from '@/content/registry';
@@ -228,6 +230,90 @@ describe('the glossary', () => {
       );
     }
   });
+});
+
+/**
+ * The photograph at the end of layer 4.
+ *
+ * Every published module carries one, and the two things that can be wrong with
+ * it are both invisible in review. The `width` and `height` in the module file
+ * are what the browser reserves before the bytes arrive, so a number that does
+ * not match the file is a layout shift nobody sees on a fast connection — they
+ * are read back off the file here rather than trusted. And a `src` pointing at
+ * a file that was never committed renders as a broken image on the live site
+ * and as nothing at all in a unit suite that only looks at the AST.
+ */
+const FIGURE_MAX_BYTES = 500 * 1024;
+
+/**
+ * Modules deliberately without a figure.
+ *
+ * `kepler-orbits` wants a measured astrometry plot of S2's orbit around
+ * Sagittarius A*. ESO's release for that result carries only artist's
+ * impressions; the Max Planck page hosting the real plot is © Max-Planck-
+ * Gesellschaft with the figures taken from a Nature paper; and the A&A papers
+ * are marked "© ESO" and "Free Access" with no Creative Commons wording — free
+ * to read is not free to reuse. Nothing else may be substituted, so the module
+ * ships without one until a properly licensed plot exists.
+ *
+ * Listing it here rather than skipping silently is the point: a module losing
+ * its figure has to show up in a diff.
+ */
+const WITHOUT_FIGURE: readonly string[] = ['kepler-orbits'];
+
+describe('the layer-4 photograph', () => {
+  it('lists no module that in fact has a figure', () => {
+    for (const id of WITHOUT_FIGURE) {
+      const module = modules[id];
+      expect(module, `"${id}" is in WITHOUT_FIGURE but is not a module`).toBeDefined();
+      const blocks = module!.layers.real.body;
+      expect(
+        blocks.some((b) => b.k === 'figure'),
+        `"${id}" has a figure now — take it out of WITHOUT_FIGURE`,
+      ).toBe(false);
+    }
+  });
+
+  for (const module of published.filter((m) => !WITHOUT_FIGURE.includes(m.id))) {
+    it(`${module.id}: ends layer 4 with exactly one well-formed figure`, async () => {
+      const blocks = module.layers.real.body;
+      const figures = blocks.filter((b) => b.k === 'figure');
+      expect(figures.length, `${module.id}: expected exactly one figure in layer 4`).toBe(1);
+
+      const last = blocks[blocks.length - 1];
+      expect(last?.k, `${module.id}: the figure should be the last block of layer 4`).toBe('figure');
+      const fig = last as Extract<(typeof blocks)[number], { k: 'figure' }>;
+
+      expect(fig.alt.trim().length, `${module.id}: empty alt`).toBeGreaterThan(0);
+      expect(fig.caption.trim().length, `${module.id}: empty caption`).toBeGreaterThan(0);
+      expect(fig.credit.trim().length, `${module.id}: empty credit`).toBeGreaterThan(0);
+      // Alt text substitutes for the image; a caption says why it is here. A
+      // figure whose alt is its caption has one of the two jobs undone.
+      expect(fig.alt.trim(), `${module.id}: alt and caption are the same text`).not.toBe(
+        fig.caption.trim(),
+      );
+
+      expect(fig.src, `${module.id}: src should be a site-absolute path`).toBe(
+        `/figures/${module.id}.webp`,
+      );
+
+      const path = `public${fig.src}`;
+      expect(() => readFileSync(path), `${module.id}: ${path} is missing`).not.toThrow();
+
+      const bytes = statSync(path).size;
+      expect(
+        bytes,
+        `${module.id}: ${(bytes / 1024).toFixed(1)} kB exceeds the 500 kB cap`,
+      ).toBeLessThanOrEqual(FIGURE_MAX_BYTES);
+
+      // The authored dimensions against the file's own, so a re-encode that
+      // changes the size cannot ship without the module file following it.
+      const meta = await sharp(path).metadata();
+      expect(meta.width, `${module.id}: authored width does not match the file`).toBe(fig.width);
+      expect(meta.height, `${module.id}: authored height does not match the file`).toBe(fig.height);
+      expect(meta.format, `${module.id}: not a webp`).toBe('webp');
+    });
+  }
 });
 
 describe('titleFromSlug', () => {

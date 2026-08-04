@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { M_SUN, PARSEC } from '@/physics/constants';
-import { em, m, p, prose, term } from '../rich';
+import { em, figure, m, p, prose, term } from '../rich';
 
 /** Megaparsec in metres — the natural unit for a source at this distance. */
 const MEGAPARSEC = 1e6 * PARSEC;
@@ -234,6 +234,28 @@ const gravitationalWaves: Module = {
           ', with the striking consequence that making a detector twice as sensitive reaches ',
           'twice as far, and so eight times as much universe.',
         ),
+        /*
+         * Source: https://www.ligo.caltech.edu/image/ligo20160211a — LIGO's own
+         * rendering of the GW150914 strain figure (Fig. 1 of Abbott et al.,
+         * PRL 116, 061102), three panels: Hanford and Livingston each against
+         * the predicted waveform, and the two overlaid after the 6.9 ms shift.
+         * Licence, from https://www.ligo.caltech.edu/page/image-use-policy:
+         * images are "available for journalistic, educational, and personal
+         * uses, but restrictions are placed on commercial use", and "unless
+         * otherwise noted in the caption information for an image, the credit
+         * line should be 'Courtesy Caltech/MIT/LIGO Laboratory'". This image's
+         * own page notes its credit as "Caltech/MIT/LIGO Lab", so that is the
+         * line used, in place of the authored one.
+         */
+        figure({
+          src: '/figures/gravitational-waves.webp',
+          width: 1024,
+          height: 1280,
+          alt: 'Two overlaid strain traces oscillating faster and larger over two tenths of a second, then settling to a flat line.',
+          caption:
+            'The first gravitational wave detected: strain against time at the two LIGO sites on 14 September 2015, the same waveform arriving 6.9 milliseconds apart across the continent. From first tremor to silence the signal lasts a fifth of a second; the sim’s chirp is this curve made audible.',
+          credit: 'Caltech/MIT/LIGO Lab',
+        }),
       ),
     },
 

@@ -33,6 +33,23 @@ export const mathBlock = (tex: string, caption?: Inline[]): Block => ({
   ...(caption ? { caption } : {}),
 });
 
+/**
+ * A photograph or measured plot.
+ *
+ * Takes an object rather than positional arguments: six fields, five of them
+ * strings, is exactly the shape where positional call sites become unreadable
+ * and a transposed pair of them typechecks. `width` and `height` are the file's
+ * real pixel dimensions — `tests/content.test.ts` reads them off the file.
+ */
+export const figure = (props: {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
+  credit: string;
+}): Block => ({ k: 'figure', ...props });
+
 export const em = (...children: Inline[]): Inline => ({ k: 'em', children });
 export const strong = (...children: Inline[]): Inline => ({ k: 'strong', children });
 export const code = (text: string): Inline => ({ k: 'code', text });

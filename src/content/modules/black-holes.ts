@@ -11,7 +11,7 @@
  */
 import type { Module } from '../types';
 import { M_SUN } from '@/physics/constants';
-import { em, m, p, prose, term } from '../rich';
+import { em, figure, m, p, prose, term } from '../rich';
 
 const blackHoles: Module = {
   id: 'black-holes',
@@ -177,6 +177,25 @@ const blackHoles: Module = {
           'you would cross the point of no return and feel nothing at all. Counterintuitively, ',
           'the bigger the black hole, the gentler its doorstep.',
         ),
+        /*
+         * Source: https://www.eso.org/public/images/eso1907a/ (ESO release eso1907)
+         * Licence, from https://www.eso.org/public/copyright/: ESO images "are
+         * licensed under a Creative Commons Attribution 4.0 International
+         * License, and may on a non-exclusive basis be reproduced without fee
+         * provided the credit is clear and visible" — and "the full image or
+         * footage credit must be presented in a clear and readable manner to
+         * all users, with the wording unaltered". The credit below is the
+         * wording the release itself carries.
+         */
+        figure({
+          src: '/figures/black-holes.webp',
+          width: 1280,
+          height: 746,
+          alt: 'A bright orange ring, brighter along its lower edge, surrounding a dark central circle.',
+          caption:
+            'The first image of a black hole: M87*, six and a half billion solar masses, photographed by the Event Horizon Telescope. The glow is hot gas orbiting just outside the horizon; the dark centre is a shadow wide enough to swallow the Solar System.',
+          credit: 'EHT Collaboration',
+        }),
       ),
     },
 

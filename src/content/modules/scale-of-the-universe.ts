@@ -22,7 +22,7 @@ import {
   R_EARTH,
   R_SUN,
 } from '@/physics/constants';
-import { em, m, p, prose, term } from '../rich';
+import { em, figure, m, p, prose, term } from '../rich';
 
 /* ------------------------------------------------------------------ */
 /* Cited inputs                                                        */
@@ -314,6 +314,24 @@ const scaleOfTheUniverse: Module = {
           'part from which light has had time to reach us: a horizon, not a wall. What lies ',
           'beyond is larger, possibly without limit, and genuinely unknown.',
         ),
+        /*
+         * Source: https://esahubble.org/images/heic0611b/
+         * Licence, from https://esahubble.org/copyright/: ESA/Hubble images are
+         * released under the Creative Commons Attribution 4.0 International
+         * license, and "the full image or footage credit must be presented in a
+         * clear and readable manner to all users, with the wording unaltered".
+         * The credit below is therefore the release's own wording, which
+         * carries a second "and" the authored line did not.
+         */
+        figure({
+          src: '/figures/scale-of-the-universe.webp',
+          width: 1280,
+          height: 1280,
+          alt: 'Thousands of galaxies of varied colours, shapes and sizes scattered across a black field of sky.',
+          caption:
+            'The Hubble Ultra Deep Field: eleven days of accumulated exposure on a patch of sky about one-thirteenth the width of the full Moon. Nearly every smudge and spiral is a galaxy of billions of stars, some seen as they were more than twelve billion years ago.',
+          credit: 'NASA, ESA, and S. Beckwith (STScI) and the HUDF Team',
+        }),
       ),
     },
 

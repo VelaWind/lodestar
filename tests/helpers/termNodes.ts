@@ -65,6 +65,10 @@ function fromBlock(node: Block, out: RawTerm[]): void {
     case 'mathBlock':
       node.caption?.forEach((child) => fromInline(child, out));
       return;
+    // A leaf, and one that cannot hold a mark: a figure's caption and credit
+    // are plain strings, so there is no `Inline` here to walk.
+    case 'figure':
+      return;
     default: {
       const _exhaustive: never = node;
       return _exhaustive;

@@ -124,6 +124,36 @@ function block(node: Block, key: number): ReactNode {
           )}
         </figure>
       );
+    case 'figure':
+      return (
+        // Set to the reading column, deliberately *not* `.breakout`. The two
+        // things that break out — the sim stage and the landing grid — do it
+        // because they stop working narrow. A photograph does not; a photograph
+        // wider than the prose it illustrates just pulls the eye out of the
+        // column and makes the text beside it look like a caption.
+        <figure key={key} className="my-2 space-y-2.5">
+          <img
+            src={node.src}
+            // The file's own pixel dimensions, so the browser reserves the box
+            // before the bytes land. Without them the caption and everything
+            // under it jumps when the image decodes.
+            width={node.width}
+            height={node.height}
+            alt={node.alt}
+            loading="lazy"
+            decoding="async"
+            className="h-auto w-full max-w-full rounded-lg border border-edge-soft bg-void-800"
+          />
+          <figcaption className="space-y-1">
+            <span className="block font-prose text-[0.9375rem] leading-[1.6] text-ink-dim">
+              {node.caption}
+            </span>
+            <span className="block font-ui text-[0.7rem] tracking-wide text-ink-faint">
+              Credit: {node.credit}
+            </span>
+          </figcaption>
+        </figure>
+      );
     default: {
       const _exhaustive: never = node;
       return _exhaustive;

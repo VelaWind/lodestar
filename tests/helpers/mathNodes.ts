@@ -68,6 +68,10 @@ function fromBlock(node: Block, out: string[]): void {
       // authoring path, same exposure to the bug above.
       out.push(node.tex);
       return;
+    // A leaf whose strings are plain by type: no `Inline[]` anywhere in it, so
+    // no LaTeX can reach it and there is nothing to descend into.
+    case 'figure':
+      return;
     default: {
       const _exhaustive: never = node;
       return _exhaustive;

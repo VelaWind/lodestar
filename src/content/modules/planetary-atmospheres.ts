@@ -31,7 +31,7 @@
  */
 import type { Module } from '../types';
 import { M_EARTH, R_EARTH } from '@/physics/constants';
-import { em, m, p, prose, term } from '../rich';
+import { em, figure, m, p, prose, term } from '../rich';
 
 const planetaryAtmospheres: Module = {
   id: 'planetary-atmospheres',
@@ -238,6 +238,29 @@ const planetaryAtmospheres: Module = {
           'marginal-to-retained; the real Mars is nearly airless. The gap is the fingerprint of ',
           'escape routes this simple picture omits, and the going-deeper layer is about them.',
         ),
+        /*
+         * Source: https://www.jpl.nasa.gov/images/pia14913-orange-and-blue-hazes/
+         *         (Cassini, PIA14913 — "Orange and Blue Hazes")
+         * Asset:  https://d2pn8kiwq2w21t.cloudfront.net/original_images/jpegPIA14913.jpg
+         * Licence: NASA/JPL imagery, public domain in the United States under
+         * NASA's media usage guidelines; the credit below is the line the JPL
+         * page states, used in place of the authored spacing.
+         *
+         * Not PIA07774, which the brief offered as an example: that frame is a
+         * crescent-lit disc ringed by a *purple* halo, and the authored alt
+         * describes an orange limb under a thin detached *blue* layer. PIA14913
+         * is that view — same instrument, same feature, and the one the alt
+         * text was written for.
+         */
+        figure({
+          src: '/figures/planetary-atmospheres.webp',
+          width: 924,
+          height: 657,
+          alt: 'The curved edge of Titan, an orange atmosphere fading upward into a thin detached blue haze layer.',
+          caption:
+            'Titan’s edge, photographed by Cassini: an atmosphere with half again Earth’s surface pressure, held by a moon with a seventh of Earth’s gravity. It survives because Titan is cold: at 94 kelvin, nitrogen’s thermal tail never reaches escape speed. The detached blue layer is photochemical haze.',
+          credit: 'NASA/JPL-Caltech/Space Science Institute',
+        }),
       ),
     },
 
