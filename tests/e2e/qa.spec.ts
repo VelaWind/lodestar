@@ -2091,6 +2091,43 @@ test('glossary: a term opens, reads, and closes', async ({ page }) => {
   await expect(trigger, 'no ISCO term marked in the black-holes caption').toHaveCount(1);
   await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
+  /**
+   * The live region, before anything has been opened.
+   *
+   * This is the assertion that keeps the announcement working, and it has to
+   * run here rather than after the first open: a live region inserted with its
+   * content already in it announces nothing, so "exists and is empty on load"
+   * is the property, not "exists once a panel is up". A future refactor that
+   * moved the region into `GlossaryTerm`'s JSX would still pass every check
+   * below and silence the feature entirely.
+   */
+  const liveAtRest = await page.evaluate(() => {
+    const region = document.getElementById('glossary-live-region');
+    if (!region) return null;
+    const style = getComputedStyle(region);
+    return {
+      polite: region.getAttribute('aria-live'),
+      atomic: region.getAttribute('aria-atomic'),
+      text: (region.textContent ?? '').trim(),
+      count: document.querySelectorAll('#glossary-live-region, [id^="glossary-live-region"]').length,
+      // Hidden by size and clip, not by `display:none` or `visibility:hidden`,
+      // either of which takes it out of the accessibility tree.
+      width: Math.round(region.getBoundingClientRect().width),
+      display: style.display,
+      visibility: style.visibility,
+    };
+  });
+  expect(liveAtRest, 'no glossary live region on the page at rest').not.toBeNull();
+  expect(liveAtRest!.polite, 'the live region should be polite').toBe('polite');
+  expect(liveAtRest!.atomic, 'the definition is one announcement, not a diff').toBe('true');
+  expect(liveAtRest!.text, 'the live region must mount empty, or it announces nothing').toBe('');
+  expect(liveAtRest!.count, 'exactly one live region, however many terms are marked').toBe(1);
+  expect(liveAtRest!.width, 'the live region should be visually hidden').toBeLessThanOrEqual(1);
+  expect(liveAtRest!.display, 'display:none would hide it from screen readers too').not.toBe('none');
+  expect(liveAtRest!.visibility, 'visibility:hidden would hide it from screen readers too').not.toBe(
+    'hidden',
+  );
+
   // A button, and visibly not a link.
   const looks = await trigger.evaluate((el) => {
     const style = getComputedStyle(el);
@@ -2143,6 +2180,14 @@ test('glossary: a term opens, reads, and closes', async ({ page }) => {
   expect(wiring.inBody, 'the panel should be portalled out of the clipping ancestors').toBe(true);
   expect(wiring.label, 'the panel should be labelled by the term').toBe('innermost stable orbit');
   expect(wiring.role).toBe('note');
+
+  // And the definition is spoken, not merely painted. The panel lands at the
+  // end of <body>, nowhere near where a screen reader is reading, so the text
+  // has to arrive in the live region for anyone to hear it.
+  await expect(
+    page.locator('#glossary-live-region'),
+    'the open definition should be announced',
+  ).toHaveText('ISCO: The closest distance at which anything can steadily orbit a black hole; closer than this, it spirals in.');
 
   // Inside the viewport, on all four sides. A panel clipped by the accordion or
   // hanging off a 390px screen is the failure the portal exists to prevent.
@@ -2199,6 +2244,12 @@ test('glossary: a term opens, reads, and closes', async ({ page }) => {
   await expect(panel, 'Escape should dismiss the panel').toHaveCount(0);
   await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   await expect(trigger, 'Escape should return focus to the word').toBeFocused();
+  // The region stays; what it says does not. A definition left in it would be
+  // re-read by anything that walks the page afterwards.
+  await expect(
+    page.locator('#glossary-live-region'),
+    'the announcement should clear when the panel closes',
+  ).toHaveText('');
 
   /* --- tap toggles, on the viewport that has a finger --------------- */
 
@@ -2224,6 +2275,90 @@ test('glossary: a term opens, reads, and closes', async ({ page }) => {
   }
 
   assertClean(w, 'glossary tooltip');
+});
+
+/**
+ * Selecting the definition must not dismiss it.
+ *
+ * The panel is a plain div, so pressing in it moves focus off the trigger, and
+ * the trigger's blur used to close the panel on the mousedown — before the drag
+ * had begun. A reader could not copy a definition, or highlight one while
+ * reading it, and every existing assertion here passed throughout: they all
+ * either click the trigger or click somewhere that is *meant* to dismiss.
+ *
+ * Desktop only. Selecting text by drag is a pointer gesture; the touch path
+ * uses a long-press and a native selection UI that Playwright does not drive.
+ */
+test('glossary: selecting the definition keeps it open', async ({ page }) => {
+  test.skip(
+    test.info().project.name.startsWith('mobile'),
+    'drag-selection is a pointer gesture',
+  );
+
+  const w = watch(page);
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  const trigger = page.locator('[data-glossary-term="isco"]');
+  const panel = page.locator('[data-glossary-panel="isco"]');
+
+  await trigger.click();
+  await expect(panel, 'the click should pin the definition open').toBeVisible();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  await settle(page, 400);
+
+  const body = await panel.evaluate((el) => {
+    const paragraph = el.querySelectorAll('p')[1]!;
+    const r = paragraph.getBoundingClientRect();
+    // The last line of the definition: a drag along it selects real words
+    // without leaving the panel.
+    return { left: r.left + 6, right: r.right - 6, y: r.bottom - 8 };
+  });
+
+  await page.mouse.move(body.left, body.y);
+  await page.mouse.down();
+  // The mousedown alone was enough to close it before the fix, so the state is
+  // asserted here as well as after the drag.
+  await expect(
+    trigger,
+    'pressing inside the panel closed it — the blur handler fired on the mousedown',
+  ).toHaveAttribute('aria-expanded', 'true');
+  await page.mouse.move(body.right, body.y, { steps: 10 });
+  await page.mouse.up();
+  await settle(page, 300);
+
+  await expect(panel, 'dragging a selection dismissed the panel').toBeVisible();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+  const selected = await page.evaluate(() => (window.getSelection()?.toString() ?? '').trim());
+  expect(
+    selected.length,
+    'nothing was selected — the drag did not land on the definition text',
+  ).toBeGreaterThan(4);
+  expect(
+    'The closest distance at which anything can steadily orbit a black hole; closer than this, it spirals in.',
+    `the selection "${selected}" is not part of the definition`,
+  ).toContain(selected);
+
+  // The announcement is still standing, because the panel is.
+  await expect(page.locator('#glossary-live-region')).toContainText('ISCO:');
+
+  /* --- and everything that should still dismiss, still does --------- */
+
+  await page.keyboard.press('Escape');
+  await expect(panel, 'Escape should still dismiss after a selection').toHaveCount(0);
+  await expect(trigger, 'Escape should still return focus to the word').toBeFocused();
+
+  await trigger.click();
+  await expect(panel).toBeVisible();
+  // A press that begins outside is a dismissal, however recently one began
+  // inside — the flag must not have stuck.
+  await page.mouse.click(20, 320);
+  await expect(panel, 'a click outside should dismiss the panel').toHaveCount(0);
+  await expect(page.locator('#glossary-live-region'), 'and clear the announcement').toHaveText('');
+
+  await assertNoOverflow(page, 'black-holes after selecting a definition');
+  assertClean(w, 'glossary selection');
 });
 
 /**
@@ -2293,6 +2428,15 @@ test('glossary: only one definition is open at a time', async ({ page }) => {
   await expect(page.locator('[data-glossary-panel="accretion-disc"]')).toBeVisible();
   await expect(kerr).toHaveAttribute('aria-expanded', 'false');
   await expect(disc).toHaveAttribute('aria-expanded', 'true');
+
+  // The announcement follows. React runs every effect teardown in a commit
+  // before every effect, so the closing term's "clear" would wipe the opening
+  // term's text if the live region were not owned by whoever spoke last — this
+  // is the assertion that says it is.
+  await expect(
+    page.locator('#glossary-live-region'),
+    'switching terms should announce the new definition, not silence',
+  ).toHaveText(/^Accretion disc: A swirling disc of hot gas/);
 
   // The definition escapes both clipping boxes: it is wider or taller than the
   // 18rem sidebar it was triggered from would allow, and fully on screen.

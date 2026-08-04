@@ -10,7 +10,9 @@
  *
  *   - One or two sentences, no jargon inside the definition. A tooltip that
  *     needs its own tooltip has failed.
- *   - No math, no exponents beyond a written-out power, no symbols. This is the
+ *   - Plain prose, no equations: a number can appear where the number is the
+ *     point (a power of ten, a mass in kilograms), and a symbol only where the
+ *     entry exists to name it, as λ is in escape parameter. This is the
  *     text a reader meets *before* layer 4, and it is read in a small panel.
  *   - `title` is the natural display form of the id — what the reader would
  *     expect to see written at the top of the panel — not the surface text that

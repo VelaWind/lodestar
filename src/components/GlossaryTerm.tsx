@@ -15,8 +15,12 @@
  *    silently re-root a `fixed` child that had not been portalled. Out of the
  *    tree entirely is the only placement that cannot be clipped, and `fixed`
  *    then means the trigger's viewport rect is the whole of the arithmetic.
- *    The cost is that the panel does not follow the page, which is why it
- *    closes on scroll rather than trying to track.
+ *    The cost is that a `fixed` panel is pinned to the viewport rather than to
+ *    the word it belongs to, so it has to be told when the page moves: it
+ *    re-measures on every scroll while the page is still settling — which is
+ *    how it rides out the smooth scroll that Tab uses to bring a term into
+ *    view — and only once the page has been still for `SCROLL_SETTLE_MS` does
+ *    a further scroll mean the reader has moved on, and dismiss it.
  *
  * 2. **A trigger is a `<button>`, and the term node is a leaf.** Anything else
  *    is a div with a tabindex and a hand-rolled Enter handler, and the AST
@@ -50,6 +54,77 @@ const closers = new Map<string, () => void>();
 
 function claim(id: string): void {
   for (const [other, close] of closers) if (other !== id) close();
+}
+
+/* ------------------------------------------------------------------ */
+/* Announcing the definition                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One live region for the whole page, created empty and never removed.
+ *
+ * The panel is portalled to the end of `<body>`, which is right for painting
+ * and wrong for hearing: a screen-reader user gets the expanded state from
+ * `aria-expanded` and then nothing, because the text that appeared is nowhere
+ * near where they are reading. `aria-describedby` would not help either — it is
+ * read on focus, and the panel does not exist until focus has already happened.
+ *
+ * So the definition is spoken through a live region instead. Two properties it
+ * has to have, both of them the reason this is imperative module state rather
+ * than JSX:
+ *
+ *   - **It exists before the text does.** A live region that is inserted with
+ *     its content already in it announces nothing in most screen readers; the
+ *     region has to be in the accessibility tree first, and the *mutation* is
+ *     what is announced. Rendering it inside `GlossaryTerm` would insert region
+ *     and text together on the same commit.
+ *   - **There is exactly one.** Forty-six triggers rendering forty-six live
+ *     regions is forty-six things for a screen reader to watch, and the one
+ *     that speaks would be whichever won the race.
+ *
+ * Created lazily rather than at module scope because `place` above is imported
+ * by a Node-environment unit test, where `document` does not exist.
+ */
+const LIVE_REGION_ID = 'glossary-live-region';
+
+/** Which panel last spoke, so a close only clears its own announcement. */
+let announcedBy: string | null = null;
+
+function liveRegion(): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+
+  const existing = document.getElementById(LIVE_REGION_ID);
+  if (existing) return existing;
+
+  const node = document.createElement('div');
+  node.id = LIVE_REGION_ID;
+  node.setAttribute('aria-live', 'polite');
+  // The whole definition is one announcement; without this a screen reader may
+  // read only the changed part of it.
+  node.setAttribute('aria-atomic', 'true');
+  // Visually hidden, inline rather than via a class: the node is built in
+  // JavaScript, and a utility class on an element Tailwind's scanner cannot see
+  // in markup is a class that might not survive a purge.
+  node.style.cssText =
+    'position:absolute;width:1px;height:1px;margin:-1px;padding:0;' +
+    'overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
+  document.body.appendChild(node);
+  return node;
+}
+
+function announce(id: string, definition: string): void {
+  const region = liveRegion();
+  if (!region) return;
+  announcedBy = id;
+  region.textContent = definition;
+}
+
+function stopAnnouncing(id: string): void {
+  if (announcedBy !== id) return;
+  const region = liveRegion();
+  if (!region) return;
+  announcedBy = null;
+  region.textContent = '';
 }
 
 /* ------------------------------------------------------------------ */
@@ -136,6 +211,33 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
    * pins and its second closes.
    */
   const pinned = useRef(false);
+  /**
+   * A pointer press that landed inside the panel and has not been released.
+   *
+   * The panel is a plain div, so pressing in it to select the definition moves
+   * focus off the trigger, and the trigger's blur closed the panel out from
+   * under the selection — a reader could not copy a definition, or even
+   * highlight one while reading it. Verified before it was fixed:
+   * `aria-expanded` flipped to false on the mousedown, before the drag had
+   * begun.
+   *
+   * Dropping `onBlur` altogether would be the smaller diff and the wrong one:
+   * blur is what dismisses a panel the keyboard merely tabbed past. So blur
+   * still closes, unless the press that caused it began inside the panel.
+   */
+  const pressInPanel = useRef(false);
+  /**
+   * Focus is being handed back by Escape, and must not be read as a request.
+   *
+   * `onFocus` opens the panel when focus arrives by keyboard, and Chromium
+   * scores a programmatic `.focus()` as `:focus-visible` whenever the last
+   * input was a key — which Escape is. So once a press inside the panel had
+   * moved focus to the body, Escape closed the panel and the focus it restored
+   * immediately reopened it. Invisible before this patch, because until then
+   * the trigger always still had focus when Escape arrived, and calling
+   * `.focus()` on the already-focused element fires no event at all.
+   */
+  const restoringFocus = useRef(false);
 
   const cancelHover = useCallback(() => {
     if (hoverTimer.current !== null) {
@@ -147,6 +249,7 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
   const close = useCallback(() => {
     cancelHover();
     pinned.current = false;
+    pressInPanel.current = false;
     setOpen(false);
   }, [cancelHover]);
 
@@ -157,6 +260,12 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
 
   /* The registry, and the teardown that keeps a timer from outliving the page. */
   useEffect(() => {
+    // Built here, on the first term to mount, and left empty. By the time any
+    // panel opens the region has been in the accessibility tree since the page
+    // rendered, which is the condition for the text landing in it to be
+    // announced at all.
+    liveRegion();
+
     closers.set(panelId, () => {
       pinned.current = false;
       setOpen(false);
@@ -203,14 +312,26 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
       // they pressed it from, not wherever it happened to be.
       event.stopPropagation();
       close();
+      // `.focus()` dispatches focus and focusin synchronously, so the flag is
+      // read and cleared within this call.
+      restoringFocus.current = true;
       triggerEl.current?.focus();
+      restoringFocus.current = false;
     };
     const onPointerDown = (event: Event): void => {
       const target = event.target as Node | null;
       if (!target) return;
       if (triggerEl.current?.contains(target)) return;
-      if (panelEl.current?.contains(target)) return;
+      if (panelEl.current?.contains(target)) {
+        // Capture phase, so this runs before the browser's default action moves
+        // focus and before the blur it causes — which is the whole point.
+        pressInPanel.current = true;
+        return;
+      }
       close();
+    };
+    const onPointerUp = (): void => {
+      pressInPanel.current = false;
     };
 
     // Until the page has been still for a beat, a scroll is assumed to be the
@@ -236,6 +357,11 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
 
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('pointerdown', onPointerDown, true);
+    // On `window`, not `document`: a drag that ends outside the panel — or
+    // outside the document entirely — still has to clear the flag, or the next
+    // blur would find a press that is long over and decline to close.
+    window.addEventListener('pointerup', onPointerUp, true);
+    window.addEventListener('pointercancel', onPointerUp, true);
     // Capture, because the scroll that matters is often a container's rather
     // than the window's, and those do not bubble.
     window.addEventListener('scroll', onScroll, { capture: true, passive: true });
@@ -244,10 +370,25 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
       window.clearTimeout(settle);
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('pointerdown', onPointerDown, true);
+      window.removeEventListener('pointerup', onPointerUp, true);
+      window.removeEventListener('pointercancel', onPointerUp, true);
       window.removeEventListener('scroll', onScroll, true);
       window.removeEventListener('resize', onResize);
     };
   }, [open, close, reposition]);
+
+  /**
+   * Speak the definition while the panel is open, and stop when it closes.
+   *
+   * Keyed on the panel id so that switching terms reads the new one: React runs
+   * every destroy in a commit before every create, so the outgoing term's
+   * `stopAnnouncing` cannot wipe the incoming term's announcement.
+   */
+  useEffect(() => {
+    if (!open || !entry) return;
+    announce(panelId, `${entry.title}: ${entry.body}`);
+    return () => stopAnnouncing(panelId);
+  }, [open, entry, panelId]);
 
   /**
    * An unknown ref renders as plain text rather than a dead control.
@@ -300,9 +441,16 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
         onFocus={(event) => {
           // Keyboard focus reveals it; a mouse click also focuses, and letting
           // that open the panel would fight the toggle on the very same event.
+          if (restoringFocus.current) return;
           if (event.currentTarget.matches(':focus-visible')) show();
         }}
-        onBlur={close}
+        onBlur={() => {
+          // Focus left the word — unless it left because the reader pressed
+          // into the panel to select the definition, which is reading, not
+          // leaving.
+          if (pressInPanel.current) return;
+          close();
+        }}
         /* Dotted, in the muted tone, on the prose's own colour — a link here is
            star-blue and solid-underlined, and the two must not be confusable at
            a glance. `decoration-dotted` rather than a bottom border so the
