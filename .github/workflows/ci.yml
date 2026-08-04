@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   verify:
-    name: typecheck · test · build
+    name: typecheck · lint · test · build
     runs-on: ubuntu-latest
 
     steps:
@@ -39,6 +39,13 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      # Between typecheck and test on purpose: the linter's job here is
+      # correctness rules the compiler does not cover (hook dependencies,
+      # components created during render, logs left in shipped code), and
+      # finding those before a five-second test run is cheaper than after.
+      - name: Lint
+        run: npm run lint
 
       - name: Test
         run: npm test

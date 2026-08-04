@@ -455,6 +455,7 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
       phase: 'ready',
       staticPath: false,
     };
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the canvas scene lives in a ref and this is the one flag React owns; both are rebuilt together so the button and the drawing cannot disagree
     setPhase('ready');
     paint();
   }, [M, R, v0, apex, escaping, escapeSpeed, paint]);

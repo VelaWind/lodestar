@@ -27,6 +27,18 @@ function SimFallback({ label }: { label: string }) {
 }
 
 export function SimStage({ moduleId, layer, values, onChange, onReset }: Props) {
+  /*
+   * `react-hooks/static-components` reads this as a component being created
+   * during render, and it is not: `sims` is a module-scope `Record` built once
+   * by `import.meta.glob` + `lazy()`, so `getSim` is a lookup that returns the
+   * same reference for the same key on every render. The rule cannot see
+   * through the indirection, and the indirection is the point — it is what
+   * makes "add a module" a data-file-plus-sim job with no shell edits.
+   *
+   * Checked rather than assumed: if this really did mint a component per
+   * render, every slider drag would remount the canvas and lose the running
+   * animation, which the behaviour suite drives on all seven sims.
+   */
   const Sim = getSim(layer.simKey);
 
   return (
@@ -43,6 +55,7 @@ export function SimStage({ moduleId, layer, values, onChange, onReset }: Props) 
         <div className="min-w-0 rounded-lg border border-edge-soft bg-void-800/40 p-4">
           {Sim ? (
             <Suspense fallback={<SimFallback label="Loading simulation…" />}>
+              {/* eslint-disable-next-line react-hooks/static-components -- registry lookup, not a component factory; `sims` is built once at module scope */}
               <Sim
                 moduleId={moduleId}
                 params={layer.params}

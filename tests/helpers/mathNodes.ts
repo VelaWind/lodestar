@@ -125,6 +125,7 @@ export function mathNodesOf(module: Module): MathNode[] {
  * trace is the line break itself. Nothing here authors LaTeX across lines, and a
  * `mathBlock` that wanted to would carry `\\` in a plain string, not a raw one.
  */
+// eslint-disable-next-line no-control-regex -- the control characters are the subject: this pattern exists to detect them in tex that a template-literal cooker damaged
 const CONTROL = /[\t\n\v\f\r\0\x08]/;
 
 /**

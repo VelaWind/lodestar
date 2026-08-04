@@ -152,7 +152,6 @@ export function routeHeadsPlugin(): Plugin {
 
       writeFileSync(join(outDir, 'sitemap.xml'), sitemapXml(routes));
 
-      // eslint-disable-next-line no-console
       console.log(
         `\nroute heads: ${routes.length} routes, ${written} files + sitemap.xml ` +
           `(${routes.map((r) => r.path || '/').join(', ')})`,

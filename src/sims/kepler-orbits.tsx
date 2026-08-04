@@ -401,7 +401,7 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
     };
     // `sweep` is deliberately absent: toggling the overlay must not restart the
     // orbit. The effect below hands it to the live scene instead.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `sweep` is omitted on purpose; listing it would restart the orbit whenever the overlay is toggled, and the effect below feeds it to the live scene instead
   }, [M, a, e, T, geom, rate, reduced, paint]);
 
   useEffect(() => {

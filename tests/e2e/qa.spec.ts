@@ -105,7 +105,6 @@ function assertClean(w: Watcher, where: string): void {
     w.all.length === 0
       ? 'silent'
       : `${w.errors.length} error / ${w.warnings.length} warning / ${w.all.length} total`;
-  // eslint-disable-next-line no-console
   console.log(`  console[${where}]: ${summary}`);
   for (const line of w.all.slice(0, 8)) console.log(`      ${line}`);
 
@@ -117,7 +116,6 @@ function assertClean(w: Watcher, where: string): void {
   const excused = w.errors.length + w.pageErrors.length - errors.length - pageErrors.length;
   if (excused > 0) {
     const why = ignorable(w.errors.find(ignorable) ?? w.pageErrors.find(ignorable) ?? '')?.why;
-    // eslint-disable-next-line no-console
     console.log(`      (${excused} excused: ${why})`);
   }
 
@@ -775,7 +773,6 @@ test('gravitational-waves audio schedules without throwing', async ({ page }) =>
     'audio started but never ended for the default binary',
   ).toBeVisible({ timeout: 15_000 });
 
-  // eslint-disable-next-line no-console
   console.log(`  audio[default binary]: ${w.all.length === 0 ? 'silent' : w.all.join(' | ')}`);
   expect(w.pageErrors, 'exceptions from the Web Audio path (default binary)').toEqual([]);
 
@@ -795,7 +792,6 @@ test('gravitational-waves audio schedules without throwing', async ({ page }) =>
     timeout: 5_000,
   });
   await page.waitForTimeout(1_500);
-  // eslint-disable-next-line no-console
   console.log(`  audio[neutron stars]: ${w.all.length === 0 ? 'silent' : w.all.join(' | ')}`);
   expect(w.pageErrors, 'exceptions from the Web Audio path (neutron stars)').toEqual([]);
 
@@ -912,7 +908,6 @@ test('social preview image is declared absolutely and resolves', async ({ page }
   ).toContain('image/png');
 
   const bytes = (await response.body()).length;
-  // eslint-disable-next-line no-console
   console.log(`  og:image ${image} — ${response.status()}, ${(bytes / 1024).toFixed(1)} kB`);
   expect(bytes, 'og:image looks empty').toBeGreaterThan(5_000);
 
@@ -990,7 +985,6 @@ test('layout: breakouts stay centred on the prose column', async ({ page }) => {
     const stage = await geometry(page, '#layer-panel-play .breakout');
     const canvas = await geometry(page, '#layer-panel-play canvas');
 
-    // eslint-disable-next-line no-console
     console.log(
       `  layout[${width}] prose ${prose.left}..${prose.right} (c ${prose.centre}) · ` +
         `stage ${stage.left}..${stage.right} (c ${stage.centre}) · canvas ${canvas.width}px`,
@@ -1032,7 +1026,6 @@ test('layout: breakouts stay centred on the prose column', async ({ page }) => {
 
     const hero = await geometry(page, 'main header p');
     const cards = await geometry(page, 'main ul.breakout');
-    // eslint-disable-next-line no-console
     console.log(
       `  layout[${width}] hero c ${hero.centre} · cards ${cards.left}..${cards.right} (c ${cards.centre})`,
     );
@@ -1117,7 +1110,6 @@ for (const [name, path] of A11Y_PAGES) {
     );
 
     if (advisory.length > 0) {
-      // eslint-disable-next-line no-console
       console.log(
         `  a11y[${name}] advisory: ` +
           advisory.map((v) => `${v.impact}/${v.id} x${v.nodes.length}`).join(', '),
@@ -1420,7 +1412,6 @@ test('behaviour: kepler sweeps equal areas and moves non-uniformly', async ({ pa
   expect(star.n, 'the star should be a small disc, not a field of pixels').toBeLessThan(4_000);
 
   const spread = await readouts(page, 'kepler-orbits');
-  // eslint-disable-next-line no-console
   console.log(`  kepler: periapsis ${spread['periapsis']}, apoapsis ${spread['apoapsis']}`);
 
   await rememberFrame(page);
@@ -1459,7 +1450,6 @@ test('behaviour: kepler sweeps equal areas and moves non-uniformly', async ({ pa
     }
     return { near, far, nearReach, farReach };
   }, star.x);
-  // eslint-disable-next-line no-console
   console.log(`  kepler: wedge pixels near ${near} / far ${far}, reach ${nearReach.toFixed(0)} / ${farReach.toFixed(0)}`);
   expect(near, 'no wedge shading on the periapsis side of the focus').toBeGreaterThan(200);
   expect(far, 'no wedge shading on the apoapsis side of the focus').toBeGreaterThan(200);
@@ -1545,7 +1535,6 @@ test('behaviour: kepler sweeps equal areas and moves non-uniformly', async ({ pa
   const sorted = [...steps].sort((a, b) => a - b);
   const median = at(sorted, Math.floor(sorted.length / 2), 'angular steps');
   const largest = at(sorted, sorted.length - 1, 'angular steps');
-  // eslint-disable-next-line no-console
   console.log(
     `  kepler: angular step median ${median.toFixed(4)} rad, max ${largest.toFixed(4)} rad, ratio ${(largest / median).toFixed(0)}x`,
   );
@@ -1625,7 +1614,6 @@ test('behaviour: the scale ladder walks ten rungs in size order', async ({ page 
   };
   const classes = rungs.map((r) => classOf(r.light));
   const classAt = (i: number): number => at(classes, i, 'crossing-time classes');
-  // eslint-disable-next-line no-console
   console.log(`  ladder: ${rungs.map((r) => r.light).join(' -> ')}`);
   for (let i = 1; i < classes.length; i += 1) {
     expect(
@@ -1721,7 +1709,6 @@ test('behaviour: the tidal verdict flips where the physics says it does', async 
   // The threshold sits between the two readings that straddle the flip, so the
   // mass it corresponds to sits between the masses those readings came from.
   const expected = massAt(Math.sqrt(lastLethal.g * firstSurvivable.g));
-  // eslint-disable-next-line no-console
   console.log(
     `  black holes: flip between ${lastLethal.mass.toExponential(2)} kg (${lastLethal.g.toPrecision(3)} g) and ${firstSurvivable.mass.toExponential(2)} kg (${firstSurvivable.g.toPrecision(3)} g); tidal physics puts it at ${expected.toExponential(2)} kg`,
   );
@@ -1789,10 +1776,10 @@ test('behaviour: the chirp sonification runs and tears itself down', async ({ pa
         probe.last = this;
         for (const name of ['createOscillator', 'createGain'] as const) {
           const original = this[name].bind(this);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- monkey-patching a DOM class to count node creations; the index signature does not exist on the typed AudioContext
           (this as any)[name] = (...rest: unknown[]) => {
             probe.nodes.push(name);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- calling back through the captured original, whose overloads cannot be expressed once erased
             return (original as any)(...rest);
           };
         }
@@ -1846,7 +1833,6 @@ test('behaviour: the chirp sonification runs and tears itself down', async ({ pa
   const inspiral = bnsReadouts['from 30 hz to merger'] ?? '';
   const observed30 = seconds(inspiral);
   const predicted30 = timeToMerger(mc, 30);
-  // eslint-disable-next-line no-console
   console.log(
     `  gravitational waves: 30 Hz to merger reads ${inspiral}, quadrupole formula gives ${predicted30.toFixed(1)} s`,
   );
@@ -2089,7 +2075,6 @@ test('behaviour: the registry publishes seven modules and leaks no drafts', asyn
     ).not.toContainText('draft');
   }
 
-  // eslint-disable-next-line no-console
   console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
   expect(planned, 'planned-chip total across every published page').toBe(3);
 
@@ -2819,7 +2804,6 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
       `${id}: the caption should carry prose as well as the credit`,
     ).not.toBe(creditText);
 
-    // eslint-disable-next-line no-console
     console.log(
       `  figure[${id}]: ${shown.naturalWidth}x${shown.naturalHeight} natural, ` +
         `${shown.renderedWidth}px rendered — ${creditText}`,

@@ -155,7 +155,6 @@ test('every route serves its own head', async ({ request, baseURL }) => {
   expect(checked.length, 'nine routes checked').toBe(9);
   expect(new Set(checked).size, 'every route path is distinct').toBe(9);
 
-  // eslint-disable-next-line no-console
   console.log(`  heads: ${checked.length} routes, each with its own title, description and canonical`);
 });
 
@@ -178,6 +177,5 @@ test('the sitemap is a real file listing every route', async ({ request, baseURL
     expect(locs, `${module.id} in the sitemap`).toContain(`${SITE_ORIGIN}/m/${module.id}`);
   }
 
-  // eslint-disable-next-line no-console
   console.log(`  sitemap: ${locs.length} URLs`);
 });

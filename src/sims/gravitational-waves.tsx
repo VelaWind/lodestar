@@ -460,6 +460,7 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
       rafRef.current = null;
     }
     sceneRef.current = win ? { mc, d, window: win, progress: 1, samples: null } : null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the canvas scene lives in a ref and this is the one flag React owns; both are rebuilt together so the button and the drawing cannot disagree
     setSweeping(false);
     paint();
 

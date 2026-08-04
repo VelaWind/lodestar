@@ -209,7 +209,6 @@ function emit(title: string, results: CheckResult[]): CheckBlock {
   const failures = results.reduce((n, r) => n + (r.passed ? 0 : 1), 0);
   const summary = `${title} — ${results.length - failures}/${results.length} passed`;
 
-  // eslint-disable-next-line no-console
   console[failures > 0 ? 'warn' : 'info'](
     `[lodestar] ${summary}\n${results.map((r) => r.line).join('\n')}`,
   );
@@ -274,7 +273,6 @@ export function verifyEscapeIntegrator(): CheckBlock {
     `      ${detail}` +
     `  ·  Δ ${(error * 100).toFixed(4)}%  ·  tolerance ±1.0%`;
 
-  // eslint-disable-next-line no-console
   console[passed ? 'info' : 'warn'](`[lodestar] ${line}`);
 
   return { title: name, results: [{ name, passed, detail, line }], failures: passed ? 0 : 1 };

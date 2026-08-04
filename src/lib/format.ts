@@ -170,6 +170,7 @@ function logDomain(param: Param): { lo: number; hi: number } {
     return { lo: param.min, hi: param.max > param.min ? param.max : param.min * 10 };
   }
   if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console -- dev-only authoring diagnostic; the `import.meta.env.DEV` guard means Vite strips this from the production bundle
     console.warn(
       `[lodestar] Param "${param.id}" is scale:'log' but min=${param.min}. ` +
         `A log axis cannot include zero or negative values; clamping the domain ` +

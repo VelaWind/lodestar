@@ -33,6 +33,7 @@ for (const [path, mod] of Object.entries(moduleFiles)) {
   const data = mod.default;
   if (import.meta.env.DEV && data.id !== key) {
     // A mismatch silently breaks deep links, so shout during development.
+    // eslint-disable-next-line no-console -- dev-only authoring diagnostic; the `import.meta.env.DEV` guard means Vite strips this from the production bundle
     console.error(
       `[registry] ${path} declares id "${data.id}" but its filename says "${key}". ` +
         `The filename is the URL; make them match.`,

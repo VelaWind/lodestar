@@ -293,9 +293,20 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
     );
   }, []);
 
-  /* Position before paint, so the panel never appears in the wrong place first. */
+  /*
+   * Position before paint, so the panel never appears in the wrong place first.
+   *
+   * The `setPlacement(null)` on close is what `react-hooks/set-state-in-effect`
+   * objects to, and it is deliberate: a placement is a measurement of a panel
+   * that no longer exists, and clearing it is what makes `visibility: hidden`
+   * the mount state next time. Keeping a stale one would let a panel paint at
+   * the previous trigger's coordinates for the frame before it is re-measured.
+   * It cannot be derived during render either — the value comes from
+   * `getBoundingClientRect` on a node that has to be in the document first.
+   */
   useLayoutEffect(() => {
     if (!open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clearing a measurement of a panel that has just unmounted; there is nothing to derive it from during render
       setPlacement(null);
       return;
     }

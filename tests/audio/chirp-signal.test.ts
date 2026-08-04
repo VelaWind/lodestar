@@ -540,7 +540,6 @@ describe('chirp signal: measured', () => {
         ].join('\n'),
       );
     }
-    // eslint-disable-next-line no-console
     console.log(`\n${rows.join('\n')}\n`);
     expect(rows.length).toBe(CASES.length);
   });

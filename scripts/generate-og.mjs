@@ -81,5 +81,4 @@ const png = await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toBuffer(
 await writeFile(OUT, png);
 
 const { width, height, size } = await sharp(png).metadata();
-// eslint-disable-next-line no-console
 console.log(`wrote ${OUT} — ${width}x${height}, ${(size / 1024).toFixed(1)} kB`);
