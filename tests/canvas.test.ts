@@ -129,6 +129,66 @@ function escapeCases(): Case[] {
       }
     }
   }
+
+  /**
+   * The altitude axis must never label two ticks the same.
+   *
+   * At the heaviest body and the smallest radius, surface gravity is enormous
+   * and an 8 km/s launch barely leaves the ground: the whole axis spans about a
+   * metre and a half, and rounded to whole metres its four ticks read
+   * "1 m / 1 m / 1 m / 0 m". An axis that repeats itself is worse than no axis,
+   * because it looks like a working one.
+   *
+   * Asserted against what was drawn rather than against the tick generator.
+   * The labels all share one x — they are right-aligned in the axis gutter — so
+   * the biggest group of text records at a common x is the axis, and every
+   * string in it has to be distinct.
+   */
+  it('labels every altitude tick differently at the steepest corner', () => {
+    const M = paramOf(params, 'M').max;
+    const R = paramOf(params, 'R').min;
+
+    for (const v of extremes(paramOf(params, 'v0'))) {
+      const apex = apexAltitude(M, R, v.value);
+      const escaping = v.value >= vEsc(M, R);
+      const axis = ev.makeAxis(R, apex, escaping);
+
+      for (const width of [390, 900]) {
+        const { ctx, records } = recordingContext();
+        ev.drawScene(ctx, width, 352, {
+          apex,
+          escaping,
+          axis,
+          flight: null,
+          cursor: 0,
+          altitude: 0,
+          phase: 'ready',
+          staticPath: false,
+        });
+
+        const byColumn = new Map<number, string[]>();
+        for (const record of records) {
+          if (record.kind !== 'text' || record.text === undefined) continue;
+          const column = Math.round(record.x1);
+          byColumn.set(column, [...(byColumn.get(column) ?? []), record.text]);
+        }
+        const axisColumn = [...byColumn.values()]
+          .filter((texts) => texts.includes('surface'))
+          .sort((a, b) => b.length - a.length)[0];
+
+        expect(axisColumn, `M=max R=min v0=${v.stop} at ${width}px: no axis labels drawn`).toBeDefined();
+        expect(
+          axisColumn!.length,
+          `M=max R=min v0=${v.stop} at ${width}px: expected more than one tick`,
+        ).toBeGreaterThan(1);
+        expect(
+          [...axisColumn!].sort(),
+          `M=max R=min v0=${v.stop} at ${width}px: repeated altitude tick labels — ${axisColumn!.join(' / ')}`,
+        ).toEqual([...new Set(axisColumn!)].sort());
+      }
+    }
+  });
+
   return cases;
 }
 
@@ -397,6 +457,50 @@ function atmosphereCases(): Case[] {
   add('lightest gas at max T on the smallest world', paramOf(params, 'M').min, paramOf(params, 'R').max, 2500, h2);
   add('heaviest gas at min T on the largest world', paramOf(params, 'M').max, paramOf(params, 'R').min, 50, co2);
 
+  /*
+   * The corner where the chart title and the escape label shared a line.
+   *
+   * Lightest world, hottest exosphere: the escape line lands far enough left
+   * that the label centred on it clamps to the frame's left edge, which is
+   * where the title is left-aligned. The two rendered interleaved —
+   * "CO₂ æescapet 0.458 km/s". The sweeps above vary one slider against the
+   * others' defaults and never put mass and temperature at opposite extremes
+   * together, so none of them reached it.
+   */
+  for (const gas of GASES) {
+    add(
+      'collision corner: lightest world, hottest exosphere',
+      paramOf(params, 'M').min,
+      dr,
+      paramOf(params, 'T').max,
+      gas,
+    );
+  }
+
+  it('keeps the chart title clear of the escape label at the light-and-hot corner', () => {
+    // The specific pair that overprinted, asserted directly rather than only
+    // through the sweep above, so a failure names the two labels involved.
+    const escapeSpeed = vEsc(paramOf(params, 'M').min, dr);
+    for (const gas of GASES) {
+      for (const width of [390, 900]) {
+        const { ctx, records } = recordingContext();
+        pa.drawScene(ctx, width, 304, {
+          escapeSpeed,
+          temperature: paramOf(params, 'T').max,
+          gas,
+          verdict: retentionVerdict(paramOf(params, 'M').min, dr, paramOf(params, 'T').max, gas.mass)
+            .verdict,
+        });
+
+        const collisions = textCollisions(records);
+        expect(
+          collisions.map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+          `${gas.id} at ${width}px: the title and the escape label overlap`,
+        ).toEqual([]);
+      }
+    }
+  });
+
   it('stretches the speed axis to hold both the curve and the threshold', () => {
     // Hydrogen at 2500 K on a small world: the escape line sits left of the peak.
     const wide = pa.speedAxisMax(vEsc(paramOf(params, 'M').min, paramOf(params, 'R').max), 4541);
@@ -445,6 +549,7 @@ const MEASURED_PLACEMENT = new Set([
   'escape-velocity',
   'black-holes',
   'gravitational-waves',
+  'planetary-atmospheres',
 ]);
 
 for (const sim of SIMS) {

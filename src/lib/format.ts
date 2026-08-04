@@ -93,6 +93,23 @@ export function formatWithUnit(param: Param, si: number): string {
   return unit ? `${n} ${unit}` : n;
 }
 
+/**
+ * The name a screen reader reads for a slider: "Surface radius (m)".
+ *
+ * Named here rather than interpolated at the call site because of the one
+ * parameter on the site with no unit. Eccentricity is genuinely dimensionless —
+ * it is a ratio, and the module says so — and the old template produced
+ * "Eccentricity ()", which a screen reader reads out as a stray bracket pair.
+ * A unitless parameter gets the label alone.
+ *
+ * `paramLabel` picks friendly or technical wording from the tier; this only
+ * decides whether a unit is worth announcing.
+ */
+export function sliderAriaLabel(label: string, param: Param): string {
+  const unit = param.format?.displayUnit?.unit ?? param.unit;
+  return unit ? `${label} (${unit})` : label;
+}
+
 /* ------------------------------- LaTeX output ------------------------------- */
 
 /** `1.23e5` → `1.23 \times 10^{5}` so KaTeX renders it as real scientific notation. */

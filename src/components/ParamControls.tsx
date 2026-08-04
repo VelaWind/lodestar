@@ -10,6 +10,7 @@ import {
   formatWithUnit,
   paramLabel,
   positionToValue,
+  sliderAriaLabel,
   sliderBounds,
   valueToPosition,
 } from '@/lib/format';
@@ -107,7 +108,7 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
                   ),
                 );
               }}
-              aria-label={`${label} (${param.unit})`}
+              aria-label={sliderAriaLabel(label, param)}
               aria-valuetext={formatWithUnit(param, value)}
             />
             {param.scale === 'log' && (

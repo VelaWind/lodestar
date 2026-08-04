@@ -78,7 +78,7 @@ const escapeVelocity: Module = {
         },
         {
           id: 'R',
-          friendlyLabel: 'How big across is it?',
+          friendlyLabel: 'How big is its radius?',
           technicalLabel: 'Surface radius',
           symbol: 'R',
           unit: 'm',

@@ -23,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
+import { schwarzschildRadius } from '@/physics/blackhole';
 import { firstClearPlacement, labelBox, type LabelBox } from './labels';
 import type { Flight } from '@/physics/escape';
 
@@ -34,16 +35,74 @@ const KM = new Intl.NumberFormat('en', { maximumSignificantDigits: 3 });
 const KMS = new Intl.NumberFormat('en', { maximumFractionDigits: 2 });
 
 /** Altitude in metres → a rounded, unit-named string. */
-function formatAltitude(metres: number): string {
+function formatAltitude(metres: number, decimals = 0): string {
   if (!Number.isFinite(metres)) return '∞';
-  if (metres < 1000) return `${Math.round(metres)} m`;
+  if (metres < 1000) return `${metres.toFixed(decimals)} m`;
   return `${KM.format(metres / 1000)} km`;
+}
+
+/**
+ * Axis labels that are all different from each other.
+ *
+ * The altitude axis divides its range into quarters, and at the extreme corner
+ * of the sliders — the heaviest body at the smallest radius, where surface
+ * gravity is enormous and an 8 km/s launch barely leaves the ground — the whole
+ * axis spans about a metre and a half. Rounded to whole metres, four ticks read
+ * "1 m", "1 m", "1 m", "0 m": an axis that says the same thing four times is
+ * worse than no axis, because it looks like a working one.
+ *
+ * So the precision widens until the labels separate, and only if they still do
+ * not — which means two ticks are genuinely at the same height — are the
+ * duplicates dropped. Widening first keeps the tick count stable at every
+ * setting except the degenerate one.
+ */
+function uniqueTickLabels(ticks: Tick[]): { tick: Tick; label: string }[] {
+  for (const decimals of [0, 1, 2, 3]) {
+    const labelled = ticks.map((tick) => ({
+      tick,
+      label: tick.h === 0 ? 'surface' : formatAltitude(tick.h, decimals),
+    }));
+    if (new Set(labelled.map((l) => l.label)).size === labelled.length) return labelled;
+  }
+
+  const seen = new Set<string>();
+  const kept: { tick: Tick; label: string }[] = [];
+  for (const tick of ticks) {
+    const label = tick.h === 0 ? 'surface' : formatAltitude(tick.h, 3);
+    if (seen.has(label)) continue;
+    seen.add(label);
+    kept.push({ tick, label });
+  }
+  return kept;
 }
 
 /** Speed in m/s → km/s, the natural unit at this scale. */
 function formatSpeed(mps: number): string {
   if (!Number.isFinite(mps)) return '—';
   return `${KMS.format(mps / 1000)} km/s`;
+}
+
+/**
+ * The warning for a body the sliders have collapsed into a black hole.
+ *
+ * The mass slider reaches 10³² kg and the radius slider goes down to a
+ * kilometre, so the two together describe a body inside its own event horizon —
+ * at which point the module's whole formula is describing something that cannot
+ * exist. `v_esc = √(2GM/R)` returns a number larger than c and the sim draws a
+ * trajectory for it, which is exactly the quiet lie this project exists to
+ * avoid: an expert spots it in seconds, and a beginner has no way to.
+ *
+ * Strictly `R < r_s`. At `R = r_s` the Newtonian escape speed equals c exactly,
+ * which is the famous coincidence the going-deeper layer is about — that case
+ * is interesting rather than broken, and says so there instead.
+ */
+function collapseNote(M: number, R: number): string | null {
+  const rs = schwarzschildRadius(M);
+  if (!Number.isFinite(rs) || !(R < rs)) return null;
+  return (
+    `Smaller than its own Schwarzschild radius (${formatAltitude(rs)}): ` +
+    `this world is a black hole, and the Newtonian number above has stopped meaning anything.`
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -198,9 +257,8 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
      run from "surface" to "100,000 km", and a fixed 62 px gutter clipped the
      widest of them off the left edge of the canvas at every width — invisible on
      a desktop-sized frame only because nobody looked at the pixel column. */
-  const ticks = axisTicks(axis);
-  const labelOf = (tick: Tick) => (tick.h === 0 ? 'surface' : formatAltitude(tick.h));
-  const widestLabel = ticks.reduce((max, t) => Math.max(max, ctx.measureText(labelOf(t)).width), 0);
+  const ticks = uniqueTickLabels(axisTicks(axis));
+  const widestLabel = ticks.reduce((max, t) => Math.max(max, ctx.measureText(t.label).width), 0);
 
   const plotLeft = Math.max(PAD.left, Math.ceil(widestLabel) + PAD.gutterGap);
   const plotRight = w - PAD.right;
@@ -234,7 +292,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   ctx.lineWidth = 1;
   ctx.textAlign = 'right';
 
-  for (const tick of ticks) {
+  for (const { tick, label } of ticks) {
     const y = yFor(tick.h);
     if (y < yTop - 2 || y > ySurface + 2) continue;
 
@@ -252,7 +310,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.setLineDash([]);
 
     ctx.fillStyle = tick.boundary ? COLORS.star : COLORS.inkFaint;
-    ctx.fillText(labelOf(tick), plotLeft - 8, y);
+    ctx.fillText(label, plotLeft - 8, y);
   }
 
   // Say plainly what the axis is doing. An expert reads a log axis instantly,
@@ -409,6 +467,7 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
   const escapeSpeed = useMemo(() => vEsc(M, R), [M, R]);
   const apex = useMemo(() => apexAltitude(M, R, v0), [M, R, v0]);
   const escaping = v0 >= escapeSpeed;
+  const collapsed = useMemo(() => collapseNote(M, R), [M, R]);
   const ratio = escapeSpeed > 0 ? v0 / escapeSpeed : 0;
 
   const [phase, setPhase] = useState<Phase>('ready');
@@ -649,6 +708,12 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
           {idle ? (reduced ? 'Show trajectory' : 'Launch') : 'Reset'}
         </button>
       </div>
+
+      {collapsed && (
+        <p className="border-t border-edge-soft pt-3 font-ui text-xs leading-relaxed text-ember">
+          {collapsed}
+        </p>
+      )}
     </div>
   );
 }
@@ -690,4 +755,4 @@ function Readout({
  * so the module's real surface stays what it has always been — a default export
  * taking SimProps — and so nobody imports them by accident.
  */
-export const __internals = { drawScene, makeAxis };
+export const __internals = { drawScene, makeAxis, axisTicks, uniqueTickLabels, collapseNote };

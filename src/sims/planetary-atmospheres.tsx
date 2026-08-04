@@ -59,6 +59,9 @@ const VERDICT_COLOR: Record<Retention, string> = {
   loses: '#6b7488',
 };
 
+/** Clear space kept between two labels that share a line. */
+const LABEL_GAP = 8;
+
 /** Centred text nudged inward when it would cross the frame — as the other sims do. */
 function fillTextClamped(
   ctx: CanvasRenderingContext2D,
@@ -189,10 +192,34 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   ctx.lineTo(escapeX, bottom);
   ctx.stroke();
 
+  /*
+   * The escape label shares its line with the chart title, so its left bound is
+   * the title's right edge rather than the frame's.
+   *
+   * Both sit on `top - 12`: the title left-aligned at `left`, the escape label
+   * centred on the escape line and clamped inward when that line is near an
+   * edge. On a light world with a hot exosphere — the mass slider at minimum,
+   * the temperature at maximum — the escape line is far enough left that the
+   * clamp parked the label exactly on top of the title, and the two rendered as
+   * "CO₂ æescapet 0.458 km/s". Measured and dodged rather than moved to another
+   * line, which is what the other sims' collision fixes do and what keeps the
+   * label beside the line it names.
+   */
+  const title = `${scene.gas.label} at ${Math.round(scene.temperature)} K`;
+  ctx.font = '10px Inter, system-ui, -apple-system, sans-serif';
+  const titleRight = left + ctx.measureText(title).width;
+
   ctx.textAlign = 'center';
   ctx.fillStyle = COLORS.ember;
   ctx.font = '600 10px Inter, system-ui, sans-serif';
-  fillTextClamped(ctx, `escape ${formatSpeed(scene.escapeSpeed)}`, escapeX, top - 12, left, right);
+  fillTextClamped(
+    ctx,
+    `escape ${formatSpeed(scene.escapeSpeed)}`,
+    escapeX,
+    top - 12,
+    titleRight + LABEL_GAP,
+    right,
+  );
 
   ctx.font = '10px Inter, system-ui, -apple-system, sans-serif';
   ctx.fillStyle = 'rgba(157,180,255,0.75)';
@@ -209,7 +236,8 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
 
   ctx.textAlign = 'left';
   ctx.fillStyle = COLORS.inkFaint;
-  ctx.fillText(`${scene.gas.label} at ${Math.round(scene.temperature)} K`, left, top - 12);
+  ctx.font = '10px Inter, system-ui, -apple-system, sans-serif';
+  ctx.fillText(title, left, top - 12);
 }
 
 /* ------------------------------------------------------------------ */
