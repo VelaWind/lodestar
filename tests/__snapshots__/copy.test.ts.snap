@@ -1,0 +1,546 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`reader-visible copy > every published module, word for word 1`] = `
+{
+  "black-holes": {
+    "L1 hook": "Pack enough mass into a small enough space, and the speed needed to leave exceeds the speed of light. Past that line, falling inward is the only direction there is.",
+    "L2 intuition": "Picture a river sliding toward a waterfall, and fish that can swim, flat out, one metre per second. Far upstream the current is lazy, and the fish go wherever they please. Nearer the falls, the water quickens. Somewhere in the river is a line where the current itself reaches one metre per second. Past it, no fish returns. A fish there can swim as hard as it likes, in any direction it likes: the water carrying it moves faster than swimming can undo, and every stroke still ends closer to the falls. A black hole works like the river, with space in the role of the water and light in the role of the fastest swimmer. The horizon is the line where the inward flow passes light’s speed. The analogy breaks in one telling place: the fish feels the current, but you would feel nothing at the line. No jolt, no marker, no change in your own physics: the crossing is invisible to the one who crosses it, and that strange fact is genuine relativity, not a defect of the picture.",
+    "L3 approximation 0": "The hole does not rotate. Real ones do, often near the maximum allowed, and spin is not a small correction: for a maximally rotating Kerr hole the prograde innermost stable orbit falls from 3 r_s to 0.5 r_s and the prograde photon orbit with it, the horizon itself becomes oblate, and the energy released by matter falling in rises from 5.7% of its rest mass to 42%. Everything drawn here is the non-rotating limit.",
+    "L3 approximation 1": "The hole carries no charge. This one costs almost nothing: any net charge attracts the opposite sign out of the surrounding plasma and neutralises quickly, so astrophysical holes are uncharged to excellent accuracy.",
+    "L3 approximation 2": "There is no accretion disc, no jet, and nothing else nearby. A real hole of any of these masses is drawn as an isolated vacuum solution here, and everything that makes one visible — the disc, the ring of lensed light, the outflow — is absent.",
+    "L3 approximation 3": "The picture is a plan view of coordinate radii, not a photograph. r_s, 1.5 r_s and 3 r_s are Schwarzschild radial coordinates plotted as if space were flat; the geometry they describe is curved, so the drawn separations are labels rather than distances a ruler would measure. Nor is this what a camera would see: the hole’s own lensing would wrap the far side of the disc into view and swell the dark patch from the horizon’s r_s to a shadow of radius √27 GM/c² ≈ 2.6 r_s, about 5.2 r_s across.",
+    "L3 approximation 4": "The tidal number is a static, radial estimate. It is the head-to-foot stretch on a rigid 1.7 m person falling feet-first, evaluated exactly at the horizon, with the person short compared with r_s. The coefficient is exact for Schwarzschild (the relativistic answer for radial separations is the Newtonian one) but the body is not rigid, does not stay radial, and the figure says nothing about what happens on the way down.",
+    "L3 approximation 5": "The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: including other massless species and the particles a shrinking hole becomes hot enough to emit shortens it by a factor of a few. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.",
+    "L3 approximation 6": "The two panels carry two different scales, each labelled on the canvas. The three radii are drawn to one scale within the geometry panel; the horizon and the comparison object share a separate scale in the size panel. A single scale across both would collapse one panel or the other into a dot.",
+    "L3 caption": "One slider: mass. Sweep it from collapsed stars to the giants in galactic centres and watch the anatomy rescale: the horizon, the ring where light itself can orbit, the innermost stable orbit. Then check the readout that says whether arriving would kill you.",
+    "L4 figure alt": "A bright orange ring, brighter along its lower edge, surrounding a dark central circle.",
+    "L4 real": "A black hole is a region where gravity has won outright, wrapped in an event horizon: the surface of no return, with radius named the Schwarzschild radius after the physicist who found it within weeks of Einstein publishing general relativity. There is no material surface there, and it is startlingly small: the Sun’s works out to three kilometres, and the ten-solar-mass hole the slider starts on spans a city, 29.5 kilometres in radius. Outside it sit two more landmarks. At one and a half horizon radii lies the photon sphere, where light can orbit in circles. At three, the innermost stable circular orbit: closer in than that, no steady orbit exists and matter spirals through. Black holes come in two well-stocked sizes. Stellar-mass holes, a few to a few tens of Suns, are collapsed cores of massive stars; gravitational-wave detectors now catch pairs of them merging routinely. Supermassive holes sit in galactic centres: our own galaxy’s, Sagittarius A*, weighs 4.15 million Suns (its horizon would sit nine Suns deep) and M87’s giant reaches 6.5 billion, a horizon four times wider than Neptune’s whole distance from our Sun. Both have been photographed by the Event Horizon Telescope: the images show a bright ring of hot orbiting gas around a central shadow roughly two and a half times the horizon’s width. The misconception to retire is the cosmic vacuum cleaner. A black hole does not reach out and suck; at any distance, its pull equals that of any other object of the same mass. Swap the Sun for a one-solar-mass hole and every planet keeps its orbit exactly: the Solar System would go dark, not off the rails. What would kill you is more particular: tidal force, the difference between the pull on your head and the pull on your feet. Near a stellar-mass hole that difference reaches millions of g far outside the horizon: lethal long before arrival. At Sagittarius A*’s horizon it is a ten-thousandth of a g: you would cross the point of no return and feel nothing at all. Counterintuitively, the bigger the black hole, the gentler its doorstep. The first image of a black hole: M87*, six and a half billion solar masses, photographed by the Event Horizon Telescope. The glow is hot gas orbiting just outside the horizon; the dark centre is a shadow wide enough to swallow the Solar System. EHT Collaboration",
+    "L5 intro": null,
+    "L5 note (schwarzschild-radius)": "r_s — radius of the event horizon; M — the mass (your slider); G — gravitational constant; c — the speed of light. Linear in mass: ten times the mass, ten times the radius, which is why the anatomy only rescales as you drag.",
+    "L5 note (tidal-at-horizon)": "\\Delta a — difference in pull between head and feet; h — the height of the body, fixed here at 1.7 m (the human rung of the scale ladder). Substituting r_s turns this into \\Delta a = c^{6}h/(4G^{2}M^{2}): tides at the horizon fall as the square of the mass, which is the whole story of survivable versus lethal. Worked example (default, 10 solar masses): r_s = 29.5 km, and \\Delta a at the horizon is about 1.8 × 10⁷ g — eighteen million times Earth’s gravity, across your height alone. Drag the slider to Sagittarius A* and the same formula gives one ten-thousandth of a g.",
+    "L6 deeper": "The horizon carries no local physics. Spacetime there is smooth, curvature is modest for large holes, and an infalling observer crosses in finite proper time having measured nothing special: the horizon is a globally defined surface (the boundary of what can ever send light to infinity), not a place with properties. The escape-velocity framing from this module’s sibling gets the radius right while misdescribing the physics: light does not launch and fall back at r_s; rather, inside, every future-directed path points inward. Once through, reaching the centre is as unavoidable as reaching next Tuesday. For Sagittarius A*, that is at most about a minute of proper time. The diagram above is Schwarzschild: non-rotating, the one-parameter idealization. Astrophysical holes rotate, some rapidly, and rotation reshapes the anatomy: for a maximally spinning Kerr hole the prograde ISCO descends from 3 r_s to 0.5 r_s, photon orbits split by direction, and an ergosphere appears from which orbital energy can be extracted. Accretion-disc spectra and the EHT ring shapes are read against Kerr, not Schwarzschild, templates. Hawking’s 1974 result gives the horizon a temperature, T_H \\propto 1/M, and with it black hole thermodynamics’ strangest feature: negative heat capacity. Absorbing mass makes a hole colder; radiating makes it hotter, so an evaporating hole runs away, ending in a flash. But the temperatures are absurdly low (sixty billionths of a kelvin for one solar mass) and every known black hole is colder than the 2.7 K microwave background around it. They are all, for now, net absorbers: nothing in the present universe is evaporating. Only after the cosmos cools below a hole’s temperature does the 10^{67}-year countdown genuinely begin, and the crossover mass (a hole as warm as today’s CMB) is about the mass of the Moon, far below anything astrophysics knows how to make. Evaporation sharpened the field’s central open problem. Thermal radiation carries no imprint of what fell in, so a hole that evaporates completely seems to erase information. Quantum mechanics forbids that. Hawking held for decades that the information is lost; the 1997 Maldacena duality argued it cannot be; and replica-wormhole calculations since 2019 have recovered, from gravity itself, the Page curve that unitarity demands. The emerging consensus is that information escapes, with no consensus mechanism for how, which keeps the paradox productive fifty years on. Meanwhile the objects themselves became laboratory subjects: LIGO’s first detection was two ~30-solar-mass holes merging, radiating three Suns of mass in a fifth of a second, a peak power briefly exceeding the light of every star in the observable universe combined.",
+    "L7 reason -> escape-velocity": "Setting escape velocity to the speed of light predicts this radius exactly; that module’s going-deeper explains why the agreement is a famous coincidence.",
+    "L7 reason -> gravitational-waves": "When two of these spiral together, spacetime itself carries the announcement.",
+    "L7 reason -> kepler-orbits": "Sagittarius A* was weighed by the stars orbiting it: Kepler’s third law applied at four million solar masses.",
+    "reference 0": {
+      "label": "EHT Collaboration 2019, “First M87 Event Horizon Telescope Results. I”, ApJL 875, L1",
+      "note": "M87* mass and image in layer 4",
+      "url": "https://doi.org/10.3847/2041-8213/ab0ec7",
+    },
+    "reference 1": {
+      "label": "EHT Collaboration 2022, “First Sagittarius A* Event Horizon Telescope Results. I”, ApJL 930, L12",
+      "note": "Sgr A* image in layer 4",
+      "url": "https://doi.org/10.3847/2041-8213/ac6674",
+    },
+    "reference 2": {
+      "label": "GRAVITY Collaboration 2019, “A geometric distance measurement to the Galactic center black hole”, A&A 625, L10",
+      "note": "Sgr A* mass",
+      "url": "https://doi.org/10.1051/0004-6361/201935656",
+    },
+    "reference 3": {
+      "label": "Hawking 1974, “Black hole explosions?”, Nature 248, 30",
+      "note": "Hawking temperature in layer 6",
+      "url": "https://doi.org/10.1038/248030a0",
+    },
+    "reference 4": {
+      "label": "Abbott et al. 2016, “Observation of Gravitational Waves from a Binary Black Hole Merger”, PRL 116, 061102",
+      "note": "GW150914 figures in layer 6",
+      "url": "https://doi.org/10.1103/PhysRevLett.116.061102",
+    },
+    "tagline": "One number, how heavy, decides everything else about it.",
+    "title": "Black Holes",
+  },
+  "escape-velocity": {
+    "L1 hook": "Throw a stone upward and gravity always wins. But every world has a speed — reach it, and nothing ever comes back.",
+    "L2 intuition": "Picture coasting on a bicycle toward a hill, no pedalling allowed. Whether you crest it is decided entirely at the bottom: arrive too slow and you roll back; arrive fast enough and you make it over with speed to spare. Gravity works like a hill stretching away from every planet: steepest at the surface, gentler the farther out you go, and never quite ending. Here is the strange part: although the hill goes on forever, the total climb adds up to a finite amount. So there is a single starting speed that beats it. Below that speed you coast up, slow, stop, and fall back. At or above it, you never stop at all. That threshold is what you are testing when you drag the launch slider below. The analogy breaks in one place: a bicycle loses speed to friction and air resistance, and this hill has neither. Nothing in empty space slows the climb except gravity itself.",
+    "L3 approximation 0": "No atmosphere: no drag, no heating. This is the largest omission near the surface: a real projectile leaving the ground at 11 km/s does not reach space, it burns up like a meteor in reverse. The vacuum result is only honest above roughly 100 km, which is why real launches are powered rather than ballistic.",
+    "L3 approximation 1": "The body is perfectly spherical and does not rotate. Sphericity costs almost nothing (a uniform sphere pulls exactly as a point mass would, so the formula is exact for one) but rotation does: launching eastward from Earth’s equator is worth about 0.47 km/s of free speed, and the equatorial bulge shifts surface gravity by roughly 0.5%.",
+    "L3 approximation 2": "The launch is purely radial: straight up, along the line to the centre. Escape speed itself is direction-independent for an unpowered object, so the threshold shown is correct for any angle that misses the surface; what changes is the path. An angled launch traces a conic section, not the vertical line drawn here.",
+    "L3 approximation 3": "Newtonian gravity only. Above roughly 0.3c the relativistic result departs from this one. At the Schwarzschild radius the Newtonian formula returns exactly c, which is a coincidence of the algebra rather than a derivation (see Going deeper).",
+    "L3 approximation 4": "Two bodies, one of them negligible. The projectile does not recoil the planet, and nothing else pulls on it. Escaping Earth is not escaping the Sun: that needs a further 12.3 km/s from Earth’s orbital position.",
+    "L3 approximation 5": "Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 40 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the apex, where it is slowest.",
+    "L3 approximation 6": "The altitude axis is linear near the surface and logarithmic above, with the switchover marked on the axis. Without it, a 100 km hop and a 10⁶ km escape cannot share a frame. Vertical distances are therefore not comparable across the boundary: the trajectory’s shape is distorted, though every altitude it reads off is exact.",
+    "L3 approximation 7": "Trajectories are integrated with semi-implicit Euler at a fixed timestep, not solved in closed form. The scheme is symplectic, so energy error stays bounded rather than drifting, and the apex it produces agrees with the exact energy-conservation result to well under 1%. The apex altitude reported in the readout is the closed-form value, not the integrated one.",
+    "L3 caption": "Pick a world (how heavy, how big) then choose a launch speed and fire straight up. Watch what falls back and what doesn’t.",
+    "L4 figure alt": "The Earth, half in shadow, rising above the grey cratered horizon of the Moon.",
+    "L4 real": "What the sliders call how heavy and how big are the body’s mass M and radius R. The launch threshold you have been probing is its escape velocity: the minimum speed an unpowered projectile needs at the surface to climb away and never fall back. Despite the name it is a speed, not a velocity: the direction barely matters, so long as you do not aim into the ground. For Earth it is 11.2 km/s, about thirty-three times the speed of sound, or the length of Manhattan every two seconds. The Moon’s is 2.4 km/s, Mars sits at 5.0, Jupiter demands 59.5, and the Sun 618. None of these were measured by launching anything. A body’s mass comes from watching how things orbit it, its radius from imaging and occultations, and escape velocity follows from the two. The most common misconception about it: that rockets must reach escape velocity. They do not. Escape velocity applies to a projectile given all its speed at the surface, coasting ever after. A rocket that keeps thrusting could leave Earth at walking pace, given absurd amounts of fuel. That is hopelessly inefficient, which is why real launches burn hard and early, but nothing in physics forbids it. A related confusion: satellites have not escaped anything. Low Earth orbit needs about 7.8 km/s sideways, and the International Space Station is permanently falling. Escape velocity also draws the line between worlds that keep an atmosphere and worlds that lose one. Gas molecules move at thermal speeds set by temperature; when the fastest of them exceed escape velocity, the atmosphere leaks into space, molecule by molecule. Which is why the Moon is bare while Titan (with a similar escape velocity of 2.6 km/s) holds a nitrogen atmosphere denser than Earth’s. Titan is cold, so its molecules are slow. Temperature and escape velocity set the boundary together; gravity alone does not decide. Earthrise, photographed by Bill Anders from Apollo 8 lunar orbit on 24 December 1968. Getting there took nearly the whole escape budget: the translunar burn left Earth at about 10.8 kilometres per second, within four percent of the escape speed this module computes. NASA / Bill Anders, Apollo 8 (AS8-14-2383)",
+    "L5 intro": null,
+    "L5 note (apex)": "r_{\\max} — farthest distance from the body’s centre; v_0 — launch speed (your slider). Altitude at apex is r_{\\max} - R. As v_0 approaches v_{\\text{esc}}, the denominator approaches zero and the apex runs away to infinity — that divergence is the escape threshold itself. Worked example (Earth sliders at default): M = 5.972 × 10²⁴ kg, R = 6.371 × 10⁶ m gives v_{\\text{esc}} = 11.19 km/s. Launching at v_0 = 8 km/s puts the apex near 6,700 km of altitude — a little more than one Earth radius up — before the fall back begins.",
+    "L5 note (escape-velocity)": "v_{\\text{esc}} — escape velocity at the surface; G — gravitational constant; M — mass of the body (your slider); R — its radius (your slider).",
+    "L6 deeper": "The derivation is two lines of energy bookkeeping. Specific orbital energy is \\varepsilon = v^2/2 - GM/r; escape means reaching r \\to \\infty with v \\geq 0, i.e. \\varepsilon \\geq 0. The non-obvious step is that the well has finite depth at all: \\int_R^\\infty GM/r^2\\,dr = GM/R converges. Setting v^2/2 = GM/R gives v_{\\text{esc}} = \\sqrt{2GM/R}. Note it is \\sqrt{2} times the circular orbit speed at the same radius, which is why “add 41% to orbital velocity” is a serviceable rule of thumb for leaving from orbit. The assumptions, stated as assumptions. Spherical symmetry, so the shell theorem reduces the body to a point mass, degraded for oblate or irregular bodies at low altitude. An isolated two-body system: in reality, escaping Earth’s well only delivers you into the Sun’s; leaving the Solar System from Earth’s surface takes about 16.6 km/s once Earth’s orbital motion is spent wisely. A non-rotating body: Earth’s equator donates 0.47 km/s eastward for free, which is why launch sites crowd the equator. A vacuum: atmospheric drag makes an actual 11 km/s surface launch a fireball, so quoted escape velocities are surface values applied, in practice, from above the atmosphere. And Newtonian gravity throughout. That last assumption fails interestingly. Set v_{\\text{esc}} = c and solve for the radius: r = 2GM/c^2, which is exactly the Schwarzschild radius of general relativity. Michell in 1784 and Laplace after him ran this argument and predicted “dark stars.” The numerical agreement is a coincidence: the Newtonian picture of light as a projectile that decelerates is wrong twice over, in ways that cancel. In relativity nothing slows the light; inside the horizon there are no outgoing paths at all. Atmospheric escape, by contrast, is a live research field. The mechanisms — Jeans escape from the thermal tail, hydrodynamic outflow, solar-wind stripping and sputtering — operate at rates MAVEN has now measured at Mars: roughly 100 grams per second lost to solar-wind stripping today, a few kilograms per second in total, spiking during solar storms, and integrating to most of Mars’s original atmosphere over four billion years. Zahnle and Catling’s “cosmic shoreline” — an empirical line in the plane of escape velocity versus stellar irradiation separating airless bodies from air-bearing ones — turns this module’s parameter into an axis of one of exoplanet science’s open questions: whether rocky planets around M-dwarfs sit above or below the line. The first JWST measurements of the inner TRAPPIST-1 planets lean toward bare rock, and the question is unsettled.",
+    "L7 reason -> black-holes": "Where escape velocity reaches the speed of light — and why that Newtonian phrasing is famously almost right.",
+    "L7 reason -> kepler-orbits": "Below escape speed, aim sideways instead of up: escape velocity is √2 times circular orbit speed, and everything between the two thresholds is an orbit.",
+    "L7 reason -> planetary-atmospheres": "The shoreline between worlds that keep their air and worlds that leak it into space.",
+    "reference 0": {
+      "label": "NASA Planetary Fact Sheet (D. R. Williams, NASA GSFC)",
+      "note": "Planetary escape velocities quoted in layer 4",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+    },
+    "reference 1": {
+      "label": "CODATA 2018 recommended values of the fundamental constants",
+      "note": "Value of G",
+      "url": "https://physics.nist.gov/cuu/Constants/",
+    },
+    "reference 2": {
+      "label": "Jakosky et al. 2018, “Loss of the Martian atmosphere to space”, Icarus 315",
+      "note": "MAVEN loss rates in layer 6",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0019103517306917",
+    },
+    "reference 3": {
+      "label": "Zahnle & Catling 2017, “The Cosmic Shoreline”, ApJ 843:122",
+      "note": "Escape velocity vs irradiation boundary",
+      "url": "https://iopscience.iop.org/article/10.3847/1538-4357/aa7846",
+    },
+    "reference 4": {
+      "label": "Bate, Mueller & White, “Fundamentals of Astrodynamics”",
+      "note": "Energy derivation and orbital mechanics background",
+      "url": "https://store.doverpublications.com/0486600610.html",
+    },
+    "tagline": "How fast you have to throw something so gravity never gets it back.",
+    "title": "Escape Velocity",
+  },
+  "exoplanets": {
+    "L1 hook": "We know of more than six thousand planets around other stars, and we have photographed almost none of them. Most were found by watching starlight blink.",
+    "L2 intuition": "Watch a streetlight from across a valley at night. A moth is circling it, far too small and too far away for you to see. But every time the moth crosses in front of the bulb, the light dims. Not much: a flicker at the edge of what you can measure. You could never point to the moth. Yet if the flicker comes back again and again on a perfect schedule — same dimming, same duration, like clockwork — you know something is circling that light, you know how big it is compared to the bulb, and you know how long its laps take. You have discovered the moth without ever seeing it. That is the transit method. The streetlight is a star, the moth is a planet, and the schedule is everything: one dip could be anything, but the same dip returning on the same clock is an orbit. The analogy breaks in one place that matters: a streetlight shines steadily, but real stars flicker on their own, with spots, flares, and a constant simmer of variation often larger than the dip itself. Finding the planet means telling its metronome-regular shadow apart from the star’s own restlessness, which is why it took space telescopes staring at one field for years.",
+    "L3 approximation 0": "The stellar disc is uniformly bright. It is not: a star is limb-darkened, dimmer at the edge than at the centre, because looking at the limb you see higher and cooler layers. So a real light curve has no corners: the planet blocks less light as it first crosses the dim limb, and the shoulders of this trapezoid are rounded off. Fitting that curvature is how limb-darkening coefficients are measured, and getting it wrong biases the planet radius by a few percent.",
+    "L3 approximation 1": "The transit is central: the planet crosses the middle of the disc, impact parameter zero. Almost none are. A real transit is a chord, and a shorter one: a planet crossing near the limb takes less time and gives a V-shaped curve with barely any flat bottom. Duration and impact parameter are degenerate in a single light curve, which is why a measured planet radius always comes with a fitted impact parameter beside it.",
+    "L3 approximation 2": "The orbit is circular and edge-on. Eccentricity changes the transit duration through the planet’s speed at conjunction (a planet transiting near periapsis crosses faster) and the "chance of alignment" readout is the geometric probability for a circular orbit only.",
+    "L3 approximation 3": "The planet is opaque, spherical and contributes no light of its own. Real hot Jupiters emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are oblate enough to matter.",
+    "L3 approximation 4": "One planet, one star. Multi-planet systems perturb each other, and those perturbations shift transit times by minutes: transit timing variations, which is how several planets have been found without ever seeing their own transit.",
+    "L3 approximation 5": "The frame shows the transit and half again either side, not the whole orbit. At the default settings the transit is 3% of the period, and for an Earth around a Sun it is 0.15%: an axis spanning one orbit would draw the dip a pixel wide. What is inside the frame is to scale (the planet against the star, and its speed across the disc); the axis simply stops at the edges of the event.",
+    "L3 approximation 6": "Depth is capped at total. The sliders reach a planet larger than its star, which is a real configuration for a 2 R_J planet around a 0.1 R_☉ dwarf; there the "transit" is a total eclipse and the flux goes to zero rather than the formula’s negative.",
+    "L3 caption": "Build the system: a star, a planet, an orbit. Then watch the crossing and the dip it carves: top panel the view, bottom panel the measurement, on the same clock.",
+    "L4 figure alt": "A graph of measured stellar brightness dipping sharply and briefly at each transit of the planet.",
+    "L4 real": "A transit is a planet crossing its star’s face as seen from here, and the record of brightness against time is a light curve. Its dip carries the geometry directly: the depth — the fraction of light lost — is the ratio of the two discs’ areas, so a dip of one percent means a planet one tenth its star’s diameter. Jupiter crossing the Sun would dim it by about 1%. Earth would manage 84 parts per million (a porch light dimming for a gnat) which is the whole reason finding another Earth required leaving the atmosphere. The method’s short history is steep. The first planet around a Sun-like star, in 1995, was found by a different technique (the wobble it raised in its star) and turned out to be a giant skimming its star in four days, a hot Jupiter no theorist had ordered. The first transit came in 1999, when one of those giants, HD 209458 b, was caught dimming its star by about 1.5% right on the wobble’s schedule. Then the strategy scaled: NASA’s Kepler telescope stared at one patch of 150,000 stars for four years, and found planets in such numbers that the count now exceeds six thousand, most of them transit discoveries. Rocky worlds between Earth’s size and Neptune’s, a kind our own system lacks, turned out to be the most common find of all. Transits have a built-in blind spot: the orbit must be edge-on to us. For a planet like Earth around a star like the Sun, that alignment is roughly a 1-in-213 accident. Every count is therefore a floor: for each transiting world, a couple of hundred siblings hide at other tilts, and correcting for this is how we know the galaxy holds more planets than stars. The misconception to retire is that a transit shows a silhouette. Nothing is resolved; the star itself is a single point of light. Everything in this module — the planet’s size, its orbit, its very existence — is read out of one wiggling number, brightness against time. That a dip in a graph can weigh in as discovery of a world is the method’s actual magic. A real transit: the Kepler space telescope watching the hot Jupiter HAT-P-7b cross its star, the mission’s first published light curve. The dip is under one percent, and where the sim draws a trapezoid, nature rounds the corners. NASA / Kepler mission",
+    "L5 intro": null,
+    "L5 note (transit-depth)": "\\delta — fraction of the star’s light blocked (dimensionless); R_p — the planet’s radius (your slider); R_\\star — the star’s radius (your slider). Areas, not radii: a planet half the star’s radius blocks a quarter of its light.",
+    "L5 note (transit-duration)": "T — time from first contact to last; P — the orbital period, which Kepler’s third law supplies from the star’s mass M_\\star and the distance a (both your sliders) — this equation reads the same period() the orbits module runs on; a — the orbital distance. The arcsin is the slice of the orbit the star’s disc subtends. Worked example (defaults — a hot Jupiter at 0.05 AU): \\delta = 1.01%, and P = 4.08 days gives T = 3.2 hours. Slide the planet out to Earth’s distance and shrink it to Earth’s size: the dip collapses to 84 parts per million, 13 hours long, once a year — the signal Kepler was built to catch.",
+    "L6 deeper": "The duration formula is the central-chord best case, and its failure modes are the working tools. A real transit crosses at impact parameter b, the miss distance from the disc’s centre in stellar radii; the chord shortens as \\sqrt{1 - b^2}, so duration alone cannot separate a grazing pass of a big star from a central pass of a small one. The degeneracy is broken by the dip’s shape: ingress and egress lengthen and the bottom rounds as b grows, which is why fitting the full curve (not reading off depth and width) is how parameters are actually extracted. Limb darkening rounds the shoulders further: a stellar disc is dimmer at its edge, so this module’s trapezoid is the zeroth-order sketch of a subtler profile. The dip also has to earn belief. A background eclipsing binary blended into the same pixel fakes a transit convincingly, and early surveys drowned in such impostors: Kepler’s candidates outnumber its confirmed planets still. Vetting is statistical and multi-instrument: the odd-even depth test (a binary’s alternating eclipses differ), the hunt for a secondary dip at half-phase, and mass limits from the wobble method. When both methods land on the same object, they compound: the transit gives the radius, the wobble gives the mass, and together a density, the single number that says gas giant, water world, or iron-cored rock. The frontier is what happens during the dip itself. A planet with an atmosphere is fractionally bigger at wavelengths its gases absorb, so the transit is measurably deeper there: the depth’s wavelength-dependence is a chemical assay of air on a world no one can see. This is transmission spectroscopy, and JWST performs it routinely: its first clear detection of carbon dioxide in an exoplanet atmosphere, on the hot giant WASP-39 b in 2022, was a proof that the same trick that counts planets can read them. Whether it can read a small one is the open question: the TRAPPIST-1 rocky worlds sit at the edge of feasibility, their measurements to date compatible with thin atmospheres or none, and the answer bears directly on whether transiting rocky planets are airless by rule or by exception.",
+    "L7 reason -> escape-velocity": "Whether a found world holds an atmosphere comes down to the threshold this module ends on.",
+    "L7 reason -> kepler-orbits": "The duration equation imports this module’s third law verbatim: the period under every transit is Kepler’s.",
+    "L7 reason -> planetary-atmospheres": "Transmission spectroscopy reads air on invisible worlds. Whether small planets keep any is the shoreline question.",
+    "reference 0": {
+      "label": "Mayor & Queloz 1995, "A Jupiter-mass companion to a solar-type star", Nature 378, 355",
+      "note": "51 Peg b in layer 4",
+      "url": "https://doi.org/10.1038/378355a0",
+    },
+    "reference 1": {
+      "label": "Charbonneau et al. 2000, "Detection of Planetary Transits Across a Sun-like Star", ApJL 529, L45",
+      "note": "HD 209458 b, the first transit",
+      "url": "https://doi.org/10.1086/312457",
+    },
+    "reference 2": {
+      "label": "Borucki et al. 2010, "Kepler Planet-Detection Mission", Science 327, 977",
+      "note": "The 150,000-star survey in layer 4",
+      "url": "https://doi.org/10.1126/science.1185402",
+    },
+    "reference 3": {
+      "label": "NASA Exoplanet Archive (NExScI, Caltech/IPAC)",
+      "note": "The running count; the 6,000 milestone passed in September 2025",
+      "url": "https://exoplanetarchive.ipac.caltech.edu/",
+    },
+    "reference 4": {
+      "label": "JWST Transiting Exoplanet Community ERS Team 2023, "Identification of carbon dioxide in an exoplanet atmosphere", Nature 614, 649",
+      "note": "WASP-39 b in layer 6",
+      "url": "https://doi.org/10.1038/s41586-022-05269-w",
+    },
+    "tagline": "A star dims by a hundredth, on schedule, and there is a world in the way.",
+    "title": "Exoplanets",
+  },
+  "gravitational-waves": {
+    "L1 hook": "In September 2015, a ripple in space itself swept through Earth. For a fifth of a second it changed the distance between mirrors four kilometres apart, by far less than the width of a single proton. We caught it.",
+    "L2 intuition": "Drop a stone into a still pond and rings spread outward, carrying a little of the splash’s energy away across the surface. Now make the stone two black holes, circling each other dozens of times a second and climbing, and make the pond space itself. Their frantic orbit churns the fabric they sit in, and the disturbance spreads out in all directions at the speed of light, growing fainter as it goes. By the time it washes over Earth, the ripple from even the most violent collision in the universe has thinned to almost nothing. As the two holes spiral closer they circle faster, so the ripples come quicker and stronger, rising together toward a crescendo — and then stop. That rising sweep is called the chirp, and it is what the simulation below draws and plays. The analogy breaks in one deep place: pond ripples are water moving up and down, a thing moving through a medium. A gravitational wave has no medium. It is the distances between things that ripple; the “pond” is the geometry you are made of, and when the wave passes, you are momentarily, very slightly, taller and thinner.",
+    "L3 approximation 0": "Newtonian quadrupole only: the leading-order waveform, with no post-Newtonian corrections. The error grows as the bodies speed up, which is exactly where the signal is loudest: by the last few cycles the orbital velocity is a third of the speed of light and the leading-order phase has drifted measurably from the real one. Real searches match against waveforms carrying corrections to 3.5 post-Newtonian order and beyond, precisely because the phase has to stay right for hundreds of cycles.",
+    "L3 approximation 1": "The waveform stops at the innermost stable circular orbit and there is no merger or ringdown. Everything after that cutoff is numerical relativity rather than algebra: the two bodies plunge together, merge, and the remnant rings down, radiating past the cutoff frequency at amplitudes larger than anything the inspiral formula predicts. GW150914 crosses this model’s cutoff around 68 Hz; the real signal ran on to about 250 Hz, and most of its energy came out after this trace ends. The cutoff itself uses the Schwarzschild ISCO of the combined mass, which is a conventional marker rather than a derived boundary for a two-body system.",
+    "L3 approximation 2": "The orbit is circular, and the bodies are point masses with no spin. Circularity is the mildest assumption here: gravitational radiation itself circularises an eccentric orbit long before it reaches a detector’s band, so it is good late in the inspiral and poor early. Spin is not so mild: it shifts both the cutoff and the phase, and measuring it is one of the things a real detection is for.",
+    "L3 approximation 3": "The amplitude is averaged over sky position and orientation. A real detector measures F₊h₊ + F×h×: what gets through depends on where the source sits in the antenna pattern and how the orbital plane is tilted to the line of sight, varying the strain by a factor of a few either way. The readout is an order-of-magnitude figure, not a prediction of what a particular instrument would record.",
+    "L3 approximation 4": "Nothing here is redshifted. The masses are source-frame and the distance is treated as a simple luminosity distance; a real signal from 410 Mpc arrives with every frequency lowered by (1+z) ≈ 1.09, which is why the mass a detector measures directly — the redshifted, detector-frame chirp mass — is about 30.5 M_☉ for GW150914 while the source-frame value is 28.1.",
+    "L3 approximation 5": "The trace covers the final octave of frequency, and it is played slowly. Choosing an octave rather than a fixed duration keeps the picture honest across the slider’s range (every binary shows the same 7.7 cycles) but the durations differ enormously: 175 ms for the default pair, 7 ms for two neutron stars. Playback is slowed by the factor shown beside it, because at true speed the whole trace would flick past in under a fifth of a second.",
+    "L3 approximation 6": "The sound is a sonification, not a recording. A gravitational wave is a stretching of space, not a pressure wave, and there is nothing to hear where it comes from; the tone is an oscillator driven at the wave’s own frequency and amplitude. The frequencies are true and unshifted (which is possible only because a stellar-mass inspiral happens to sweep through the range human hearing covers) and where the true band falls below about 20 Hz the pitch is held there rather than transposed.",
+    "L3 caption": "Choose two masses and how far away they collide, then watch the final moments of the spiral. The trace rises in frequency and strength together — the chirp — and the button plays it at its true frequencies, which for black holes sit, by coincidence, in the range of human hearing.",
+    "L4 figure alt": "Three stacked panels of gravitational-wave strain against time; in the lowest, the traces from the two detectors overlaid, oscillating faster and larger over two tenths of a second before settling to a flat line.",
+    "L4 real": "A gravitational wave is a travelling stretch-and-squeeze of space, predicted by Einstein in 1916 and radiated by any mass whose motion is violent and lopsided enough: in practice, pairs of compact objects in their final orbits. The wave’s size is expressed as strain, h: the fractional change in any length it crosses. The strains reaching Earth are around 10^{-21} — across the four-kilometre arms of a detector, a few thousandths the width of a proton — a distance smaller than anything else humanity has ever measured. Measuring that takes an interferometer: two perpendicular arms, laser light bouncing between mirrors, arranged so the two beams cancel exactly — until a passing wave stretches one arm while squeezing the other and light leaks through. LIGO’s two detectors caught the first signal, GW150914, on 14 September 2015: the final fifth of a second of two black holes, thirty-six and twenty-nine solar masses, that had spiralled toward each other for the better part of the universe’s age. The wave reached Earth from 1.3 billion light-years away. The signal’s signature is the chirp (frequency and amplitude rising together as the orbit shrinks) and remarkably, one number controls its shape: the chirp mass, a particular blend of the two masses. Read the chirp’s timing and you have weighed the system. Two years later came the discovery that opened a second field: GW170817, two neutron stars, whose chirp lasted nearly a minute and ended in an explosion telescopes could see. Comparing the wave’s arrival with the light’s showed gravitational waves travel at the speed of light to exquisite precision. The misconception to head off sits in this module’s own play button: gravitational waves are not sound. They cross empty space, where sound cannot; playing the chirp is a sonification, honest only because the frequencies happen to be audible ones. And unlike sound or light from a bulb, what falls off with distance is the wave’s amplitude, as 1/d rather than 1/d^2, with the striking consequence that making a detector twice as sensitive reaches twice as far, and so eight times as much universe. The first gravitational wave detected: strain against time at the two LIGO sites on 14 September 2015, the same waveform arriving 6.9 milliseconds apart across the continent. From first tremor to silence the signal lasts a fifth of a second; the sim’s chirp is this curve made audible. Caltech/MIT/LIGO Lab",
+    "L5 intro": null,
+    "L5 note (chirp-mass)": "\\mathcal{M}_c — chirp mass, the one combination of the masses the chirp’s timing measures; m_1, m_2 — the two masses (your sliders). Equal masses give \\mathcal{M}_c \\approx 0.87\\,m; the blend is weighted toward the lighter partner.",
+    "L5 note (strain)": "h — strain, the fractional stretch (dimensionless); d — distance to the source (your slider); f — the wave’s frequency; G, c — the usual constants. \\mathcal{M}_c enters from equation 1, so both mass sliders reach this equation through it. Note the first factor: amplitude falls as 1/d alone. Worked example (defaults — GW150914): m_1 = 36 and m_2 = 29 solar masses give \\mathcal{M}_c = 28.1 solar masses. At the model’s cutoff frequency, 68 Hz, and 408 megaparsecs, h = 1.3 × 10⁻²¹ — which over a four-kilometre arm is a length change of 5 × 10⁻¹⁸ m, about one three-hundredth the width of a proton. Slide both masses down to 1.4 — a neutron-star pair — and the chirp stretches from a fifth of a second to nearly a minute.",
+    "L6 deeper": "Why quadrupole radiation and nothing simpler? Conservation laws forbid the alternatives. Monopole radiation would require the total mass-energy to oscillate; it is conserved. Dipole radiation would require the mass dipole’s second derivative (the centre of mass) to accelerate; momentum conservation forbids it. The leading radiative term is therefore the third derivative of the mass quadrupole, which is why gravitational radiation is so faint and why only violently asymmetric motion emits usefully: a perfectly spherical collapse, however cataclysmic, radiates nothing. The chirp mass is both the model’s power and its confession. To leading order the waveform’s phase evolution depends on m_1 and m_2 only through \\mathcal{M}_c: a 36 + 29 binary and a very different pair with the same chirp mass trace nearly identical chirps. The degeneracy breaks only at higher post-Newtonian orders, where the mass ratio enters; that is how full analyses recover both masses, and why their individual error bars are always wider than the chirp mass’s. The Newtonian quadrupole model here fails in the same regime: it treats the orbit as Kepler’s, and by the last orbits (speeds past a third of light) the post-Newtonian corrections it drops are no longer corrections. The sim’s cutoff at the innermost stable orbit is where even that expansion gives way to numerical relativity, which is how the merger and ringdown beyond the cutoff are actually computed. The waves were believed in long before they were caught. The Hulse–Taylor binary pulsar, found in 1974, is a natural clock in a decaying orbit, and four decades of timing show the decay tracking the energy gravitational waves should carry off to better than a percent. That was the indirect proof, and a Nobel prize, twenty years before LIGO’s direct one. What the field is becoming is an instrument. A chirp’s amplitude and its timing together yield the source’s absolute distance with no rung borrowed from the astronomical distance ladder: a standard siren. GW170817, with its optical counterpart pinning the host galaxy, gave an independent measurement of the universe’s expansion rate; with enough such events, sirens could arbitrate the current tension between competing expansion-rate measurements. And the band is widening at both ends: pulsar timing arrays reported evidence in 2023 of a nanohertz background (plausibly the murmur of supermassive pairs across cosmic history) while the space interferometer LISA is being built for the millihertz decades between, where a million-solar-mass merger rings for hours instead of milliseconds.",
+    "L7 reason -> black-holes": "The objects doing the colliding — and where the energy of three Suns went in a fifth of a second.",
+    "L7 reason -> cosmic-distance-ladder": "Standard sirens measure distance with no ladder at all; every other cosmic distance borrows a rung from somewhere.",
+    "L7 reason -> kepler-orbits": "The inspiral is Kepler’s clockwork right up until it isn’t: the wave’s frequency is set by the orbit’s, doubled.",
+    "reference 0": {
+      "label": "Abbott et al. 2016, “Observation of Gravitational Waves from a Binary Black Hole Merger”, PRL 116, 061102",
+      "note": "GW150914 throughout",
+      "url": "https://doi.org/10.1103/PhysRevLett.116.061102",
+    },
+    "reference 1": {
+      "label": "Abbott et al. 2017, “GW170817: Observation of Gravitational Waves from a Binary Neutron Star Inspiral”, PRL 119, 161101",
+      "note": "The neutron-star event in layers 4 and 6",
+      "url": "https://doi.org/10.1103/PhysRevLett.119.161101",
+    },
+    "reference 2": {
+      "label": "Abbott et al. 2017, “Gravitational Waves and Gamma-Rays from a Binary Neutron Star Merger: GW170817 and GRB 170817A”, ApJL 848, L13",
+      "note": "Speed-of-gravity constraint",
+      "url": "https://doi.org/10.3847/2041-8213/aa920c",
+    },
+    "reference 3": {
+      "label": "Weisberg & Taylor 2005, “The Relativistic Binary Pulsar B1913+16”, ASP Conf. 328",
+      "note": "Hulse–Taylor orbital decay in layer 6",
+      "url": "https://arxiv.org/abs/astro-ph/0407149",
+    },
+    "reference 4": {
+      "label": "Agazie et al. (NANOGrav) 2023, “Evidence for a Gravitational-wave Background”, ApJL 951, L8",
+      "note": "The nanohertz background in layer 6",
+      "url": "https://doi.org/10.3847/2041-8213/acdac6",
+    },
+    "tagline": "Two black holes fall together, and space itself rings.",
+    "title": "Gravitational Waves",
+  },
+  "kepler-orbits": {
+    "L1 hook": "A planet close to its star races; far away, it crawls. The rule tying the two together took humanity two thousand years of sky-watching to find — and it fits on one line.",
+    "L2 intuition": "Watch a child on a swing. Fastest at the very bottom of the arc, slowest at the top of each rise: speed and height trading into each other, back and forth, in a rhythm that repeats exactly. A planet on a stretched orbit runs the same trade with its star. Falling inward, it gains speed, moving fastest at its closest approach. Climbing away, it spends that speed again, drifting slowest at the far end of its path. Then the cycle repeats, and the time it takes (the orbit’s period) comes out the same every single lap. The analogy breaks in one place: a swing needs pushing, because its bearings and the air steal a little energy every pass. An orbit has nothing to rub against. The trade repeats exactly, for millions of years, with nothing driving it.",
+    "L3 approximation 0": "Two bodies and nothing else. No other planet pulls on this one, so the orbit closes exactly and repeats forever. Real multi-planet systems perturb each other continuously: it is those perturbations that turned up Neptune, and that make the Solar System’s long-term evolution a numerical question rather than a formula.",
+    "L3 approximation 1": "The planet is a test particle: it has no mass of its own. A real pair orbits their common barycentre, and both move. The error is of order m/M: negligible for a planet around a star, not negligible for Jupiter and the Sun (the Sun’s wobble about the barycentre is what most exoplanet detections actually measure), and outright wrong for a binary star.",
+    "L3 approximation 2": "Both bodies are point masses. Nothing here has a radius, so the smallest orbits the sliders allow would lie inside a real star, and no tidal distortion or oblateness is modelled.",
+    "L3 approximation 3": "Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 arcseconds per century for Mercury, the discrepancy that made GR famous. The orbit drawn here never precesses.",
+    "L3 approximation 4": "The ellipse is fixed in space and traced repeatedly. With no perturbations and no relativity, periapsis stays put; the animation loops the same closed path indefinitely.",
+    "L3 approximation 5": "Playback is time-accelerated, and by a different factor for every orbit: one full period is compressed to a fixed number of seconds of wall time, so the acceleration factor is shown on the readout and changes as you drag. Relative timing within an orbit is exact: the planet genuinely dawdles near apoapsis, which is the second law and not a rendering artifact.",
+    "L3 approximation 6": "The orbit is scaled to fit the frame and drawn face-on, looking straight down on the orbital plane. Distances within one orbit are therefore comparable to each other but not across slider settings: the ellipse is redrawn to the same size whether it is 0.007 AU or 67 AU across. Real orbits are also inclined to the line of sight, which is why an observed orbit is a projection of the one shown here.",
+    "L3 caption": "Choose a star, choose how far out the planet rides and how stretched its path is, then watch it trade speed for distance. Turn on the sweep to see the trade measured.",
+    "L4 figure alt": "Measured positions of the star S2 tracing a long ellipse around the position of Sagittarius A*, with an inset comparing its track in 2005 and in 2021–2022, the two offset by the precession of the orbit.",
+    "L4 real": "The path is an ellipse (a stretched circle with two special interior points called foci) and the star sits at one focus, not at the centre. How far out is the semi-major axis a, half the ellipse’s long dimension. How stretched is the eccentricity e: zero is a perfect circle, and values approaching one are ever-thinner ovals. The closest point of the orbit is periapsis (perihelion, around the Sun), the farthest apoapsis (aphelion), and one full lap takes the orbital period T. Johannes Kepler extracted three laws from this geometry, working from Tycho Brahe’s naked-eye measurements of Mars: no telescope, a decade of arithmetic. First: orbits are ellipses with the Sun at a focus. Second: a planet sweeps out equal areas in equal times, which is the speed-for-distance trade made precise. Third: the square of the period grows as the cube of the semi-major axis. Press the sweep toggle above and drag a to watch both at work. Real orbits are barely stretched. Earth’s eccentricity is 0.0167: drawn to scale, you could not tell it from a circle by eye. Mercury, the most eccentric planet, reaches 0.206. Halley’s comet runs at 0.967, which is what a very thin ellipse looks like in practice: seventy-five years out, months back around the Sun. The common misconception is that seasons come from this stretch. Earth actually passes closest to the Sun in early January, the depth of northern winter. Seasons come from the tilt of Earth’s axis, not from distance. Newton later showed all three laws fall out of one law of gravity, and that the third law hides a scale: the period depends on the central body’s mass. Modern astronomy runs this backward constantly. Watch anything orbit, time it, and you have weighed what it orbits: the Sun, other stars, and the four-million-solar-mass black hole at the centre of our galaxy, weighed by the stars whipping around it. The star S2, tracked for three decades as it loops around Sagittarius A*, the four-million-solar-mass black hole at the centre of the Galaxy. Its sixteen-year orbit is Kepler’s first law drawn by a real star; at closest approach it moves at nearly three percent of the speed of light, and its ellipse precesses just as general relativity predicts. GRAVITY Collaboration, A&A 692, A242 (2024), CC BY 4.0 (Fig. 2, upper panel)",
+    "L5 intro": null,
+    "L5 note (apsides)": "r_p — periapsis distance, the closest approach; r_a — apoapsis distance, the farthest reach; e — eccentricity (your slider). Worked example (defaults): M = 1.988 × 10³⁰ kg and a = 1.496 × 10¹¹ m give T = 365.3 days. Earth’s e = 0.0167 puts periapsis at 0.983 AU and apoapsis at 1.017 AU — a swing of about five million kilometres that you would never notice from the shape alone.",
+    "L5 note (third-law)": "T — orbital period; a — semi-major axis (your slider); M — mass of the central body (your slider); G — gravitational constant. Note what is absent: e. The period does not care how stretched the orbit is — only how big and around what.",
+    "L6 deeper": "All three laws follow from F = -GMm/r^2 in a few moves. A central force exerts no torque, so specific angular momentum h = r^2\\dot{\\nu} is conserved, and since the areal rate is dA/dt = h/2, the second law is immediate. Energy and angular momentum together force the trajectory into a conic section with the mass at a focus: the first law. The third takes one non-obvious cancellation: T = \\pi a b/(h/2) with b = a\\sqrt{1 - e^2} and h = \\sqrt{GMa(1 - e^2)}: the eccentricity terms annihilate, leaving T^2 = 4\\pi^2 a^3/GM. A comet spending decades in the cold and weeks at perihelion has exactly the period of a circular orbit with the same a. The assumptions, stated as assumptions. The planet is a test particle: the honest form is T^2 = 4\\pi^2 a^3 / G(M + m), and for Jupiter the difference shifts the period by about 0.05%, below this sim’s display precision, far above modern measurement precision. The system is two bodies: real systems are not, and the deviations are the signal; perturbations of Uranus’s orbit located Neptune on paper before any telescope found it. Over long spans the N-body problem turns chaotic: Laskar’s integrations put the inner solar system’s predictability horizon near five million years, after which trajectories — not the planets themselves — dissolve into uncertainty. The bodies are points: real oblateness makes satellite orbits precess, which sun-synchronous spacecraft exploit deliberately. And gravity is Newtonian: Mercury’s perihelion creeps forward 43 arcseconds per century beyond what Newton can book-keep, the first confirmed prediction of general relativity. In 2020 the GRAVITY collaboration watched the star S2 trace the same relativistic precession around the galaxy’s central black hole, at four million solar masses instead of one. The third law is also the working tool of exoplanet science. A star’s radial-velocity wobble plus the law yields planet masses; in packed systems like TRAPPIST-1, planets tug each other’s transit times off schedule, and those deviations weigh worlds too small and dim for any other scale.",
+    "L7 reason -> black-holes": "The mass in Kepler’s third law is how Sagittarius A* was weighed: by the orbits of the stars around it.",
+    "L7 reason -> escape-velocity": "Stretch e toward 1 and add speed: past a threshold the ellipse tears open and never closes. That threshold is escape velocity.",
+    "L7 reason -> exoplanets": "Timing orbits is how we count and weigh planets around other stars.",
+    "reference 0": {
+      "label": "NASA Planetary Fact Sheet (D. R. Williams, NASA GSFC)",
+      "note": "Orbital elements quoted in layer 4",
+      "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/",
+    },
+    "reference 1": {
+      "label": "Murray & Dermott, “Solar System Dynamics”, Cambridge UP",
+      "note": "Derivations and the two-body correction",
+      "url": "https://doi.org/10.1017/CBO9781139174817",
+    },
+    "reference 2": {
+      "label": "GRAVITY Collaboration 2020, “Detection of the Schwarzschild precession in the orbit of the star S2”, A&A 636, L5",
+      "note": "S2 precession in layer 6",
+      "url": "https://doi.org/10.1051/0004-6361/202037813",
+    },
+    "reference 3": {
+      "label": "Laskar 1989, “A numerical experiment on the chaotic behaviour of the Solar System”, Nature 338",
+      "note": "Chaos horizon figure",
+      "url": "https://doi.org/10.1038/338237a0",
+    },
+    "reference 4": {
+      "label": "Grimm et al. 2018, “The nature of the TRAPPIST-1 exoplanets”, A&A 613, A68",
+      "note": "Transit-timing masses in layer 6",
+      "url": "https://doi.org/10.1051/0004-6361/201732233",
+    },
+    "tagline": "Why orbits are ellipses, why the star sits off-centre, and why speed changes.",
+    "title": "Kepler Orbits",
+  },
+  "planetary-atmospheres": {
+    "L1 hook": "Every world is leaking. Earth loses about three kilograms of hydrogen to space each second. It is happening now, quietly, over your head.",
+    "L2 intuition": "Put a handful of ping-pong balls in an open box and shake it. The balls bounce at all different heights — most stay low, a few leap surprisingly high — and if the shaking is vigorous enough, every so often one clears the rim and is gone. An atmosphere is that box. The shaking is heat: the warmer the gas, the faster its molecules dart about, and at any moment a few in the swarm are moving far faster than the rest. The rim is gravity: a world’s escape threshold. Molecules that happen to be in the fast few, headed upward, clear it and never return. Lighter balls bounce higher for the same shake, which is the crucial part: light gases ride the shaking faster than heavy ones, so a world can hold its heavy gases for eternity while its lightest ones drain away. The analogy breaks in one place: the box empties in minutes, because every ball takes its turn near the rim. A planet’s air leaks only from its thin uppermost fringe, and only from the fastest sliver of molecules there, so the draining takes millions to billions of years, a leak measured in geologic time.",
+    "L3 approximation 0": "The verdict is a rule of thumb, not a flux. Real Jeans escape is a rate computed at the exobase (the altitude where a molecule stops colliding on its way out) and it depends *exponentially* on the escape parameter, so a planet does not flip from keeping a gas to losing it at a threshold; it loses it a thousand times faster per unit of λ. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.",
+    "L3 approximation 1": "One temperature stands for the whole exosphere. A real one varies with latitude, with local time, and by a factor of three over the solar cycle: Earth’s thermosphere runs about 500 K at solar minimum and 1500 K at maximum, so the same planet sits at different places on this chart depending on the decade.",
+    "L3 approximation 2": "Only thermal escape is modelled. The mechanisms that actually stripped Mars are missing: hydrodynamic outflow, in which an escaping light gas drags heavier ones with it; solar-wind stripping of an unmagnetised upper atmosphere; sputtering; and impact erosion. That is why a body can fail this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept (see Going deeper).",
+    "L3 approximation 3": "Each gas is judged on its own. In a real atmosphere the species interact: hydrogen escaping from a hydrogen-rich upper atmosphere carries heavier molecules along with it, and photochemistry converts one species into another; water is not lost as water, it is split, and the hydrogen leaves.",
+    "L3 approximation 4": "The planet’s radius is treated as the escape radius. The exobase sits above the surface (several hundred kilometres up on Earth) where gravity is slightly weaker, so a real escape velocity at the escape altitude is a few percent lower than the surface figure used here.",
+    "L3 caption": "Build a world — its heft, its size, the temperature where its air meets space — then pick a gas and see the race: the spread of molecular speeds against the escape threshold. The shaded tail is what leaves.",
+    "L4 figure alt": "The curved edge of Titan, an orange atmosphere fading upward into a thin detached blue haze layer.",
+    "L4 real": "Gas molecules at temperature T move with a spread of speeds — the Maxwell–Boltzmann distribution, the curve in the simulation — and the spread’s location depends on two things: temperature and the molecule’s mass. Hotter means faster; lighter means faster. A hydrogen molecule at a given temperature typically moves about four and a half times as fast as a carbon-dioxide molecule, because it weighs a twenty-second as much. Escape happens from the atmosphere’s top: the exosphere, the altitude where the air is so thin that a molecule flying upward will likely never hit another. From there, any molecule in the distribution’s fast tail that exceeds the escape velocity simply leaves. This slow molecular evaporation is Jeans escape, and because the tail thins so steeply, a serviceable rule of thumb emerges: a gas survives over geologic time when the world’s escape velocity is at least about six times the gas’s typical thermal speed. Below that, the tail is fat enough to drain the reservoir. One number in this story is routinely misjudged: the temperature. What matters is not the weather at the surface but the temperature at the fringe where escape happens. there, absorbed sunlight makes the thin gas hot. Earth’s upper atmosphere runs near a thousand kelvin, hotter than a pizza oven, even while you need a coat below. The rule of thumb sorts most of the Solar System cleanly. Earth holds its nitrogen, oxygen, and carbon dioxide with room to spare. But hydrogen and helium sit below the line, which is why our air has essentially none of the universe’s two most common gases. The helium in a party balloon, once popped, is beginning a one-way trip off the planet. Run the sliders at the Moon’s values and its daytime surface, and carbon dioxide narrowly passes — yet the Moon is bare, a first warning that heat is not the only thief: the solar wind, stripping molecules away one by one over billions of years, finishes off whatever a small world’s gravity can technically hold. Titan, barely stronger than the Moon gravitationally but brutally cold, keeps a nitrogen atmosphere denser than ours, the pairing this site’s escape-velocity module promised. And Jupiter clears the bar even for hydrogen itself, which is how it stayed a gas giant. Then there is Mars, which the rule of thumb gets wrong, and instructively. Run the sliders at Mars values and carbon dioxide reads as marginal-to-retained; the real Mars is nearly airless. The gap is the fingerprint of escape routes this simple picture omits, and the going-deeper layer is about them. Titan’s edge, photographed by Cassini: an atmosphere with half again Earth’s surface pressure, held by a moon with a seventh of Earth’s gravity. It survives because Titan is cold: at 94 kelvin, nitrogen’s thermal tail never reaches escape speed. The detached blue layer is photochemical haze. NASA/JPL-Caltech/Space Science Institute",
+    "L5 intro": null,
+    "L5 note (retention-criterion)": "v_{\\text{esc}} — the escape velocity, computed by the same function the escape-velocity module runs on; M, R — the world’s mass and radius (your sliders). The factor of six is empirical shorthand for “the fast tail is too thin to matter” — the math layer’s honest confession is that this inequality compresses an exponential, and the next layer unpacks it. Worked example (Earth defaults, T = 1000 K): nitrogen’s v_{\\text{th}} = 0.77 km/s against v_{\\text{esc}} = 11.19 km/s — a ratio of 14.5, comfortably kept. Hydrogen’s v_{\\text{th}} = 2.87 km/s gives a ratio of 3.9 — below six, and Earth duly leaks it. Same planet, same temperature: the molecule’s mass alone decides.",
+    "L5 note (thermal-speed)": "v_{\\text{th}} — the most probable molecular speed, the peak of the distribution; T — the exosphere temperature (your slider); k_B — Boltzmann’s constant, the exchange rate between temperature and energy; m — the mass of one molecule of the selected gas (the chips above the chart).",
+    "L6 deeper": "The factor-six rule compresses an exponential, and the compression hides orders of magnitude. The Jeans escape flux scales as e^{-\\lambda} in the escape parameter \\lambda = (v_{esc}/v_{th})^2, so the difference between \\lambda = 15 and \\lambda = 40 is not “somewhat slower” but the difference between an atmosphere with a deadline and one that outlives its star. This is why the verdicts in the simulation switch so sharply as the sliders move: the underlying physics really is that steep, and the three-way verdict is a coarse-grained reading of a cliff. Jeans escape is also the gentlest of the escape routes, and worlds are shaped by the harsher ones. When a light gas is abundant and strongly heated, the upper atmosphere stops leaking molecule-by-molecule and starts flowing outward as a wind — hydrodynamic escape — dragging heavier gases with it; early Venus, Earth, and Mars all likely shed primordial hydrogen this way, and it is happening in real time on close-in exoplanets: the hot giant HD 209458 b trails an escaping hydrogen cloud detected in transit, an atmosphere observably boiling off. Worlds without a protective magnetic field face solar-wind stripping, the mechanism MAVEN measured at Mars. And large impacts can blast off atmosphere wholesale. Mars is the compound case: too small to hold interior heat, it lost its magnetic dynamo, and the wind plus its weak gravity did the rest. The evidence is written in isotopes, where the heavy hydrogen left behind outnumbers its expected share several times over, the residue of oceans’ worth of departed water. The synthesis is the cosmic shoreline: plot worlds by escape velocity against the stellar radiation they endure, and the airless ones separate from the air-bearing ones along a rough empirical line. This module’s sliders move a world across that plane. The live question is which side of the line the galaxy’s most common temperate rocky worlds — those around red dwarfs, whose flaring youth batters young atmospheres — actually fall on; the early JWST verdicts on the TRAPPIST-1 planets lean airless, and the census has just begun.",
+    "L7 reason -> escape-velocity": "The threshold in this module’s inequality is that module’s entire subject: same function, same number, now with a gas to test against it.",
+    "L7 reason -> exoplanets": "The worlds being sorted by the shoreline are found by transits. An escaping atmosphere was itself first seen as a deeper transit.",
+    "reference 0": {
+      "label": "Catling & Kasting 2017, “Atmospheric Evolution on Inhabited and Lifeless Worlds”, Cambridge UP",
+      "note": "Escape mechanisms, the factor-six criterion, and the Earth loss rates in layers 1 and 4",
+      "url": "https://doi.org/10.1017/9781139020558",
+    },
+    "reference 1": {
+      "label": "Zahnle & Catling 2017, “The Cosmic Shoreline”, ApJ 843:122",
+      "note": "The escape-velocity–irradiation plane in layer 6",
+      "url": "https://iopscience.iop.org/article/10.3847/1538-4357/aa7846",
+    },
+    "reference 2": {
+      "label": "Jakosky et al. 2018, “Loss of the Martian atmosphere to space”, Icarus 315",
+      "note": "MAVEN stripping measurements",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0019103517306917",
+    },
+    "reference 3": {
+      "label": "Vidal-Madjar et al. 2003, “An extended upper atmosphere around the extrasolar planet HD209458b”, Nature 422, 143",
+      "note": "The evaporating hot Jupiter in layer 6",
+      "url": "https://doi.org/10.1038/nature01448",
+    },
+    "tagline": "Whether a world keeps its air is a race between gravity and heat.",
+    "title": "Planetary Atmospheres",
+  },
+  "scale-of-the-universe": {
+    "L1 hook": "From a proton to the edge of the visible universe is about forty-two steps, if each step means “ten times bigger.” You are standing fifteen steps from the proton.",
+    "L2 intuition": "You already know how to move through scales: it’s the pinch-zoom on a map. Your street, your city, the country, the continent, the whole planet — each gesture multiplies, and a dozen of them carry you from your rooftop to all of Earth. This module is that gesture, continued in both directions until it runs out of universe. Zoom in past your skin, past cells, past atoms, until you reach the smallest things that can still be called things. Zoom out past the planet, past the Sun’s neighbourhood, past the galaxy, until you reach the largest thing that can be seen at all. The analogy breaks in one place: on the map, every zoom level is crowded with detail. In nature, almost every step of the ladder lands in emptiness: the interesting objects cluster on a few rungs, with vast stretches of nearly nothing between them.",
+    "L3 approximation 0": "The illustrations are icons, not scale drawings. A proton is a filled circle and a galaxy is an ellipse because the point of each rung is its size, not its appearance; nothing about the shapes carries information.",
+    "L3 approximation 1": "Two anchors are never shown to relative scale. They cannot be: at 63,000 to one, drawing a proton beside a hydrogen atom at the same magnification would put the proton below a single pixel. The ratio lives in the zoom transition between rungs, not in any one picture.",
+    "L3 approximation 2": "Quantum objects have no sharp edge. The proton figure is twice a charge radius and the atom figure is twice an orbital expectation value; both are conventions about where a distribution has thinned out enough to stop counting, not measurements of a boundary.",
+    "L3 approximation 3": "The observable-universe figure is a comoving diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.",
+    "L3 approximation 4": "The galaxy’s edge is a convention. A disc that thins out gradually has no diameter until someone picks a surface-brightness cut, and published values for the Milky Way range over roughly a factor of two.",
+    "L3 caption": "Drag from a proton to everything there is. Each stop offers one honest comparison to the stop before, and the readout keeps a running answer to the only question that spans the whole ladder: how long would light take to cross this?",
+    "L4 figure alt": "Thousands of galaxies of varied colours, shapes and sizes scattered across a black field of sky.",
+    "L4 real": "Each factor of ten in size is an order of magnitude: one rung of the ladder you have been dragging. The ladder here runs about forty-two of them, and the sizes on it deserve their fine print. At the bottom, “size” itself goes soft. A proton has no edge; the 1.7 femtometre figure is twice its charge radius, the statistical spread of its electric charge. An atom is even fuzzier: quoted diameters are twice the Bohr radius, the most probable distance of the electron in hydrogen. These are definitions as much as measurements, and they are the best that can be done for objects without surfaces. In the middle, sizes are ordinary facts: a red blood cell near 7.5 micrometres, a human at 1.7 metres, Earth at 12,742 kilometres across. At the top, the natural ruler changes from metres to time. A light-year is the distance light covers in a year (about nine and a half trillion kilometres) and it carries a built-in reminder: light from Proxima Centauri, 4.2 light-years out, shows you that star as it was 4.2 years ago. Every look outward is a look backward. The last rung needs the most care. The observable universe is about 93 billion light-years across — yet the universe is 13.8 billion years old. The two numbers coexist because space itself has been expanding while the light travelled: the galaxies whose ancient light reaches us today have been carried, by that expansion, to some 46 billion light-years away by now. And the common misconception is in the name: the observable universe is not the universe. It is the part from which light has had time to reach us: a horizon, not a wall. What lies beyond is larger, possibly without limit, and genuinely unknown. The Hubble Ultra Deep Field: eleven days of accumulated exposure on a patch of sky about one-thirteenth the width of the full Moon. Nearly every smudge and spiral is a galaxy of billions of stars, some seen as they were more than twelve billion years ago. NASA, ESA, and S. Beckwith (STScI) and the HUDF Team",
+    "L5 intro": null,
+    "L5 note (light-crossing)": "t — time for light to cross the current scale; s — the size you have dialled in (your slider); c — the speed of light. This single relation is the readout beside the sim: it turns any size into a time.",
+    "L5 note (rungs)": "n — how many factors of ten separate the current scale from the bottom of the ladder; s_p — the proton’s 1.68 × 10⁻¹⁵ m, fixed as the reference rung. Worked example (default, the human rung): s = 1.70 m gives t = 5.7 nanoseconds — light crosses you about 176 million times a second — and n = 15.0: you stand fifteen rungs above the proton, with about twenty-seven more rising overhead.",
+    "L6 deeper": "The 93-billion-light-year figure is a comoving diameter, and the distinction it rests on is the working vocabulary of cosmology. The proper distance to a galaxy (where it is “now”) stretches as space expands; the comoving distance factors that expansion out and stays fixed for objects riding the general flow. The observable universe’s radius is the comoving distance light could have travelled since the beginning: the particle horizon, about 46.5 billion light-years by the Planck satellite’s 2018 parameters. The naive answer, 13.8 billion light-years, fails because it treats the photon’s journey as motion through static space; integrating the travel along an expanding metric is what yields the factor of roughly 3.4. Note what the horizon is not. It is not an edge of anything physical, and nothing special sits there: an observer on a galaxy at our horizon sees their own 93-billion-light-year sphere, with us near its rim. Whether the whole universe extends far beyond, or infinitely, is open. Planck’s measurements find spatial curvature indistinguishable from zero; if the universe does curve back on itself, that flatness forces its full extent to be enormously larger than the patch we see, and if it is exactly flat and simply connected, it is infinite. No current measurement decides this. The bottom of the ladder has its own recent story. The proton’s charge radius was, for a decade, the subject of a genuine crisis: measurements using muonic hydrogen in 2010 came in four percent smaller than the accepted value, a gap of over five standard deviations, spawning speculation about new physics. It resolved undramatically: re-measurements of ordinary hydrogen converged on the smaller figure, and CODATA adopted 0.841 femtometres in 2018. The episode is a working lesson in what “the size of the proton” means: not a property read off an object, but the output of a measurement scheme — and schemes can disagree. That the ladder’s rungs cluster where they do is not accident either. Atomic sizes are set by the balance of electromagnetic attraction against quantum mechanics; stellar sizes by gravity against pressure. The structure of the ladder is a map of which force wins at which scale, a question this module leaves open and its connections pick up.",
+    "L7 reason -> cosmic-distance-ladder": "These distances are claims. How astronomers actually measure them, rung by rung, is its own story.",
+    "L7 reason -> expansion-of-the-universe": "Why the visible universe is seven times wider than its age suggests: the expansion that stretches the top rungs of the ladder.",
+    "L7 reason -> kepler-orbits": "The Neptune rung is an orbit, not an object; this is the clockwork inside that dot.",
+    "reference 0": {
+      "label": "CODATA 2018 recommended values of the fundamental constants",
+      "note": "Proton charge radius and Bohr radius",
+      "url": "https://physics.nist.gov/cuu/Constants/",
+    },
+    "reference 1": {
+      "label": "Planck Collaboration 2020, “Planck 2018 results. VI. Cosmological parameters”, A&A 641, A6",
+      "note": "Age, horizon size, and curvature in layers 4 and 6",
+      "url": "https://doi.org/10.1051/0004-6361/201833910",
+    },
+    "reference 2": {
+      "label": "Pohl et al. 2010, “The size of the proton”, Nature 466",
+      "note": "The muonic-hydrogen measurement in layer 6",
+      "url": "https://doi.org/10.1038/nature09250",
+    },
+    "reference 3": {
+      "label": "Bland-Hawthorn & Gerhard 2016, “The Galaxy in Context”, ARA&A 54",
+      "note": "Milky Way dimensions",
+      "url": "https://doi.org/10.1146/annurev-astro-081915-023441",
+    },
+    "reference 4": {
+      "label": "Lineweaver & Davis 2005, “Misconceptions about the Big Bang”, Scientific American 292",
+      "note": "The expansion/horizon confusions layer 6 addresses",
+      "url": "https://www.scientificamerican.com/article/misconceptions-about-the-2005-03/",
+    },
+    "tagline": "Ten rungs from a proton to the observable universe, and the ratios between them.",
+    "title": "Scale of the Universe",
+  },
+}
+`;
+
+exports[`reader-visible copy > the About page, word for word 1`] = `
+{
+  "sections": [
+    {
+      "body": "Every topic on this site is a single module that unfolds in seven layers: from a one-sentence hook, through an analogy and a live simulation, down to the derivation and the open research questions. A depth setting controls which layers open by default, and nothing else: there are no beginner pages and no advanced pages, because parallel versions of the same idea drift apart and quietly start contradicting each other. One text, written once, read at the depth you choose.",
+      "heading": "One module, three readers",
+    },
+    {
+      "body": "Every simulation runs on real physical values in SI units. The sliders wear friendly labels, but underneath each one is a real quantity with a unit and a symbol. The math layer reads the same parameter objects the animation does. Drag a mass slider and the number that appears in the equation is the number in the physics loop. Nothing is staged for the visual. The discipline has teeth. Constants are defined once, cited to CODATA and the IAU, and never inlined. Every approximation a simulation makes — circular orbits, no atmosphere, a trapezoid where reality curves — is disclosed beside the simulation itself, because a reader who knows the field will spot it in seconds, and should find that the site said it first. Every module cites primary sources, and no figure ships unchecked: claims that can be computed are recomputed through the site’s own physics code before publication, and claims that can’t are verified against the paper they cite.",
+      "heading": "The honesty rule",
+    },
+    {
+      "body": "Lodestar is a solo project built in collaboration with Claude Code, and the interesting part is the division of labour. Editorial voice, physics decisions, and every word of module prose stay with the author; the implementation agent builds to spec and is structurally prevented from drifting. The project’s authoring standards — the seven-layer format, the terminology rules, the SI discipline — live in the repository as machine-readable skills the agent loads on every task, so consistency is enforced rather than remembered. Verification runs the same way it would on a team. A sanity suite recomputes known physics (Earth’s year, escape velocity, the Schwarzschild radius of the Sun) through the same code paths the simulations use, on every change. Unit tests snapshot every published equation. An end-to-end suite drives the deployed site in a real browser, at phone and desktop widths, and reads the pixels. It has caught real bugs the unit layer could not see, which is the point of having both.",
+      "heading": "Built solo, with an AI pair",
+    },
+    {
+      "body": "Vite, React 18, TypeScript in strict mode, Tailwind, Zustand, Framer Motion, KaTeX, and hand-drawn Canvas 2D. Content is typed data, not a CMS: a new module is one data file and one simulation component, and the shell discovers both. Deployed on Vercel; tested in CI on every push.",
+      "heading": "The stack",
+    },
+  ],
+  "title": "How Lodestar is built",
+}
+`;
+
+exports[`reader-visible copy > the glossary, word for word 1`] = `
+{
+  "accretion-disc": {
+    "body": "A swirling disc of hot gas spiralling into a compact object, glowing from friction as it falls.",
+    "title": "Accretion disc",
+  },
+  "angular-momentum": {
+    "body": "The measure of orbiting or spinning motion that stays constant unless something twists the system.",
+    "title": "Angular momentum",
+  },
+  "apex": {
+    "body": "The top of the flight: where the projectile stops climbing and starts falling back.",
+    "title": "Apex",
+  },
+  "arcsecond": {
+    "body": "One 3,600th of a degree: about a coin seen from four kilometres away.",
+    "title": "Arcsecond",
+  },
+  "ballistic": {
+    "body": "Unpowered: all the speed is given at launch, and gravity alone does the rest.",
+    "title": "Ballistic",
+  },
+  "barycentre": {
+    "body": "The shared centre of mass two bodies actually orbit; for a star and planet it sits just off the star’s centre.",
+    "title": "Barycentre",
+  },
+  "comoving": {
+    "body": "Distance with cosmic expansion factored out, so it stays fixed for galaxies riding the general flow.",
+    "title": "Comoving",
+  },
+  "cutoff-frequency": {
+    "body": "Where this model stops: the wave frequency at the last stable orbit, just before merger.",
+    "title": "Cutoff frequency",
+  },
+  "eclipsing-binary": {
+    "body": "Two stars orbiting edge-on to us, each dimming the other as it passes; their dips can mimic a planet’s.",
+    "title": "Eclipsing binary",
+  },
+  "eht": {
+    "body": "A network of radio dishes across Earth acting as one planet-sized telescope; it photographed M87* and Sagittarius A*.",
+    "title": "EHT",
+  },
+  "ergosphere": {
+    "body": "A region just outside a spinning hole’s horizon where space itself is dragged around; orbital energy can be extracted there.",
+    "title": "Ergosphere",
+  },
+  "escape-parameter": {
+    "body": "λ: the squared ratio of escape speed to thermal speed; escape rates depend on it exponentially.",
+    "title": "Escape parameter",
+  },
+  "femtometre": {
+    "body": "10⁻¹⁵ metres: the scale of protons and atomic nuclei.",
+    "title": "Femtometre",
+  },
+  "hot-jupiter": {
+    "body": "A gas giant orbiting scorchingly close to its star, circling in days: the easiest kind of planet to find.",
+    "title": "Hot Jupiter",
+  },
+  "hydrodynamic-escape": {
+    "body": "Atmosphere loss as a wind: a heated light gas flows outward in bulk, dragging heavier gases with it.",
+    "title": "Hydrodynamic escape",
+  },
+  "impact-parameter": {
+    "body": "How far off-centre the planet crosses the star’s disc: zero through the middle, near one grazing the edge.",
+    "title": "Impact parameter",
+  },
+  "inspiral": {
+    "body": "The final stage of a binary’s life: the orbit shrinking as gravitational waves carry energy away.",
+    "title": "Inspiral",
+  },
+  "isco": {
+    "body": "The closest distance at which anything can steadily orbit a black hole; closer than this, it spirals in.",
+    "title": "ISCO",
+  },
+  "jeans-escape": {
+    "body": "Atmosphere loss one molecule at a time: the fastest few in the gas exceed escape velocity and leave.",
+    "title": "Jeans escape",
+  },
+  "kerr": {
+    "body": "The exact description of a rotating black hole, found by Roy Kerr in 1963; non-rotating holes follow Schwarzschild’s simpler solution.",
+    "title": "Kerr",
+  },
+  "light-curve": {
+    "body": "A graph of a star’s brightness against time.",
+    "title": "Light curve",
+  },
+  "limb": {
+    "body": "The visible edge of a star’s or planet’s disc.",
+    "title": "Limb",
+  },
+  "luminosity-distance": {
+    "body": "Distance inferred from how much a signal has faded on its way here.",
+    "title": "Luminosity distance",
+  },
+  "magnetic-dynamo": {
+    "body": "The churning of a planet’s molten interior that generates its magnetic field and shields its air.",
+    "title": "Magnetic dynamo",
+  },
+  "maxwell-boltzmann": {
+    "body": "The bell-shaped spread of molecular speeds in a gas: most middling, a few very fast.",
+    "title": "Maxwell–Boltzmann",
+  },
+  "megaparsec": {
+    "body": "About 3.26 million light-years; GW150914’s source sat roughly 410 of them away.",
+    "title": "Megaparsec",
+  },
+  "merger": {
+    "body": "The moment the two objects finally touch and become one.",
+    "title": "Merger",
+  },
+  "muonic-hydrogen": {
+    "body": "Hydrogen with its electron swapped for a heavier muon, which orbits closer and probes the proton more sharply.",
+    "title": "Muonic hydrogen",
+  },
+  "n-body": {
+    "body": "Three or more bodies all pulling on each other; no formula solves it, only computation.",
+    "title": "N-body",
+  },
+  "occultation": {
+    "body": "One body passing in front of another; timing when a star blinks out behind a planet measures the planet’s size.",
+    "title": "Occultation",
+  },
+  "photochemistry": {
+    "body": "Chemistry driven by sunlight: high-altitude molecules are split apart, and the light fragments escape.",
+    "title": "Photochemistry",
+  },
+  "post-newtonian": {
+    "body": "Corrections added to Newtonian gravity, order by order in speed, to approach Einstein’s full theory.",
+    "title": "Post-Newtonian",
+  },
+  "precession": {
+    "body": "A slow rotation of the orbit’s ellipse itself, so the closest-approach point drifts around the star.",
+    "title": "Precession",
+  },
+  "proper-time": {
+    "body": "Time as measured by a clock you carry with you, not by a distant observer.",
+    "title": "Proper time",
+  },
+  "pulsar-timing-array": {
+    "body": "Millisecond pulsars watched as one galaxy-sized detector: passing waves subtly shift their tick arrivals.",
+    "title": "Pulsar timing array",
+  },
+  "quadrupole": {
+    "body": "The simplest lopsidedness of a mass arrangement that can radiate gravitational waves; a perfect sphere cannot.",
+    "title": "Quadrupole",
+  },
+  "red-dwarf": {
+    "body": "The smallest, coolest, most common kind of star: dim, long-lived, and violently flaring when young.",
+    "title": "Red dwarf",
+  },
+  "ringdown": {
+    "body": "The last vibration of the merged hole, ringing like a struck bell as it settles into shape.",
+    "title": "Ringdown",
+  },
+  "schwarzschild-radius": {
+    "body": "The radius of the event horizon: pack a mass inside it and nothing, light included, gets back out.",
+    "title": "Schwarzschild radius",
+  },
+  "shell-theorem": {
+    "body": "Newton’s result that a uniform sphere pulls exactly as if all its mass sat at its centre.",
+    "title": "Shell theorem",
+  },
+  "solar-mass": {
+    "body": "The Sun’s mass used as a unit, about 2 × 10³⁰ kg. A ten-solar-mass hole weighs ten Suns.",
+    "title": "Solar mass",
+  },
+  "sputtering": {
+    "body": "Atmosphere loss by impact: solar-wind particles strike molecules at the top of the air and knock them into space.",
+    "title": "Sputtering",
+  },
+  "standard-deviation": {
+    "body": "The statistician’s yardstick for surprise; five of them makes chance a one-in-a-million explanation.",
+    "title": "Standard deviation",
+  },
+  "strain": {
+    "body": "The fractional stretch a passing wave gives any length; dimensionless, and around 10⁻²¹ at Earth.",
+    "title": "Strain",
+  },
+  "test-particle": {
+    "body": "A body so light its own gravity is ignored: it feels the pull without noticeably pulling back.",
+    "title": "Test particle",
+  },
+  "tidal-force": {
+    "body": "The difference in gravity’s pull between the near and far side of an object, stretching it along its length.",
+    "title": "Tidal force",
+  },
+}
+`;
