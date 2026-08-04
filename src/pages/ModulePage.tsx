@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { LayerId, Module, Param, ParamUpdate } from '@/content/types';
 import { getModule } from '@/content/registry';
+import { useNoindex } from '@/lib/useNoindex';
 import { LAYER_META, LAYER_ORDER, defaultOpenFor } from '@/lib/layers';
 import { defaultsOf, useAppStore } from '@/store/useAppStore';
 import { Layer } from '@/components/Layer';
@@ -178,6 +179,8 @@ function renderLayer(
 }
 
 function NotFound({ id }: { id: string | undefined }) {
+  useNoindex();
+
   return (
     <div className="py-24 text-center">
       <p className="font-prose text-2xl text-ink">No module called “{id}”.</p>

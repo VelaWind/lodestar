@@ -59,8 +59,8 @@ export default defineConfig({
     /*
      * The other two engines, on a deliberately narrower scope.
      *
-     * Everything above runs on Chromium, and for two and a half years of this
-     * project that was the whole of the coverage — which is a gap in exactly
+     * Everything above runs on Chromium, and until these three projects landed
+     * in 64f4855 that was the whole of the coverage — which is a gap in exactly
      * the place the site is most engine-dependent. The glossary tooltip is
      * built on `:focus-visible`, on the order of `pointerdown` against `blur`,
      * and on a portalled `position: fixed` panel measured against the trigger's

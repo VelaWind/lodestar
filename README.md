@@ -41,7 +41,7 @@ Vite · React 18 · React Router · TypeScript (strict) · Tailwind · Zustand �
 
 Each module's Connections layer links onward, including to two modules that were never written — `cosmic-distance-ladder` and `expansion-of-the-universe`. Those links render as "planned" chips rather than dead links, and they are a map of where the subject goes next rather than a commitment to write it.
 
-An address that matches nothing says so. `/m/<unknown>` names the slug it could not find; anything else reaches a quiet not-found page. Neither redirects, because bouncing a stale link to the index hides both that it was wrong and what it asked for.
+An address that matches nothing says so. `/m/<unknown>` names the slug it could not find; anything else reaches a quiet not-found page. Neither redirects, because bouncing a stale link to the index hides both that it was wrong and what it asked for. One tradeoff, disclosed: a static single-page host serves unknown addresses with a 200, so both not-found states mark themselves noindex and drop the canonical while mounted — as close to a real 404 as the platform allows.
 
 ## Development
 

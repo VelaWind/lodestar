@@ -29,6 +29,7 @@ import {
   type Locator,
   type Page,
 } from '@playwright/test';
+import { SITE_ORIGIN } from '../../src/lib/site';
 
 const MODULES = [
   'escape-velocity',
@@ -2828,6 +2829,22 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * with no sign anything had gone wrong and dropped the address they asked for
  * out of the history. A silent redirect is not a 404.
  */
+/**
+ * What the head says while a not-found state is on screen.
+ *
+ * A static host cannot answer 404 — the catch-all rewrite serves the app shell
+ * with a 200 for every unknown address — so the two things a client can still
+ * do have to be true: `robots: noindex` present, and the build's canonical
+ * gone, because a canonical on a not-found page claims the address is the page
+ * of record.
+ */
+async function headMarkers(page: Page): Promise<{ noindex: string | null; canonical: string | null }> {
+  return page.evaluate(() => ({
+    noindex: document.querySelector('meta[name="robots"]')?.getAttribute('content') ?? null,
+    canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href') ?? null,
+  }));
+}
+
 test('an address that matches nothing says so @cross-engine', async ({ page }) => {
   const w = watch(page);
 
@@ -2835,6 +2852,10 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
 
   await page.goto('/no-such-page', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
+
+  const catchAll = await headMarkers(page);
+  expect(catchAll.noindex, '/no-such-page should be noindex').toBe('noindex');
+  expect(catchAll.canonical, '/no-such-page should drop the canonical').toBeNull();
 
   expect(new URL(page.url()).pathname, 'an unknown address should not be redirected away').toBe(
     '/no-such-page',
@@ -2878,6 +2899,43 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
     'the module route should name the slug it could not find',
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Back to all modules' })).toBeVisible();
+
+  const namedSlug = await headMarkers(page);
+  expect(namedSlug.noindex, '/m/<unknown> should be noindex').toBe('noindex');
+  expect(namedSlug.canonical, '/m/<unknown> should drop the canonical').toBeNull();
+
+  /* --- and both are put back on the way out ------------------------- */
+
+  /*
+   * The half that would rot silently. Both states remove a head element the
+   * build wrote, and if the removal were not undone on unmount the rest of the
+   * session would run without a canonical — invisible to a reader, and to every
+   * other test here, all of which arrive by a fresh load.
+   *
+   * What comes back is the *served document's* canonical, not the destination
+   * route's. An unknown address is served the root shell by the catch-all
+   * rewrite, and nothing rewrites the canonical during client-side navigation —
+   * per-route canonicals are a property of the served HTML, which `heads.spec`
+   * asserts on nine fresh loads. Getting this wrong is what the first run of
+   * this assertion did.
+   */
+  await page.getByRole('link', { name: 'Back to all modules' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await settle(page, 500);
+
+  const restored = await headMarkers(page);
+  expect(
+    restored.canonical,
+    'the canonical the shell was served with should be back after the not-found state unmounts',
+  ).toBe(`${SITE_ORIGIN}/`);
+  expect(restored.noindex, 'leaving a not-found state should clear the noindex').toBeNull();
+
+  // And a module loaded directly still carries its own, unaffected.
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  await settle(page, 500);
+  const real = await headMarkers(page);
+  expect(real.canonical, 'a real module page').toBe(`${SITE_ORIGIN}/m/black-holes`);
+  expect(real.noindex, 'a real module page should not be noindex').toBeNull();
 
   await assertNoOverflow(page, 'not found');
   assertClean(w, 'not found');

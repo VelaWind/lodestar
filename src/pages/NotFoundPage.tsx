@@ -18,8 +18,11 @@
  */
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useNoindex } from '@/lib/useNoindex';
 
 export function NotFoundPage() {
+  useNoindex();
+
   useEffect(() => {
     document.title = 'Nothing here · Lodestar';
   }, []);
