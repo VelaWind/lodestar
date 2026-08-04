@@ -265,9 +265,10 @@ const blackHoles: Module = {
           'escape-velocity framing from this module’s sibling gets the radius right while ',
           'misdescribing the physics: light does not launch and fall back at ',
           m`r_s`,
-          '; rather, inside, every future-directed path points inward. Once through, reaching the ',
-          'centre is as unavoidable as reaching next Tuesday. For Sagittarius A*, that is at ',
-          'most about a minute of proper time.',
+          '; rather, inside, every future-directed path points inward. Once through, the centre ',
+          'is no longer a place ahead of you but a moment ahead of you: inside the horizon it ',
+          'lies in your future, and the future is not a direction you can steer around. For ',
+          'Sagittarius A*, that is at most about a minute of proper time.',
         ),
         p(
           'The diagram above is Schwarzschild: non-rotating, the one-parameter idealization. ',

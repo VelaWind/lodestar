@@ -165,7 +165,7 @@ const gravitationalWaves: Module = {
         ),
         prose(
           p(
-            'The trace covers the final octave of frequency, and it is played slowly. Choosing an octave rather than a fixed duration keeps the picture honest across the slider’s range (every binary shows the same 7.7 cycles) but the durations differ enormously: 175 ms for the default pair, 7 ms for two neutron stars. Playback is slowed by the factor shown beside it, because at true speed the whole trace would flick past in under a fifth of a second.',
+            'The trace covers the final octave of frequency, and it is played slowly. Choosing an octave rather than a fixed duration keeps the picture honest across the slider’s range (a near-equal pair like the default sweeps about 7.7 cycles; the more lopsided the pair, the more cycles the octave holds, nearly 200 at a hundred to one) but the durations differ enormously: 175 ms for the default pair, 7 ms for two neutron stars. Playback is slowed by the factor shown beside it, because at true speed the whole trace would flick past in under a fifth of a second.',
           ),
         ),
         prose(
@@ -239,13 +239,20 @@ const gravitationalWaves: Module = {
          * rendering of the GW150914 strain figure (Fig. 1 of Abbott et al.,
          * PRL 116, 061102), three panels: Hanford and Livingston each against
          * the predicted waveform, and the two overlaid after the 6.9 ms shift.
-         * Licence, from https://www.ligo.caltech.edu/page/image-use-policy:
-         * images are "available for journalistic, educational, and personal
-         * uses, but restrictions are placed on commercial use", and "unless
-         * otherwise noted in the caption information for an image, the credit
-         * line should be 'Courtesy Caltech/MIT/LIGO Laboratory'". This image's
-         * own page notes its credit as "Caltech/MIT/LIGO Lab", so that is the
-         * line used, in place of the authored one.
+         * Licence, quoted from https://www.ligo.caltech.edu/page/image-use-policy
+         * as it reads today: images "may be used for any purpose without prior
+         * permission, subject to the special cases noted below", and "the
+         * credit line should be 'Courtesy Caltech/MIT/LIGO Laboratory'". The
+         * operative restriction is that "the endorsement of any product or
+         * service by Caltech, MIT, LIGO, or the National Science Foundation
+         * (NSF) must neither be claimed nor implied", which nothing here does.
+         * This image's own page notes its credit as "Caltech/MIT/LIGO Lab", so
+         * that is the line used, in place of the authored one.
+         *
+         * An earlier version of this comment had the policy narrower than it
+         * is — "journalistic, educational, and personal uses" with commercial
+         * use restricted, which is the special case for third-party material
+         * rather than the general rule.
          */
         figure({
           src: '/figures/gravitational-waves.webp',

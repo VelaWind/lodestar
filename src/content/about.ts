@@ -62,9 +62,10 @@ export const aboutSections: AboutSection[] = [
     body: prose(
       p(
         'Lodestar is a solo project built in collaboration with Claude Code, and the interesting ',
-        'part is the division of labour. Editorial voice, physics decisions, and every word of ',
-        'module prose stay with the author; the implementation agent builds to spec and is ',
-        'structurally prevented from drifting. The project’s authoring standards — the ',
+        'part is the division of labour. The division of labour is decisions, not typing: the ',
+        'physics calls, the editorial judgements, what is cut, what is corrected, and what ',
+        'counts as true stay with the author; the AI drafts to that direction, prose and code ',
+        'both, and nothing ships unread. The project’s authoring standards — the ',
         'seven-layer format, the terminology rules, the SI discipline — live in the repository as ',
         'machine-readable skills the agent loads on every task, so consistency is enforced rather ',
         'than remembered.',

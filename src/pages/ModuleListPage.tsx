@@ -79,7 +79,7 @@ export function ModuleListPage() {
           >
             {tierLabel}
           </button>
-          ) decides which layers are open when a page loads; it never changes a word of the
+          ) decides which layers are open; it never changes a word of the
           text, and nothing is ever hidden.
         </p>
       </header>
