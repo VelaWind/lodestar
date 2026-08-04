@@ -90,9 +90,7 @@ const blackHoles: Module = {
       approximations: [
         prose(
           p(
-            'The hole does not rotate. Real ones do, often near the maximum allowed, and spin is not a small correction: for a maximally rotating ',
-            term('Kerr', 'kerr'),
-            ' hole the prograde innermost stable orbit falls from 3 r_s to 0.5 r_s and the prograde photon orbit with it, the horizon itself becomes oblate, and the energy released by matter falling in rises from 5.7% of its rest mass to 42%. Everything drawn here is the non-rotating limit.',
+            'The hole does not rotate. Real ones do, often near the maximum allowed, and spin is not a small correction: for a maximally rotating Kerr hole the prograde innermost stable orbit falls from 3 r_s to 0.5 r_s and the prograde photon orbit with it, the horizon itself becomes oblate, and the energy released by matter falling in rises from 5.7% of its rest mass to 42%. Everything drawn here is the non-rotating limit.',
           ),
         ),
         prose(
@@ -102,9 +100,7 @@ const blackHoles: Module = {
         ),
         prose(
           p(
-            'There is no ',
-            term('accretion disc', 'accretion-disc'),
-            ', no jet, and nothing else nearby. A real hole of any of these masses is drawn as an isolated vacuum solution here, and everything that makes one visible — the disc, the ring of lensed light, the outflow — is absent.',
+            'There is no accretion disc, no jet, and nothing else nearby. A real hole of any of these masses is drawn as an isolated vacuum solution here, and everything that makes one visible — the disc, the ring of lensed light, the outflow — is absent.',
           ),
         ),
         prose(
@@ -257,13 +253,17 @@ const blackHoles: Module = {
         p(
           'The diagram above is Schwarzschild: non-rotating, the one-parameter idealization. ',
           'Astrophysical holes rotate, some rapidly, and rotation reshapes the anatomy: for a ',
-          'maximally spinning Kerr hole the prograde ISCO descends from ',
+          'maximally spinning ',
+          term('Kerr', 'kerr'),
+          ' hole the prograde ISCO descends from ',
           m`3 r_s`,
           ' to ',
           m`0.5 r_s`,
           ', photon orbits split by direction, and an ',
           em(term('ergosphere', 'ergosphere')),
-          ' appears from which orbital energy can be extracted. Accretion-disc spectra and the ',
+          ' appears from which orbital energy can be extracted. ',
+          term('Accretion-disc', 'accretion-disc'),
+          ' spectra and the ',
           'EHT ring shapes are read against Kerr, not Schwarzschild, templates.',
         ),
         p(

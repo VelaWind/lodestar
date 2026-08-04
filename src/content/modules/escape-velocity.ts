@@ -125,9 +125,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'Newtonian gravity only. Above roughly 0.3c the relativistic result departs from this one. At the ',
-            term('Schwarzschild radius', 'schwarzschild-radius'),
-            ' the Newtonian formula returns exactly c, which is a coincidence of the algebra rather than a derivation (see Going deeper).',
+            'Newtonian gravity only. Above roughly 0.3c the relativistic result departs from this one. At the Schwarzschild radius the Newtonian formula returns exactly c, which is a coincidence of the algebra rather than a derivation (see Going deeper).',
           ),
         ),
         prose(
@@ -137,9 +135,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 40 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the ',
-            term('apex', 'apex'),
-            ', where it is slowest.',
+            'Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 40 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the apex, where it is slowest.',
           ),
         ),
         prose(
@@ -237,7 +233,9 @@ const escapeVelocity: Module = {
               m`r_{\max}`,
               ' — farthest distance from the body’s centre; ',
               m`v_0`,
-              ' — launch speed (your slider). Altitude at apex is ',
+              ' — launch speed (your slider). Altitude at ',
+              term('apex', 'apex'),
+              ' is ',
               m`r_{\max} - R`,
               '. As ',
               m`v_0`,
@@ -304,7 +302,9 @@ const escapeVelocity: Module = {
           m`v_{\text{esc}} = c`,
           ' and solve for the radius: ',
           m`r = 2GM/c^2`,
-          ', which is exactly the Schwarzschild radius of general relativity. Michell in 1784 and ',
+          ', which is exactly the ',
+          term('Schwarzschild radius', 'schwarzschild-radius'),
+          ' of general relativity. Michell in 1784 and ',
           'Laplace after him ran this argument and predicted “dark stars.” The numerical agreement ',
           'is a coincidence: the Newtonian picture of light as a projectile that decelerates is ',
           'wrong twice over, in ways that cancel. In relativity nothing slows the light; inside ',

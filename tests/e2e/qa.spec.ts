@@ -2067,6 +2067,41 @@ test('behaviour: the registry publishes seven modules and leaks no drafts', asyn
  * reach because nothing is open when it runs.
  */
 
+/**
+ * A point on a glossary trigger that a real click would actually reach.
+ *
+ * The centre is the obvious choice and the wrong one once a panel is open: the
+ * two terms in black-holes' layer 6 sit a few lines apart, and on a 390px
+ * screen the first panel lands squarely over the second word. Clicking its
+ * centre then hits the panel, the second term never opens, and the test reports
+ * "one at a time is broken" when what is broken is the aim.
+ *
+ * So the rect is scanned for a point that hit-tests to the trigger itself.
+ * Throwing when there is none is the right failure: it means the word is
+ * completely covered, which is a finding rather than a flake.
+ */
+async function clickablePointOn(page: Page, ref: string): Promise<{ x: number; y: number }> {
+  const point = await page.evaluate((termRef) => {
+    const el = document.querySelector(`[data-glossary-term="${termRef}"]`);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    // Inset from the edges, then a coarse grid: a trigger is one or two words,
+    // so a handful of samples covers it.
+    for (const fy of [0.5, 0.3, 0.7]) {
+      for (const fx of [0.5, 0.25, 0.75, 0.1, 0.9]) {
+        const x = r.left + r.width * fx;
+        const y = r.top + r.height * fy;
+        if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue;
+        if (document.elementFromPoint(x, y) === el) return { x, y };
+      }
+    }
+    return null;
+  }, ref);
+
+  if (!point) throw new Error(`"${ref}" is entirely covered — no point on it is clickable`);
+  return point;
+}
+
 /** Tabs until focus lands on a glossary trigger, and says which one. */
 async function tabToTerm(page: Page, limit = 60): Promise<string> {
   for (let i = 0; i < limit; i += 1) {
@@ -2364,23 +2399,26 @@ test('glossary: selecting the definition keeps it open', async ({ page }) => {
 /**
  * Two terms, one panel.
  *
- * Both of these live inside the approximations disclosure — a second
- * `overflow-hidden` box nested in the first — which makes this the strictest
- * test of the portal, and the only place two triggers sit close enough together
- * for "one open at a time" to be a visible property rather than a claim.
+ * `kerr` and `accretion-disc` used to sit in the approximations disclosure and
+ * now sit in layer 6, where a reader meeting the words actually is. Layer 6 is
+ * collapsed at the default tier, so the setup expands it; everything asserted
+ * below is unchanged, because what is being tested is the claim mechanism and
+ * the portal, not the layer either term happens to live in. The nested
+ * `overflow-hidden` case the old placement covered is picked up at the end of
+ * this test on gravitational-waves, whose approximations still hold a mark.
  */
 test('glossary: only one definition is open at a time', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
   await settle(page, 900);
 
-  await page.getByRole('button', { name: /^approximations/i }).click();
+  await openLayer(page, 'deeper');
   await settle(page, 500);
 
   const kerr = page.locator('[data-glossary-term="kerr"]');
   const disc = page.locator('[data-glossary-term="accretion-disc"]');
-  await expect(kerr, 'no Kerr term in the approximations').toHaveCount(1);
-  await expect(disc, 'no accretion-disc term in the approximations').toHaveCount(1);
+  await expect(kerr, 'no Kerr term in the going-deeper layer').toHaveCount(1);
+  await expect(disc, 'no accretion-disc term in the going-deeper layer').toHaveCount(1);
 
   /**
    * Both terms parked in the clear first, then clicked where they sit.
@@ -2404,30 +2442,30 @@ test('glossary: only one definition is open at a time', async ({ page }) => {
   });
   await settle(page, 600);
 
-  const centres = await page.evaluate(() => {
-    const at = (ref: string) => {
-      const el = document.querySelector(`[data-glossary-term="${ref}"]`)!;
-      const r = el.getBoundingClientRect();
-      const x = r.left + r.width / 2;
-      const y = r.top + r.height / 2;
-      return { x, y, hits: document.elementFromPoint(x, y) === el };
-    };
-    return { kerr: at('kerr'), disc: at('accretion-disc') };
-  });
-  expect(centres.kerr.hits, 'the Kerr term is covered by something').toBe(true);
-  expect(centres.disc.hits, 'the accretion-disc term is covered by something').toBe(true);
+  /**
+   * The later word first, then the earlier one.
+   *
+   * Both terms are in the same paragraph now, a few lines apart, and a panel
+   * is 320px wide by about 120px tall: at 390px `Kerr`'s panel lands squarely
+   * over `Accretion-disc` and covers it completely — `clickablePointOn` said so
+   * rather than guessing, and that is ordinary tooltip behaviour, not a defect.
+   * Opening the lower word first puts its panel below itself, which leaves the
+   * word above it clear, so both clicks are real clicks on visible text.
+   */
+  const discPoint = await clickablePointOn(page, 'accretion-disc');
+  await page.mouse.click(discPoint.x, discPoint.y);
+  await expect(page.locator('[data-glossary-panel="accretion-disc"]')).toBeVisible();
 
-  await page.mouse.click(centres.kerr.x, centres.kerr.y);
-  await expect(page.locator('[data-glossary-panel="kerr"]')).toBeVisible();
-
-  await page.mouse.click(centres.disc.x, centres.disc.y);
+  // Aimed again now that a panel is on screen, in case it moved what is on top.
+  const kerrPoint = await clickablePointOn(page, 'kerr');
+  await page.mouse.click(kerrPoint.x, kerrPoint.y);
   await expect(
-    page.locator('[data-glossary-panel="kerr"]'),
+    page.locator('[data-glossary-panel="accretion-disc"]'),
     'opening a second term should close the first',
   ).toHaveCount(0);
-  await expect(page.locator('[data-glossary-panel="accretion-disc"]')).toBeVisible();
-  await expect(kerr).toHaveAttribute('aria-expanded', 'false');
-  await expect(disc).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('[data-glossary-panel="kerr"]')).toBeVisible();
+  await expect(disc).toHaveAttribute('aria-expanded', 'false');
+  await expect(kerr).toHaveAttribute('aria-expanded', 'true');
 
   // The announcement follows. React runs every effect teardown in a commit
   // before every effect, so the closing term's "clear" would wipe the opening
@@ -2436,12 +2474,11 @@ test('glossary: only one definition is open at a time', async ({ page }) => {
   await expect(
     page.locator('#glossary-live-region'),
     'switching terms should announce the new definition, not silence',
-  ).toHaveText(/^Accretion disc: A swirling disc of hot gas/);
+  ).toHaveText(/^Kerr: The exact description of a rotating black hole/);
 
-  // The definition escapes both clipping boxes: it is wider or taller than the
-  // 18rem sidebar it was triggered from would allow, and fully on screen.
+  // The definition escapes the layer's clipping box and is fully on screen.
   const escaped = await page.evaluate(() => {
-    const panel = document.querySelector('[data-glossary-panel="accretion-disc"]') as HTMLElement;
+    const panel = document.querySelector('[data-glossary-panel="kerr"]') as HTMLElement;
     const rect = panel.getBoundingClientRect();
     return {
       visible: rect.width > 0 && rect.height > 0,
@@ -2464,11 +2501,67 @@ test('glossary: only one definition is open at a time', async ({ page }) => {
   await settle(page, 400);
   await page.evaluate(() => window.scrollBy(0, 240));
   await expect(
-    page.locator('[data-glossary-panel="accretion-disc"]'),
+    page.locator('[data-glossary-panel="kerr"]'),
     'a scroll should dismiss the panel',
   ).toHaveCount(0);
 
-  await assertNoOverflow(page, 'black-holes approximations with a tooltip');
+  await assertNoOverflow(page, 'black-holes going-deeper with a tooltip');
+
+  /* --- the doubly-clipped case, kept covered ------------------------ */
+
+  /**
+   * A term inside the approximations disclosure, which is an
+   * `overflow-hidden` box nested inside the layer accordion's own. This is the
+   * strictest test of the portal decision, and black-holes stopped providing
+   * it when `kerr` and `accretion-disc` moved to layer 6 — gravitational-waves
+   * still marks `inspiral` there, so the case moves rather than lapsing.
+   */
+  await page.goto('/m/gravitational-waves', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+  await page.getByRole('button', { name: /^approximations/i }).click();
+  await settle(page, 500);
+
+  const inspiral = page.locator('[data-glossary-term="inspiral"]');
+  await expect(inspiral, 'no inspiral term in the approximations').toHaveCount(1);
+
+  await inspiral.scrollIntoViewIfNeeded();
+  await settle(page, 600);
+  const spot = await clickablePointOn(page, 'inspiral');
+  await page.mouse.click(spot.x, spot.y);
+  const inspiralPanel = page.locator('[data-glossary-panel="inspiral"]');
+  await expect(inspiralPanel, 'a term inside two clipping boxes should still open').toBeVisible();
+
+  const doublyClipped = await page.evaluate(() => {
+    const panel = document.querySelector('[data-glossary-panel="inspiral"]') as HTMLElement;
+    const r = panel.getBoundingClientRect();
+    return {
+      width: r.width,
+      height: r.height,
+      inViewport:
+        r.top >= 0 && r.left >= 0 && r.bottom <= window.innerHeight && r.right <= window.innerWidth,
+      inBody: panel.parentElement === document.body,
+      // Both ancestors of the trigger clip; neither may clip the panel.
+      clippingAncestors: (() => {
+        let node = document.querySelector('[data-glossary-term="inspiral"]')?.parentElement ?? null;
+        let n = 0;
+        while (node && node !== document.body) {
+          if (getComputedStyle(node).overflow === 'hidden') n += 1;
+          node = node.parentElement;
+        }
+        return n;
+      })(),
+    };
+  });
+  expect(doublyClipped.width, 'the panel was clipped to nothing').toBeGreaterThan(100);
+  expect(doublyClipped.height, 'the panel was clipped to nothing').toBeGreaterThan(20);
+  expect(doublyClipped.inViewport, 'the panel is not fully on screen').toBe(true);
+  expect(doublyClipped.inBody, 'the panel should be portalled to the body').toBe(true);
+  expect(
+    doublyClipped.clippingAncestors,
+    'the trigger should sit inside at least two overflow-hidden boxes here',
+  ).toBeGreaterThanOrEqual(2);
+
+  await assertNoOverflow(page, 'gravitational-waves approximations with a tooltip');
   assertClean(w, 'glossary one-at-a-time');
 });
 

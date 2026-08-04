@@ -258,9 +258,7 @@ const scaleOfTheUniverse: Module = {
         ),
         prose(
           p(
-            'The observable-universe figure is a ',
-            term('comoving', 'comoving'),
-            ' diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
+            'The observable-universe figure is a comoving diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
           ),
         ),
         prose(
@@ -370,7 +368,7 @@ const scaleOfTheUniverse: Module = {
       body: prose(
         p(
           'The 93-billion-light-year figure is a ',
-          em('comoving'),
+          em(term('comoving', 'comoving')),
           ' diameter, and the distinction it rests on is the working vocabulary of cosmology. ',
           'The ',
           em('proper distance'),

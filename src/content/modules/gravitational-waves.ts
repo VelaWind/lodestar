@@ -134,22 +134,12 @@ const gravitationalWaves: Module = {
       approximations: [
         prose(
           p(
-            'Newtonian ',
-            term('quadrupole', 'quadrupole'),
-            ' only: the leading-order waveform, with no ',
-            term('post-Newtonian', 'post-newtonian'),
-            ' corrections. The error grows as the bodies speed up, which is exactly where the signal is loudest: by the last few cycles the orbital velocity is a third of the speed of light and the leading-order phase has drifted measurably from the real one. Real searches match against waveforms carrying corrections to 3.5 post-Newtonian order and beyond, precisely because the phase has to stay right for hundreds of cycles.',
+            'Newtonian quadrupole only: the leading-order waveform, with no post-Newtonian corrections. The error grows as the bodies speed up, which is exactly where the signal is loudest: by the last few cycles the orbital velocity is a third of the speed of light and the leading-order phase has drifted measurably from the real one. Real searches match against waveforms carrying corrections to 3.5 post-Newtonian order and beyond, precisely because the phase has to stay right for hundreds of cycles.',
           ),
         ),
         prose(
           p(
-            'The waveform stops at the innermost stable circular orbit and there is no ',
-            term('merger', 'merger'),
-            ' or ',
-            term('ringdown', 'ringdown'),
-            '. Everything after that cutoff is numerical relativity rather than algebra: the two bodies plunge together, merge, and the remnant rings down, radiating past the ',
-            term('cutoff frequency', 'cutoff-frequency'),
-            ' at amplitudes larger than anything the ',
+            'The waveform stops at the innermost stable circular orbit and there is no merger or ringdown. Everything after that cutoff is numerical relativity rather than algebra: the two bodies plunge together, merge, and the remnant rings down, radiating past the cutoff frequency at amplitudes larger than anything the ',
             term('inspiral', 'inspiral'),
             ' formula predicts. GW150914 crosses this model’s cutoff around 68 Hz; the real signal ran on to about 250 Hz, and most of its energy came out after this trace ends. The cutoff itself uses the Schwarzschild ISCO of the combined mass, which is a conventional marker rather than a derived boundary for a two-body system.',
           ),
@@ -170,9 +160,7 @@ const gravitationalWaves: Module = {
           p(
             'Nothing here is redshifted. The masses are source-frame and the distance is treated as a simple ',
             term('luminosity distance', 'luminosity-distance'),
-            '; a real signal from 410 ',
-            term('Mpc', 'megaparsec'),
-            ' arrives with every frequency lowered by (1+z) ≈ 1.09, which is why the mass a detector measures directly — the redshifted, detector-frame chirp mass — is about 30.5 M_☉ for GW150914 while the source-frame value is 28.1.',
+            '; a real signal from 410 Mpc arrives with every frequency lowered by (1+z) ≈ 1.09, which is why the mass a detector measures directly — the redshifted, detector-frame chirp mass — is about 30.5 M_☉ for GW150914 while the source-frame value is 28.1.',
           ),
         ),
         prose(
@@ -298,7 +286,11 @@ const gravitationalWaves: Module = {
               m`m_2`,
               ' = 29 solar masses give ',
               m`\mathcal{M}_c`,
-              ' = 28.1 solar masses. At the model’s cutoff frequency, 68 Hz, and 408 megaparsecs, ',
+              ' = 28.1 solar masses. At the model’s ',
+              term('cutoff frequency', 'cutoff-frequency'),
+              ', 68 Hz, and 408 ',
+              term('megaparsecs', 'megaparsec'),
+              ', ',
               m`h`,
               ' = 1.3 × 10⁻²¹ — which over a four-kilometre arm is a length change of 5 × 10⁻¹⁸ m, ',
               'about one three-hundredth the width of a proton. Slide both masses down to 1.4 — a ',
@@ -314,7 +306,9 @@ const gravitationalWaves: Module = {
     deeper: {
       body: prose(
         p(
-          'Why quadrupole radiation and nothing simpler? Conservation laws forbid the ',
+          'Why ',
+          term('quadrupole', 'quadrupole'),
+          ' radiation and nothing simpler? Conservation laws forbid the ',
           'alternatives. Monopole radiation would require the total mass-energy to oscillate; it ',
           'is conserved. Dipole radiation would require the mass dipole’s second derivative (the ',
           'centre of mass) to accelerate; momentum conservation forbids it. The leading ',
@@ -335,13 +329,19 @@ const gravitationalWaves: Module = {
           ' through ',
           m`\mathcal{M}_c`,
           ': a 36 + 29 binary and a very different pair with the same chirp mass trace nearly ',
-          'identical chirps. The degeneracy breaks only at higher post-Newtonian orders, where ',
+          'identical chirps. The degeneracy breaks only at higher ',
+          term('post-Newtonian', 'post-newtonian'),
+          ' orders, where ',
           'the mass ratio enters; that is how full analyses recover both masses, and why their ',
           'individual error bars are always wider than the chirp mass’s. The Newtonian quadrupole ',
           'model here fails in the same regime: it treats the orbit as Kepler’s, and by the last ',
           'orbits (speeds past a third of light) the post-Newtonian corrections it drops are no ',
           'longer corrections. The sim’s cutoff at the innermost stable orbit is where even that ',
-          'expansion gives way to numerical relativity, which is how the merger and ringdown ',
+          'expansion gives way to numerical relativity, which is how the ',
+          term('merger', 'merger'),
+          ' and ',
+          term('ringdown', 'ringdown'),
+          ' ',
           'beyond the cutoff are actually computed.',
         ),
         p(

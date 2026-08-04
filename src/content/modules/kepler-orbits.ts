@@ -125,9 +125,7 @@ const keplerOrbits: Module = {
         ),
         prose(
           p(
-            'The planet is a ',
-            term('test particle', 'test-particle'),
-            ': it has no mass of its own. A real pair orbits their common ',
+            'The planet is a test particle: it has no mass of its own. A real pair orbits their common ',
             term('barycentre', 'barycentre'),
             ', and both move. The error is of order m/M: negligible for a planet around a star, not negligible for Jupiter and the Sun (the Sun’s wobble about the barycentre is what most exoplanet detections actually measure), and outright wrong for a binary star.',
           ),
@@ -139,9 +137,7 @@ const keplerOrbits: Module = {
         ),
         prose(
           p(
-            'Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 ',
-            term('arcseconds', 'arcsecond'),
-            ' per century for Mercury, the discrepancy that made GR famous. The orbit drawn here never precesses.',
+            'Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 arcseconds per century for Mercury, the discrepancy that made GR famous. The orbit drawn here never precesses.',
           ),
         ),
         prose(
@@ -312,7 +308,9 @@ const keplerOrbits: Module = {
           '.',
         ),
         p(
-          'The assumptions, stated as assumptions. The planet is a test particle: the honest form ',
+          'The assumptions, stated as assumptions. The planet is a ',
+          term('test particle', 'test-particle'),
+          ': the honest form ',
           'is ',
           m`T^2 = 4\pi^2 a^3 / G(M + m)`,
           ', and for Jupiter the difference shifts the period by about 0.05%, below this sim’s ',
@@ -324,7 +322,9 @@ const keplerOrbits: Module = {
           'predictability horizon near five million years, after which trajectories — not the ',
           'planets themselves — dissolve into uncertainty. The bodies are points: real oblateness ',
           'makes satellite orbits precess, which sun-synchronous spacecraft exploit deliberately. ',
-          'And gravity is Newtonian: Mercury’s perihelion creeps forward 43 arcseconds per ',
+          'And gravity is Newtonian: Mercury’s perihelion creeps forward 43 ',
+          term('arcseconds', 'arcsecond'),
+          ' per ',
           'century beyond what Newton can book-keep, the first confirmed prediction of general ',
           'relativity. In 2020 the GRAVITY collaboration watched the star S2 trace the same ',
           'relativistic ',

@@ -152,9 +152,7 @@ const exoplanets: Module = {
       approximations: [
         prose(
           p(
-            'The stellar disc is uniformly bright. It is not: a star is limb-darkened, dimmer at the edge than at the centre, because looking at the ',
-            term('limb', 'limb'),
-            ' you see higher and cooler layers. So a real ',
+            'The stellar disc is uniformly bright. It is not: a star is limb-darkened, dimmer at the edge than at the centre, because looking at the limb you see higher and cooler layers. So a real ',
             term('light curve', 'light-curve'),
             ' has no corners: the planet blocks less light as it first crosses the dim limb, and the shoulders of this trapezoid are rounded off. Fitting that curvature is how limb-darkening coefficients are measured, and getting it wrong biases the planet radius by a few percent.',
           ),
@@ -173,9 +171,7 @@ const exoplanets: Module = {
         ),
         prose(
           p(
-            'The planet is opaque, spherical and contributes no light of its own. Real ',
-            term('hot Jupiters', 'hot-jupiter'),
-            ' emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are oblate enough to matter.',
+            'The planet is opaque, spherical and contributes no light of its own. Real hot Jupiters emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are oblate enough to matter.',
           ),
         ),
         prose(
@@ -217,7 +213,7 @@ const exoplanets: Module = {
           'The method’s short history is steep. The first planet around a Sun-like star, in ',
           '1995, was found by a different technique (the wobble it raised in its star) and ',
           'turned out to be a giant skimming its star in four days, a ',
-          em('hot Jupiter'),
+          em(term('hot Jupiter', 'hot-jupiter')),
           ' no theorist had ordered. The first transit came in 1999, when one of those giants, ',
           'HD 209458 b, was caught dimming its star by about 1.5% right on the wobble’s ',
           'schedule. Then the strategy scaled: NASA’s Kepler telescope stared at one patch of ',
@@ -315,7 +311,7 @@ const exoplanets: Module = {
           m`b`,
           ' grows, which is why fitting the full curve (not reading off depth and width) is how ',
           'parameters are actually extracted. ',
-          em('Limb darkening'),
+          em(term('Limb', 'limb'), ' darkening'),
           ' rounds the shoulders further: a stellar disc is dimmer at its edge, so this ',
           'module’s trapezoid is the zeroth-order sketch of a subtler profile.',
         ),
