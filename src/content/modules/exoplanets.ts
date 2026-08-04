@@ -237,26 +237,42 @@ const exoplanets: Module = {
           'method’s actual magic.',
         ),
         /*
-         * Source: https://www.nasa.gov/image-article/hat-p7b-light-curves/
-         * Asset:  https://www.nasa.gov/wp-content/uploads/2023/03/376622main_GroundKepler1_428.jpg
-         * Licence, from NASA's media usage guidelines: "NASA content – images,
-         * audio, video, and media files … generally are not subject to
-         * copyright in the United States", usable for educational purposes
-         * provided NASA is acknowledged as the source. No credit line is
-         * mandated, so the authored one stands.
+         * Plotted here from the mission's own photometry, not a press graphic.
          *
-         * 428×321 is the only resolution NASA publishes; it is shipped at that
-         * size rather than upscaled, so the browser is doing the enlarging
-         * rather than the encoder pretending to detail that was never there.
+         * Source: Kepler long-cadence light curves for HAT-P-7 (KIC 10666592),
+         * quarters 0 and 1, from the Mikulski Archive for Space Telescopes —
+         * https://archive.stsci.edu/pub/kepler/lightcurves/0106/010666592/
+         * (kplr010666592-2009131105131_llc.fits and -2009166043257_llc.fits).
+         * Kepler data are in the public domain; NASA asks only that the mission
+         * and the archive be acknowledged, which the credit line does.
+         *
+         * Processing, in full, because a plot is evidence and what was done to
+         * it is part of the claim:
+         *   1. Cadences with a non-zero SAP_QUALITY flag discarded, and the
+         *      pipeline's PDCSAP_FLUX column used — 1,872 good cadences of
+         *      2,115 across the two quarters.
+         *   2. Split at gaps longer than half a day; the longest contiguous run
+         *      taken, and its first ten days kept — 453 cadences from
+         *      BKJD 131.512.
+         *   3. One straight line fitted to the out-of-transit points of that
+         *      window and divided out, then divided by the median.
+         * Nothing else: no smoothing, no clipping, no phase folding, and every
+         * surviving cadence is drawn.
+         *
+         * Validated before it was encoded, against what HAT-P-7b is known to
+         * do: five transits, consecutive centres 2.1968–2.2129 days apart
+         * against a catalogued period of 2.2047, and a mean depth of 0.632%.
+         * Had either failed the plot would have been thrown away rather than
+         * captioned.
          */
         figure({
           src: '/figures/exoplanets.webp',
-          width: 428,
-          height: 321,
-          alt: 'A graph of measured stellar brightness dipping sharply and briefly at each transit of the planet.',
+          width: 1280,
+          height: 622,
+          alt: 'A graph of Kepler’s measured brightness of the star HAT-P-7 over ten days, dipping sharply at each transit of the planet.',
           caption:
-            'A real transit: the Kepler space telescope watching the hot Jupiter HAT-P-7b cross its star, the mission’s first published light curve. The dip is under one percent, and where the sim draws a trapezoid, nature rounds the corners.',
-          credit: 'NASA / Kepler mission',
+            'A real transit, plotted from the archive: the Kepler space telescope watching the hot Jupiter HAT-P-7b cross its star every 2.2 days, in the mission’s earliest photometry. The dip is under one percent, and where the sim draws a trapezoid, nature rounds the corners.',
+          credit: 'NASA Kepler mission data via MAST (KIC 10666592); plotted for this page',
         }),
       ),
     },
