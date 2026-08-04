@@ -1,7 +1,8 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
 import { ModuleListPage } from '@/pages/ModuleListPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 
 /**
  * The index is the entry point and stays eager. The other two routes are split
@@ -38,7 +39,9 @@ export default function App() {
             <Route path="/" element={<ModuleListPage />} />
             <Route path="/m/:id" element={<ModulePage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Not a redirect. Bouncing an unknown address to the index loses
+                both the fact that it was wrong and the address itself. */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </AppShell>

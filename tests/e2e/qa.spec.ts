@@ -71,6 +71,29 @@ function watch(page: Page): Watcher {
 }
 
 /**
+ * Console output the engine produces about someone else's code.
+ *
+ * Exactly one entry, and it earns its place rather than being a convenience.
+ * Firefox validates the MathML that KaTeX emits and logs "Invalid markup:
+ * Incorrect number of children for <msub/> tag" as a JavaScript error for some
+ * of the subscripts in layer 5 — `v_{\text{esc}}` among them. Nothing about the
+ * page is broken by it: the visual layer renders, and the MathML is still in
+ * the DOM and still read by assistive technology, which the screen-reader test
+ * asserts separately. It is KaTeX's markup and Firefox's strictness, and no
+ * change on this side removes it.
+ *
+ * Filtered rather than skipping the four tests it appears in, because "this
+ * page logged nothing else" is worth keeping on Firefox — a real error there
+ * would still fail. Anything not matching this stays fatal on every engine.
+ */
+const KNOWN_ENGINE_NOISE: { pattern: RegExp; why: string }[] = [
+  {
+    pattern: /Invalid markup: Incorrect number of children for <\w+\/> tag/,
+    why: 'Firefox MathML validator vs KaTeX output; render and a11y unaffected',
+  },
+];
+
+/**
  * Reports what the page said, then asserts it said nothing broken.
  *
  * The tally is printed rather than merely asserted because "no console errors"
@@ -86,8 +109,20 @@ function assertClean(w: Watcher, where: string): void {
   console.log(`  console[${where}]: ${summary}`);
   for (const line of w.all.slice(0, 8)) console.log(`      ${line}`);
 
-  expect(w.pageErrors, `${where}: uncaught exceptions`).toEqual([]);
-  expect(w.errors, `${where}: console errors`).toEqual([]);
+  const ignorable = (line: string): { why: string } | undefined =>
+    KNOWN_ENGINE_NOISE.find((entry) => entry.pattern.test(line));
+
+  const errors = w.errors.filter((line) => !ignorable(line));
+  const pageErrors = w.pageErrors.filter((line) => !ignorable(line));
+  const excused = w.errors.length + w.pageErrors.length - errors.length - pageErrors.length;
+  if (excused > 0) {
+    const why = ignorable(w.errors.find(ignorable) ?? w.pageErrors.find(ignorable) ?? '')?.why;
+    // eslint-disable-next-line no-console
+    console.log(`      (${excused} excused: ${why})`);
+  }
+
+  expect(pageErrors, `${where}: uncaught exceptions`).toEqual([]);
+  expect(errors, `${where}: console errors`).toEqual([]);
 }
 
 /** The page must never be wider than the window it is in. */
@@ -645,7 +680,7 @@ test('kepler sweep overlay changes the drawing', async ({ page }) => {
 /* Depth control                                                       */
 /* ------------------------------------------------------------------ */
 
-test('depth tiers change which layers are open', async ({ page }) => {
+test('depth tiers change which layers are open @cross-engine', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
   await settle(page);
@@ -1066,7 +1101,7 @@ const A11Y_PAGES: [string, string][] = [
 ];
 
 for (const [name, path] of A11Y_PAGES) {
-  test(`accessibility: ${name}`, async ({ page }) => {
+  test(`accessibility: ${name} @cross-engine`, async ({ page }) => {
     await page.goto(path, { waitUntil: 'domcontentloaded' });
     await settle(page, 1_200);
 
@@ -1106,7 +1141,7 @@ for (const [name, path] of A11Y_PAGES) {
  * layer 7, and the approximations summary beside the sim. Anything a reader can
  * reveal by clicking has to be audited in the state they reveal it in.
  */
-test('accessibility: a module page with every layer expanded', async ({ page }) => {
+test('accessibility: a module page with every layer expanded @cross-engine', async ({ page }) => {
   // This module links to `cosmic-distance-ladder`, which is backlog rather than
   // draft, so the chip does not vanish the day another module is published.
   await page.goto('/m/gravitational-waves', { waitUntil: 'domcontentloaded' });
@@ -1156,17 +1191,30 @@ test('accessibility: a module page with every layer expanded', async ({ page }) 
   ).toEqual([]);
 });
 
-test('keyboard: the whole sim is operable without a pointer', async ({ page }) => {
+test('keyboard: the whole sim is operable without a pointer @cross-engine', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/scale-of-the-universe', { waitUntil: 'domcontentloaded' });
   await settle(page, 1_000);
 
-  // The skip link is the first thing focus reaches, and it goes somewhere.
-  await page.keyboard.press('Tab');
-  const first = page.locator(':focus');
-  await expect(first, 'first tab stop should be the skip link').toHaveText(/skip to content/i);
-  await first.press('Enter');
-  await expect(page.locator('#main')).toBeFocused();
+  /*
+   * The skip link is the first thing focus reaches, and it goes somewhere.
+   *
+   * Not on WebKit. Safari's default is that Tab moves between form controls
+   * only — links are reached with Option+Tab unless the user turns on "Press
+   * Tab to highlight each item" — so the first Tab there lands on the Curious
+   * depth radio and the skip link is simply not in the sequence. That is the
+   * platform's keyboard model rather than anything this page decides, and the
+   * link is present, focusable and functional on every engine. Everything below
+   * this point is sliders, buttons and chips, all of which Tab reaches on
+   * WebKit, so only these four lines are scoped out.
+   */
+  if (!test.info().project.name.includes('webkit')) {
+    await page.keyboard.press('Tab');
+    const first = page.locator(':focus');
+    await expect(first, 'first tab stop should be the skip link').toHaveText(/skip to content/i);
+    await first.press('Enter');
+    await expect(page.locator('#main')).toBeFocused();
+  }
 
   // The log-slider keyboard contract, checked on the longest slider in the app
   // and again below on the shortest, because the whole point of it is that the
@@ -2114,7 +2162,7 @@ async function tabToTerm(page: Page, limit = 60): Promise<string> {
   throw new Error(`no glossary trigger reached in ${limit} tab presses`);
 }
 
-test('glossary: a term opens, reads, and closes', async ({ page }) => {
+test('glossary: a term opens, reads, and closes @cross-engine', async ({ page }) => {
   const w = watch(page);
   const mobile = test.info().project.name.startsWith('mobile');
 
@@ -2313,6 +2361,101 @@ test('glossary: a term opens, reads, and closes', async ({ page }) => {
 });
 
 /**
+ * The pointer contract: intent to open, leaving to close, a click to pin.
+ *
+ * This is the regression test for the bug ccd76ec shipped and then fixed in the
+ * same session. Hover opened the panel after 150 ms; the click that followed
+ * found it already open and a plain toggle closed it, so a reader who hovered a
+ * word and then clicked it — the most ordinary sequence there is — got the
+ * definition taken away. The fix was to make a click *pin* rather than toggle,
+ * and pinning is invisible from the outside except through exactly this
+ * sequence, which is why it needs a test of its own rather than an assertion
+ * bolted onto one of the others.
+ *
+ * Desktop only. Hover is a pointer concept; the touch path has its own
+ * tap-toggle coverage in the journey above, and on a touch project
+ * `pointerenter` fires as part of the tap, which is the case the component
+ * deliberately ignores.
+ */
+test('glossary: hover opens, leaving closes, a click pins @cross-engine', async ({ page }) => {
+  test.skip(test.info().project.name.startsWith('mobile'), 'hover is a pointer gesture');
+
+  const w = watch(page);
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+
+  const trigger = page.locator('[data-glossary-term="isco"]');
+  const panel = page.locator('[data-glossary-panel="isco"]');
+  await trigger.scrollIntoViewIfNeeded();
+  await settle(page, 600);
+
+  const term = await clickablePointOn(page, 'isco');
+  /** The left gutter: nowhere near the word, and nothing interactive there. */
+  const away = { x: 16, y: 420 };
+  const hover = async (): Promise<void> => {
+    await page.mouse.move(term.x, term.y);
+  };
+  const leave = async (): Promise<void> => {
+    await page.mouse.move(away.x, away.y);
+  };
+
+  /* --- a pointer passing through does not open it ------------------- */
+
+  // On and straight off, well inside the 150 ms intent delay. Asserting the
+  // delay by racing it would flake; asserting that a sweep never opens the
+  // panel is the same property, measured in a way that cannot.
+  await hover();
+  await leave();
+  await settle(page, 500);
+  await expect(panel, 'a pointer passing over the word should not open it').toHaveCount(0);
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* --- resting on it does ------------------------------------------- */
+
+  await hover();
+  await expect(panel, 'hovering should open the definition after the intent delay').toBeVisible();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  // Opened by hover alone: nothing was clicked, so focus never moved.
+  const focused = await page.evaluate(
+    () => (document.activeElement as HTMLElement | null)?.dataset.glossaryTerm ?? null,
+  );
+  expect(focused, 'hover should not move focus').toBeNull();
+
+  /* --- and leaving closes it again ---------------------------------- */
+
+  await leave();
+  await expect(panel, 'moving away from an unpinned panel should close it').toHaveCount(0);
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* --- hover, then click: pinned ------------------------------------ */
+
+  await hover();
+  await expect(panel, 'hovering should open it again').toBeVisible();
+  await page.mouse.click(term.x, term.y);
+  await expect(
+    panel,
+    'clicking a word whose panel is already hover-open should keep it, not toggle it shut',
+  ).toBeVisible();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+  await leave();
+  await settle(page, 400);
+  await expect(
+    panel,
+    'a pinned panel should survive the pointer leaving the word',
+  ).toBeVisible();
+
+  /* --- and a second click dismisses --------------------------------- */
+
+  await page.mouse.click(term.x, term.y);
+  await expect(panel, 'a second click should dismiss the pinned panel').toHaveCount(0);
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  await assertNoOverflow(page, 'black-holes after the hover sequence');
+  assertClean(w, 'glossary hover');
+});
+
+/**
  * Selecting the definition must not dismiss it.
  *
  * The panel is a plain div, so pressing in it moves focus off the trigger, and
@@ -2324,7 +2467,7 @@ test('glossary: a term opens, reads, and closes', async ({ page }) => {
  * Desktop only. Selecting text by drag is a pointer gesture; the touch path
  * uses a long-press and a native selection UI that Playwright does not drive.
  */
-test('glossary: selecting the definition keeps it open', async ({ page }) => {
+test('glossary: selecting the definition keeps it open @cross-engine', async ({ page }) => {
   test.skip(
     test.info().project.name.startsWith('mobile'),
     'drag-selection is a pointer gesture',
@@ -2407,7 +2550,7 @@ test('glossary: selecting the definition keeps it open', async ({ page }) => {
  * `overflow-hidden` case the old placement covered is picked up at the end of
  * this test on gravitational-waves, whose approximations still hold a mark.
  */
-test('glossary: only one definition is open at a time', async ({ page }) => {
+test('glossary: only one definition is open at a time @cross-engine', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
   await settle(page, 900);
@@ -2587,7 +2730,7 @@ test('glossary: only one definition is open at a time', async ({ page }) => {
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
  */
-test('every module shows its layer-4 photograph', async ({ page }) => {
+test('every module shows its layer-4 photograph @cross-engine', async ({ page }) => {
   const w = watch(page);
 
   for (const id of MODULES) {
@@ -2664,6 +2807,74 @@ test('every module shows its layer-4 photograph', async ({ page }) => {
   }
 
   assertClean(w, 'figures');
+});
+
+/* ------------------------------------------------------------------ */
+/* Addresses that match nothing                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Two ways to be nowhere, and both have to say so.
+ *
+ * `/m/<unknown>` matched the module route and failed on the slug, so it can
+ * name what it could not find. `/no-such-page` matched no route at all — it
+ * used to `<Navigate to="/" replace />`, which put the reader on the front page
+ * with no sign anything had gone wrong and dropped the address they asked for
+ * out of the history. A silent redirect is not a 404.
+ */
+test('an address that matches nothing says so @cross-engine', async ({ page }) => {
+  const w = watch(page);
+
+  /* --- no route at all ---------------------------------------------- */
+
+  await page.goto('/no-such-page', { waitUntil: 'domcontentloaded' });
+  await settle(page, 700);
+
+  expect(new URL(page.url()).pathname, 'an unknown address should not be redirected away').toBe(
+    '/no-such-page',
+  );
+  await expect(page.getByRole('heading', { level: 1, name: 'Nothing here' })).toBeVisible();
+  await expect(page.getByText('No module lives at this address.')).toBeVisible();
+  await expect(page, 'the tab should say where you are').toHaveTitle(/^Nothing here/);
+  // And it is a not-found state, not the index wearing a heading.
+  await expect(
+    page.locator('main a[href^="/m/"]'),
+    'the not-found page should not be the module index',
+  ).toHaveCount(0);
+
+  const back = page.getByRole('link', { name: 'Back to all modules' });
+  await expect(back).toBeVisible();
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  expect(
+    results.violations
+      .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+      .map((v) => `${v.impact} ${v.id}`),
+    'not-found page: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await back.click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.locator('main a[href^="/m/"]'),
+    'the link should land on the index',
+  ).toHaveCount(MODULES.length);
+
+  /* --- a route that matched, with a slug that did not ---------------- */
+
+  await page.goto('/m/does-not-exist', { waitUntil: 'domcontentloaded' });
+  await settle(page, 700);
+  expect(new URL(page.url()).pathname).toBe('/m/does-not-exist');
+  await expect(
+    page.getByText('No module called'),
+    'the module route should name the slug it could not find',
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Back to all modules' })).toBeVisible();
+
+  await assertNoOverflow(page, 'not found');
+  assertClean(w, 'not found');
 });
 
 /* ------------------------------------------------------------------ */
