@@ -514,8 +514,17 @@ test('landing page', async ({ page }) => {
   );
   for (const id of MODULES) expect(hrefs, `card for ${id}`).toContain(`/m/${id}`);
 
+  // The footer used to carry a repository link, and asserted its presence here.
+  // The repository is private now, so the assertion is inverted rather than
+  // deleted: a link that 404s for every reader is worse than no link, and this
+  // is the spot that would notice it coming back.
   await expect(
-    page.locator('footer a[href="https://github.com/VelaWind/lodestar"]'),
+    page.locator('footer a[href*="github.com/VelaWind"]'),
+    'the footer should not link the private repository',
+  ).toHaveCount(0);
+  await expect(
+    page.locator('footer a[href="/about"]'),
+    'the footer should still offer the about page',
   ).toHaveCount(1);
 
   await assertNoOverflow(page, 'landing');
@@ -2814,6 +2823,55 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
   }
 
   assertClean(w, 'figures');
+});
+
+/* ------------------------------------------------------------------ */
+/* Nothing points at the private repository                            */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The repository is private, so a link to it is a 404 with the reader's name
+ * on it.
+ *
+ * One literal anchor was removed from the footer, and a footer renders on every
+ * route — so this walks all nine and checks the rendered DOM rather than the
+ * source. `git grep` finds a hardcoded href; it does not find one built from a
+ * template, pulled out of module data, or added to a component that did not
+ * have one when the grep was run. This does.
+ *
+ * Scope is the rendered site only. README, LICENSE and source comments name the
+ * repository freely and should: they are read by people who already have it.
+ *
+ * Chromium-only by omission of the `@cross-engine` tag — an href is an href on
+ * every engine, and this is about content rather than rendering.
+ */
+test('no route links the private repo', async ({ page }) => {
+  const w = watch(page);
+  const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
+  expect(routes.length, 'all nine routes').toBe(9);
+
+  const offenders: string[] = [];
+
+  for (const route of routes) {
+    await page.goto(route, { waitUntil: 'domcontentloaded' });
+    await settle(page, 500);
+
+    // Every anchor on the page, not just the footer's: the point is that
+    // nothing anywhere points there, including anything added later.
+    const hrefs = await page.locator('a[href]').evaluateAll((nodes) =>
+      nodes.map((n) => (n as HTMLAnchorElement).getAttribute('href') ?? ''),
+    );
+    expect(hrefs.length, `${route}: no links at all — did the page render?`).toBeGreaterThan(0);
+
+    for (const href of hrefs) {
+      if (href.includes('github.com/VelaWind')) offenders.push(`${route} -> ${href}`);
+    }
+  }
+
+  expect(offenders, 'these routes link the private repository').toEqual([]);
+
+  console.log(`  private repo: ${routes.length} routes checked, no links out`);
+  assertClean(w, 'private repo links');
 });
 
 /* ------------------------------------------------------------------ */

@@ -77,6 +77,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             Every simulation runs on real SI quantities (the same numbers the equations use),
             and every figure is cited to its source.
           </p>
+          {/* One link now, but still a flex row: `shrink-0` is what keeps it
+              off the paragraph's last line at narrow widths, and the baseline
+              alignment is what lines it up with that paragraph on one row at
+              `sm`. The repository link that used to sit beside it was removed
+              when the repository went private — a footer that offers a 404 is
+              worse than a footer with one link. */}
           <span className="flex shrink-0 flex-wrap items-baseline gap-x-4 gap-y-1">
             <Link
               to="/about"
@@ -84,14 +90,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               How this is built
             </Link>
-            <a
-              href="https://github.com/VelaWind/lodestar"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="-my-2 py-2 text-ink-faint underline decoration-edge underline-offset-4 transition-colors hover:text-star hover:decoration-star"
-            >
-              Built in the open: source &amp; authoring standards
-            </a>
           </span>
         </div>
       </footer>
