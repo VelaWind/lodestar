@@ -2842,15 +2842,28 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * Scope is the rendered site only. README, LICENSE and source comments name the
  * repository freely and should: they are read by people who already have it.
  *
+ * The second half is the other side of the same claim. Removing the link left
+ * the site silent about why, so About now says the repository is private and
+ * that access is available on request — and the owner found that sentence
+ * missing from the rendered page, because it had never been written. Checking
+ * "no link" without checking "and here is what to do instead" is how that gap
+ * survived a release: the absence was asserted, the replacement was not. Both
+ * halves live in one test so neither can be satisfied alone.
+ *
+ * The href match is `github.com`, not `github.com/VelaWind`. Nothing in
+ * `src/` links to GitHub at all, so the broader pattern costs nothing and also
+ * catches a link to some other account's mirror of this repository.
+ *
  * Chromium-only by omission of the `@cross-engine` tag — an href is an href on
  * every engine, and this is about content rather than rendering.
  */
-test('no route links the private repo', async ({ page }) => {
+test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
   expect(routes.length, 'all nine routes').toBe(9);
 
   const offenders: string[] = [];
+  let aboutChecked = false;
 
   for (const route of routes) {
     await page.goto(route, { waitUntil: 'domcontentloaded' });
@@ -2864,13 +2877,33 @@ test('no route links the private repo', async ({ page }) => {
     expect(hrefs.length, `${route}: no links at all — did the page render?`).toBeGreaterThan(0);
 
     for (const href of hrefs) {
-      if (href.includes('github.com/VelaWind')) offenders.push(`${route} -> ${href}`);
+      if (href.includes('github.com')) offenders.push(`${route} -> ${href}`);
+    }
+
+    if (route === '/about') {
+      // Read from <main>, not the whole document: this asserts the sentence is
+      // rendered where a reader meets it, which is exactly what a logged-out
+      // check of the page looks at.
+      const main = await page.locator('main').innerText();
+      expect(
+        main,
+        '/about must tell a reader who cannot open the repository how to ask',
+      ).toContain('available to reviewers on request');
+
+      // The seam this shipped alongside. The paragraph said "the division of
+      // labour" twice across a sentence boundary; the phrase must not come back.
+      expect(main, 'the duplicated "division of labour" seam is back').not.toContain(
+        'The division of labour is',
+      );
+
+      aboutChecked = true;
     }
   }
 
   expect(offenders, 'these routes link the private repository').toEqual([]);
+  expect(aboutChecked, '/about was never walked — the route list changed').toBe(true);
 
-  console.log(`  private repo: ${routes.length} routes checked, no links out`);
+  console.log(`  private repo: ${routes.length} routes checked, no links out; /about states the terms`);
   assertClean(w, 'private repo links');
 });
 
