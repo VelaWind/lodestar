@@ -67,3 +67,12 @@ The `.claude/skills/` directory contains the project's authoring standards — t
 ## Licensing
 
 The code is MIT-licensed (see LICENSE). The photographs and plots in public/figures/ are not covered by that grant: each carries its own licence — NASA public domain, CC BY 4.0, or an institutional image policy — stated in the credit line on its page and in the source comment above its figure node in src/content/modules/. The module prose, the glossary definitions, and the figure captions are © the author: quote with attribution rather than republishing wholesale.
+
+### Reviewer access
+The repository is private. To give a reviewer read access to the code,
+the history, and the CI runs — with no write access of any kind:
+    gh api -X PUT repos/VelaWind/lodestar/collaborators/USERNAME -f permission=pull
+GitHub sends them an invitation to accept. Revoke when they are done:
+    gh api -X DELETE repos/VelaWind/lodestar/collaborators/USERNAME
+The Read role sees everything this README describes and can change
+nothing.
