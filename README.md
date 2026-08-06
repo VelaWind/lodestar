@@ -38,6 +38,20 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 
 Two further topics, `cosmic-distance-ladder` and `expansion-of-the-universe`, appear in Connections layers as planned chips rather than links. They are not written, and the site says so where it names them.
 
+## Running it
+
+```bash
+npm install
+npm run dev        # sanity suite logs to the browser console on boot
+npm run lint       # eslint, correctness rules only
+npm test           # vitest, 324 tests in 8 files
+npm run build      # typecheck, production build, per-route HTML, sitemap
+npm run preview    # serve dist/
+npm run e2e        # playwright, needs a deployment (see Tests)
+```
+
+On a clean install with Node 22: lint reports zero issues, `npm test` passes 324 of 324, and `npm run build` emits 9 route HTML files (17 total) plus `sitemap.xml`.
+
 <!-- site:case-study:start -->
 
 ## Architecture
@@ -52,20 +66,6 @@ Two further topics, `cosmic-distance-ladder` and `expansion-of-the-universe`, ap
 ## Stack
 
 Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and `noUnusedParameters`), Tailwind 3, Zustand 5, Framer Motion 11, KaTeX, Canvas 2D. Deployed on Vercel.
-
-## Running it
-
-```bash
-npm install
-npm run dev        # sanity suite logs to the browser console on boot
-npm run lint       # eslint, correctness rules only
-npm test           # vitest, 324 tests in 8 files
-npm run build      # typecheck, production build, per-route HTML, sitemap
-npm run preview    # serve dist/
-npm run e2e        # playwright, needs a deployment (see Tests)
-```
-
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 324 of 324, and `npm run build` emits 9 route HTML files (17 total) plus `sitemap.xml`.
 
 ## Tests
 
