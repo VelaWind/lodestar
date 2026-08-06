@@ -38,6 +38,8 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 
 Two further topics, `cosmic-distance-ladder` and `expansion-of-the-universe`, appear in Connections layers as planned chips rather than links. They are not written, and the site says so where it names them.
 
+<!-- site:case-study:start -->
+
 ## Architecture
 
 - **A module is data, not code.** One typed file in `src/content/modules/` (prose as a serialisable AST, params, equations, references) plus one canvas component in `src/sims/`. `src/content/registry.ts` builds both maps with `import.meta.glob`, so adding a module needs no wiring in the shell.
@@ -84,6 +86,8 @@ The browser suite is separate: `playwright.config.ts` defines five projects (Chr
 ## Known limits
 
 Some files are very large and heavily commented: `sanity.ts` is 964 lines and the escape-velocity simulation 758, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI. Two topics named in Connections layers were never written.
+
+<!-- site:case-study:end -->
 
 ## Licensing
 
