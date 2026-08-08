@@ -26,10 +26,11 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { DISTANCE, DURATION, EASE } from '@/motion/tokens';
-import { Reveal } from '@/motion/Reveal';
+import { Reveal, __internals as revealInternals } from '@/motion/Reveal';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import { __internals } from '@/motion/useRafLoop';
 
+const { startsVisible, revealStyle } = revealInternals;
 const { startRafLoop, MAX_DELTA_MS } = __internals;
 
 /* ------------------------------------------------------------------ globals */
@@ -147,32 +148,33 @@ describe('Reveal', () => {
       createElement(Reveal, null, createElement('p', null, 'Ganymede')),
     );
 
-    // The point of the whole component: the text is present in the document
-    // while it is still invisible, so nothing that reads the page rather than
-    // looking at it is ever waiting on an animation.
+    // The text is present, and — because the first render happens before
+    // anything has been measured — it is present *visibly*. Rendering hidden
+    // and then un-hiding costs a paint at opacity 0, and for whichever element
+    // happens to be the largest contentful paint, that paint is the metric.
+    // Hiding is now something done only to a box measured off screen.
     expect(markup).toContain('<p>Ganymede</p>');
-    expect(markup).toContain('opacity:0');
-    expect(markup).toContain(`translateY(${DISTANCE.rise}px)`);
+    expect(markup).not.toContain('opacity:0');
+    expect(markup).not.toContain('transition');
+    expect(markup).not.toContain('will-change');
+    expect(markup).not.toContain('translateY');
   });
 
   it('animates nothing but opacity and transform', () => {
-    stubWindow(false);
-    stubIntersectionObserver();
-
-    const markup = renderToStaticMarkup(
-      createElement(Reveal, {
-        distance: DISTANCE.drift,
-        delay: DURATION.fast,
-        children: 'Callisto',
-      }),
+    /* Read off the styles the animating modes build, rather than off server
+       markup. The hidden state is now reached by measuring a box, and there is
+       no box on the server — but the property list is the same claim either
+       way, and this is where it can still be made. */
+    for (const mode of ['waiting', 'entered'] as const) {
+      const transition = String(revealStyle(mode, DISTANCE.drift, DURATION.fast)?.transition ?? '');
+      expect(transition).not.toBe('');
+      const properties = transition.split(/,(?![^(]*\))/).map((part) => part.trim().split(' ')[0]);
+      expect(properties.sort()).toEqual(['opacity', 'transform']);
+      expect(transition).toContain(`${DURATION.fast}ms`);
+    }
+    expect(revealStyle('waiting', DISTANCE.drift, 0)?.transform).toBe(
+      `translateY(${DISTANCE.drift}px)`,
     );
-
-    const transition = /transition:([^;"]+)/.exec(markup)?.[1] ?? '';
-    expect(transition).not.toBe('');
-    const properties = transition.split(/,(?![^(]*\))/).map((part) => part.trim().split(' ')[0]);
-    expect(properties.sort()).toEqual(['opacity', 'transform']);
-    expect(markup).toContain(`translateY(${DISTANCE.drift}px)`);
-    expect(markup).toContain(`${DURATION.fast}ms`);
   });
 
   it('renders as the element it is asked for, so a list stays a list', () => {
@@ -189,14 +191,74 @@ describe('Reveal', () => {
     expect(markup).not.toContain('<div');
   });
 
-  it('still animates when rendered as something other than a div', () => {
+  it('renders as the requested element with its children, whatever the mode', () => {
     stubWindow(false);
     stubIntersectionObserver();
 
     const markup = renderToStaticMarkup(createElement(Reveal, { as: 'li', children: 'Io' }));
 
-    expect(markup).toContain('opacity:0');
-    expect(markup).toContain(`translateY(${DISTANCE.rise}px)`);
+    // The tag and the children are the part that must never depend on a
+    // measurement; the style is the only part that does.
+    expect(markup).toMatch(/^<li[^>]*>Io<\/li>$/);
+  });
+
+  /*
+   * The initial-viewport skip.
+   *
+   * This cannot be asserted through `renderToStaticMarkup`, and the reason is
+   * the point of the mechanism rather than a gap in it: whether a box is on
+   * screen is a question about layout, and there is no layout on the server.
+   * What the component does is measure in a layout effect — after the DOM is
+   * mutated, before the browser paints — and choose a mode. So the two halves
+   * are asserted where they live: the predicate that reads a box, and the style
+   * each mode produces. The end-to-end claim, that no visible element ever
+   * paints at opacity 0, is a browser measurement and is made by the LCP harness.
+   */
+  it('treats any box with a pixel on screen as already visible', () => {
+    const H = 844;
+    // Fully inside, straddling the top, straddling the bottom, one pixel in.
+    expect(startsVisible({ top: 100, bottom: 400 }, H)).toBe(true);
+    expect(startsVisible({ top: -200, bottom: 50 }, H)).toBe(true);
+    expect(startsVisible({ top: 800, bottom: 1200 }, H)).toBe(true);
+    expect(startsVisible({ top: H - 1, bottom: H + 500 }, H)).toBe(true);
+    // Taller than the viewport, covering all of it.
+    expect(startsVisible({ top: -500, bottom: 2000 }, H)).toBe(true);
+  });
+
+  it('treats a box entirely off screen as not visible', () => {
+    const H = 844;
+    expect(startsVisible({ top: H, bottom: H + 300 }, H)).toBe(false);
+    expect(startsVisible({ top: 2000, bottom: 2400 }, H)).toBe(false);
+    // Entirely above, scrolled past.
+    expect(startsVisible({ top: -400, bottom: 0 }, H)).toBe(false);
+  });
+
+  it('gives an element in the initial viewport no style at all', () => {
+    // Both the first render and the measured-visible state must be inert: no
+    // opacity to paint, no transform or will-change to promote a layer for.
+    for (const mode of ['unmeasured', 'static'] as const) {
+      expect(revealStyle(mode, DISTANCE.rise, 0)).toBeUndefined();
+    }
+  });
+
+  it('hides only an element measured outside the viewport, and animates it in', () => {
+    const waiting = revealStyle('waiting', DISTANCE.rise, 0);
+    expect(waiting?.opacity).toBe(0);
+    expect(waiting?.transform).toBe(`translateY(${DISTANCE.rise}px)`);
+    expect(waiting?.willChange).toBe('opacity, transform');
+    expect(String(waiting?.transition)).toContain(`${DURATION.slow}ms`);
+
+    const entered = revealStyle('entered', DISTANCE.rise, 0);
+    expect(entered?.opacity).toBe(1);
+    expect(entered?.transform).toBe('none');
+    // The layer is released once the entrance is under way.
+    expect(entered?.willChange).toBeUndefined();
+    // Both ends carry the transition, or the change between them would jump.
+    expect(String(entered?.transition)).toContain(`${DURATION.slow}ms`);
+  });
+
+  it('carries the stagger delay into the transition it builds', () => {
+    expect(String(revealStyle('waiting', DISTANCE.rise, 180)?.transition)).toContain('180ms');
   });
 
   it('falls back to the visible state when there is no IntersectionObserver', () => {
