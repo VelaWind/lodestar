@@ -450,6 +450,32 @@ async function settle(page: Page, ms = 900): Promise<void> {
   await page.waitForTimeout(ms);
 }
 
+/**
+ * Walk the page top to bottom so every progressive-reveal wrapper has been in
+ * the viewport once, then return to the top.
+ *
+ * `behavior: 'instant'` is load-bearing: the site sets `scroll-behavior: smooth`
+ * globally, and a smooth scroll restarted every 120ms never arrives anywhere —
+ * the page spends the whole loop chasing the newest target and the bottom of a
+ * five-thousand-pixel article is never reached, which is exactly the region
+ * this exists to reach.
+ */
+async function revealEverything(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const jump = (top: number) =>
+      window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
+    const step = Math.round(window.innerHeight * 0.75);
+    const end = document.documentElement.scrollHeight;
+    for (let y = 0; y <= end; y += step) {
+      jump(y);
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
+    jump(0);
+  });
+  // The reveal is 400ms; let the last screenful finish arriving.
+  await page.waitForTimeout(700);
+}
+
 
 /**
  * Waits until a locator's count stops changing, rather than sleeping and hoping.
@@ -1187,9 +1213,31 @@ test('accessibility: a module page with every layer expanded @cross-engine', asy
   ).toBeVisible();
   await expect(page.locator('#layer-panel-deeper')).toBeVisible();
 
+  /*
+   * Scroll the whole page before auditing, and not for the reason a stray
+   * `scrollIntoView` usually appears in a test.
+   *
+   * The layers rise into view as a reader reaches them, which means a layer
+   * below the fold is still at `opacity: 0` — and axe treats a fully
+   * transparent element as not visible on screen, so its colour-contrast rule
+   * skips the subtree entirely. Measured on this page: 40 nodes checked without
+   * this scroll, 96 with it. Expanding every layer is no longer enough to have
+   * *audited* every layer, and without this the test would stay green while
+   * quietly covering less than half of what it was written to cover.
+   */
+  await revealEverything(page);
+
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
+
+  const stillHidden = await page.evaluate(
+    () =>
+      Array.from(document.querySelectorAll('main article > div > div')).filter(
+        (el) => Number(getComputedStyle(el).opacity) < 1,
+      ).length,
+  );
+  expect(stillHidden, 'a layer never revealed, so axe never audited it').toBe(0);
 
   const blocking = results.violations.filter(
     (v) => v.impact === 'serious' || v.impact === 'critical',

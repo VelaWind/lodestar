@@ -11,9 +11,13 @@
  * cover both.
  */
 import { useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { DURATION, EASE } from '@/motion/tokens';
+import { useReducedMotion } from '@/motion/useReducedMotion';
 import type { RichText as RichTextAst } from '@/content/types';
 import { RichText } from './RichText';
+
+const EASE_OUT = [...EASE.out];
 
 export function Approximations({ items }: { items: RichTextAst[] }) {
   const [open, setOpen] = useState(false);
@@ -33,7 +37,9 @@ export function Approximations({ items }: { items: RichTextAst[] }) {
           viewBox="0 0 12 12"
           className="h-2.5 w-2.5 shrink-0 fill-current"
           animate={{ rotate: open ? 90 : 0 }}
-          transition={reduced ? { duration: 0 } : { duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          transition={
+            reduced ? { duration: 0 } : { duration: DURATION.fast / 1000, ease: EASE_OUT }
+          }
         >
           <path d="M3 1l6 5-6 5z" />
         </motion.svg>
@@ -41,33 +47,34 @@ export function Approximations({ items }: { items: RichTextAst[] }) {
         <span className="font-mono text-[0.7rem] text-ink-faint">{items.length}</span>
       </button>
 
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={reduced ? { duration: 0 } : { duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
-          >
-            <ul className="space-y-2.5 border-t border-edge-soft px-4 py-3 font-prose text-sm leading-relaxed text-ink-dim">
-              {items.map((item, i) => (
-                <li
-                  key={i}
-                  /* `[&_p]:…` restates the item's own type on the paragraph
-                     RichText emits: the shared prose size (1.0625rem/1.75) is
-                     set for a reading column, and this is an 18rem sidebar. The
-                     rendered result is the string version's, to the pixel. */
-                  className="relative pl-4 before:absolute before:left-0 before:top-[0.65em] before:h-1 before:w-1 before:rounded-full before:bg-ember/60 [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-ink-dim [&>div]:max-w-none [&>div]:space-y-2"
-                >
-                  <RichText content={item} />
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Instant, for the same reason the layer drawers are — see the note in
+          `Layer.tsx`. This one sits in an 18rem sidebar next to a running
+          canvas, so a height animation here reflowed the sim's column on every
+          frame of it. */}
+      {open && (
+        /* `overflow-hidden` outlives the animation it was added for.
+           `qa.spec.ts` opens a glossary term in here specifically because the
+           trigger then sits inside two nested clipping boxes — this one and
+           layer 3's panel — and the tooltip is portalled to `<body>` so that it
+           escapes both. Drop this and that test is still green while no longer
+           testing anything: the scenario it was built for stops existing. */
+        <div className="overflow-hidden">
+          <ul className="space-y-2.5 border-t border-edge-soft px-4 py-3 font-prose text-sm leading-relaxed text-ink-dim">
+            {items.map((item, i) => (
+              <li
+                key={i}
+                /* `[&_p]:…` restates the item's own type on the paragraph
+                   RichText emits: the shared prose size (1.0625rem/1.75) is set
+                   for a reading column, and this is an 18rem sidebar. The
+                   rendered result is the string version's, to the pixel. */
+                className="relative pl-4 before:absolute before:left-0 before:top-[0.65em] before:h-1 before:w-1 before:rounded-full before:bg-ember/60 [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-ink-dim [&>div]:max-w-none [&>div]:space-y-2"
+              >
+                <RichText content={item} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

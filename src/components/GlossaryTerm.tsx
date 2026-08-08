@@ -42,8 +42,13 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { DISTANCE, DURATION, EASE } from '@/motion/tokens';
+import { useReducedMotion } from '@/motion/useReducedMotion';
 import { lookup } from '@/content/glossary';
+
+/** Framer wants a mutable tuple; the token is readonly. */
+const EASE_OUT = [...EASE.out];
 
 /* ------------------------------------------------------------------ */
 /* One open at a time                                                  */
@@ -482,10 +487,30 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
                 role="note"
                 aria-labelledby={triggerId}
                 data-glossary-panel={termRef}
-                initial={reduced ? false : { opacity: 0, y: 3 }}
+                /*
+                 * Open: fade up over `DURATION.fast` from `DISTANCE.nudge`.
+                 * Close: instant.
+                 *
+                 * The asymmetry is deliberate. An entrance is information — the
+                 * panel is telling you where it came from — while an exit is
+                 * just the thing you already dismissed still being on screen.
+                 * Fading it out delays the next tooltip, and this panel is one
+                 * of a set a reader tabs straight through.
+                 *
+                 * One set of values for every way in. A tooltip reached by Tab
+                 * animates exactly as one reached by a cursor: nothing here
+                 * branches on how it was opened, and it must not start to —
+                 * a keyboard reader getting a different, quieter treatment is
+                 * how "accessible" quietly turns into "second class".
+                 */
+                initial={reduced ? false : { opacity: 0, y: DISTANCE.nudge }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={reduced ? { opacity: 1 } : { opacity: 0 }}
-                transition={reduced ? { duration: 0 } : { duration: 0.14, ease: 'easeOut' }}
+                exit={{ opacity: 0, transition: { duration: 0 } }}
+                transition={
+                  reduced
+                    ? { duration: 0 }
+                    : { duration: DURATION.fast / 1000, ease: EASE_OUT }
+                }
                 style={{
                   position: 'fixed',
                   top: placement?.top ?? 0,

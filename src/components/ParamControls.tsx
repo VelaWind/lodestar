@@ -42,7 +42,10 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
         <button
           type="button"
           onClick={onReset}
-          className="-my-3 py-3 font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
+          /* Opacity, not scale: this sits on a baseline with the "Parameters"
+             heading, and a scaling word next to a static one reads as a wobble
+             rather than a press. */
+          className="-my-3 py-3 font-ui text-xs text-ink-faint underline-offset-4 transition-[color,opacity] duration-150 ease-out hover:text-star hover:underline active:opacity-70"
         >
           Reset
         </button>
