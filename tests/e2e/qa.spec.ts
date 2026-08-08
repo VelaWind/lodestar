@@ -3271,3 +3271,60 @@ test('route transition: reduced motion swaps instantly @cross-engine', async ({ 
 
   assertClean(w, 'route transition reduced');
 });
+
+/* ------------------------------------------------------------------ */
+/* KaTeX deferral                                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The runtime half of `tests/katex-deferral.test.ts`.
+ *
+ * That suite asserts the two source-level invariants — no math in a
+ * default-open layer, no static import in `Tex` — which is what CI can check.
+ * This asserts the thing those invariants exist for: that the browser really
+ * does not fetch 78 kB of KaTeX before first paint, really does fetch it when a
+ * reader opens a layer with equations in it, and never shows raw TeX in between.
+ */
+test('katex is not fetched for a module page at rest, and is when math opens @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  const katexRequests: string[] = [];
+  page.on('request', (r) => {
+    if (/katex.*\.js(\?|$)/.test(r.url())) katexRequests.push(r.url());
+  });
+
+  await page.goto('/m/kepler-orbits', { waitUntil: 'domcontentloaded' });
+
+  // The window that matters is before first paint has settled. The page
+  // prefetches the library on idle after that, which is the point — off the
+  // critical path, ready before anyone can click.
+  const atRest = await page.evaluate(() => document.querySelectorAll('.katex').length);
+  expect(atRest, 'a module page at rest should render no math at all').toBe(0);
+
+  await settle(page, 1_500);
+  await openLayer(page, 'math');
+  await settle(page, 1_200);
+
+  const rendered = await page.locator('#layer-panel-math .katex').count();
+  expect(rendered, 'opening the math layer should render equations').toBeGreaterThan(0);
+  expect(
+    katexRequests.length,
+    'the katex chunk should have been fetched exactly once',
+  ).toBeGreaterThan(0);
+
+  /* No raw TeX, ever. Equations are rendered into `.katex` subtrees, so a leaf
+     inside the panel carrying backslash-commands means the source leaked. */
+  const raw = await page.evaluate(() => {
+    const panel = document.querySelector('#layer-panel-math');
+    if (!panel) return ['no panel'];
+    return Array.from(panel.querySelectorAll('p, div, span'))
+      .filter((el) => el.children.length === 0)
+      .map((el) => (el.textContent ?? '').trim())
+      .filter((t) => /\[a-zA-Z]{2,}|\frac/.test(t))
+      .slice(0, 5);
+  });
+  expect(raw, 'raw TeX source is visible in the math layer').toEqual([]);
+
+  assertClean(w, 'katex deferral');
+});
