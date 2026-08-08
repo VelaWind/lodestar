@@ -4,11 +4,26 @@
  */
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { Starfield } from '@/visual/Starfield';
 import { DepthControl } from './DepthControl';
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-void-900 text-ink">
+      {/* Mounted here, above the router, so the sky persists across navigation
+          rather than restarting on every route change.
+
+          First child, and no z-index on it or on anything else. Everything below
+          — the wash, the header, `main`, the footer — is positioned with an auto
+          or explicit z-index, so all of them paint after a positioned sibling
+          that comes earlier in the DOM. A negative z-index was the obvious
+          alternative and does not work: this wrapper's opaque `bg-void-900` is
+          an in-flow background, and in-flow backgrounds paint *after* negative
+          z-index descendants, so the starfield would be invisible behind it.
+          Being first in the tree is what makes this work without touching the
+          stacking of a single existing element. */}
+      <Starfield />
+
       {/* A single, very faint radial wash. The theme is dark and quiet; the
           content should be the only thing with contrast. */}
       <div
