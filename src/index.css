@@ -72,18 +72,56 @@
   .lodestar-slider::-webkit-slider-runnable-track {
     @apply h-1 rounded-full bg-void-500;
   }
+  /*
+   * Thumb states. `150ms` is `DURATION.fast` — the tokens live in TypeScript and
+   * a stylesheet cannot import them, so the number is written out here and
+   * nowhere else in this file.
+   *
+   * Three states raise the thumb, and they are three separate rules on purpose:
+   * a selector list containing a vendor pseudo-element that the browser does not
+   * recognise invalidates the *whole* list, so `-webkit-` and `-moz-` can never
+   * share one. Only `transform` transitions, which is composited and cannot move
+   * anything around it.
+   *
+   * Reduced motion is handled by the global block above: it forces every
+   * transition to 0.01ms, so the thumb still grows — the state is still legible
+   * — but nothing travels. That is the same bargain the hover state has always
+   * had here.
+   */
   .lodestar-slider::-webkit-slider-thumb {
-    @apply h-3.5 w-3.5 appearance-none rounded-full bg-star transition-transform;
+    @apply h-3.5 w-3.5 appearance-none rounded-full bg-star;
     box-shadow: 0 0 0 3px rgb(6 8 13 / 0.9);
+    transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
     /* Webkit aligns the thumb to the top of the track: (track − thumb) / 2. */
     margin-top: -5px;
   }
   .lodestar-slider::-webkit-slider-thumb:hover {
     transform: scale(1.15);
   }
+  /* The drag itself. `:active` is on the input, not the thumb — a thumb has no
+     active state of its own, and the pointer leaves it constantly mid-drag. */
+  .lodestar-slider:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+  /* Keyboard focus, so the control a reader is about to drive with the arrow
+     keys is as obvious as the one under their cursor. Independent of hover. */
+  .lodestar-slider:focus-visible::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+
   .lodestar-slider::-moz-range-thumb {
     @apply h-3.5 w-3.5 rounded-full border-0 bg-star;
     box-shadow: 0 0 0 3px rgb(6 8 13 / 0.9);
+    transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .lodestar-slider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+  }
+  .lodestar-slider:active::-moz-range-thumb {
+    transform: scale(1.15);
+  }
+  .lodestar-slider:focus-visible::-moz-range-thumb {
+    transform: scale(1.15);
   }
   .lodestar-slider::-moz-range-track {
     @apply h-1 rounded-full bg-void-500;

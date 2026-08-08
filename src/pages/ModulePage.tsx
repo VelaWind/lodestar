@@ -9,6 +9,8 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { LayerId, Module, Param, ParamUpdate } from '@/content/types';
 import { getModule } from '@/content/registry';
+import { DISTANCE } from '@/motion/tokens';
+import { Reveal } from '@/motion/Reveal';
 import { useNoindex } from '@/lib/useNoindex';
 import { LAYER_META, LAYER_ORDER, defaultOpenFor } from '@/lib/layers';
 import { defaultsOf, useAppStore } from '@/store/useAppStore';
@@ -81,7 +83,11 @@ function ModuleView({ module }: { module: Module }) {
             negative margin keeps the layout identical. */}
         <Link
           to="/"
-          className="-my-2 inline-block py-2 font-ui text-xs text-ink-faint underline-offset-4 transition-colors hover:text-star hover:underline"
+          /* `active:opacity-70` is the press affordance: opacity only, because a
+             scale on an inline link nudges the text around it. `DURATION.fast`
+             is spelled out rather than left to Tailwind's default so it stays
+             right if that default ever moves. */
+          className="-my-2 inline-block py-2 font-ui text-xs text-ink-faint underline-offset-4 transition-[color,opacity] duration-150 ease-out hover:text-star hover:underline active:opacity-70"
         >
           ← All modules
         </Link>
@@ -110,7 +116,10 @@ function ModuleView({ module }: { module: Module }) {
           type="button"
           onClick={toggleAll}
           aria-expanded={allOpen}
-          className="inline-flex h-9 items-center rounded-full border border-edge-soft bg-void-800/60 px-3.5 font-ui text-xs text-ink-faint transition-colors hover:border-star-dim/60 hover:bg-void-700/60 hover:text-star sm:h-7"
+          /* The one control on the page shaped like a button, so it gets the
+             one press affordance that is shaped like a button being pressed.
+             `scale` is composited and cannot move the layer list below it. */
+          className="inline-flex h-9 items-center rounded-full border border-edge-soft bg-void-800/60 px-3.5 font-ui text-xs text-ink-faint transition-[transform,color,border-color,background-color] duration-150 ease-out hover:border-star-dim/60 hover:bg-void-700/60 hover:text-star active:scale-[0.98] sm:h-7"
         >
           {allOpen ? 'Collapse all' : 'Expand all'}
         </button>
@@ -121,14 +130,36 @@ function ModuleView({ module }: { module: Module }) {
           layer list ends where its last panel ends. */}
       <div>
         {LAYER_ORDER.map((layerId) => (
-          <Layer
+          /*
+           * Each layer rises into place as it comes into view. No `delay` is
+           * passed and none should be: seven layers down a page this long are
+           * never on screen together, so scroll position already spaces them
+           * out, and a stagger on top of that would be a queue for content the
+           * reader has already scrolled to.
+           *
+           * All seven `<section>`s are in the document from the first render —
+           * that is `Reveal`'s contract, not a side effect of it — so the
+           * headers are readable, linkable and clickable before any observer
+           * has fired. Only `opacity` and `transform` move.
+           *
+           * The divider rides on this wrapper rather than on the section inside
+           * it. `first:border-t-0` is `:first-child`, and a section that is the
+           * only child of its own wrapper is always a first child; left on the
+           * section, every rule between layers would switch itself off.
+           */
+          <Reveal
             key={layerId}
-            meta={LAYER_META[layerId]}
-            open={open.has(layerId)}
-            onToggle={() => toggle(layerId)}
+            distance={DISTANCE.rise}
+            className="border-t border-edge-soft first:border-t-0"
           >
-            {renderLayer(layerId, module, values, setParam, resetParams)}
-          </Layer>
+            <Layer
+              meta={LAYER_META[layerId]}
+              open={open.has(layerId)}
+              onToggle={() => toggle(layerId)}
+            >
+              {renderLayer(layerId, module, values, setParam, resetParams)}
+            </Layer>
+          </Reveal>
         ))}
       </div>
 
