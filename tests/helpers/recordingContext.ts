@@ -25,7 +25,7 @@
  * `measureText` is judged by the same ruler it used.
  */
 
-export type DrawKind = 'text' | 'arc' | 'rect' | 'point' | 'ellipse';
+export type DrawKind = 'text' | 'arc' | 'rect' | 'point' | 'ellipse' | 'gradient';
 
 export interface DrawRecord {
   kind: DrawKind;
@@ -44,12 +44,19 @@ export const WIDTH_RATIO = 0.52;
 export interface Recording {
   ctx: CanvasRenderingContext2D;
   records: DrawRecord[];
+  /** Every radius a radial gradient was built with, outer first-class. */
+  glowRadii: number[];
+  /** Every value assigned to `globalAlpha` — how trails are checked. */
+  alphas: number[];
 }
 
 export function recordingContext(): Recording {
   const records: DrawRecord[] = [];
+  const glowRadii: number[] = [];
+  const alphas: number[] = [];
   let fontPx = 10;
   let align: CanvasTextAlign = 'start';
+  let alpha = 1;
 
   const allFinite = (...values: number[]) => values.every((v) => Number.isFinite(v));
 
@@ -87,7 +94,18 @@ export function recordingContext(): Recording {
     strokeStyle: '' as string | CanvasGradient,
     lineWidth: 1,
     lineCap: 'butt' as CanvasLineCap,
-    globalAlpha: 1,
+
+    /* `globalAlpha` is an accessor rather than a field so every value a sim
+       assigns is recorded. It is the only channel a trail's fade travels
+       through — the dots themselves are plain arcs — so without this there is
+       no way to assert that a trail stayed within bounds. */
+    set globalAlpha(value: number) {
+      alpha = value;
+      alphas.push(value);
+    },
+    get globalAlpha() {
+      return alpha;
+    },
 
     /* No-ops: transforms and path bookkeeping do not change what is *reachable*
        on screen for any sim here, and modelling them would mean writing a
@@ -106,7 +124,13 @@ export function recordingContext(): Recording {
     scale: () => {},
     setLineDash: () => {},
     setTransform: () => {},
-    createRadialGradient: () => gradient,
+    /* Recorded as geometry as well as radii: a glow is a filled circle, and a
+       NaN in its radius drops it exactly the way a NaN in an arc does. */
+    createRadialGradient: (_x0: number, _y0: number, r0: number, x1: number, y1: number, r1: number) => {
+      glowRadii.push(r0, r1);
+      push('gradient', x1 - r1, x1 + r1, y1 - r1, y1 + r1);
+      return gradient;
+    },
     createLinearGradient: () => gradient,
 
     moveTo: (x: number, y: number) => push('point', x, x, y, y),
@@ -133,7 +157,32 @@ export function recordingContext(): Recording {
     },
   };
 
-  return { ctx: ctx as unknown as CanvasRenderingContext2D, records };
+  return { ctx: ctx as unknown as CanvasRenderingContext2D, records, glowRadii, alphas };
+}
+
+/**
+ * Glow radii that are not a finite, non-negative number.
+ *
+ * A glow is sized from the body it sits behind, and the body's drawn radius is
+ * itself derived from an auto-scale that divides by a span the sliders can take
+ * to zero. That is the path by which a glow radius becomes `NaN` or `Infinity`,
+ * and canvas answers a non-finite gradient by throwing on some engines and
+ * silently drawing nothing on others.
+ */
+export function badGlowRadii(radii: number[]): number[] {
+  return radii.filter((r) => !Number.isFinite(r) || r < 0);
+}
+
+/**
+ * Alphas outside `[0, limit]`.
+ *
+ * Canvas clamps `globalAlpha` silently, so an out-of-range value is invisible in
+ * the picture and still wrong: a trail computed to alpha 3 is a trail whose fade
+ * has stopped fading, and one computed to `NaN` is ignored entirely, leaving the
+ * *previous* alpha applied to everything drawn after it.
+ */
+export function alphasOutOfRange(alphas: number[], limit = 1): number[] {
+  return alphas.filter((a) => !Number.isFinite(a) || a < 0 || a > limit);
 }
 
 /** Text records that fall outside the frame, with half a pixel of slack. */

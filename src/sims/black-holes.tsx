@@ -31,6 +31,7 @@ import {
   tidalAccelerationAtHorizon,
 } from '@/physics/blackhole';
 import { layOutRow } from './labels';
+import { createGlowCache, drawGlow } from '@/visual/glow';
 
 /* ------------------------------------------------------------------ */
 /* Display helpers — formatting only, never used to compute            */
@@ -168,6 +169,10 @@ const COLORS = {
 };
 
 const TAU = 2 * Math.PI;
+/** Accretion glow, as a multiple of the horizon's drawn radius. Under 1: it
+    never leaves the disc, so it can never touch a label. */
+const GLOW_SCALE = 0.95;
+const accretionGlow = createGlowCache();
 const PAD = { left: 14, right: 14, top: 18, bottom: 26 };
 /** Share of the canvas given to the geometry panel, along the splitting axis. */
 const GEOMETRY_SHARE = 0.6;
@@ -250,6 +255,16 @@ function drawGeometry(
 
   /* Horizon — filled, and filled with nothing. The disc is the darkest value on
      the page on purpose: it is not a surface with a shaded side. */
+  /* The accretion region: a glow *inside* the horizon radius, drawn before the
+     disc so the disc stays the darkest value on the page. Bounded by `rsPx`
+     rather than by a keep-out list, and that bound is what guarantees it clears
+     every label here — each of the three radius labels sits outside its own
+     ring, and the horizon is the innermost of the three. */
+  // No keep-out list is needed: `GLOW_SCALE` is below 1, so the glow is strictly
+  // inside the horizon disc, and `available` bounds it against the frame.
+  const glowR = Math.min(rsPx * GLOW_SCALE, available * 0.5);
+  drawGlow(ctx, accretionGlow, cx, cy, glowR, 'rgba(232,189,125,0.30)', 'rgba(232,189,125,0)');
+
   ctx.fillStyle = COLORS.void;
   ctx.beginPath();
   ctx.arc(cx, cy, rsPx, 0, TAU);

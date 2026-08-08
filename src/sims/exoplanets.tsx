@@ -29,6 +29,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
+import { createGlowCache, drawGlow, glowRadius } from '@/visual/glow';
+import { createTrail, drawTrail, pushTrail, resetTrail, type Trail } from '@/visual/trail';
 import { JULIAN_YEAR } from '@/physics/constants';
 import {
   lightCurve,
@@ -142,6 +144,11 @@ const COLORS = {
 
 const TAU = 2 * Math.PI;
 const PAD = { left: 58, right: 14, top: 16, bottom: 30 };
+/** Glow radius as a multiple of the star's drawn radius. */
+const GLOW_SCALE = 1.25;
+/** Retained planet positions. A count, not a duration — see `visual/trail`. */
+const TRAIL_LENGTH = 60;
+const starGlow = createGlowCache();
 /** Share of the drawable height given to the star panel. */
 const STAR_SHARE = 0.52;
 
@@ -155,6 +162,8 @@ export interface Scene {
   shape: TransitShape;
   /** 0 → 1 across the drawn window. */
   progress: number;
+  /** Decoration only. `null`/absent under reduced motion and in still frames. */
+  trail?: Trail | null;
 }
 
 /** The window drawn, in seconds either side of mid transit. */
@@ -229,22 +238,41 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   ctx.rect(left, top, plotW, starPanelH);
   ctx.clip();
 
-  const glow = ctx.createRadialGradient(cx, starCy, rsPx * 0.6, cx, starCy, rsPx * 1.25);
-  glow.addColorStop(0, 'rgba(244,217,164,0.22)');
-  glow.addColorStop(1, 'rgba(244,217,164,0)');
-  ctx.fillStyle = glow;
-  ctx.beginPath();
-  ctx.arc(cx, starCy, rsPx * 1.25, 0, TAU);
-  ctx.fill();
+  /* The glow was already a multiple of the star's drawn radius. What is new is
+     the cap: the clip above keeps it inside the star panel, and this keeps it
+     off the axis labels down the left edge, which the clip does not cover. */
+  const glowR = glowRadius(rsPx * GLOW_SCALE, cx, starCy, w, h, null, 0);
+  drawGlow(
+    ctx,
+    starGlow,
+    cx,
+    starCy,
+    glowR,
+    'rgba(244,217,164,0.22)',
+    'rgba(244,217,164,0)',
+  );
 
   ctx.fillStyle = COLORS.photosphere;
   ctx.beginPath();
   ctx.arc(cx, starCy, rsPx, 0, TAU);
   ctx.fill();
 
-  /* --- the planet, on the same scale, at the current phase --- */
+  /* --- the planet's trail, then the planet ---
+     Screen coordinates: the planet crosses a straight line at fixed height, so
+     there is no world frame worth transforming from. Recorded here rather than
+     in the loop because this is the only place the drawn position exists, which
+     makes the head of the trail the planet's own pixel by construction.
+     Still clipped to the star panel, so it cannot run out over the light curve. */
   const t = -half + scene.progress * 2 * half;
   const planetX = xAt(t);
+
+  if (scene.trail) {
+    pushTrail(scene.trail, planetX, starCy);
+    // The planet is a dark disc on a bright star, so its trail is drawn in the
+    // star's own colour and reads as the light it has not yet blocked.
+    drawTrail(ctx, scene.trail, COLORS.photosphere, rpPx, 0, 1, 0, 1);
+  }
+
   ctx.fillStyle = COLORS.planet;
   ctx.beginPath();
   ctx.arc(planetX, starCy, rpPx, 0, TAU);
@@ -337,6 +365,8 @@ export default function ExoplanetsSim({ params, values }: SimProps) {
   const reduced = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  /* One buffer for the component's life, reused across parameter changes. */
+  const trailRef = useRef<Trail | null>(null);
   const sceneRef = useRef<Scene | null>(null);
 
   const ms = readParam(params, values, 'Mstar');
@@ -382,7 +412,16 @@ export default function ExoplanetsSim({ params, values }: SimProps) {
     }
     // Reduced motion parks the planet at mid transit, which is the frame that
     // carries the most information: full depth, planet centred on the disc.
-    sceneRef.current = { rs, rp, a, shape, progress: reduced ? 0.5 : 0 };
+    if (!reduced) trailRef.current ??= createTrail(TRAIL_LENGTH);
+    if (trailRef.current) resetTrail(trailRef.current);
+    sceneRef.current = {
+      rs,
+      rp,
+      a,
+      shape,
+      progress: reduced ? 0.5 : 0,
+      trail: reduced ? null : trailRef.current,
+    };
     paint();
 
     if (reduced || !shape.transits) return;
