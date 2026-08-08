@@ -3079,3 +3079,147 @@ test.describe('prefers-reduced-motion', () => {
     });
   }
 });
+
+/* ------------------------------------------------------------------ */
+/* Route transitions                                                   */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The crossfade between routes, and the one property of it that could ever
+ * become a source of flake: whether the incoming page is real yet.
+ *
+ * The failure this guards against is subtle and would not look like a bug. An
+ * `AnimatePresence` set to `mode="wait"` holds the incoming route unmounted
+ * until the outgoing one has finished leaving, so for 150ms the new page exists
+ * in the URL and nowhere else. Every assertion in this file would still pass —
+ * they all `settle()` first — while a reader who clicks and immediately taps
+ * gets nothing, and any future test that does not sleep becomes intermittent.
+ * So this asserts the DOM at the first moment the URL is the new one, with no
+ * settle between the click and the read.
+ *
+ * The module chunk is warmed first, deliberately. Without that this would be
+ * measuring `React.lazy` fetching a quarter-megabyte of KaTeX, which is a real
+ * wait but not this one, and the test would be about the network instead.
+ */
+test('route transition: the incoming page is readable at once @cross-engine', async ({ page }) => {
+  const w = watch(page);
+
+  await page.goto('/m/kepler-orbits', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+  await page.getByRole('link', { name: '← All modules' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await settle(page, 700);
+
+  // The click under test. Nothing between it and the read below.
+  await page.getByRole('link', { name: /Kepler Orbits/ }).first().click();
+  await expect(page).toHaveURL(/\/m\/kepler-orbits/);
+
+  const atOnce = await page.evaluate(() => {
+    // The outlet holds one frame per route in flight. The one on its way out
+    // marks itself `inert`, so "the page the reader is now on" is the frame
+    // without that attribute — which is the thing whose content has to be ready.
+    const outlet = document.querySelector('main > div');
+    const frames = outlet ? Array.from(outlet.children) : [];
+    const live = frames.find((f) => !f.hasAttribute('inert')) ?? null;
+    const leaving = frames.filter((f) => f.hasAttribute('inert'));
+
+    return {
+      frames: frames.length,
+      leavingCount: leaving.length,
+      heading: live?.querySelector('h1')?.textContent?.trim() ?? null,
+      sliders: live?.querySelectorAll('input[type="range"]').length ?? 0,
+      simPanels: live?.querySelectorAll('#layer-panel-play').length ?? 0,
+      // A page that is halfway gone must not be reachable by Tab.
+      leavingTabbables: leaving.reduce(
+        (n, f) => n + f.querySelectorAll('a[href], button, input').length,
+        0,
+      ),
+      leavingHidden: leaving.every((f) => f.getAttribute('aria-hidden') === 'true'),
+    };
+  });
+
+  expect(atOnce.heading, 'the incoming heading should exist before the fade finishes').toBe(
+    'Kepler Orbits',
+  );
+  expect(
+    atOnce.sliders,
+    'the incoming controls should exist before the fade finishes',
+  ).toBeGreaterThan(0);
+  expect(atOnce.simPanels, 'the live frame should carry exactly one sim panel').toBe(1);
+
+  /* If the crossfade is still running there are two frames, and the outgoing
+     one must be inert and hidden. If it has already finished there is one, and
+     there is nothing to hide. Both are correct; what is not correct is a second
+     frame that is still reachable. */
+  expect(atOnce.frames, 'at most two routes in flight').toBeLessThanOrEqual(2);
+  if (atOnce.leavingCount > 0) {
+    expect(atOnce.leavingTabbables, 'the outgoing page still has focusable content').toBeGreaterThan(
+      0,
+    );
+    expect(atOnce.leavingHidden, 'the outgoing page must be hidden from assistive tech').toBe(true);
+  }
+
+  // And it cleans up after itself: one frame left, fully opaque, no offset.
+  await settle(page, 700);
+  const settled = await page.evaluate(() => {
+    const outlet = document.querySelector('main > div');
+    const frames = outlet ? Array.from(outlet.children) : [];
+    const first = frames[0];
+    return {
+      frames: frames.length,
+      inertLeft: frames.filter((f) => f.hasAttribute('inert')).length,
+      opacity: first ? Number(getComputedStyle(first).opacity) : null,
+      transform: first ? getComputedStyle(first).transform : null,
+      position: first ? getComputedStyle(first).position : null,
+    };
+  });
+  expect(settled.frames, 'the outgoing route should be gone once the fade ends').toBe(1);
+  expect(settled.inertLeft, 'nothing should still be marked inert').toBe(0);
+  expect(settled.opacity, 'the settled route should be fully opaque').toBe(1);
+  expect(settled.position, 'the settled route should be back in normal flow').toBe('static');
+  expect(settled.transform, 'the settled route should carry no leftover offset').toMatch(
+    /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/,
+  );
+
+  assertClean(w, 'route transition');
+});
+
+/**
+ * Under reduced motion the transition is not a faster transition, it is no
+ * transition: the outgoing route is gone on the same tick, which is what keeps
+ * its unmount effects — the canonical link being restored, above all — running
+ * when they always did.
+ */
+test('route transition: reduced motion swaps instantly @cross-engine', async ({ page }) => {
+  const w = watch(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+
+  await page.goto('/m/kepler-orbits', { waitUntil: 'domcontentloaded' });
+  await settle(page, 900);
+  await page.getByRole('link', { name: '← All modules' }).click();
+  await expect(page).toHaveURL(/\/$/);
+
+  const atOnce = await page.evaluate(() => {
+    const main = document.querySelector('main');
+    return {
+      // A frame on its way out is the only thing that ever carries `inert`, so
+      // its absence is the check that nothing is being held on screen to fade.
+      leavingFrames: main?.querySelectorAll('[inert]').length ?? 0,
+      partiallyFaded: Array.from(main?.querySelectorAll('div') ?? []).filter((el) => {
+        const o = Number(getComputedStyle(el).opacity);
+        return o > 0 && o < 1;
+      }).length,
+      cards: document.querySelectorAll('a[href^="/m/"]').length,
+      heading: main?.querySelector('h1')?.textContent?.trim() ?? null,
+    };
+  });
+
+  expect(atOnce.leavingFrames, 'reduced motion should never hold a route on its way out').toBe(0);
+  expect(atOnce.partiallyFaded, 'reduced motion should never render mid-fade').toBe(0);
+  expect(atOnce.cards, 'the index should be complete immediately').toBe(MODULES.length);
+  expect(atOnce.heading, 'the index heading should be there immediately').toBe(
+    'Space, explained in layers you choose to open.',
+  );
+
+  assertClean(w, 'route transition reduced');
+});
