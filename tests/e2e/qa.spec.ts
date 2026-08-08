@@ -153,7 +153,14 @@ interface CanvasStats {
  */
 async function canvasStats(page: Page, index = 0): Promise<CanvasStats> {
   const stats = await page.evaluate((i) => {
-    const canvas = document.querySelectorAll('canvas')[i] as HTMLCanvasElement | undefined;
+    // Scoped to the sim panel, not `canvas` at large. Document order stopped
+    // meaning "the sim" when the ambient starfield mounted at the app shell —
+    // it is a full-viewport canvas that precedes `main`, so it is `canvas[0]`
+    // on every page. Every assertion below is unchanged; they simply point at
+    // the element they were always about.
+    const canvas = document.querySelectorAll('#layer-panel-play canvas')[i] as
+      | HTMLCanvasElement
+      | undefined;
     if (!canvas || canvas.width === 0) return null;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
@@ -443,6 +450,7 @@ async function settle(page: Page, ms = 900): Promise<void> {
   await page.waitForTimeout(ms);
 }
 
+
 /**
  * Waits until a locator's count stops changing, rather than sleeping and hoping.
  *
@@ -542,7 +550,7 @@ for (const [index, id] of MODULES.entries()) {
     await page.goto(`/m/${id}`, { waitUntil: 'domcontentloaded' });
 
     // Layer 3 is open at the default (Curious) tier, so the sim mounts on load.
-    const canvas = page.locator('canvas').first();
+    const canvas = page.locator('#layer-panel-play canvas');
     await expect(canvas).toBeVisible();
     await settle(page);
 
@@ -608,7 +616,7 @@ for (const [index, id] of MODULES.entries()) {
 test('escape-velocity launch below and above the threshold', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/escape-velocity', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('canvas').first()).toBeVisible();
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
   await settle(page);
 
   // Earth's threshold is 11.19 km/s, so 8 km/s must fall back.
@@ -651,7 +659,7 @@ test('escape-velocity launch below and above the threshold', async ({ page }) =>
 test('kepler sweep overlay changes the drawing', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/kepler-orbits', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('canvas').first()).toBeVisible();
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
   await settle(page);
 
   // The orbit animates, so a single before/after pair proves nothing on its own.
@@ -766,7 +774,7 @@ test('equation toggle substitutes live values', async ({ page }) => {
 test('gravitational-waves audio schedules without throwing', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/gravitational-waves', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('canvas').first()).toBeVisible();
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
   await settle(page, 1_500);
 
   const hear = page.getByRole('button', { name: 'Hear it' });
@@ -1269,7 +1277,7 @@ test('screen reader: canvases are labelled and described', async ({ page }) => {
     await page.goto(`/m/${id}`, { waitUntil: 'domcontentloaded' });
     await settle(page, 900);
 
-    const described = await page.locator('canvas').first().evaluate((canvas) => {
+    const described = await page.locator('#layer-panel-play canvas').evaluate((canvas) => {
       const describedBy = canvas.getAttribute('aria-describedby');
       const target = describedBy ? document.getElementById(describedBy) : null;
       return {
@@ -3047,7 +3055,7 @@ test.describe('prefers-reduced-motion', () => {
       // `useReducedMotion` sees it on mount.
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto(`/m/${id}`, { waitUntil: 'domcontentloaded' });
-      await expect(page.locator('canvas').first()).toBeVisible();
+      await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
       await settle(page, 1_500);
 
       const first = await canvasStats(page);
