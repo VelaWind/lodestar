@@ -12,14 +12,18 @@ import { getModule } from '@/content/registry';
 import { DISTANCE } from '@/motion/tokens';
 import { Reveal } from '@/motion/Reveal';
 import { useNoindex } from '@/lib/useNoindex';
-import { LAYER_META, LAYER_ORDER, defaultOpenFor } from '@/lib/layers';
+import { LAYER_META, LAYER_ORDER, defaultOpenFor, layerHasMath } from '@/lib/layers';
 import { defaultsOf, useAppStore } from '@/store/useAppStore';
 import { Layer } from '@/components/Layer';
 import { RichText } from '@/components/RichText';
 import { SimStage } from '@/components/SimStage';
 import { EquationBlock } from '@/components/EquationBlock';
+import { ensureKatex, katexLoaded } from '@/components/Tex';
 import { Connections } from '@/components/Connections';
 import { References } from '@/components/References';
+
+/** Upper bound on how long the KaTeX prefetch waits for an idle moment. */
+const KATEX_PREFETCH_MS = 2000;
 
 export function ModulePage() {
   const { id } = useParams<{ id: string }>();
@@ -62,16 +66,55 @@ function ModuleView({ module }: { module: Module }) {
     setOpen(defaultOpenFor(tier));
   }
 
-  const toggle = (layerId: LayerId) =>
-    setOpen((prev) => {
-      const next = new Set(prev);
-      if (next.has(layerId)) next.delete(layerId);
-      else next.add(layerId);
-      return next;
-    });
+  /*
+   * KaTeX is fetched here, once, after the page has had its first paint — never
+   * as part of it. `requestIdleCallback` puts it behind whatever the browser
+   * still has to do, and the timeout is the floor for a machine that never goes
+   * idle. By the time a reader has read the hook and reached for a layer with
+   * equations in it, the library is already in memory and opening is instant.
+   */
+  useEffect(() => {
+    const idle = window.requestIdleCallback;
+    if (typeof idle !== 'function') {
+      const timer = setTimeout(() => void ensureKatex(), KATEX_PREFETCH_MS);
+      return () => clearTimeout(timer);
+    }
+    const handle = idle(() => void ensureKatex(), { timeout: KATEX_PREFETCH_MS });
+    return () => window.cancelIdleCallback?.(handle);
+  }, []);
+
+  /*
+   * Opening a layer waits for KaTeX if that layer has math in it and the
+   * library has not arrived yet.
+   *
+   * This is what keeps the deferral invisible. The alternative — open now,
+   * render the equations when they load — is a layout shift on every module
+   * page, because an equation appearing pushes everything below it down, and
+   * after the 500ms grace period that follows a click it is a shift that counts.
+   * Waiting instead means the panel and its equations appear in the same commit,
+   * fully rendered. In practice the prefetch above has already finished and this
+   * resolves on the spot.
+   */
+  const openLayers = (next: Set<LayerId>) => {
+    const needsMath = LAYER_ORDER.some(
+      (id) => next.has(id) && !open.has(id) && layerHasMath(module, id, tier),
+    );
+    if (needsMath && !katexLoaded()) {
+      void ensureKatex().then(() => setOpen(next));
+      return;
+    }
+    setOpen(next);
+  };
+
+  const toggle = (layerId: LayerId) => {
+    const next = new Set(open);
+    if (next.has(layerId)) next.delete(layerId);
+    else next.add(layerId);
+    openLayers(next);
+  };
 
   const allOpen = open.size === LAYER_ORDER.length;
-  const toggleAll = () => setOpen(allOpen ? new Set() : new Set(LAYER_ORDER));
+  const toggleAll = () => openLayers(allOpen ? new Set() : new Set(LAYER_ORDER));
 
   return (
     <article>

@@ -3,7 +3,7 @@
  * policy. The shell reads this and nothing else when deciding what to open, so
  * changing the reading experience is a one-file change.
  */
-import type { LayerId } from '@/content/types';
+import type { LayerId, Module } from '@/content/types';
 
 export type DepthTier = 'curious' | 'student' | 'deep';
 
@@ -62,4 +62,38 @@ export const TIERS: { id: DepthTier; label: string; blurb: string }[] = [
 
 export function defaultOpenFor(tier: DepthTier): Set<LayerId> {
   return new Set(DEFAULT_OPEN[tier]);
+}
+
+/**
+ * Does opening this layer put KaTeX on screen?
+ *
+ * Three separate sources of math, and only the first is a RichText node:
+ *
+ *   - `math` always renders equations — `EquationLayer.equations[].tex` is bare
+ *     LaTeX rather than a `math` node, so walking the tree would miss it.
+ *   - `play` renders each parameter's `symbol` beside its label, but only at the
+ *     Deep tier; at the other two the symbol is noise in front of a plain-language
+ *     phrase and is not rendered at all.
+ *   - Every other layer is prose, where math arrives as `math` or `mathBlock`
+ *     nodes and has to be looked for.
+ *
+ * Used to decide whether opening a layer must wait for the library. Wrong in the
+ * "yes" direction costs a promise that resolves immediately; wrong in the "no"
+ * direction costs a layout shift, so the two special cases above are not
+ * optional.
+ */
+export function layerHasMath(module: Module, layerId: LayerId, tier: DepthTier): boolean {
+  if (layerId === 'math') return true;
+  if (layerId === 'play') return tier === 'deep';
+  return hasMathNode(module.layers[layerId]);
+}
+
+function hasMathNode(value: unknown): boolean {
+  if (Array.isArray(value)) return value.some(hasMathNode);
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    if (record.k === 'math' || record.k === 'mathBlock') return true;
+    return Object.values(record).some(hasMathNode);
+  }
+  return false;
 }

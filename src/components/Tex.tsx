@@ -12,7 +12,6 @@
  * and own the memoisation, which is the only real cost of renderToString.
  */
 import { memo, useMemo } from 'react';
-import katex from 'katex';
 /*
  * KaTeX's full font set, deliberately not subsetted.
  *
@@ -34,6 +33,61 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import '@/styles/katex.css';
 
+/* ------------------------------------------------------------------ */
+/* Loading KaTeX late, and only when there is math to render           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The library is 78 kB of JavaScript and, on the page a first-time reader
+ * lands on, renders nothing at all: at the Curious tier the open layers are the
+ * hook, the intuition and the sim, and none of the seven published modules has
+ * a single `math` or `mathBlock` node in any of them. It was still fetched in
+ * the second wave of the module page's request chain, ahead of first paint,
+ * because `Tex` imported it at module scope.
+ *
+ * So the import is dynamic and the module holds the result. Three states, and
+ * the distinction matters to callers: loaded, loading, and not yet asked for.
+ */
+type KatexModule = typeof import('katex');
+
+let katexModule: KatexModule | null = null;
+let katexPending: Promise<void> | null = null;
+
+/** True once `renderToString` can be called synchronously. */
+export function katexLoaded(): boolean {
+  return katexModule !== null;
+}
+
+/**
+ * Start the fetch, or join the one already in flight.
+ *
+ * Idempotent and safe to call from anywhere — the page prefetches on idle, and
+ * the accordion calls it again before opening a layer that has math in it.
+ */
+export function ensureKatex(): Promise<void> {
+  if (katexModule) return Promise.resolve();
+  katexPending ??= import('katex').then((m) => {
+    katexModule = (m as unknown as { default?: KatexModule }).default ?? (m as KatexModule);
+  });
+  return katexPending;
+}
+
+/**
+ * The module, or a thrown promise.
+ *
+ * Throwing a promise is the Suspense protocol, and it is the safety net rather
+ * than the main path. Everything that opens a layer waits for `ensureKatex`
+ * first, so by the time a `Tex` mounts the library is normally already here. If
+ * something ever mounts one before that — a tier restored from storage on a
+ * cold, slow load — React suspends instead of rendering, which is the one
+ * behaviour that is acceptable: the reader waits a moment for the page, and
+ * never sees raw TeX or watches an equation push the paragraph below it down.
+ */
+function readKatex(): KatexModule {
+  if (katexModule) return katexModule;
+  throw ensureKatex();
+}
+
 interface TexProps {
   tex: string;
   display?: boolean;
@@ -41,7 +95,7 @@ interface TexProps {
 }
 
 function render(tex: string, display: boolean): string {
-  return katex.renderToString(tex, {
+  return readKatex().renderToString(tex, {
     displayMode: display,
     throwOnError: false,
     errorColor: '#e8737d',
