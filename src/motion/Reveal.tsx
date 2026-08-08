@@ -17,10 +17,48 @@
  * survives this by construction rather than by measurement. Animating `height`,
  * `top`, `margin` or `padding` here would be a defect, not a style choice.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { DISTANCE, DURATION, EASE } from './tokens';
 import { useReducedMotion } from './useReducedMotion';
+
+/**
+ * A layout effect on the client, a plain effect on the server.
+ *
+ * `useLayoutEffect` is the whole mechanism below — it is the only hook that runs
+ * after the DOM has been mutated and *before* the browser paints, which is the
+ * one window in which an element's box can be measured and its style corrected
+ * without a frame ever reaching the screen in between. On the server there is no
+ * paint to be ahead of, and calling it there is only a warning in the log.
+ */
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/**
+ * What a Reveal is doing right now.
+ *
+ *   `unmeasured` — first render. Renders at its *final* state, styled with
+ *                  nothing at all, because nothing is yet known about where the
+ *                  box landed.
+ *   `static`     — never animates: reduced motion, no IntersectionObserver, or
+ *                  measured to be in the initial viewport.
+ *   `waiting`    — measured to be entirely outside the initial viewport, so it
+ *                  is hidden and waiting for its observer.
+ *   `entered`    — the observer fired; this is the entrance.
+ */
+type Mode = 'unmeasured' | 'static' | 'waiting' | 'entered';
+
+/**
+ * Does this box have any part of it inside the initial viewport?
+ *
+ * Deliberately "any part", not the observer's 15%. The question this answers is
+ * not "should this animate" but "can the reader see it right now", and one
+ * visible pixel is enough to make a fade to opacity 0 a thing that happened on
+ * screen. Pure, and exported for the test, because the alternative is asserting
+ * it through a browser.
+ */
+function startsVisible(rect: { top: number; bottom: number }, viewportHeight: number): boolean {
+  return rect.top < viewportHeight && rect.bottom > 0;
+}
 
 /**
  * Fire once 15% of the element's box is on screen. A pure `0` threshold trips
@@ -76,20 +114,46 @@ export function Reveal({
   };
 
   /*
-   * Two inputs, one derived answer. `crossed` is the only piece of state — did
-   * the observer ever see this element — and the reasons to skip the animation
-   * entirely are *derived* during render rather than written into state by an
-   * effect. That ordering is what guarantees the promise in the header: if
-   * there is no `IntersectionObserver` to tell us when to reveal, or the reader
-   * has asked for less motion, `shown` is already true on the very first paint,
-   * so the "no animation" path never flashes a frame at opacity 0 on its way to
-   * being corrected.
+   * Nothing animates unless it is asked to, and the asking happens *after* the
+   * box exists. `inert` is derived every render rather than captured, so a
+   * reader who turns reduced motion on mid-session is obeyed immediately.
    */
-  const [crossed, setCrossed] = useState(false);
-  const shown = crossed || reduced || typeof IntersectionObserver === 'undefined';
+  const inert = reduced || typeof IntersectionObserver === 'undefined';
+  const [mode, setMode] = useState<Mode>('unmeasured');
+
+  /*
+   * The measurement, and the reason this is a *layout* effect.
+   *
+   * The obvious implementation of "skip the animation for anything already on
+   * screen" is to start hidden and un-hide inside the first IntersectionObserver
+   * callback. That is wrong in a way that does not show up in the code: an
+   * observer callback is asynchronous and is delivered after layout, so the
+   * frame in between is a real frame, and an element that was always on screen
+   * paints once at opacity 0 before being corrected. On a module page that
+   * element is the hook paragraph, which is the largest contentful paint, and
+   * the browser will not count a paint at opacity 0 — so the fix costs the page
+   * its LCP, measured at 508ms against 40ms, while looking correct.
+   *
+   * So the default is inverted. Every Reveal renders at its final state with no
+   * style at all, and this effect — which runs after the DOM is mutated and
+   * before the browser paints — pushes *only* boxes that are entirely outside
+   * the viewport into the hidden state. An element the reader can see is never
+   * assigned opacity 0 in any commit; an element they cannot see is assigned it
+   * before the first paint, where being invisible is the point.
+   */
+  useIsomorphicLayoutEffect(() => {
+    if (inert || mode !== 'unmeasured') return;
+
+    const node = ref.current;
+    if (!node) return;
+
+    const rect = node.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    setMode(startsVisible(rect, viewportHeight) ? 'static' : 'waiting');
+  }, [inert, mode]);
 
   useEffect(() => {
-    if (shown) return;
+    if (inert || mode !== 'waiting') return;
 
     const node = ref.current;
     if (!node) return;
@@ -97,7 +161,7 @@ export function Reveal({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          setCrossed(true);
+          setMode('entered');
           // Once only. Nothing here re-hides, so a live observer would just be
           // a callback the page keeps paying for on every scroll.
           observer.disconnect();
@@ -108,7 +172,7 @@ export function Reveal({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [shown]);
+  }, [inert, mode]);
 
   /*
    * The wrapper is a plain `<div>`, not `display: contents`.
@@ -128,17 +192,7 @@ export function Reveal({
    * collapses them into one cell. Wrap each child separately and stagger them
    * with `delay` instead.
    */
-  const style: CSSProperties | undefined = reduced
-    ? undefined
-    : {
-        opacity: shown ? 1 : 0,
-        transform: shown ? 'none' : `translateY(${distance}px)`,
-        transition: `opacity ${DURATION.slow}ms ${EASE_OUT} ${delay}ms, transform ${DURATION.slow}ms ${EASE_OUT} ${delay}ms`,
-        // Only while there is something still to composite. Left on
-        // permanently it pins a layer per revealed element for the life of the
-        // page, which on a long module is a real memory cost for no benefit.
-        willChange: shown ? undefined : 'opacity, transform',
-      };
+  const style = inert ? undefined : revealStyle(mode, distance, delay);
 
   const Tag = as;
 
@@ -148,3 +202,34 @@ export function Reveal({
     </Tag>
   );
 }
+
+/**
+ * The inline style for each mode.
+ *
+ * `unmeasured` and `static` return nothing at all — not `opacity: 1`, not
+ * `transform: none`, not an idle `transition`. An element that is never going to
+ * animate should carry no evidence that it might: `will-change` and a transform
+ * each promote it to its own compositor layer, and a page of layers costs memory
+ * for an effect that is not running.
+ */
+function revealStyle(mode: Mode, distance: number, delay: number): CSSProperties | undefined {
+  if (mode === 'unmeasured' || mode === 'static') return undefined;
+
+  const transition = `opacity ${DURATION.slow}ms ${EASE_OUT} ${delay}ms, transform ${DURATION.slow}ms ${EASE_OUT} ${delay}ms`;
+
+  if (mode === 'entered') {
+    // No `willChange` once it is on its way in: the transition is the last thing
+    // this element will ever do, and holding the layer past it is pure cost.
+    return { opacity: 1, transform: 'none', transition };
+  }
+
+  return {
+    opacity: 0,
+    transform: `translateY(${distance}px)`,
+    transition,
+    willChange: 'opacity, transform',
+  };
+}
+
+/** Test-only surface. Not part of the API any component should reach for. */
+export const __internals = { startsVisible, revealStyle };
