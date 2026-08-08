@@ -40,6 +40,7 @@ import {
   chirpCurves,
 } from '@/sims/gw-audio';
 import { labelBox } from './labels';
+import { createGlowCache, drawGlow, glowRadius } from '@/visual/glow';
 
 /* ------------------------------------------------------------------ */
 /* Display helpers — formatting only, never used to compute            */
@@ -183,6 +184,10 @@ const COLORS = {
 };
 
 const TAU_2PI = 2 * Math.PI;
+/** Drawn radius of the source dot, px, and its glow as a multiple of it. */
+const SOURCE_R = 3;
+const GLOW_SCALE = 5;
+const sourceGlow = createGlowCache();
 /** `left` is a floor; the real gutter is measured from the strain labels. */
 const PAD = { left: 46, right: 12, top: 18, bottom: 34, gutterGap: 10 };
 /** Samples per horizontal pixel. Six is enough that a cycle never aliases. */
@@ -310,9 +315,18 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.lineTo(x, bottom);
     ctx.stroke();
 
+    /* The leading edge is the source: the point the waveform is being written
+       from. The glow is a multiple of the dot's own radius and capped against
+       the frame, so at the left-hand end of a sweep it cannot bleed onto the
+       strain-axis labels. Decoration only — `strain[drawn]` is the same value
+       the trace is drawn from, untouched. */
+    const sourceY = yFor(strain[drawn]!);
+    const glowR = glowRadius(SOURCE_R * GLOW_SCALE, x, sourceY, w, h, null, 0);
+    drawGlow(ctx, sourceGlow, x, sourceY, glowR, 'rgba(232,189,125,0.45)', 'rgba(232,189,125,0)');
+
     ctx.fillStyle = COLORS.ember;
     ctx.beginPath();
-    ctx.arc(x, yFor(strain[drawn]!), 3, 0, TAU_2PI);
+    ctx.arc(x, sourceY, SOURCE_R, 0, TAU_2PI);
     ctx.fill();
 
     ctx.font = '600 11px Inter, system-ui, sans-serif';

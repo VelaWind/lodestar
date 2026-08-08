@@ -34,6 +34,8 @@ import {
   visViva,
   type OrbitGeometry,
 } from '@/physics/kepler';
+import { createGlowCache, drawGlow, glowRadius } from '@/visual/glow';
+import { createTrail, drawTrail, pushTrail, resetTrail, type Trail } from '@/visual/trail';
 
 /* ------------------------------------------------------------------ */
 /* Display helpers — formatting only, never used to compute            */
@@ -92,6 +94,30 @@ const WEDGE_SAMPLES = 96;
 
 const TAU = 2 * Math.PI;
 
+/** Drawn radii, px. The glow is a multiple of the star's, never a fixed size. */
+const STAR_R = 5.5;
+const PLANET_R = 4.5;
+const GLOW_SCALE = 4;
+
+/**
+ * Retained positions in the planet's trail — a count, not a duration.
+ *
+ * One orbit is `ORBIT_SECONDS` of wall clock, so at 60fps this is roughly the
+ * last eighth of the path. Enough to read as motion and as *direction*, short
+ * enough that at e = 0.97 the fast periapsis passage does not smear the whole
+ * inner orbit into a solid arc.
+ */
+const TRAIL_LENGTH = 90;
+
+/** Reused per frame: the label band the star's glow must not reach into. */
+const KEEP_OUT = new Float64Array(4);
+
+/** One cache for the star's glow, module-scoped so no frame allocates one. */
+const starGlow = createGlowCache();
+
+/** Stand-in so `resetTrail` needs no null branch before the first allocation. */
+const EMPTY_TRAIL = createTrail(1);
+
 interface Point {
   x: number;
   y: number;
@@ -113,6 +139,14 @@ interface Scene {
   sweep: boolean;
   /** No animation: draw the planet parked at periapsis. */
   frozen: boolean;
+  /**
+   * Where the planet has been, in world coordinates. Decoration only — nothing
+   * reads it back. `null` under reduced motion, which is how "no trails" is
+   * expressed without branching inside the draw loop, and optional so a caller
+   * that only wants a still frame — the canvas regression suite — need not
+   * invent one.
+   */
+  trail?: Trail | null;
 }
 
 const COLORS = {
@@ -261,18 +295,21 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     ctx.fillText(apsis.label, px + (fitsOutboard ? apsis.dx : -apsis.dx), Y(0) - 12);
   }
 
-  /* --- the star, at the focus --- */
+  /* --- the star, at the focus ---
+     The glow was a flat 22px. It is now four times the star's drawn radius,
+     capped against the frame edges and against the two apsis labels above —
+     which is what stops it washing over "periapsis" on a phone, where the
+     auto-scale puts the marker a few pixels from the star. */
   const sx = X(0);
   const sy = Y(0);
-  const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, 22);
-  glow.addColorStop(0, 'rgba(157,180,255,0.55)');
-  glow.addColorStop(1, 'rgba(157,180,255,0)');
-  ctx.fillStyle = glow;
+  KEEP_OUT[0] = plotLeft;
+  KEEP_OUT[1] = plotTop - 24;
+  KEEP_OUT[2] = plotLeft + plotW;
+  KEEP_OUT[3] = Y(0) - 6;
+  const glowR = glowRadius(STAR_R * GLOW_SCALE, sx, sy, w, h, KEEP_OUT, 1);
+  drawGlow(ctx, starGlow, sx, sy, glowR, 'rgba(157,180,255,0.55)', 'rgba(157,180,255,0)');
   ctx.beginPath();
-  ctx.arc(sx, sy, 22, 0, TAU);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(sx, sy, 5.5, 0, TAU);
+  ctx.arc(sx, sy, STAR_R, 0, TAU);
   ctx.fillStyle = COLORS.star;
   ctx.fill();
 
@@ -280,6 +317,24 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   const now = stateAt(scene.M, scene.a, scene.e, scene.frozen ? 0 : scene.t);
   const px = X(now.x);
   const py = Y(now.y);
+
+  /* --- the trail ---
+     World coordinates, transformed with the same scale and offset as everything
+     else here, so it can never drift off the ellipse. Drawn before the planet so
+     the head sits under the body rather than over it. `scene.trail` is null
+     under reduced motion and while the planet is parked. */
+  if (scene.trail && !scene.frozen) {
+    drawTrail(
+      ctx,
+      scene.trail,
+      COLORS.ember,
+      PLANET_R,
+      cx + geom.focusOffset * scale,
+      scale,
+      cy,
+      -scale,
+    );
+  }
 
   ctx.strokeStyle = 'rgba(232,189,125,0.35)';
   ctx.lineWidth = 1;
@@ -289,7 +344,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.arc(px, py, 4.5, 0, TAU);
+  ctx.arc(px, py, PLANET_R, 0, TAU);
   ctx.fillStyle = COLORS.ember;
   ctx.fill();
 }
@@ -308,6 +363,9 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
   const reduced = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  /* One buffer for the life of the component, reused across parameter changes
+     rather than reallocated with each one. */
+  const trailRef = useRef<Trail | null>(null);
   const sceneRef = useRef<Scene | null>(null);
   const speedRef = useRef<HTMLSpanElement | null>(null);
 
@@ -375,7 +433,13 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
       wedges: buildWedges(M, a, e, T),
       sweep,
       frozen: Boolean(reduced),
+      /* Allocated once per parameter change, never per frame — and not at all
+         under reduced motion, where there is no path to leave behind. The
+         previous orbit's points describe a curve this one does not follow, so
+         the buffer is new rather than carried over. */
+      trail: reduced ? null : (trailRef.current ??= createTrail(TRAIL_LENGTH)),
     };
+    resetTrail(trailRef.current ?? EMPTY_TRAIL);
     paint();
 
     if (reduced || !(T > 0)) return;
@@ -388,6 +452,14 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
       const dtWall = Math.min(0.1, (now - last) / 1000);
       last = now;
       scene.t = (scene.t + dtWall * scene.rate) % scene.T;
+      /* Record where the planet is *after* the clock has advanced and from the
+         same `stateAt` the draw will use, so the head of the trail is the body's
+         own position rather than an approximation of it. Nothing downstream
+         reads this back. */
+      if (scene.trail) {
+        const at = stateAt(scene.M, scene.a, scene.e, scene.t);
+        pushTrail(scene.trail, at.x, at.y);
+      }
       paint();
       rafRef.current = requestAnimationFrame(tick);
     };

@@ -33,7 +33,7 @@ import { __internals as su } from '@/sims/scale-of-the-universe';
 
 import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
 import { chirpMass, fCutoff } from '@/physics/gw';
-import { orbitGeometry, period } from '@/physics/kepler';
+import { orbitGeometry, period, stateAt } from '@/physics/kepler';
 import { transitShape } from '@/physics/transit';
 import { GASES, retentionVerdict } from '@/physics/atmosphere';
 import {
@@ -43,8 +43,11 @@ import {
 } from '@/physics/blackhole';
 
 import type { Param } from '@/content/types';
+import { MAX_TRAIL_ALPHA, createTrail, pushTrail } from '@/visual/trail';
 import {
   describeRecord,
+  alphasOutOfRange,
+  badGlowRadii,
   nonFiniteDraws,
   recordingContext,
   textCollisions,
@@ -563,7 +566,7 @@ for (const sim of SIMS) {
     for (const width of WIDTHS) {
       it(`draws cleanly at ${width}×${sim.height}`, () => {
         for (const testCase of cases) {
-          const { ctx, records } = recordingContext();
+          const { ctx, records, glowRadii, alphas } = recordingContext();
           testCase.draw(ctx, width, sim.height);
 
           const overflowing = textOutsideFrame(records, width, sim.height);
@@ -576,6 +579,36 @@ for (const sim of SIMS) {
           expect(
             broken.map(describeRecord),
             `${sim.name} · ${testCase.label} · ${width}×${sim.height}: non-finite coordinates`,
+          ).toEqual([]);
+
+          /*
+           * Decoration, held to the same standard as geometry.
+           *
+           * A glow's radius comes from the body's drawn radius, which comes
+           * from an auto-scale that divides by a span the sliders can drive to
+           * zero — so it is on exactly the path that produces `NaN` at an
+           * extreme. Canvas throws on a non-finite gradient in some engines and
+           * silently draws nothing in others, which is the failure this catches
+           * at a width and a slider stop rather than in a screenshot.
+           */
+          expect(
+            badGlowRadii(glowRadii),
+            `${sim.name} · ${testCase.label} · ${width}×${sim.height}: glow radius not finite and non-negative`,
+          ).toEqual([]);
+
+          /*
+           * Every alpha, held to canvas's own range rather than to the trail's.
+           *
+           * Not every `globalAlpha` here belongs to a trail — scale-of-the-universe
+           * washes its whole frame at 0.875 — so the bound that applies to all of
+           * them is [0, 1]. Canvas clamps silently, so an out-of-range value is
+           * invisible and still wrong, and a `NaN` is ignored outright, which
+           * leaves the *previous* alpha applied to everything drawn after it. The
+           * tighter trail bound is asserted below, where trails actually exist.
+           */
+          expect(
+            alphasOutOfRange(alphas),
+            `${sim.name} · ${testCase.label} · ${width}×${sim.height}: alpha outside [0, 1]`,
           ).toEqual([]);
         }
       });
@@ -601,3 +634,140 @@ for (const sim of SIMS) {
     }
   });
 }
+
+/* ------------------------------ trails and glow ------------------------------ */
+
+/**
+ * The decoration this pass added, checked where it actually lives.
+ *
+ * The per-sim loop above asserts the invariants that hold for every sim — glow
+ * radii finite, alpha inside canvas's own range. These are the tighter ones, and
+ * they only make sense on the two sims that carry a trail: that a trail never
+ * reaches the opacity of the body it trails, and that a glow sized from a body
+ * whose drawn radius is set by an auto-scale still fits the frame it is drawn
+ * in. Both are asserted with the buffer *full*, because a trail with one point
+ * in it exercises none of the decay arithmetic.
+ */
+describe('trails and glow', () => {
+  const keplerParams = keplerOrbits.layers.play.params;
+  const exoParams = exoplanets.layers.play.params;
+
+  it('keeps trail alpha under the body it trails, at every extreme', () => {
+    for (const m of extremes(paramOf(keplerParams, 'M'))) {
+      for (const a of extremes(paramOf(keplerParams, 'a'))) {
+        for (const e of extremes(paramOf(keplerParams, 'e'))) {
+          const geom = orbitGeometry(a.value, e.value);
+          const T = period(m.value, a.value);
+          const trail = createTrail(90);
+          // Fill it the way the loop does: real positions, all the way round.
+          for (let i = 0; i < 200; i += 1) {
+            const at = stateAt(m.value, a.value, e.value, (i / 200) * T);
+            pushTrail(trail, at.x, at.y);
+          }
+          expect(trail.count, 'the buffer should be full').toBe(90);
+
+          for (const width of WIDTHS) {
+            const { ctx, records, glowRadii, alphas } = recordingContext();
+            ko.drawScene(ctx, width, 384, {
+              M: m.value,
+              a: a.value,
+              e: e.value,
+              T,
+              geom,
+              t: T * 0.25,
+              rate: T / 12,
+              wedges: [],
+              sweep: false,
+              frozen: false,
+              trail,
+            });
+
+            const label = `kepler M=${m.stop} a=${a.stop} e=${e.stop} @${width}`;
+            // 1 is `drawTrail` restoring the context on its way out, not a
+            // value any dot was drawn at; everything else is a trail alpha.
+            const trailAlphas = alphas.filter((a) => a !== 1);
+            expect(trailAlphas.length, `${label}: the trail drew nothing`).toBeGreaterThan(0);
+            expect(
+              alphasOutOfRange(trailAlphas, MAX_TRAIL_ALPHA),
+              `${label}: trail alpha`,
+            ).toEqual([]);
+            expect(badGlowRadii(glowRadii), `${label}: glow radius`).toEqual([]);
+            for (const r of glowRadii) {
+              expect(r, `${label}: glow radius ${r} escapes the frame`).toBeLessThanOrEqual(
+                Math.max(width, 384),
+              );
+            }
+            expect(nonFiniteDraws(records).map(describeRecord), `${label}: geometry`).toEqual([]);
+          }
+        }
+      }
+    }
+  });
+
+  it('keeps the transit trail bounded at every extreme', () => {
+    const ms = paramOf(exoParams, 'Mstar').default;
+    for (const rs of extremes(paramOf(exoParams, 'Rstar'))) {
+      for (const rp of extremes(paramOf(exoParams, 'Rp'))) {
+        for (const a of extremes(paramOf(exoParams, 'a'))) {
+          const shape = transitShape(ms, rs.value, rp.value, a.value);
+          const trail = createTrail(60);
+
+          for (const width of WIDTHS) {
+            const { ctx, records, glowRadii, alphas } = recordingContext();
+            // Ten frames so the buffer fills and the decay is exercised.
+            for (let i = 0; i < 70; i += 1) {
+              ep.drawScene(ctx, width, 352, {
+                rs: rs.value,
+                rp: rp.value,
+                a: a.value,
+                shape,
+                progress: i / 70,
+                trail,
+              });
+            }
+
+            const label = `exoplanets Rs=${rs.stop} Rp=${rp.stop} a=${a.stop} @${width}`;
+            // 1 is `drawTrail` restoring the context on its way out, not a
+            // value any dot was drawn at; everything else is a trail alpha.
+            const trailAlphas = alphas.filter((a) => a !== 1);
+            /* The sliders reach a corner where the orbit lies inside the star.
+               There is no transit to draw there, so `drawScene` bails to a
+               message before it ever reaches the planet — and a trail that drew
+               nothing is the correct outcome, not a missing one. */
+            if (shape.transits) {
+              expect(trailAlphas.length, `${label}: the trail drew nothing`).toBeGreaterThan(0);
+            }
+            expect(
+              alphasOutOfRange(trailAlphas, MAX_TRAIL_ALPHA),
+              `${label}: trail alpha`,
+            ).toEqual([]);
+            expect(badGlowRadii(glowRadii), `${label}: glow radius`).toEqual([]);
+            expect(nonFiniteDraws(records).map(describeRecord), `${label}: geometry`).toEqual([]);
+          }
+        }
+      }
+    }
+  });
+
+  it('draws no trail at all when there is none to draw', () => {
+    const geom = orbitGeometry(paramOf(keplerParams, 'a').default, 0.3);
+    const T = period(paramOf(keplerParams, 'M').default, paramOf(keplerParams, 'a').default);
+    const { ctx, alphas } = recordingContext();
+    ko.drawScene(ctx, 660, 384, {
+      M: paramOf(keplerParams, 'M').default,
+      a: paramOf(keplerParams, 'a').default,
+      e: 0.3,
+      T,
+      geom,
+      t: 0,
+      rate: 1,
+      wedges: [],
+      sweep: false,
+      frozen: true,
+      trail: null,
+    });
+    // Reduced motion and the parked planet both arrive here. Nothing should
+    // have touched alpha, which is how "no trails" is observable from outside.
+    expect(alphas).toEqual([]);
+  });
+});
