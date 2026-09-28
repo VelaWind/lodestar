@@ -39,6 +39,7 @@ const MODULES = [
   'gravitational-waves',
   'exoplanets',
   'planetary-atmospheres',
+  'expansion-of-the-universe',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2057,6 +2058,84 @@ test('behaviour: every gas chip selects, redraws and keeps its verdict', async (
   assertClean(w, 'atmospheres behaviour');
 });
 
+/**
+ * The expansion module, end to end, on every engine.
+ *
+ * Four claims, each the kind a unit test cannot see. The distance slider drives
+ * the redshift a reader reads; the H₀ slider drives the Hubble time; a glossary
+ * term in the real-picture layer opens from the keyboard alone; and the page,
+ * with that layer open, has no serious accessibility violation.
+ */
+test('behaviour: expansion readouts follow the sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/expansion-of-the-universe', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'expansion at rest');
+
+  const readout = (index: number) =>
+    page.locator('#expansion-of-the-universe-readouts dd').nth(index).innerText();
+
+  /* Distance moves the redshift. The default is Coma: z = 0.0225. */
+  const zAtComa = await readout(2);
+  expect(zAtComa.trim(), 'the default redshift should be Coma’s').toBe('0.0225');
+  await dragSliderToEnd(page, page.locator('#p-d'), 'max');
+  const zFar = await readout(2);
+  expect(zFar, 'dragging the galaxy away should change the redshift').not.toBe(zAtComa);
+  expect(Number(zFar), 'farther means more redshift').toBeGreaterThan(Number(zAtComa));
+  await assertNoOverflow(page, 'expansion at the far end');
+
+  /* H₀ moves the Hubble time: 14.5 billion years at Planck's value, shorter at 80. */
+  const tAtPlanck = await readout(5);
+  expect(tAtPlanck).toContain('14.5 billion years');
+  const h0 = page.locator('#p-H0');
+  await h0.focus();
+  await page.keyboard.press('End');
+  // The spoken value rather than the raw one: the input serialises a float in
+  // s⁻¹, and its last digits differ from the `max` attribute's.
+  await expect(h0).toHaveAttribute('aria-valuetext', '80 km/s/Mpc');
+  const tAtMax = await readout(5);
+  expect(tAtMax, 'a faster expansion should shorten the Hubble time').not.toBe(tAtPlanck);
+  expect(tAtMax).toContain('12.2 billion years');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the Hubble–Lemaître law').toBe(
+    'hubble-lemaitre-law',
+  );
+  const trigger = page.locator('[data-glossary-term="hubble-lemaitre-law"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="hubble-lemaitre-law"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('twice as far, twice as fast');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'expansion: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '14-expansion-behaviour');
+  assertClean(w, 'expansion behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2067,18 +2146,21 @@ test('behaviour: every gas chip selects, redraws and keeps its verdict', async (
  * module that is not published degrades to a chip rather than a dead link, and
  * no draft is reachable from anywhere a reader looks.
  *
- * The planned chips are three, and it is worth writing down why, because the
+ * The planned chips are five, and it is worth writing down why, because the
  * number moves when the backlog does: they point at `cosmic-distance-ladder`
- * twice and `expansion-of-the-universe` once, neither of which is written. Two
- * further chips existed until `planetary-atmospheres` was published — a module
- * that was finished and registered but still carried a draft flag, so the index
- * hid it and every link to it degraded to a chip.
+ * three times (twice from older modules, once from the expansion module), and
+ * at `cosmic-microwave-background` and `early-universe` once each, both from
+ * the expansion module; none of the three is written. The chip that pointed at
+ * `expansion-of-the-universe` became a live link when that module was
+ * published. Two further chips existed until `planetary-atmospheres` was
+ * published — a module that was finished and registered but still carried a
+ * draft flag, so the index hid it and every link to it degraded to a chip.
  *
  * Every target here is a module nobody has written. A chip pointing at a module
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'expansion-of-the-universe'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'cosmic-microwave-background', 'early-universe'];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2090,7 +2172,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes seven modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes eight modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -2142,7 +2224,7 @@ test('behaviour: the registry publishes seven modules and leaks no drafts', asyn
   }
 
   console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
-  expect(planned, 'planned-chip total across every published page').toBe(3);
+  expect(planned, 'planned-chip total across every published page').toBe(5);
 
   assertClean(w, 'registry');
 });
@@ -2776,7 +2858,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All seven modules now, with no exception branch. `kepler-orbits` carried one
+ * All eight modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -2916,7 +2998,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all nine routes').toBe(9);
+  expect(routes.length, 'all ten routes').toBe(10);
 
   const offenders: string[] = [];
   let aboutChecked = false;

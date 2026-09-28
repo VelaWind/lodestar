@@ -10,11 +10,8 @@
  *   2. src/sims/<simKey>.tsx         (default-exports a component taking SimProps)
  */
 import type { Module } from '../types';
-import { M_SUN, PARSEC } from '@/physics/constants';
+import { M_SUN, MEGAPARSEC } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
-
-/** Megaparsec in metres — the natural unit for a source at this distance. */
-const MEGAPARSEC = 1e6 * PARSEC;
 
 const gravitationalWaves: Module = {
   id: 'gravitational-waves',
