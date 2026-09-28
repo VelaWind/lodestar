@@ -2095,7 +2095,7 @@ test('behaviour: expansion readouts follow the sliders, and a term opens by keyb
   await page.keyboard.press('End');
   // The spoken value rather than the raw one: the input serialises a float in
   // s⁻¹, and its last digits differ from the `max` attribute's.
-  await expect(h0).toHaveAttribute('aria-valuetext', '80.0 km/s/Mpc');
+  await expect(h0).toHaveAttribute('aria-valuetext', '80 km/s/Mpc');
   const tAtMax = await readout(5);
   expect(tAtMax, 'a faster expansion should shorten the Hubble time').not.toBe(tAtPlanck);
   expect(tAtMax).toContain('12.2 billion years');
