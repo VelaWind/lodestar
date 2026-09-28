@@ -147,6 +147,52 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "A star dims by a hundredth, on schedule, and there is a world in the way.",
     "title": "Exoplanets",
   },
+  "expansion-of-the-universe": {
+    "L1 hook": "Point a telescope at almost any distant galaxy and it is moving away from you; point at one twice as far, and it is leaving twice as fast. This is not because you are at the centre of anything.",
+    "L2 intuition": "Take a rubber band, mark it with ink dots a centimetre apart, and stretch it to twice its length. The dot that was one centimetre from you is now two centimetres away: it moved one centimetre. The dot that was five centimetres away is now ten: it moved five. Farther dots move farther in the same time, so they move faster. And this is true from whichever dot you choose. No dot is the centre of the stretching. That is what the galaxies are doing. They are not flying through space away from us. The space between them is stretching, and the farther the galaxy, the more stretching lies between here and there. Light is stretched the same way. A light wave that leaves a galaxy arrives with its crests farther apart, and light with crests farther apart is redder. The farther the galaxy, the redder its light arrives. A galaxy close enough for its own motion to beat the stretching, and only a handful are, arrives bluer instead. Where the analogy breaks: a rubber band has ends and is stretched into the room around it. The universe has no known edge and is not stretching into anything. And the ink dots stretch with the band; galaxies do not. Gravity holds each galaxy together while the space between them grows.",
+    "L3 approximation 0": "Redshift here is speed divided by the speed of light. That holds nearby; at the far end of the distance slider it is a few percent below the full result.",
+    "L3 approximation 1": "Distance means how far the galaxy is right now. The light you see left it long ago, when it was closer.",
+    "L3 approximation 2": "Light travel time is distance divided by the speed of light, ignoring that space stretched while the light was in flight. About a tenth off at the far end of the slider.",
+    "L3 caption": "Drag the galaxy farther away and watch the line in its light slide toward red. Then give the galaxy some motion of its own and see how close it has to be before that motion wins.",
+    "L4 figure alt": "A black field scattered with smooth, pale golden oval galaxies of different sizes, the largest just right of centre, with a tilted bluish spiral galaxy at upper left and hundreds of tiny orange specks, far more distant galaxies, filling the background.",
+    "L4 real": "What we have been calling stretching is the expansion of space, and the rule the sim draws is the Hubble–Lemaître law: a galaxy’s recession velocity, the speed at which the distance to it grows, equals its distance multiplied by the Hubble constant, H_0. Current measurements put H_0 near 70 km/s per megaparsec (3.26 million light-years), so every extra 3.26 million light-years of distance adds about 70 km/s of speed. The stretching shows up in light as redshift: the fractional increase in wavelength, the crest-to-crest length of the wave, between emission and arrival, written z. Astronomers measure it from spectral lines, the sharp features atoms leave at fixed wavelengths. The hydrogen line the sim uses, Hα, sits at 656.28 nm in the laboratory; from a galaxy at z = 0.02 it arrives at 669 nm. This is a cosmological redshift: the wave was lengthened by space stretching while the light was in flight. It is not a Doppler shift, the change in pitch of a passing siren, though at small z the two give the same number and the sim treats them as the same. A galaxy moving toward us fast enough shows a blueshift, a shortening of wavelength. Andromeda does: its own motion through space, its peculiar velocity, carries it toward the Milky Way at about 110 km/s, more than the roughly 50 km/s of expansion across the 2.5 million light-years between us. Gravity wins over expansion inside groups and clusters of galaxies; expansion wins across the gulfs between them. The history is often told wrong. Vesto Slipher measured the first of these shifts between 1912 and 1917, beginning with Andromeda’s blueshift. Georges Lemaître derived the velocity–distance relation from general relativity, Einstein’s theory of gravity, in 1927 and estimated the constant. Edwin Hubble published the relation with measured distances in 1929, with a constant near 500 km/s/Mpc, seven times too high because his distances were wrong. The International Astronomical Union recommended the name Hubble–Lemaître law in 2018. Two misconceptions. The galaxies are not fleeing a central explosion: the Big Bang, the hot dense state the expansion began from, happened everywhere, and every observer sees the same recession from their own position. And the expansion is not into anything. The universe has no known edge, and “outside” is not a place. The value of H_0 is disputed. Fitting the cosmic microwave background, the faint glow left over from the early universe, gives 67.4 ± 0.5 km/s/Mpc; measuring nearby galaxies directly gives 73.0 ± 1.0. The gap is five times larger than either uncertainty and has survived a decade of checking. Nobody yet knows whether a measurement is wrong or the model is. The sim’s slider covers both values. The Coma Cluster, about 320 million light-years away and the sim’s starting point. Every galaxy in it is receding from us at roughly 6 700 km/s; the redshift of the whole cluster was one of the first measured. NASA, ESA, and the Hubble Heritage Team (STScI/AURA). Acknowledgment: D. Carter (Liverpool John Moores University) and the Coma HST ACS Treasury Team.",
+    "L5 intro": null,
+    "L5 note (hubble-time)": "t_H — the Hubble time, the age the universe would have if it had always expanded at today’s rate. The true age is close to it: see going deeper. Worked example, the Coma Cluster. d = 3.09 \\times 10^{24}\\,\\text{m} (326 million light-years, 100 Mpc), H_0 = 2.18 \\times 10^{-18}\\,\\text{s}^{-1} (67.4 km/s/Mpc), v_{\\text{pec}} = 0. v = 2.18 \\times 10^{-18} \\times 3.09 \\times 10^{24} = 6.74 \\times 10^{6}\\,\\text{m/s} = 6\\,740\\,\\text{km/s} z = 6.74 \\times 10^{6} / 3.00 \\times 10^{8} = 0.0225 \\lambda_{\\text{obs}} = 656.28\\,\\text{nm} \\times 1.0225 = 671.0\\,\\text{nm} t_H = 1 / (2.18 \\times 10^{-18}\\,\\text{s}^{-1}) = 4.58 \\times 10^{17}\\,\\text{s} = 14.5 billion years Coma’s measured redshift is 0.023; the small difference is its peculiar velocity.",
+    "L5 note (recession-velocity)": "v — recession velocity, the rate at which the distance grows; H_0 — the Hubble constant (your slider); d — proper distance now (your slider). Linear: twice the distance, twice the speed.",
+    "L5 note (redshift)": "\\lambda_{\\text{obs}} — the wavelength that arrives; \\lambda_{\\text{rest}} — the laboratory wavelength, 656.28 nm for Hα; v_{\\text{pec}} — the galaxy’s own motion (your slider); c — the speed of light. The approximation holds while z is much less than 1.",
+    "L6 deeper": "Write the distance to any galaxy as d(t) = a(t)\\,\\chi, where \\chi is a fixed comoving coordinate labelling the galaxy and a(t) is the scale factor, the single number recording how stretched the universe is at time t. Differentiating, \\dot d = \\dot a\\,\\chi = (\\dot a / a)\\,d. The velocity–distance relation is therefore a consequence of homogeneity: any uniform stretching produces a speed proportional to distance, with the same proportionality seen from every point. The Hubble parameter H(t) = \\dot a / a is a function of time; H_0 is its value now. “Constant” means constant across space, not across history. Cosmological redshift follows from the same scale factor with no velocity in it: 1 + z = a(t_0) / a(t_{\\text{emit}}). The wavelength grows by exactly the factor the universe grew while the light was travelling. Expanding in small z recovers z \\approx H_0 d / c, but the next term depends on the expansion history. For comoving distance, d = (c/H_0)\\,[\\,z - (1 + q_0)\\,z^2/2 + \\dots\\,], where q_0 = -\\ddot a\\,a / \\dot a^2 is the deceleration parameter. With the Planck 2018 densities, \\Omega_m = 0.315 and \\Omega_\\Lambda = 0.685, q_0 = \\Omega_m/2 - \\Omega_\\Lambda \\approx -0.53: the expansion is accelerating, a result first established from Type Ia supernovae in 1998 and attributed to dark energy. The sim’s linear z = v/c therefore underestimates z by about 2% at z = 0.1 and about 5% at the far end of the distance slider. “Distance” also stops being one number. Proper distance now, the distance the light travelled, and the luminosity distance inferred from brightness differ by factors of order (1 + z) and agree only for z \\lesssim 0.1. The sim’s d is proper distance now. Recession velocity H_0 d exceeds c beyond the Hubble radius c/H_0, about 4.4 Gpc or 14.5 billion light-years. This violates nothing: special relativity limits motion through space, and recession is not motion through space. Light from beyond the Hubble radius still reaches us because the Hubble radius grows over time, overtaking photons that were once being carried away. The observable universe extends to about 46 billion light-years, more than three Hubble radii. The Hubble tension is the field’s central open problem. The early-universe route fits the cosmic microwave background with the ΛCDM model and predicts H_0 = 67.4 \\pm 0.5 km/s/Mpc. The late-universe route calibrates Type Ia supernovae with Cepheid variables and measures 73.04 ± 1.04 (SH0ES, 2022). The discrepancy exceeds 5\\sigma. The tip-of-the-red-giant-branch calibration returned 69.8 ± 0.8 (stat) ± 1.7 (sys) in 2019, between the two, and JWST measurements since 2024 have sharpened rather than settled the argument: SH0ES Cepheid photometry was confirmed and crowding ruled out at high significance, while the Carnegie-Chicago programme’s three JWST methods gave values between 68 and 72. Proposed explanations divide into distance-ladder systematics and new physics, such as an early dark energy component that shrinks the sound horizon the CMB fit depends on. None is accepted. Finally, the age. 1/H_0 is the age the universe would have if it had always expanded at today’s rate; at H_0 = 67.4 km/s/Mpc it is 14.5 billion years. Deceleration by matter early on and acceleration by \\Lambda late on nearly cancel, so the ΛCDM age, 13.80 ± 0.02 billion years, is 0.95 of the Hubble time.",
+    "L7 reason -> cosmic-distance-ladder": "Every point on the Hubble diagram needs a distance measured some other way. That is where the distances come from, and why two teams disagree.",
+    "L7 reason -> cosmic-microwave-background": "Run the stretching backward far enough and the light reaching you left before there were any galaxies.",
+    "L7 reason -> early-universe": "1/H₀ is a rough age. That module walks through the first moments of it.",
+    "L7 reason -> scale-of-the-universe": "The distance slider here covers the same range you climbed there; now each step has a speed attached.",
+    "reference 0": {
+      "label": "Planck Collaboration 2020, “Planck 2018 results VI: Cosmological parameters”, A&A 641, A6",
+      "note": "H₀ = 67.4 ± 0.5 km/s/Mpc, Ω_m, Ω_Λ and the 13.80 Gyr age",
+      "url": "https://doi.org/10.1051/0004-6361/201833910",
+    },
+    "reference 1": {
+      "label": "Riess et al. 2022, “A Comprehensive Measurement of the Local Value of the Hubble Constant”, ApJL 934, L7",
+      "note": "SH0ES value 73.04 ± 1.04 km/s/Mpc",
+      "url": "https://doi.org/10.3847/2041-8213/ac5c5b",
+    },
+    "reference 2": {
+      "label": "Freedman et al. 2019, “The Carnegie-Chicago Hubble Program. VIII”, ApJ 882, 34",
+      "note": "TRGB value 69.8 km/s/Mpc",
+      "url": "https://doi.org/10.3847/1538-4357/ab2f73",
+    },
+    "reference 3": {
+      "label": "Hubble 1929, “A relation between distance and radial velocity among extra-galactic nebulae”, PNAS 15, 168",
+      "note": "The original velocity–distance plot and the ~500 km/s/Mpc constant",
+      "url": "https://doi.org/10.1073/pnas.15.3.168",
+    },
+    "reference 4": {
+      "label": "NIST Atomic Spectra Database, H I lines",
+      "note": "Hα air wavelength 656.28 nm",
+      "url": "https://physics.nist.gov/asd",
+    },
+    "tagline": "Almost every galaxy is moving away from us, and the farther it is, the faster it goes.",
+    "title": "The Expansion of the Universe",
+  },
   "gravitational-waves": {
     "L1 hook": "In September 2015, a ripple in space itself swept through Earth. For a fifth of a second it changed the distance between mirrors four kilometres apart, by far less than the width of a single proton. We caught it.",
     "L2 intuition": "Drop a stone into a still pond and rings spread outward, carrying a little of the splash’s energy away across the surface. Now make the stone two black holes, circling each other dozens of times a second and climbing, and make the pond space itself. Their frantic orbit churns the fabric they sit in, and the disturbance spreads out in all directions at the speed of light, growing fainter as it goes. By the time it washes over Earth, the ripple from even the most violent collision in the universe has thinned to almost nothing. As the two holes spiral closer they circle faster, so the ripples come quicker and stronger, rising together toward a crescendo — and then stop. That rising sweep is called the chirp, and it is what the simulation below draws and plays. The analogy breaks in one deep place: pond ripples are water moving up and down, a thing moving through a medium. A gravitational wave has no medium. It is the distances between things that ripple; the “pond” is the geometry you are made of, and when the wave passes, you are momentarily, very slightly, taller and thinner.",
@@ -382,13 +428,29 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The shared centre of mass two bodies actually orbit; for a star and planet it sits just off the star’s centre.",
     "title": "Barycentre",
   },
+  "blueshift": {
+    "body": "A shortening of the light wave: it arrives bluer than it left. Seen from galaxies approaching us faster than expansion carries them away.",
+    "title": "Blueshift",
+  },
+  "cepheid-variable": {
+    "body": "A star that brightens and dims on a regular cycle whose length reveals its true brightness, and so its distance.",
+    "title": "Cepheid variable",
+  },
   "comoving": {
     "body": "Distance with cosmic expansion factored out, so it stays fixed for galaxies riding the general flow.",
     "title": "Comoving",
   },
+  "cosmological-redshift": {
+    "body": "Redshift caused by space stretching while the light travels: the wave grows by the same factor the universe grew. Distinct from a Doppler shift.",
+    "title": "Cosmological redshift",
+  },
   "cutoff-frequency": {
     "body": "Where this model stops: the wave frequency at the last stable orbit, just before merger.",
     "title": "Cutoff frequency",
+  },
+  "dark-energy": {
+    "body": "Whatever is making the expansion speed up rather than slow down. About 70% of the universe’s energy today; its nature is unknown.",
+    "title": "Dark energy",
   },
   "eclipsing-binary": {
     "body": "Two stars orbiting edge-on to us, each dimming the other as it passes; their dips can mimic a planet’s.",
@@ -414,6 +476,14 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A gas giant orbiting scorchingly close to its star, circling in days: the easiest kind of planet to find.",
     "title": "Hot Jupiter",
   },
+  "hubble-constant": {
+    "body": "Today’s expansion rate: how much recession speed each unit of distance adds. Near 70 km/s per megaparsec; the exact value is disputed.",
+    "title": "Hubble constant",
+  },
+  "hubble-lemaitre-law": {
+    "body": "Recession speed grows in step with distance: twice as far, twice as fast. Named for Edwin Hubble and Georges Lemaître.",
+    "title": "Hubble–Lemaître law",
+  },
   "hydrodynamic-escape": {
     "body": "Atmosphere loss as a wind: a heated light gas flows outward in bulk, dragging heavier gases with it.",
     "title": "Hydrodynamic escape",
@@ -437,6 +507,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "kerr": {
     "body": "The exact description of a rotating black hole, found by Roy Kerr in 1963; non-rotating holes follow Schwarzschild’s simpler solution.",
     "title": "Kerr",
+  },
+  "lambda-cdm": {
+    "body": "The standard model of the universe: ordinary matter, cold dark matter and a constant dark energy, Λ, expanding from a hot beginning.",
+    "title": "ΛCDM",
   },
   "light-curve": {
     "body": "A graph of a star’s brightness against time.",
@@ -478,6 +552,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "One body passing in front of another; timing when a star blinks out behind a planet measures the planet’s size.",
     "title": "Occultation",
   },
+  "peculiar-velocity": {
+    "body": "A galaxy’s own motion through space, on top of the expansion. Typically a few hundred km/s.",
+    "title": "Peculiar velocity",
+  },
   "photochemistry": {
     "body": "Chemistry driven by sunlight: high-altitude molecules are split apart, and the light fragments escape.",
     "title": "Photochemistry",
@@ -502,9 +580,17 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The simplest lopsidedness of a mass arrangement that can radiate gravitational waves; a perfect sphere cannot.",
     "title": "Quadrupole",
   },
+  "recession-velocity": {
+    "body": "The rate at which the distance to a galaxy grows because space is expanding. Not motion through space.",
+    "title": "Recession velocity",
+  },
   "red-dwarf": {
     "body": "The smallest, coolest, most common kind of star: dim, long-lived, and violently flaring when young.",
     "title": "Red dwarf",
+  },
+  "redshift": {
+    "body": "The fractional stretching of a light wave between leaving its source and arriving. Positive means longer, redder light.",
+    "title": "Redshift",
   },
   "ringdown": {
     "body": "The last vibration of the merged hole, ringing like a struck bell as it settles into shape.",
@@ -521,6 +607,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "solar-mass": {
     "body": "The Sun’s mass used as a unit, about 2 × 10³⁰ kg. A ten-solar-mass hole weighs ten Suns.",
     "title": "Solar mass",
+  },
+  "sound-horizon": {
+    "body": "How far pressure waves travelled through the hot early universe before it cleared, about 150 megaparsecs today. A fixed ruler that surveys measure against.",
+    "title": "Sound horizon",
   },
   "sputtering": {
     "body": "Atmosphere loss by impact: solar-wind particles strike molecules at the top of the air and knock them into space.",
@@ -541,6 +631,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "tidal-force": {
     "body": "The difference in gravity’s pull between the near and far side of an object, stretching it along its length.",
     "title": "Tidal force",
+  },
+  "type-ia-supernova": {
+    "body": "The explosion of a white dwarf star that has gained too much mass. All reach nearly the same peak brightness, so how bright one looks tells its distance.",
+    "title": "Type Ia supernova",
   },
 }
 `;

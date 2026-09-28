@@ -18,6 +18,7 @@ if (import.meta.env.DEV) {
       verifyGravitationalWaveModel,
       verifyTransitModel,
       verifyAtmosphereModel,
+      verifyCosmologyModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -27,6 +28,7 @@ if (import.meta.env.DEV) {
       verifyGravitationalWaveModel();
       verifyTransitModel();
       verifyAtmosphereModel();
+      verifyCosmologyModel();
     },
   );
 }
