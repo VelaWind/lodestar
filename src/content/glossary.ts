@@ -125,6 +125,57 @@ export const glossary: Record<string, GlossaryEntry> = {
     body: 'A graph of a star’s brightness against time.',
   },
 
+  /* Expansion of the universe -------------------------------------- */
+
+  redshift: {
+    title: 'Redshift',
+    body: 'The fractional stretching of a light wave between leaving its source and arriving. Positive means longer, redder light.',
+  },
+  blueshift: {
+    title: 'Blueshift',
+    body: 'A shortening of the light wave: it arrives bluer than it left. Seen from galaxies approaching us faster than expansion carries them away.',
+  },
+  'hubble-constant': {
+    title: 'Hubble constant',
+    body: 'Today’s expansion rate: how much recession speed each unit of distance adds. Near 70 km/s per megaparsec; the exact value is disputed.',
+  },
+  'hubble-lemaitre-law': {
+    title: 'Hubble–Lemaître law',
+    body: 'Recession speed grows in step with distance: twice as far, twice as fast. Named for Edwin Hubble and Georges Lemaître.',
+  },
+  'recession-velocity': {
+    title: 'Recession velocity',
+    body: 'The rate at which the distance to a galaxy grows because space is expanding. Not motion through space.',
+  },
+  'peculiar-velocity': {
+    title: 'Peculiar velocity',
+    body: 'A galaxy’s own motion through space, on top of the expansion. Typically a few hundred km/s.',
+  },
+  'cosmological-redshift': {
+    title: 'Cosmological redshift',
+    body: 'Redshift caused by space stretching while the light travels: the wave grows by the same factor the universe grew. Distinct from a Doppler shift.',
+  },
+  'type-ia-supernova': {
+    title: 'Type Ia supernova',
+    body: 'The explosion of a white dwarf star that has gained too much mass. All reach nearly the same peak brightness, so how bright one looks tells its distance.',
+  },
+  'cepheid-variable': {
+    title: 'Cepheid variable',
+    body: 'A star that brightens and dims on a regular cycle whose length reveals its true brightness, and so its distance.',
+  },
+  'lambda-cdm': {
+    title: 'ΛCDM',
+    body: 'The standard model of the universe: ordinary matter, cold dark matter and a constant dark energy, Λ, expanding from a hot beginning.',
+  },
+  'sound-horizon': {
+    title: 'Sound horizon',
+    body: 'How far pressure waves travelled through the hot early universe before it cleared, about 150 megaparsecs today. A fixed ruler that surveys measure against.',
+  },
+  'dark-energy': {
+    title: 'Dark energy',
+    body: 'Whatever is making the expansion speed up rather than slow down. About 70% of the universe’s energy today; its nature is unknown.',
+  },
+
   /* Gravitational waves -------------------------------------------- */
 
   quadrupole: {

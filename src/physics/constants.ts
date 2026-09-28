@@ -44,6 +44,8 @@ export const AMU = 1.660_539_066_60e-27;
 // Measured
 export const G = 6.674_30e-11; // m³ kg⁻¹ s⁻², gravitational
 export const PARSEC = 3.085_677_581e16; // m
+/** m. 10⁶ parsecs, derived from `PARSEC` above rather than pasted (IAU 2015 Resolution B2). */
+export const MEGAPARSEC = 1e6 * PARSEC;
 export const SIGMA_SB = 5.670_374_419e-8; // W m⁻² K⁻⁴, Stefan–Boltzmann
 
 // Bodies
@@ -92,3 +94,35 @@ export const M_JUPITER = 1.898_13e27;
 
 // Scale
 export const OBSERVABLE_UNIVERSE_RADIUS = 4.4e26; // m, ≈46.5 billion ly
+
+// Cosmology
+/**
+ * One km/s/Mpc, the unit the Hubble constant is quoted in, expressed in s⁻¹.
+ * Derived from `MEGAPARSEC`, not pasted: 1 km/s per megaparsec is 10³ m/s
+ * divided by 10⁶ pc.
+ */
+export const KM_S_PER_MPC = 1e3 / MEGAPARSEC;
+/**
+ * Hubble constant from the cosmic microwave background, s⁻¹.
+ *
+ * Disputed, and the dispute is the point: this early-universe value and the
+ * distance-ladder one below differ by about 5σ (the "Hubble tension"). Neither
+ * is presented as settled; the module's slider covers both.
+ *
+ * Source: Planck Collaboration 2020, "Planck 2018 results VI: Cosmological
+ * parameters", A&A 641, A6 — H₀ = 67.4 ± 0.5 km/s/Mpc.
+ */
+export const H0_PLANCK_2018 = 67.4 * KM_S_PER_MPC;
+/**
+ * Hubble constant from Cepheid-calibrated Type Ia supernovae, s⁻¹.
+ *
+ * Source: Riess et al. 2022, "A Comprehensive Measurement of the Local Value of
+ * the Hubble Constant", ApJL 934, L7 (SH0ES) — 73.04 ± 1.04 km/s/Mpc.
+ */
+export const H0_SH0ES_2022 = 73.04 * KM_S_PER_MPC;
+/**
+ * Hydrogen Balmer-alpha (Hα, H I n = 3 → 2), wavelength in air, m.
+ *
+ * Source: NIST Atomic Spectra Database, H I lines — 656.28 nm (air).
+ */
+export const H_ALPHA_AIR = 656.28e-9;
