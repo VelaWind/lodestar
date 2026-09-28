@@ -108,8 +108,8 @@ const expansionOfTheUniverse: Module = {
           step: 0.1 * KM_S_PER_MPC,
           scale: 'linear',
           format: {
-            notation: 'fixed',
-            digits: 1,
+            notation: 'auto',
+            digits: 3,
             displayUnit: { unit: 'km/s/Mpc', factor: 1 / KM_S_PER_MPC },
           },
         },
