@@ -5,7 +5,7 @@
  * started emitting per-route shells every address served the same head. A
  * browser fixed that on hydration and nobody noticed; a crawler does not
  * hydrate, so every module link shared anywhere unfurled as the site's front
- * page — seven modules, one card, one canonical-less shell.
+ * page — eight modules, one card, one canonical-less shell.
  *
  * So this asks for the raw bytes. No browser, no `page.goto`, no hydration:
  * `request.get` returns exactly what a crawler is handed, and the assertions
@@ -29,6 +29,7 @@ import { SITE_ORIGIN } from '../../src/lib/site';
 import blackHoles from '../../src/content/modules/black-holes';
 import escapeVelocity from '../../src/content/modules/escape-velocity';
 import exoplanets from '../../src/content/modules/exoplanets';
+import expansionOfTheUniverse from '../../src/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '../../src/content/modules/gravitational-waves';
 import keplerOrbits from '../../src/content/modules/kepler-orbits';
 import planetaryAtmospheres from '../../src/content/modules/planetary-atmospheres';
@@ -38,7 +39,7 @@ import scaleOfTheUniverse from '../../src/content/modules/scale-of-the-universe'
  * The module objects, imported one by one.
  *
  * The registry itself is built with `import.meta.glob`, which only Vite
- * understands, so a Playwright spec cannot import it. Listing the seven here
+ * understands, so a Playwright spec cannot import it. Listing the eight here
  * would be the hand-maintained table this whole design exists to avoid — except
  * that the count is checked against the directory below, so a module added to
  * the tree and forgotten here fails rather than going unchecked.
@@ -47,6 +48,7 @@ const MODULE_DATA = [
   blackHoles,
   escapeVelocity,
   exoplanets,
+  expansionOfTheUniverse,
   gravitationalWaves,
   keplerOrbits,
   planetaryAtmospheres,
@@ -77,7 +79,7 @@ test('every route serves its own head', async ({ request, baseURL }) => {
   const published = MODULE_DATA.filter((m) => m.status === 'published').sort((a, b) =>
     a.id.localeCompare(b.id),
   );
-  expect(published.length, 'expected seven published modules').toBe(7);
+  expect(published.length, 'expected eight published modules').toBe(8);
 
   /** The site card, which every route keeps regardless of its own head. */
   const CARD = `${SITE_ORIGIN}/og.png`;
@@ -152,8 +154,8 @@ test('every route serves its own head', async ({ request, baseURL }) => {
 
   /* --- no two routes claim the same address ------------------------- */
 
-  expect(checked.length, 'nine routes checked').toBe(9);
-  expect(new Set(checked).size, 'every route path is distinct').toBe(9);
+  expect(checked.length, 'ten routes checked').toBe(10);
+  expect(new Set(checked).size, 'every route path is distinct').toBe(10);
 
   console.log(`  heads: ${checked.length} routes, each with its own title, description and canonical`);
 });
@@ -170,7 +172,7 @@ test('the sitemap is a real file listing every route', async ({ request, baseURL
   expect(xml, 'sitemap should not be the app shell').not.toContain('<div id="root">');
 
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  expect(locs.length, 'nine URLs').toBe(9);
+  expect(locs.length, 'ten URLs').toBe(10);
   expect(locs, 'the root').toContain(`${SITE_ORIGIN}/`);
   expect(locs, 'about').toContain(`${SITE_ORIGIN}/about`);
   for (const module of MODULE_DATA.filter((m) => m.status === 'published')) {

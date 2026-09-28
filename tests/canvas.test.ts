@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import blackHoles from '@/content/modules/black-holes';
 import exoplanets from '@/content/modules/exoplanets';
 import escapeVelocity from '@/content/modules/escape-velocity';
+import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
 import planetaryAtmospheres from '@/content/modules/planetary-atmospheres';
@@ -26,6 +27,7 @@ import scaleOfTheUniverse, { scaleAnchors } from '@/content/modules/scale-of-the
 import { __internals as bh } from '@/sims/black-holes';
 import { __internals as ep } from '@/sims/exoplanets';
 import { __internals as ev } from '@/sims/escape-velocity';
+import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
 import { __internals as ko } from '@/sims/kepler-orbits';
 import { __internals as pa } from '@/sims/planetary-atmospheres';
@@ -36,6 +38,12 @@ import { chirpMass, fCutoff } from '@/physics/gw';
 import { orbitGeometry, period, stateAt } from '@/physics/kepler';
 import { transitShape } from '@/physics/transit';
 import { GASES, retentionVerdict } from '@/physics/atmosphere';
+import {
+  lineOfSightVelocity,
+  observedWavelength,
+  redshiftFromVelocity,
+} from '@/physics/cosmology';
+import { H_ALPHA_AIR, KM_S_PER_MPC } from '@/physics/constants';
 import {
   iscoRadius,
   photonSphereRadius,
@@ -518,6 +526,96 @@ function atmosphereCases(): Case[] {
   return cases;
 }
 
+/* ------------------------- expansion of the universe ------------------------- */
+
+const EXPANSION_HEIGHT = 400;
+
+function expansionCases(): Case[] {
+  const params = expansionOfTheUniverse.layers.play.params;
+  const dMax = paramOf(params, 'd').max;
+  const H0Max = paramOf(params, 'H0').max;
+  const cases: Case[] = [];
+
+  const scene = (d: number, H0: number, vPec: number, units: 'friendly' | 'technical', shown = 1) => {
+    const vLos = lineOfSightVelocity(H0, d, vPec);
+    const target = observedWavelength(H_ALPHA_AIR, redshiftFromVelocity(vLos));
+    // `shown` < 1 is the observed line part-way through its slide from the lab.
+    const lambdaShown = H_ALPHA_AIR + (target - H_ALPHA_AIR) * shown;
+    return { d, H0, vPec, vLos, dMax, H0Max, lambdaShown, units };
+  };
+
+  for (const d of extremes(paramOf(params, 'd'))) {
+    for (const H0 of extremes(paramOf(params, 'H0'))) {
+      for (const v of extremes(paramOf(params, 'vPec'))) {
+        for (const units of ['friendly', 'technical'] as const) {
+          const stem = `d=${d.stop} H0=${H0.stop} vPec=${v.stop} ${units}`;
+          for (const shown of [1, 0.4]) {
+            cases.push({
+              label: `${stem} shown=${shown}`,
+              draw: (ctx, w, h) => eu.drawScene(ctx, w, h, scene(d.value, H0.value, v.value, units, shown)),
+            });
+          }
+        }
+      }
+    }
+  }
+
+  /*
+   * The crowded corner, asserted by name.
+   *
+   * At the far end of the distance slider the galaxy sits at the right edge of
+   * the diagram, which is exactly where both reference lines are labelled. A
+   * nonzero peculiar velocity then adds "its own motion" beside the dot, and it
+   * has to find room without landing on "Planck 2018: 67.4" or "SH0ES 2022:
+   * 73.0" — at every H₀, because the dot's height follows the slider through the
+   * band both labels occupy.
+   */
+  it('keeps "its own motion" clear of both reference labels at the far edge', () => {
+    for (const H0 of [60, 67.4, 70, 73.04, 76, 80]) {
+      for (const vPec of [-1e6, -3e5, 3e5, 1e6]) {
+        for (const units of ['friendly', 'technical'] as const) {
+          for (const width of [246, 390, 900]) {
+            const { ctx, records } = recordingContext();
+            const H0s = H0 * KM_S_PER_MPC;
+            eu.drawScene(ctx, width, EXPANSION_HEIGHT, scene(dMax, H0s, vPec, units));
+
+            const texts = records.filter((r) => r.kind === 'text').map((r) => r.text);
+            expect(texts, `H0=${H0} vPec=${vPec} ${units} @${width}: tick label missing`).toContain(
+              'its own motion',
+            );
+            expect(
+              textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+              `H0=${H0} vPec=${vPec} ${units} @${width}: labels overlap`,
+            ).toEqual([]);
+            expect(
+              textOutsideFrame(records, width, EXPANSION_HEIGHT).map(describeRecord),
+              `H0=${H0} vPec=${vPec} ${units} @${width}: text outside the frame`,
+            ).toEqual([]);
+          }
+        }
+      }
+    }
+  });
+
+  it('names the shift by its sign, and draws no motion tick when there is none', () => {
+    const text = (d: number, vPec: number) => {
+      const { ctx, records } = recordingContext();
+      eu.drawScene(ctx, 700, EXPANSION_HEIGHT, scene(d, paramOf(params, 'H0').default, vPec, 'friendly'));
+      return records.filter((r) => r.kind === 'text').map((r) => r.text);
+    };
+    // Coma: well into the Hubble flow, redshifted, no peculiar velocity.
+    const coma = text(paramOf(params, 'd').default, 0);
+    expect(coma).toContain('redshift');
+    expect(coma).not.toContain('its own motion');
+    // Andromeda's distance and approach: its own motion wins.
+    const andromeda = text(2.4e22, -1.1e5);
+    expect(andromeda).toContain('blueshift');
+    expect(andromeda).toContain('its own motion');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -528,6 +626,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'gravitational-waves', height: 288, cases: gravitationalWaveCases },
   { name: 'exoplanets', height: 352, cases: exoplanetCases },
   { name: 'planetary-atmospheres', height: 304, cases: atmosphereCases },
+  { name: 'expansion-of-the-universe', height: EXPANSION_HEIGHT, cases: expansionCases },
 ];
 
 /**
@@ -553,6 +652,7 @@ const MEASURED_PLACEMENT = new Set([
   'black-holes',
   'gravitational-waves',
   'planetary-atmospheres',
+  'expansion-of-the-universe',
 ]);
 
 for (const sim of SIMS) {
