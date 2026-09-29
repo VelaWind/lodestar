@@ -31,6 +31,8 @@ export const H = 6.626_070_15e-34; // J·s, Planck
  */
 export const H_BAR = H / (2 * Math.PI);
 export const K_B = 1.380_649e-23; // J/K, Boltzmann
+/** J per electronvolt, exact since the 2019 SI redefinition (CODATA 2018). */
+export const EV = 1.602_176_634e-19;
 /**
  * Unified atomic mass unit, kg — one twelfth of a carbon-12 atom at rest.
  *
@@ -54,6 +56,9 @@ export const B_WIEN = 2.897_771_955e-3;
 /** m. 10⁶ parsecs, derived from `PARSEC` above rather than pasted (IAU 2015 Resolution B2). */
 export const MEGAPARSEC = 1e6 * PARSEC;
 export const SIGMA_SB = 5.670_374_419e-8; // W m⁻² K⁻⁴, Stefan–Boltzmann
+
+/** Electron rest mass, kg. Source: CODATA 2018, 9.109 383 7015(28) × 10⁻³¹ kg. */
+export const M_ELECTRON = 9.109_383_7015e-31;
 
 // Bodies
 export const M_SUN = 1.988_4e30; // kg
@@ -154,6 +159,26 @@ export const Z_RECOMBINATION = 1089.92;
  * A1 — 369.82 ± 0.11 km/s.
  */
 export const V_SUN_CMB = 3.6982e5;
+/**
+ * Matter density today, as a fraction of the critical density (dimensionless).
+ *
+ * Source: Planck Collaboration 2020, "Planck 2018 results VI", A&A 641, A6,
+ * TT,TE,EE+lowE+lensing — Ω_m = 0.3153 ± 0.0073.
+ */
+export const OMEGA_M = 0.315;
+/**
+ * Dark-energy density today, as a fraction of the critical density
+ * (dimensionless). Source: Planck 2018 VI — Ω_Λ = 0.6847 ± 0.0073.
+ */
+export const OMEGA_LAMBDA = 0.685;
+/**
+ * Effective number of neutrino species (dimensionless): three, raised slightly
+ * by their incomplete decoupling before electron–positron annihilation.
+ *
+ * Source: Akita & Yamaguchi 2020, "A precision calculation of relic neutrino
+ * decoupling", JCAP 08, 012 — N_eff = 3.044.
+ */
+export const N_EFF = 3.044;
 
 // Mathematics
 /**

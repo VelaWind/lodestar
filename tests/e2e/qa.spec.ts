@@ -43,6 +43,7 @@ const MODULES = [
   'planetary-atmospheres',
   'expansion-of-the-universe',
   'cosmic-microwave-background',
+  'early-universe',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2217,6 +2218,81 @@ test('behaviour: microwave background readouts follow the sliders, and a term op
   assertClean(w, 'microwave background behaviour');
 });
 
+/**
+ * The early-universe module, end to end, on every engine.
+ *
+ * The time slider's two ends must land in the first and last epochs, with the
+ * scale factor reading today at the far end; the heaviest particle must stop
+ * being made where the default electron is still being made; a glossary term in
+ * the real-picture layer opens from the keyboard alone; and axe finds nothing
+ * serious.
+ */
+test('behaviour: early universe readouts follow the sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/early-universe', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'early universe at rest');
+
+  const readout = (index: number) =>
+    page.locator('#early-universe-readouts dd').nth(index).innerText();
+  const t = page.locator('#p-t');
+  const E = page.locator('#p-E');
+
+  /* The first microsecond: a quark–gluon plasma, hot enough for the electron. */
+  await t.focus();
+  await page.keyboard.press('Home');
+  await expect.poll(() => readout(3), { message: 'epoch at the slider minimum' }).toContain('Quark');
+  expect(await readout(4), 'the electron is still being made at a microsecond').toMatch(/^Yes/);
+
+  /* The heaviest particle on the slider is already too heavy to make. */
+  await E.focus();
+  await page.keyboard.press('End');
+  await expect.poll(() => readout(4), { message: 'heaviest particle' }).toMatch(/^No/);
+
+  /* Today: stars and galaxies, and the scale factor back at one. */
+  await t.focus();
+  await page.keyboard.press('End');
+  await expect.poll(() => readout(3), { message: 'epoch at the slider maximum' }).toContain('Stars');
+  expect((await readout(2)).trim(), 'the scale factor today').toBe('1 (today)');
+  await assertNoOverflow(page, 'early universe today');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the Big Bang').toBe('big-bang');
+  const trigger = page.locator('[data-glossary-term="big-bang"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="big-bang"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('it happened everywhere at once');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'early universe: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '16-early-universe-behaviour');
+  assertClean(w, 'early universe behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2230,10 +2306,11 @@ test('behaviour: microwave background readouts follow the sliders, and a term op
  * The planned chips are five, and it is worth writing down why, because the
  * number moves when the backlog does: they point at `cosmic-distance-ladder`
  * three times (twice from older modules, once from the expansion module), and
- * at `early-universe` twice (once each from the expansion and microwave
- * background modules); neither is written. The chips that pointed at
- * `expansion-of-the-universe` and `cosmic-microwave-background` became live
- * links when those modules were published. Two further chips existed until `planetary-atmospheres` was
+ * at `stellar-fusion` and `supernovae` once each, both from the early-universe
+ * module; none of the three is written. The chips that pointed at
+ * `expansion-of-the-universe`, `cosmic-microwave-background` and
+ * `early-universe` became live links when those modules were published. Two
+ * further chips existed until `planetary-atmospheres` was
  * published — a module that was finished and registered but still carried a
  * draft flag, so the index hid it and every link to it degraded to a chip.
  *
@@ -2241,7 +2318,7 @@ test('behaviour: microwave background readouts follow the sliders, and a term op
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'early-universe'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'stellar-fusion', 'supernovae'];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2253,7 +2330,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes nine modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes ten modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -2939,7 +3016,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All nine modules now, with no exception branch. `kepler-orbits` carried one
+ * All ten modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3053,7 +3130,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all eleven and checks the rendered DOM rather than the
+ * route — so this walks all twelve and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3079,7 +3156,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all eleven routes').toBe(11);
+  expect(routes.length, 'all twelve routes').toBe(12);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3226,7 +3303,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on eleven fresh loads. Getting this wrong is what the first run of
+   * asserts on twelve fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
