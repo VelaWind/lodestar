@@ -660,7 +660,7 @@ export default function StellarFusionSim({ params, values }: SimProps) {
           label={deep ? 'exp(−√(E_G / E₀))' : 'Chance a collision there tunnels'}
           value={scientific(tunnel, 2)}
         />
-        <Readout label={deep ? 'exp(−E₀ / kT)' : 'Fraction of protons with that energy'} value={scientific(fraction, 2)} />
+        <Readout label={deep ? 'exp(−E₀ / kT)' : 'How rare protons are at that energy'} value={scientific(fraction, 2)} />
         <Readout label={deep ? 'ε_pp' : 'Heat released per kilogram'} value={`${scientific(rate, 2)} W/kg`} />
         <Readout
           label={deep ? 'ν = d ln ε / d ln T' : 'How steeply that depends on temperature'}

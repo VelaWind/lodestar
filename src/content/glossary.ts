@@ -370,7 +370,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   'coulomb-barrier': {
     title: 'Coulomb barrier',
-    body: 'The electrical repulsion two nuclei must overcome to touch. For two protons, about a million electronvolts; a thousand times the energy they typically have in the Sun.',
+    body: 'The electrical repulsion two nuclei must overcome to touch. For two protons, about a million electronvolts; hundreds of times the energy they typically have in the Sun.',
   },
   'quantum-tunnelling': {
     title: 'Quantum tunnelling',
