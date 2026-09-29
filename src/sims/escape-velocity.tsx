@@ -729,7 +729,7 @@ function Readout({
 }) {
   return (
     <div>
-      <dt className="font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">{label}</dt>
+      <dt className="font-ui text-xs text-ink-faint">{label}</dt>
       <dd
         className={`mt-0.5 font-mono text-lg tabular-nums ${accent ? 'text-star' : 'text-ember'}`}
       >

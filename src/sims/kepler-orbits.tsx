@@ -520,7 +520,7 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
           <Readout label="periapsis" value={formatDistance(geom.periapsis)} />
           <Readout label="apoapsis" value={formatDistance(geom.apoapsis)} />
           <div>
-            <dt className="font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">
+            <dt className="font-ui text-xs text-ink-faint">
               {reduced ? 'speed at periapsis' : 'current speed'}
             </dt>
             <dd className="mt-0.5 font-mono text-lg tabular-nums text-ember">
@@ -567,7 +567,7 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
 function Readout({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">{label}</dt>
+      <dt className="font-ui text-xs text-ink-faint">{label}</dt>
       <dd className="mt-0.5 font-mono text-lg tabular-nums text-ember">{value}</dd>
     </div>
   );
