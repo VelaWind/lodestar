@@ -19,6 +19,7 @@ import blackHoles from '@/content/modules/black-holes';
 import exoplanets from '@/content/modules/exoplanets';
 import cosmicMicrowaveBackground from '@/content/modules/cosmic-microwave-background';
 import earlyUniverse from '@/content/modules/early-universe';
+import stellarFusion from '@/content/modules/stellar-fusion';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -30,6 +31,7 @@ import { __internals as bh } from '@/sims/black-holes';
 import { __internals as ep } from '@/sims/exoplanets';
 import { __internals as cmb } from '@/sims/cosmic-microwave-background';
 import { __internals as early } from '@/sims/early-universe';
+import { __internals as fusion } from '@/sims/stellar-fusion';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -833,6 +835,94 @@ function earlyUniverseCases(): Case[] {
   return cases;
 }
 
+/* ------------------------------- stellar fusion ------------------------------ */
+
+const FUSION_HEIGHT = 416;
+
+function stellarFusionCases(): Case[] {
+  const TParam = paramOf(stellarFusion.layers.play.params, 'T');
+  const cases: Case[] = [];
+
+  // The slider's ends and default, the review's screenshot temperatures, and
+  // the corner where the Gamow peak drops under the barrier panel's 1 keV floor.
+  const temperatures = [
+    ...extremes(TParam),
+    { stop: '1.05e6 K (peak at the floor)', value: 1.05e6 },
+    { stop: '3e6 K', value: 3e6 },
+    { stop: '3e7 K', value: 3e7 },
+    { stop: '6e7 K', value: 6e7 },
+  ];
+  for (const T of temperatures) {
+    for (const units of ['friendly', 'technical'] as const) {
+      cases.push({
+        label: `T=${T.stop} ${units}`,
+        draw: (ctx, w, h) => fusion.drawScene(ctx, w, h, { T: T.value, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every temperature a reader can reach.
+   *
+   * Four curve labels ride the top panel and move with T: the Boltzmann label
+   * sits near kT, which runs from the left edge to a fifth of the axis; the
+   * peak label follows E₀ from 1 keV to 21 keV; "typical proton" sits on kT.
+   * Below, the Gamow line's label and "must tunnel across this" move with E₀.
+   * Swept a twentieth of a decade at a time, all of them must be drawn, clear of
+   * each other and inside the frame.
+   */
+  it('keeps every label drawn and clear across the temperature slider', () => {
+    const expected = [
+      'how many protons have this energy',
+      'chance of tunnelling',
+      'fusion happens here',
+      'typical proton',
+      'nuclear well',
+    ];
+    for (let e = Math.log10(TParam.min); e <= Math.log10(TParam.max) + 1e-9; e += 0.05) {
+      const T = Math.min(TParam.max, 10 ** e);
+      for (const units of ['friendly', 'technical'] as const) {
+        for (const width of [246, 390, 900]) {
+          const { ctx, records } = recordingContext();
+          fusion.drawScene(ctx, width, FUSION_HEIGHT, { T, units });
+          const where = `T=${T.toPrecision(3)} K ${units} @${width}`;
+          const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+          for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+          expect(
+            textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+            `${where}: labels overlap`,
+          ).toEqual([]);
+          expect(
+            textOutsideFrame(records, width, FUSION_HEIGHT).map(describeRecord),
+            `${where}: text outside the frame`,
+          ).toEqual([]);
+        }
+      }
+    }
+  });
+
+  it('shades the tunnelling gap on the chart, and says so when the peak is below it', () => {
+    const texts = (T: number) => {
+      const { ctx, records } = recordingContext();
+      fusion.drawScene(ctx, 900, FUSION_HEIGHT, { T, units: 'friendly' });
+      return records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    };
+    expect(texts(TParam.default)).toContain('must tunnel across this');
+    expect(texts(TParam.default)).toContain('1.03 MeV');
+    const coldest = texts(TParam.min);
+    expect(coldest.some((t) => t.includes('below this chart'))).toBe(true);
+    expect(coldest).not.toContain('must tunnel across this');
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    expect(fusion.scientific(1.234e-4, 2)).toBe('1.2 × 10⁻⁴');
+    expect(fusion.scientific(9.152e-4, 2)).toBe('9.2 × 10⁻⁴');
+    expect(fusion.formatKelvin2(1.19e10)).toBe('1.2 × 10¹⁰ K');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -846,6 +936,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'expansion-of-the-universe', height: EXPANSION_HEIGHT, cases: expansionCases },
   { name: 'cosmic-microwave-background', height: CMB_HEIGHT, cases: cmbCases },
   { name: 'early-universe', height: EARLY_HEIGHT, cases: earlyUniverseCases },
+  { name: 'stellar-fusion', height: FUSION_HEIGHT, cases: stellarFusionCases },
 ];
 
 /**
@@ -874,6 +965,7 @@ const MEASURED_PLACEMENT = new Set([
   'expansion-of-the-universe',
   'cosmic-microwave-background',
   'early-universe',
+  'stellar-fusion',
 ]);
 
 for (const sim of SIMS) {

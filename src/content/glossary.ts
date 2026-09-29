@@ -365,6 +365,37 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Standard deviation',
     body: 'The statistician’s yardstick for surprise; five of them makes chance a one-in-a-million explanation.',
   },
+
+  /* Stellar fusion ------------------------------------------------- */
+
+  'coulomb-barrier': {
+    title: 'Coulomb barrier',
+    body: 'The electrical repulsion two nuclei must overcome to touch. For two protons, about a million electronvolts; a thousand times the energy they typically have in the Sun.',
+  },
+  'quantum-tunnelling': {
+    title: 'Quantum tunnelling',
+    body: 'A particle crossing a barrier it does not have the energy to climb. Not a trick of speed: the particle’s position is spread out, and part of that spread lies beyond the wall.',
+  },
+  'gamow-peak': {
+    title: 'Gamow peak',
+    body: 'The narrow range of collision energies where almost all fusion happens: high enough to tunnel, low enough that some particles actually have it.',
+  },
+  'proton-proton-chain': {
+    title: 'Proton–proton chain',
+    body: 'The sequence of reactions that turns four protons into one helium nucleus in stars like the Sun, releasing 26.7 MeV and two neutrinos.',
+  },
+  'solar-neutrino': {
+    title: 'Solar neutrino',
+    body: 'A neutrino made in the Sun’s core and reaching Earth eight minutes later, unscattered. Detecting them is how fusion in the core was confirmed directly.',
+  },
+  'cno-cycle': {
+    title: 'CNO cycle',
+    body: 'Fusion of hydrogen using carbon, nitrogen and oxygen as catalysts. Slower than the proton–proton chain in the Sun, dominant in heavier, hotter stars.',
+  },
+  superposition: {
+    title: 'Superposition',
+    body: 'A quantum state that is several classical possibilities at once, until a measurement picks one. Tunnelling is a consequence of it.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */

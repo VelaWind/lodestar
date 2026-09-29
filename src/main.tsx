@@ -21,6 +21,7 @@ if (import.meta.env.DEV) {
       verifyCosmologyModel,
       verifyCmbModel,
       verifyEarlyUniverseModel,
+      verifyFusionModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -33,6 +34,7 @@ if (import.meta.env.DEV) {
       verifyCosmologyModel();
       verifyCmbModel();
       verifyEarlyUniverseModel();
+      verifyFusionModel();
     },
   );
 }
