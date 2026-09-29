@@ -44,6 +44,13 @@ export const AMU = 1.660_539_066_60e-27;
 // Measured
 export const G = 6.674_30e-11; // m³ kg⁻¹ s⁻², gravitational
 export const PARSEC = 3.085_677_581e16; // m
+/**
+ * Wien displacement constant, m·K: λ_peak = b / T for the peak of B_λ.
+ *
+ * Source: CODATA 2018, b = 2.897 771 955… × 10⁻³ m·K (exact, since h, c and
+ * k_B are exact in the 2019 SI).
+ */
+export const B_WIEN = 2.897_771_955e-3;
 /** m. 10⁶ parsecs, derived from `PARSEC` above rather than pasted (IAU 2015 Resolution B2). */
 export const MEGAPARSEC = 1e6 * PARSEC;
 export const SIGMA_SB = 5.670_374_419e-8; // W m⁻² K⁻⁴, Stefan–Boltzmann
@@ -126,3 +133,31 @@ export const H0_SH0ES_2022 = 73.04 * KM_S_PER_MPC;
  * Source: NIST Atomic Spectra Database, H I lines — 656.28 nm (air).
  */
 export const H_ALPHA_AIR = 656.28e-9;
+/**
+ * Temperature of the cosmic microwave background today, K.
+ *
+ * Source: Fixsen 2009, "The Temperature of the Cosmic Microwave Background",
+ * ApJ 707, 916 — T₀ = 2.7255 ± 0.0006 K.
+ */
+export const T_CMB = 2.7255;
+/**
+ * Redshift of last scattering, z_* (dimensionless).
+ *
+ * Source: Planck Collaboration 2020, "Planck 2018 results VI: Cosmological
+ * parameters", A&A 641, A6 — z_* = 1089.92 ± 0.25.
+ */
+export const Z_RECOMBINATION = 1089.92;
+/**
+ * The Solar System's speed relative to the CMB rest frame, m/s.
+ *
+ * Source: Planck Collaboration 2020, "Planck 2018 results I: Overview", A&A 641,
+ * A1 — 369.82 ± 0.11 km/s.
+ */
+export const V_SUN_CMB = 3.6982e5;
+
+// Mathematics
+/**
+ * Apéry's constant, ζ(3), dimensionless. It sets the photon number density of
+ * blackbody radiation: n_γ = 16π ζ(3) (kT / hc)³.
+ */
+export const ZETA_3 = 1.202_056_903_159_594_2;

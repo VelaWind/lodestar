@@ -50,6 +50,52 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "One number, how heavy, decides everything else about it.",
     "title": "Black Holes",
   },
+  "cosmic-microwave-background": {
+    "L1 hook": "The oldest light in the universe reaches you from every direction, all day, every day. It set out before there was a single star, and it has been cooling ever since.",
+    "L2 intuition": "Picture a room filled with glowing fog, so thick and bright that you cannot see across it. Then, in one moment, the fog clears everywhere at once. The light that was trapped inside it is suddenly free, and sets off in every direction. Now imagine the room’s walls have been moving apart ever since, slowly, for a very long time. The light that set out when the fog cleared is still crossing the room. Along the way the stretching of the room has stretched the light too, pulling each wave longer and longer. What began as an orange glow, like the inside of a hot oven, has been drawn out into something far redder than red: a faint hum of microwaves, the kind of waves a kitchen oven uses, but billions of times weaker. That is what a radio dish pointed at an empty patch of sky picks up. Not the light of a star or a galaxy, but the leftover glow of the fog itself, arriving from every direction because the fog was everywhere. Where the analogy breaks: fog in a room clears from the edges inward, but this fog cleared everywhere at the same instant. And there is no far wall the light is heading toward. It keeps arriving because in every direction there is somewhere whose light is only now reaching us.",
+    "L3 approximation 0": "The spectrum is a perfect blackbody. The real one matches that shape to better than one part in ten thousand; the tiny deviations are the science, not the shape.",
+    "L3 approximation 1": "The slider stops at 3000 K, where the universe first became transparent. It was hotter before that, but no light from those times can reach us directly.",
+    "L3 approximation 2": "The sky panel shows only the hot-ahead, cool-behind pattern from our own motion. The real map has spots a hundred times fainter on top of it, and the sim does not draw them.",
+    "L3 caption": "Heat the universe back up and watch the glow climb from microwaves toward visible light. Then change how fast we are moving through it and see the sky tilt warm on one side and cool on the other.",
+    "L4 figure alt": "An oval map of the whole sky, mottled all over with small irregular patches: dark and pale blue for cooler regions, green in between, and yellow and red flecks for warmer ones, with no large-scale pattern across it.",
+    "L4 real": "The glow is the cosmic microwave background, the CMB, and the fog was the early universe itself. For its first 380 000 years the universe was a plasma, a gas of free electrons and nuclei so dense that light could not travel more than a short distance before scattering. As the universe expanded it cooled, and at about 3000 K, roughly the temperature of a lamp filament, the electrons settled onto the nuclei to form neutral atoms. That event is called recombination. Neutral gas is transparent, so from that moment the light travelled freely, and it has been travelling ever since. The shell of sky it comes from is the surface of last scattering, at a redshift of about 1090. The light is a blackbody spectrum: the fixed shape any object glows with when its only source of light is its own heat. Expansion stretches every wavelength by the same factor, so a blackbody stays a blackbody and only its temperature falls. It has fallen from about 3000 K to 2.7255 K today, measured to a precision of a fraction of a thousandth of a degree, and the peak of the glow has moved from just below visible light to a wavelength of about one millimetre. The CMB is the most perfect blackbody ever measured; nothing made in a laboratory comes close. That match is the strongest single piece of evidence that the universe was once hot and dense everywhere. Arno Penzias and Robert Wilson found the glow in 1965 with a horn antenna in New Jersey, as a persistent hiss at a wavelength of 7.35 cm that no amount of cleaning, including the removal of pigeons, would remove. Ralph Alpher and Robert Herman had predicted a leftover glow at about 5 K in 1948; almost nobody had looked. In 1990 the COBE satellite measured the spectrum and found the blackbody shape, and in 1992 it found the first anisotropy: the sky is not the same in every direction, but varies by about one part in one hundred thousand. Those tiny spots are the seeds of every galaxy. The much larger CMB dipole, a smooth variation of about three thousandths of a degree from one side of the sky to the other, is not a feature of the universe but of us: the Solar System is moving through the background at about 370 km/s, toward the constellation Leo, and the glow ahead is very slightly hotter. Two misconceptions. The CMB is not the light of the Big Bang itself; the universe was opaque for its first 380 000 years, and this is the earliest light that could escape. And the surface of last scattering is not an edge of the universe. It is a horizon, the farthest distance light has had time to travel; an observer in a distant galaxy sees their own surface, centred on them. The 3000 K figure is rounded, and recombination was not instant. It took tens of thousands of years, and the “surface” is a shell of some thickness. The numbers above are Planck 2018 values; the temperature is from the COBE FIRAS instrument. The whole sky in microwaves, with the average and the dipole removed. Red is warmer than average, blue cooler, by a few hundred-thousandths of a degree. Every galaxy cluster grew from a spot like these. NASA / WMAP Science Team",
+    "L5 intro": null,
+    "L5 note (dipole)": "\\Delta T — how much hotter the sky is straight ahead than the average; v — our speed through the background (your slider); c — the speed of light. This is the Doppler effect applied to a whole sky of light. Worked example, today’s sky. T = 2.7255\\,\\text{K}, v = 369.8\\,\\text{km/s}. \\lambda_{\\text{peak}} = 2.898 \\times 10^{-3} / 2.7255 = 1.063 \\times 10^{-3}\\,\\text{m} = 1.06\\,\\text{mm} \\Delta T = 2.7255 \\times 3.698 \\times 10^{5} / 2.998 \\times 10^{8} = 3.36 \\times 10^{-3}\\,\\text{K} = 3.36\\,\\text{mK} At the surface of last scattering, T = 2973\\,\\text{K}: z = 2973 / 2.7255 - 1 = 1090, and \\lambda_{\\text{peak}} = 2.898 \\times 10^{-3} / 2973 = 975\\,\\text{nm}, just beyond the red end of visible light.",
+    "L5 note (temperature-redshift)": "z — the redshift at which the universe had temperature T; T — the radiation temperature (your slider); T_0 — the temperature today, 2.7255 K. The temperature grows in step with the redshift because expansion stretches every wavelength.",
+    "L5 note (wien-peak)": "\\lambda_{\\text{peak}} — the wavelength at which the glow is brightest; b — Wien’s constant, 2.898 × 10⁻³ m·K. Hotter glows peak at shorter wavelengths.",
+    "L6 deeper": "That the CMB is still a blackbody is not an accident of measurement but a consequence of expansion acting on a photon gas. Write the scale factor as a, with a = 1 today. Each photon’s frequency scales as \\nu \\propto 1/a, and the photon number in a comoving volume is conserved, so the occupation number per mode, 1 / (e^{h\\nu/kT} - 1), is preserved provided T \\propto 1/a. The Planck form survives with the temperature rescaled, which is why the slider’s single parameter suffices. The relation T(z) = T_0(1 + z) has been tested directly: molecular absorption lines in quasar spectra and the Sunyaev–Zeldovich effect (the scattering of CMB photons by hot cluster gas) give T(z = 2.69) \\approx 10.5\\,\\text{K}, consistent with the prediction to a few percent. Photon number density today is n_\\gamma = 16\\pi\\,\\zeta(3)\\,(kT_0 / hc)^3 \\approx 411\\,\\text{cm}^{-3}, against a mean baryon density of about 2.5 \\times 10^{-7}\\,\\text{cm}^{-3}: a baryon-to-photon ratio \\eta \\approx 6 \\times 10^{-10}. That ratio is why recombination happened near 3000 K rather than near 158 000 K, the temperature at which kT equals the 13.6 eV binding energy of hydrogen: with over a billion photons per baryon, the high-energy tail of the photon distribution kept hydrogen ionized until the temperature had fallen to a few percent of that. Saha equilibrium, which includes the ratio, puts the midpoint of recombination near 3700 K; the true value is lower because the process did not stay in equilibrium. Direct recombination to the ground state re-emits a photon that ionizes a neighbour, so the universe became neutral through the slow channels, two-photon decay from the 2s level and the redshifting of Lyman-α photons out of resonance (Peebles 1968), which is why recombination is spread over \\Delta z \\approx 80 and why the surface of last scattering has a thickness. The anisotropies are sound. Before recombination, photons and baryons formed a single fluid with pressure, and overdensities seeded by inflation oscillated as acoustic waves. At last scattering the phases of those oscillations were frozen into the temperature map, producing the acoustic peaks in the angular power spectrum: the first at multipole \\ell \\approx 220, corresponding to about 1°, the angle the sound horizon r_* = 144.4 Mpc (comoving) subtends at the last-scattering distance. The peak positions measure the geometry of the universe, and Planck finds it flat to within 0.4%. The peak heights fix the baryon and dark-matter densities; the damping tail at high \\ell measures the thickness of last scattering. The ΛCDM model has six parameters and fits the spectrum to the cosmic-variance limit across three decades of angular scale. It is this fit that yields H_0 = 67.4 \\pm 0.5 km/s/Mpc and the 13.80 Gyr age, and this fit that the local distance ladder disagrees with. The CMB is also polarized, at the level of a few microkelvin, by Thomson scattering at last scattering. The polarization pattern decomposes into a curl-free E-mode, detected and consistent with the temperature spectrum, and a divergence-free B-mode, which scalar density perturbations cannot produce at linear order. Primordial gravitational waves from inflation would. The tensor-to-scalar ratio is currently bounded at r < 0.036 (BICEP/Keck with Planck, 2021); the B-modes have not been seen, and a detection would be a direct measurement of the energy scale of inflation. Open questions. Several large-angle anomalies, including a hemispherical power asymmetry and the Cold Spot, sit at the 2–3σ level and may be statistical flukes; with only one sky to measure, cosmic variance limits what can be said. The Hubble tension is the sharpest disagreement between the early-universe fit and late-universe measurement. And at the other extreme of precision: whether the small departures from a blackbody predicted by energy release in the early universe, \\mu-distortions at parts in 10^8 and y-distortions near parts in 10^6, can be measured, which is the target of proposed missions such as PIXIE.",
+    "L7 reason -> early-universe": "The 380 000 years before this light escaped are that module’s subject, from the first microsecond forward.",
+    "L7 reason -> expansion-of-the-universe": "Every number here follows from the stretching you dragged there; the CMB is that redshift taken to its limit.",
+    "L7 reason -> gravitational-waves": "The B-mode search is a hunt for gravitational waves from the first instant; that module explains what such waves are.",
+    "L7 reason -> scale-of-the-universe": "The surface of last scattering is the farthest thing on that ladder, and the reason the ladder has a top.",
+    "reference 0": {
+      "label": "Fixsen 2009, “The Temperature of the Cosmic Microwave Background”, ApJ 707, 916",
+      "note": "T₀ = 2.7255 ± 0.0006 K",
+      "url": "https://doi.org/10.1088/0004-637X/707/2/916",
+    },
+    "reference 1": {
+      "label": "Planck Collaboration 2020, “Planck 2018 results VI: Cosmological parameters”, A&A 641, A6",
+      "note": "z_* = 1089.92, r_* = 144.43 Mpc, age and flatness",
+      "url": "https://doi.org/10.1051/0004-6361/201833910",
+    },
+    "reference 2": {
+      "label": "Planck Collaboration 2020, “Planck 2018 results I: Overview”, A&A 641, A1",
+      "note": "Dipole amplitude 3.3621 mK and Solar System velocity 369.82 km/s",
+      "url": "https://doi.org/10.1051/0004-6361/201833880",
+    },
+    "reference 3": {
+      "label": "Penzias & Wilson 1965, “A Measurement of Excess Antenna Temperature at 4080 Mc/s”, ApJ 142, 419",
+      "note": "The discovery",
+      "url": "https://doi.org/10.1086/148307",
+    },
+    "reference 4": {
+      "label": "Fixsen et al. 1996, “The Cosmic Microwave Background Spectrum from the Full COBE FIRAS Data Set”, ApJ 473, 576",
+      "note": "The blackbody spectrum",
+      "url": "https://doi.org/10.1086/178173",
+    },
+    "tagline": "The oldest light there is still fills the sky, cooled by the stretching of space to three degrees above absolute zero.",
+    "title": "The Cosmic Microwave Background",
+  },
   "escape-velocity": {
     "L1 hook": "Throw a stone upward and gravity always wins. But every world has a speed — reach it, and nothing ever comes back.",
     "L2 intuition": "Picture coasting on a bicycle toward a hill, no pedalling allowed. Whether you crest it is decided entirely at the bottom: arrive too slow and you roll back; arrive fast enough and you make it over with speed to spare. Gravity works like a hill stretching away from every planet: steepest at the surface, gentler the farther out you go, and never quite ending. Here is the strange part: although the hill goes on forever, the total climb adds up to a finite amount. So there is a single starting speed that beats it. Below that speed you coast up, slow, stop, and fall back. At or above it, you never stop at all. That threshold is what you are testing when you drag the launch slider below. The analogy breaks in one place: a bicycle loses speed to friction and air resistance, and this hill has neither. Nothing in empty space slows the climb except gravity itself.",
@@ -408,9 +454,17 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A swirling disc of hot gas spiralling into a compact object, glowing from friction as it falls.",
     "title": "Accretion disc",
   },
+  "acoustic-peaks": {
+    "body": "The preferred sizes of the microwave background spots, set by sound waves in the early universe. The first and largest is about one degree across.",
+    "title": "Acoustic peaks",
+  },
   "angular-momentum": {
     "body": "The measure of orbiting or spinning motion that stays constant unless something twists the system.",
     "title": "Angular momentum",
+  },
+  "anisotropy": {
+    "body": "Variation from one direction on the sky to another. In the microwave background, spots a few hundred-thousandths of a degree warmer or cooler than average.",
+    "title": "Anisotropy",
   },
   "apex": {
     "body": "The top of the flight: where the projectile stops climbing and starts falling back.",
@@ -420,6 +474,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "One 3,600th of a degree: about a coin seen from four kilometres away.",
     "title": "Arcsecond",
   },
+  "b-modes": {
+    "body": "A swirl pattern in the polarization of the microwave background that gravitational waves from the first instant would leave. Searched for; not yet found.",
+    "title": "B-modes",
+  },
   "ballistic": {
     "body": "Unpowered: all the speed is given at launch, and gravity alone does the rest.",
     "title": "Ballistic",
@@ -427,6 +485,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "barycentre": {
     "body": "The shared centre of mass two bodies actually orbit; for a star and planet it sits just off the star’s centre.",
     "title": "Barycentre",
+  },
+  "blackbody": {
+    "body": "An object that absorbs all light falling on it and glows only because of its temperature. Its spectrum has one fixed shape, set by that temperature alone.",
+    "title": "Blackbody",
   },
   "blueshift": {
     "body": "A shortening of the light wave: it arrives bluer than it left. Seen from galaxies approaching us faster than expansion carries them away.",
@@ -436,9 +498,17 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A star that brightens and dims on a regular cycle whose length reveals its true brightness, and so its distance.",
     "title": "Cepheid variable",
   },
+  "cmb-dipole": {
+    "body": "The sky is about three thousandths of a degree hotter ahead of us and cooler behind: the fingerprint of our own motion through the background.",
+    "title": "CMB dipole",
+  },
   "comoving": {
     "body": "Distance with cosmic expansion factored out, so it stays fixed for galaxies riding the general flow.",
     "title": "Comoving",
+  },
+  "cosmic-microwave-background": {
+    "body": "The glow left over from the hot early universe, now stretched to microwaves and 2.7 K, arriving from every direction.",
+    "title": "Cosmic microwave background",
   },
   "cosmological-redshift": {
     "body": "Redshift caused by space stretching while the light travels: the wave grows by the same factor the universe grew. Distinct from a Doppler shift.",
@@ -512,6 +582,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The standard model of the universe: ordinary matter, cold dark matter and a constant dark energy, Λ, expanding from a hot beginning.",
     "title": "ΛCDM",
   },
+  "last-scattering": {
+    "body": "The shell of sky, at redshift about 1090, from which the microwave background light set out. Not an edge of the universe; the farthest point light can come from.",
+    "title": "Surface of last scattering",
+  },
   "light-curve": {
     "body": "A graph of a star’s brightness against time.",
     "title": "Light curve",
@@ -584,6 +658,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The rate at which the distance to a galaxy grows because space is expanding. Not motion through space.",
     "title": "Recession velocity",
   },
+  "recombination": {
+    "body": "The moment, about 380 000 years in, when the universe cooled enough for electrons to settle onto nuclei and light could travel freely. Despite the name, it was the first time they combined.",
+    "title": "Recombination",
+  },
   "red-dwarf": {
     "body": "The smallest, coolest, most common kind of star: dim, long-lived, and violently flaring when young.",
     "title": "Red dwarf",
@@ -595,6 +673,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "ringdown": {
     "body": "The last vibration of the merged hole, ringing like a struck bell as it settles into shape.",
     "title": "Ringdown",
+  },
+  "scale-factor": {
+    "body": "A single number, a, recording how stretched the universe is compared with today, when a = 1. Any wavelength of light grows in step with it.",
+    "title": "Scale factor",
   },
   "schwarzschild-radius": {
     "body": "The radius of the event horizon: pack a mass inside it and nothing, light included, gets back out.",
