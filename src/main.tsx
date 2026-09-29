@@ -22,6 +22,7 @@ if (import.meta.env.DEV) {
       verifyCmbModel,
       verifyEarlyUniverseModel,
       verifyFusionModel,
+      verifySupernovaModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -35,6 +36,7 @@ if (import.meta.env.DEV) {
       verifyCmbModel();
       verifyEarlyUniverseModel();
       verifyFusionModel();
+      verifySupernovaModel();
     },
   );
 }
