@@ -371,7 +371,7 @@ function Readout({ label, value, tone }: { label: string; value: string; tone?: 
   const color = tone === undefined ? 'text-ember' : tone === 'loses' ? 'text-ink-faint' : tone === 'marginal' ? 'text-ember' : 'text-star';
   return (
     <div>
-      <dt className="font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">{label}</dt>
+      <dt className="font-ui text-xs text-ink-faint">{label}</dt>
       <dd className={`mt-0.5 font-mono text-lg tabular-nums ${color}`}>{value}</dd>
     </div>
   );

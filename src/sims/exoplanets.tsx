@@ -505,7 +505,7 @@ export default function ExoplanetsSim({ params, values }: SimProps) {
 function Readout({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="font-ui text-[0.65rem] uppercase tracking-[0.14em] text-ink-faint">{label}</dt>
+      <dt className="font-ui text-xs text-ink-faint">{label}</dt>
       <dd className="mt-0.5 font-mono text-lg tabular-nums text-ember">{value}</dd>
     </div>
   );
