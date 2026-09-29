@@ -318,13 +318,13 @@ export const EPOCHS: readonly EpochRow[] = [
     description: 'Neutrinos stop interacting; positrons annihilate with electrons.',
   },
   {
-    kTmax_J: 0.07e6 * EV,
+    kTmax_J: 0.08e6 * EV,
     id: 'nucleosynthesis',
     title: 'Nucleosynthesis',
     description: 'Deuterium survives at last, and helium forms within minutes.',
   },
   {
-    kTmax_J: 0.02e6 * EV,
+    kTmax_J: 0.03e6 * EV,
     id: 'radiation-era',
     title: 'Radiation era',
     description: 'A glowing plasma of nuclei, electrons and light. Light still outweighs matter.',
