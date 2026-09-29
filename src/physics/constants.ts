@@ -90,6 +90,49 @@ export const T_SUN_CORE = 1.57e7;
 export const RHO_SUN_CORE = 1.5e5;
 export const X_SUN_CORE = 0.34;
 export const L_SUN = 3.828e26; // W
+/**
+ * Absolute bolometric magnitude of the Sun (dimensionless). Source: IAU 2015
+ * Resolution B2, M_bol,☉ = 4.74 (the zero point that pairs with L_SUN above).
+ */
+export const M_BOL_SUN = 4.74;
+/**
+ * The Sun's main-sequence lifetime, s: 10 billion years, rounded. The anchor of
+ * the t ∝ M^(−2.5) scaling the supernova module uses.
+ */
+export const T_MS_SUN = 1e10 * JULIAN_YEAR;
+
+// Stellar endpoints
+/**
+ * Chandrasekhar limit, kg, rounded to 1.4 M☉: the most mass electron
+ * degeneracy pressure can support. 1.44 M☉ for a carbon–oxygen white dwarf
+ * (Y_e = 0.5). Source: Chandrasekhar 1931, ApJ 74, 81.
+ */
+export const M_CHANDRASEKHAR = 1.4 * M_SUN;
+/** A typical neutron-star mass, kg: about 1.4 M☉, the peak of the measured distribution. */
+export const M_NS_TYPICAL = 1.4 * M_SUN;
+/**
+ * Neutron-star radius, m: about 12 km. Source: NICER pulsar measurements
+ * (Riley et al. 2021, Miller et al. 2021, PSR J0740+6620), R ≈ 12–13 km.
+ */
+export const R_NS = 1.2e4;
+/**
+ * Peak absolute B magnitude of a Type Ia supernova (dimensionless). Source:
+ * Richardson et al. 2014, "Absolute-magnitude Distributions of Supernovae",
+ * AJ 147, 118 — mean M_B ≈ −19.3.
+ */
+export const M_IA_PEAK = -19.3;
+/**
+ * Upper initial mass for a white-dwarf fate, kg: about 8 M☉. Source: Smartt
+ * 2009, "Progenitors of Core-Collapse Supernovae", ARA&A 47, 63 (8 ± 1 M☉).
+ */
+export const MASS_WD_MAX = 8 * M_SUN;
+/**
+ * Upper initial mass for a neutron-star fate, kg: about 20 M☉, and uncertain.
+ * Source: Smartt 2009 and 2015 (the red supergiant problem: no core-collapse
+ * progenitor above about 18 M☉ identified).
+ */
+export const MASS_NS_MAX = 20 * M_SUN;
+
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**
