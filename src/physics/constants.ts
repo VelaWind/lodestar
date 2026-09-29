@@ -34,6 +34,19 @@ export const K_B = 1.380_649e-23; // J/K, Boltzmann
 /** J per electronvolt, exact since the 2019 SI redefinition (CODATA 2018). */
 export const EV = 1.602_176_634e-19;
 /**
+ * Elementary charge, C, exact (CODATA 2018). The same number as `EV` above,
+ * which is this charge times one volt; kept as its own constant because it is
+ * a different quantity with a different unit, and a formula should say which it
+ * means.
+ */
+export const E_CHARGE = 1.602_176_634e-19;
+/** Vacuum permittivity, F/m. Source: CODATA 2018, 8.854 187 8128(13) × 10⁻¹² F/m. */
+export const EPSILON_0 = 8.854_187_8128e-12;
+/** Fine-structure constant, dimensionless. Source: CODATA 2018, 7.297 352 5693(11) × 10⁻³. */
+export const ALPHA = 7.297_352_5693e-3;
+/** One femtometre, m: the scale of nuclei. A unit, not a measurement. */
+export const FEMTOMETRE = 1e-15;
+/**
  * Unified atomic mass unit, kg — one twelfth of a carbon-12 atom at rest.
  *
  * Molecular masses are given as a multiple of this so the count of nucleons
@@ -59,10 +72,23 @@ export const SIGMA_SB = 5.670_374_419e-8; // W m⁻² K⁻⁴, Stefan–Boltzman
 
 /** Electron rest mass, kg. Source: CODATA 2018, 9.109 383 7015(28) × 10⁻³¹ kg. */
 export const M_ELECTRON = 9.109_383_7015e-31;
+/** Proton rest mass, kg. Source: CODATA 2018, 1.672 621 923 69(51) × 10⁻²⁷ kg. */
+export const M_PROTON = 1.672_621_923_69e-27;
 
 // Bodies
 export const M_SUN = 1.988_4e30; // kg
 export const R_SUN = 6.957e8; // m
+/**
+ * The Sun's centre, from the standard solar model: temperature (K), density
+ * (kg/m³, 150 g/cm³) and hydrogen mass fraction (dimensionless, depleted from
+ * the primordial ~0.71 by 4.6 billion years of fusion).
+ *
+ * Source: Bahcall, Serenelli & Basu 2005, "New Solar Opacities, Abundances,
+ * Helioseismology, and Neutrino Fluxes", ApJ 621, L85.
+ */
+export const T_SUN_CORE = 1.57e7;
+export const RHO_SUN_CORE = 1.5e5;
+export const X_SUN_CORE = 0.34;
 export const L_SUN = 3.828e26; // W
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius

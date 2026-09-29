@@ -20,6 +20,7 @@ import {
   verifyEarlyUniverseModel,
   verifyCosmologyModel,
   verifyEscapeIntegrator,
+  verifyFusionModel,
   verifyGravitationalWaveModel,
   verifyKeplerModel,
   verifyScaleLadder,
@@ -47,6 +48,7 @@ const BLOCKS: { run: () => CheckBlock; checks: number }[] = [
   { run: verifyCosmologyModel, checks: 7 },
   { run: verifyCmbModel, checks: 9 },
   { run: verifyEarlyUniverseModel, checks: 9 },
+  { run: verifyFusionModel, checks: 8 },
 ];
 
 /** Runs a block without its console output, which CI does not need to read. */
@@ -81,10 +83,10 @@ for (const { run, checks } of BLOCKS) {
 }
 
 describe('suite integrity', () => {
-  it('has 58 checks across eleven blocks', () => {
+  it('has 66 checks across twelve blocks', () => {
     const total = BLOCKS.reduce((n, b) => n + b.checks, 0);
-    expect(total).toBe(58);
-    expect(BLOCKS).toHaveLength(11);
+    expect(total).toBe(66);
+    expect(BLOCKS).toHaveLength(12);
   });
 
   it('still logs one console message per block', () => {
