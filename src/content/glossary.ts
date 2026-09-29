@@ -71,6 +71,45 @@ export const glossary: Record<string, GlossaryEntry> = {
     body: 'The difference in gravity’s pull between the near and far side of an object, stretching it along its length.',
   },
 
+  /* Cosmic microwave background ------------------------------------ */
+
+  'cosmic-microwave-background': {
+    title: 'Cosmic microwave background',
+    body: 'The glow left over from the hot early universe, now stretched to microwaves and 2.7 K, arriving from every direction.',
+  },
+  recombination: {
+    title: 'Recombination',
+    body: 'The moment, about 380 000 years in, when the universe cooled enough for electrons to settle onto nuclei and light could travel freely. Despite the name, it was the first time they combined.',
+  },
+  'last-scattering': {
+    title: 'Surface of last scattering',
+    body: 'The shell of sky, at redshift about 1090, from which the microwave background light set out. Not an edge of the universe; the farthest point light can come from.',
+  },
+  blackbody: {
+    title: 'Blackbody',
+    body: 'An object that absorbs all light falling on it and glows only because of its temperature. Its spectrum has one fixed shape, set by that temperature alone.',
+  },
+  anisotropy: {
+    title: 'Anisotropy',
+    body: 'Variation from one direction on the sky to another. In the microwave background, spots a few hundred-thousandths of a degree warmer or cooler than average.',
+  },
+  'cmb-dipole': {
+    title: 'CMB dipole',
+    body: 'The sky is about three thousandths of a degree hotter ahead of us and cooler behind: the fingerprint of our own motion through the background.',
+  },
+  'scale-factor': {
+    title: 'Scale factor',
+    body: 'A single number, a, recording how stretched the universe is compared with today, when a = 1. Any wavelength of light grows in step with it.',
+  },
+  'acoustic-peaks': {
+    title: 'Acoustic peaks',
+    body: 'The preferred sizes of the microwave background spots, set by sound waves in the early universe. The first and largest is about one degree across.',
+  },
+  'b-modes': {
+    title: 'B-modes',
+    body: 'A swirl pattern in the polarization of the microwave background that gravitational waves from the first instant would leave. Searched for; not yet found.',
+  },
+
   /* Escape velocity ------------------------------------------------ */
 
   apex: {

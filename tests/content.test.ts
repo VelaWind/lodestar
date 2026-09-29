@@ -32,7 +32,7 @@ const published = moduleList.filter((m) => m.status === 'published');
  * indistinguishable without a list. Adding a name here is the deliberate act of
  * saying "this module is planned"; removing one is what happens when it lands.
  */
-const KNOWN_BACKLOG = ['cosmic-distance-ladder', 'cosmic-microwave-background', 'early-universe'];
+const KNOWN_BACKLOG = ['cosmic-distance-ladder', 'early-universe'];
 
 /** Every string a reader could see, flattened. */
 function readableText(module: Module): string {

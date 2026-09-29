@@ -30,6 +30,8 @@ import {
   type Page,
 } from '@playwright/test';
 import { SITE_ORIGIN } from '../../src/lib/site';
+import { formatWithUnit } from '../../src/lib/format';
+import cosmicMicrowaveBackground from '../../src/content/modules/cosmic-microwave-background';
 
 const MODULES = [
   'escape-velocity',
@@ -40,6 +42,7 @@ const MODULES = [
   'exoplanets',
   'planetary-atmospheres',
   'expansion-of-the-universe',
+  'cosmic-microwave-background',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2136,6 +2139,84 @@ test('behaviour: expansion readouts follow the sliders, and a term opens by keyb
   assertClean(w, 'expansion behaviour');
 });
 
+/**
+ * The microwave background module, end to end, on every engine.
+ *
+ * Heating the universe to its transparency temperature has to carry the
+ * redshift readout from "now" to last scattering; stopping the observer has to
+ * take the dipole to exactly zero; a glossary term in the real-picture layer
+ * opens from the keyboard alone; and axe finds nothing serious.
+ */
+test('behaviour: microwave background readouts follow the sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/cosmic-microwave-background', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'microwave background at rest');
+
+  const readout = (index: number) =>
+    page.locator('#cosmic-microwave-background-readouts dd').nth(index).innerText();
+
+  /* Temperature carries the redshift from today to last scattering. */
+  expect((await readout(0)).trim(), 'the default is today’s sky').toBe('now');
+  const T = page.locator('#p-T');
+  await T.focus();
+  await page.keyboard.press('End');
+  // The step divides the log range into 304 equal parts, so End reaches the
+  // maximum exactly; the spoken value is whatever the param's own format makes
+  // of 3000 K, computed here by the same function the slider uses.
+  const TParam = cosmicMicrowaveBackground.layers.play.params.find((p) => p.id === 'T')!;
+  await expect(T).toHaveAttribute('aria-valuetext', formatWithUnit(TParam, 3000));
+  const z = Number((await readout(0)).replace(/,/g, ''));
+  expect(z, 'at 3000 K the redshift should be at last scattering').toBeGreaterThan(1090);
+  expect(z).toBeLessThan(1110);
+  await assertNoOverflow(page, 'microwave background at 3000 K');
+
+  /* Standing still: no dipole at all. */
+  const v = page.locator('#p-v');
+  await v.focus();
+  await page.keyboard.press('Home');
+  await expect(v).toHaveAttribute('aria-valuetext', '0 km/s');
+  expect((await readout(5)).trim(), 'no motion, no dipole').toBe('0.00 mK');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the CMB itself').toBe(
+    'cosmic-microwave-background',
+  );
+  const trigger = page.locator('[data-glossary-term="cosmic-microwave-background"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="cosmic-microwave-background"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('arriving from every direction');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'microwave background: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '15-microwave-background-behaviour');
+  assertClean(w, 'microwave background behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2149,10 +2230,10 @@ test('behaviour: expansion readouts follow the sliders, and a term opens by keyb
  * The planned chips are five, and it is worth writing down why, because the
  * number moves when the backlog does: they point at `cosmic-distance-ladder`
  * three times (twice from older modules, once from the expansion module), and
- * at `cosmic-microwave-background` and `early-universe` once each, both from
- * the expansion module; none of the three is written. The chip that pointed at
- * `expansion-of-the-universe` became a live link when that module was
- * published. Two further chips existed until `planetary-atmospheres` was
+ * at `early-universe` twice (once each from the expansion and microwave
+ * background modules); neither is written. The chips that pointed at
+ * `expansion-of-the-universe` and `cosmic-microwave-background` became live
+ * links when those modules were published. Two further chips existed until `planetary-atmospheres` was
  * published — a module that was finished and registered but still carried a
  * draft flag, so the index hid it and every link to it degraded to a chip.
  *
@@ -2160,7 +2241,7 @@ test('behaviour: expansion readouts follow the sliders, and a term opens by keyb
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'cosmic-microwave-background', 'early-universe'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'early-universe'];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2172,7 +2253,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes eight modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes nine modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -2858,7 +2939,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All eight modules now, with no exception branch. `kepler-orbits` carried one
+ * All nine modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -2972,7 +3053,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all nine and checks the rendered DOM rather than the
+ * route — so this walks all eleven and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -2998,7 +3079,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all ten routes').toBe(10);
+  expect(routes.length, 'all eleven routes').toBe(11);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3145,7 +3226,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on nine fresh loads. Getting this wrong is what the first run of
+   * asserts on eleven fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
