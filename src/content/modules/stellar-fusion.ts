@@ -85,7 +85,7 @@ const stellarFusion: Module = {
           default: T_SUN_CORE,
           step: 0.01, // decades
           scale: 'log',
-          format: { notation: 'auto', digits: 3 },
+          format: { notation: 'auto', digits: 3, displayUnit: { unit: 'million K', factor: 1e-6 } },
         },
         {
           id: 'rho',

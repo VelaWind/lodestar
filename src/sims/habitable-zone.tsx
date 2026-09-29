@@ -45,7 +45,8 @@ import {
   zoneVerdict,
 } from '@/physics/habitable';
 import { period } from '@/physics/kepler';
-import { DURATION, EASE, type Bezier } from '@/motion/tokens';
+import { eased } from '@/motion/ease';
+import { DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import { useTier } from '@/store/useAppStore';
 import { firstClearPlacement, labelBox, overlaps, type LabelBox } from './labels';
@@ -150,24 +151,6 @@ function formatPeriod(seconds: number): string {
   }
   const text = plainOrScientific(seconds / 86_400);
   return `${text} ${text === '1' ? 'day' : 'days'}`;
-}
-
-/**
- * A motion token's cubic Bézier, evaluated: progress in, eased progress out.
- * Bisection on x(t) = p, then y(t).
- */
-function eased(curve: Bezier, p: number): number {
-  const [x1, y1, x2, y2] = curve;
-  const at = (a: number, b: number, t: number) =>
-    3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3;
-  let lo = 0;
-  let hi = 1;
-  for (let i = 0; i < 24; i += 1) {
-    const mid = (lo + hi) / 2;
-    if (at(x1, x2, mid) < p) lo = mid;
-    else hi = mid;
-  }
-  return at(y1, y2, (lo + hi) / 2);
 }
 
 /* ------------------------------------------------------------------ */
