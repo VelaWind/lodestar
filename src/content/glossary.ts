@@ -431,6 +431,33 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Planetary nebula',
     body: 'The glowing shell of gas a Sun-like star sheds at the end of its life, lit by the white dwarf left at its centre. Nothing to do with planets.',
   },
+
+  /* Habitable zone ------------------------------------------------- */
+
+  'habitable-zone': {
+    title: 'Habitable zone',
+    body: 'The range of distances from a star where a planet with an Earth-like atmosphere could keep liquid water on its surface. A statement about temperature, not about life.',
+  },
+  'equilibrium-temperature': {
+    title: 'Equilibrium temperature',
+    body: 'The temperature a planet settles at when the starlight it absorbs balances the heat it radiates, with no atmosphere. Earth’s is 255 K; its surface is 288 K.',
+  },
+  'bond-albedo': {
+    title: 'Bond albedo',
+    body: 'The fraction of starlight a planet reflects back to space, over all wavelengths. Earth 0.30, Venus 0.77, the Moon 0.12.',
+  },
+  'greenhouse-effect': {
+    title: 'Greenhouse effect',
+    body: 'Warming of a surface by an atmosphere that lets sunlight in but absorbs the heat radiated back. Earth’s adds 33 K; Venus’s adds about 500 K.',
+  },
+  'runaway-greenhouse': {
+    title: 'Runaway greenhouse',
+    body: 'What happens when a planet gets warm enough that its evaporating oceans trap more heat, which evaporates more ocean, until the oceans are gone. Venus, probably.',
+  },
+  'tidal-locking': {
+    title: 'Tidal locking',
+    body: 'A planet turning one face permanently to its star, as the Moon does to Earth. Expected for planets in the habitable zones of red dwarfs.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */
