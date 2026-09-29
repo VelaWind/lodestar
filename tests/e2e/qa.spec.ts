@@ -46,6 +46,7 @@ const MODULES = [
   'early-universe',
   'stellar-fusion',
   'supernovae',
+  'habitable-zone',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2446,6 +2447,72 @@ test('behaviour: supernovae readouts follow both sliders, and a term opens by ke
   assertClean(w, 'supernovae behaviour');
 });
 
+/**
+ * The habitable-zone module, end to end, on every engine.
+ *
+ * At the defaults, the Earth around the Sun, the planet is in the zone at
+ * 255 K with no atmosphere; at the distance slider's minimum it is too hot,
+ * and at its maximum too cold. A glossary term in the real-picture layer
+ * opens from the keyboard alone, and axe finds nothing serious.
+ */
+test('behaviour: habitable-zone verdict follows the distance, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/habitable-zone', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'habitable zone at rest');
+
+  const readout = (index: number) => page.locator('#habitable-zone-readouts dd').nth(index);
+
+  /* Defaults: the Earth. */
+  await expect(readout(0), 'verdict at 1 AU from the Sun').toContainText('in the zone');
+  await expect(readout(3), 'Earth’s equilibrium temperature').toContainText('255');
+
+  /* Nearest and farthest. */
+  const d = page.locator('#p-d');
+  await d.focus();
+  await page.keyboard.press('Home');
+  await expect(readout(0), 'verdict at the distance minimum').toContainText('too hot');
+  await page.keyboard.press('End');
+  await expect(readout(0), 'verdict at the distance maximum').toContainText('too cold');
+  await assertNoOverflow(page, 'habitable zone at 100 AU');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the habitable zone').toBe('habitable-zone');
+  const trigger = page.locator('[data-glossary-term="habitable-zone"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="habitable-zone"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('A statement about temperature, not about life.');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'habitable zone: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '19-habitable-zone-behaviour');
+  assertClean(w, 'habitable zone behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2456,14 +2523,14 @@ test('behaviour: supernovae readouts follow both sliders, and a term opens by ke
  * module that is not published degrades to a chip rather than a dead link, and
  * no draft is reachable from anywhere a reader looks.
  *
- * The planned chips are six, and it is worth writing down why, because the
+ * The planned chips are five, and it is worth writing down why, because the
  * number moves when the backlog does: they point at `cosmic-distance-ladder`
  * four times (twice from older modules, once each from the expansion and
- * supernovae modules), at `habitable-zone` once, from stellar-fusion, and at
- * `nebulae` once, from supernovae; none of the three is written. The chips
- * that pointed at `expansion-of-the-universe`, `cosmic-microwave-background`,
- * `early-universe`, `stellar-fusion` and `supernovae` became live links when
- * those modules were published. Two
+ * supernovae modules), and at `nebulae` once, from supernovae; neither is
+ * written. The chips that pointed at `expansion-of-the-universe`,
+ * `cosmic-microwave-background`, `early-universe`, `stellar-fusion`,
+ * `supernovae` and `habitable-zone` became live links when those modules
+ * were published. Two
  * further chips existed until `planetary-atmospheres` was
  * published — a module that was finished and registered but still carried a
  * draft flag, so the index hid it and every link to it degraded to a chip.
@@ -2472,7 +2539,7 @@ test('behaviour: supernovae readouts follow both sliders, and a term opens by ke
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'habitable-zone', 'nebulae'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'nebulae'];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2484,7 +2551,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes twelve modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes thirteen modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -2536,7 +2603,7 @@ test('behaviour: the registry publishes twelve modules and leaks no drafts', asy
   }
 
   console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
-  expect(planned, 'planned-chip total across every published page').toBe(6);
+  expect(planned, 'planned-chip total across every published page').toBe(5);
 
   assertClean(w, 'registry');
 });
@@ -3170,7 +3237,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All twelve modules now, with no exception branch. `kepler-orbits` carried one
+ * All thirteen modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3284,7 +3351,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all fourteen and checks the rendered DOM rather than the
+ * route — so this walks all fifteen and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3310,7 +3377,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all fourteen routes').toBe(14);
+  expect(routes.length, 'all fifteen routes').toBe(15);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3457,7 +3524,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on fourteen fresh loads. Getting this wrong is what the first run of
+   * asserts on fifteen fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();

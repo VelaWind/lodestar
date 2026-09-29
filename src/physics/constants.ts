@@ -133,6 +133,36 @@ export const MASS_WD_MAX = 8 * M_SUN;
  */
 export const MASS_NS_MAX = 20 * M_SUN;
 
+// Habitable zone
+/**
+ * Total solar irradiance at 1 AU, W/m²: the IAU 2015 nominal value. Source:
+ * Prša et al. 2016, "Nominal Values for Selected Solar and Planetary
+ * Quantities: IAU 2015 Resolution B3", AJ 152, 41. L_SUN / (4π AU²) gives
+ * 1361.2 W/m², consistent with it; this is the reference Earth's flux ratios
+ * are quoted against.
+ */
+export const S_SUN = 1361;
+/**
+ * Bond albedos (dimensionless), rounded: Earth 0.30, Venus 0.77, Mars 0.25.
+ * Source: NASA Planetary Fact Sheets (Williams, NSSDCA).
+ */
+export const A_EARTH = 0.3;
+export const A_VENUS = 0.77;
+export const A_MARS = 0.25;
+/** Earth's greenhouse warming, K: the 288 K mean surface less the 255 K equilibrium temperature. */
+export const GREENHOUSE_EARTH = 33;
+/*
+ * Habitable-zone edges as effective stellar flux, in units of Earth's (S_eff,
+ * dimensionless), for a Sun-like star (T_eff = 5780 K). Source: Kopparapu et
+ * al. 2013, ApJ 765, 131, with the erratum's corrected inner edges (ApJ 770,
+ * 82). Conservative: the moist-greenhouse inner edge and the maximum-greenhouse
+ * outer edge. Optimistic: recent Venus and early Mars.
+ */
+export const SEFF_MOIST = 1.014;
+export const SEFF_MAXGH = 0.343;
+export const SEFF_RECENT_VENUS = 1.776;
+export const SEFF_EARLY_MARS = 0.32;
+
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**

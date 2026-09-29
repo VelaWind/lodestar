@@ -21,6 +21,7 @@ import cosmicMicrowaveBackground from '@/content/modules/cosmic-microwave-backgr
 import earlyUniverse from '@/content/modules/early-universe';
 import stellarFusion from '@/content/modules/stellar-fusion';
 import supernovae from '@/content/modules/supernovae';
+import habitableZone from '@/content/modules/habitable-zone';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -34,6 +35,7 @@ import { __internals as cmb } from '@/sims/cosmic-microwave-background';
 import { __internals as early } from '@/sims/early-universe';
 import { __internals as fusion } from '@/sims/stellar-fusion';
 import { __internals as sn } from '@/sims/supernovae';
+import { __internals as hz } from '@/sims/habitable-zone';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -52,11 +54,13 @@ import {
   redshiftFromVelocity,
 } from '@/physics/cosmology';
 import {
+  AU,
   EV,
   H_ALPHA_AIR,
   JULIAN_YEAR,
   KM_S_PER_MPC,
   LIGHT_YEAR,
+  L_SUN,
   MEGAPARSEC,
   M_SUN,
   PARSEC,
@@ -1064,6 +1068,104 @@ function supernovaeCases(): Case[] {
   return cases;
 }
 
+/* ------------------------------- habitable zone ------------------------------ */
+
+const HZ_HEIGHT = 480;
+
+function habitableZoneCases(): Case[] {
+  const params = habitableZone.layers.play.params;
+  const LParam = paramOf(params, 'L');
+  const dParam = paramOf(params, 'd');
+  const AParam = paramOf(params, 'A');
+  const cases: Case[] = [];
+
+  // Each slider's ends and default with the others at their defaults, plus the
+  // review's screenshot stops.
+  const views: { stop: string; L: number; d: number; A: number }[] = [
+    ...extremes(LParam).map((s) => ({ stop: `L=${s.stop}`, L: s.value, d: dParam.default, A: AParam.default })),
+    ...extremes(dParam).map((s) => ({ stop: `d=${s.stop}`, L: LParam.default, d: s.value, A: AParam.default })),
+    ...extremes(AParam).map((s) => ({ stop: `A=${s.stop}`, L: LParam.default, d: dParam.default, A: s.value })),
+    { stop: 'L=0.01 L☉, d=0.1 AU', L: 0.01 * L_SUN, d: 0.1 * AU, A: AParam.default },
+    { stop: 'L=100 L☉, d=10 AU', L: 100 * L_SUN, d: 10 * AU, A: AParam.default },
+  ];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const v of views) {
+      cases.push({
+        label: `${v.stop} ${units}`,
+        draw: (ctx, w, h) => hz.drawScene(ctx, w, h, { L: v.L, d: v.d, A: v.A, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every setting a reader can reach.
+   *
+   * The zone slides across the top panel with L; the planet's temperature
+   * label rides the solid curve below, and the dashed curve's label follows
+   * that curve as L and A move it. Swept a tenth of a decade at a time on L
+   * and d, and in tenths on A, everything must be drawn, clear and inside
+   * the frame.
+   */
+  it('keeps every label drawn and clear across all three sliders', () => {
+    const expected = ['water freezes', 'water boils, at Earth’s pressure', 'with an Earth-like atmosphere'];
+    const check = (L: number, d: number, A: number, units: 'friendly' | 'technical', width: number) => {
+      const { ctx, records } = recordingContext();
+      hz.drawScene(ctx, width, HZ_HEIGHT, { L, d, A, units });
+      const where = `L=${(L / L_SUN).toPrecision(3)} L☉ d=${(d / AU).toPrecision(3)} AU A=${A.toFixed(2)} ${units} @${width}`;
+      const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+      for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+        `${where}: labels overlap`,
+      ).toEqual([]);
+      expect(
+        textOutsideFrame(records, width, HZ_HEIGHT).map(describeRecord),
+        `${where}: text outside the frame`,
+      ).toEqual([]);
+    };
+    for (const units of ['friendly', 'technical'] as const) {
+      for (const width of [246, 390, 900]) {
+        for (let e = Math.log10(LParam.min); e <= Math.log10(LParam.max) + 1e-9; e += 0.1) {
+          check(Math.min(LParam.max, 10 ** e), dParam.default, AParam.default, units, width);
+        }
+        check(LParam.max, dParam.default, AParam.default, units, width);
+        for (let e = Math.log10(dParam.min); e <= Math.log10(dParam.max) + 1e-9; e += 0.1) {
+          check(LParam.default, Math.min(dParam.max, 10 ** e), AParam.default, units, width);
+        }
+        check(LParam.default, dParam.max, AParam.default, units, width);
+        for (let A = AParam.min; A <= AParam.max + 1e-9; A += 0.1) {
+          check(LParam.default, dParam.default, Math.min(AParam.max, A), units, width);
+        }
+      }
+    }
+  });
+
+  it('names the zone where it fits, and pins the dot when the planet is off the chart', () => {
+    const texts = (L: number, d: number, units: 'friendly' | 'technical' = 'friendly') => {
+      const { ctx, records } = recordingContext();
+      hz.drawScene(ctx, 900, HZ_HEIGHT, { L, d, A: AParam.default, units });
+      return records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    };
+    expect(texts(LParam.default, dParam.default)).toContain('liquid water likely');
+    expect(texts(LParam.default, dParam.default)).toContain('255 K');
+    // At 0.01 AU from the Sun the planet is at 2 550 K, far above the 700 K axis.
+    expect(texts(LParam.default, dParam.min)).toContain('2,550 K');
+    // At Deep the conservative edges carry their distances.
+    expect(texts(LParam.default, dParam.default, 'technical')).toEqual(expect.arrayContaining(['0.993', '1.71']));
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    expect(hz.formatEdges(0.9931 * AU, 1.7075 * AU)).toBe('0.993 to 1.71 AU');
+    expect(hz.formatFlux(1361.17)).toBe('1,360 W/m² (1.00 × Earth’s)');
+    expect(hz.formatFlux(1.361e8)).toBe('1.36 × 10⁸ W/m² (1.0 × 10⁵ × Earth’s)');
+    expect(hz.formatKelvinCelsius(254.59)).toBe('255 K (−18.6 °C)');
+    expect(hz.formatPeriod(365.25 * 86_400)).toBe('1 year');
+    expect(hz.formatPeriod(10 * 86_400)).toBe('10 days');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -1079,6 +1181,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'early-universe', height: EARLY_HEIGHT, cases: earlyUniverseCases },
   { name: 'stellar-fusion', height: FUSION_HEIGHT, cases: stellarFusionCases },
   { name: 'supernovae', height: SN_HEIGHT, cases: supernovaeCases },
+  { name: 'habitable-zone', height: HZ_HEIGHT, cases: habitableZoneCases },
 ];
 
 /**
@@ -1109,6 +1212,7 @@ const MEASURED_PLACEMENT = new Set([
   'early-universe',
   'stellar-fusion',
   'supernovae',
+  'habitable-zone',
 ]);
 
 for (const sim of SIMS) {
