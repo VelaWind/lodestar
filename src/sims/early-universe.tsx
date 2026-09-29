@@ -38,7 +38,8 @@ import {
   temperatureAtTime,
   timeAtTemperature,
 } from '@/physics/earlyuniverse';
-import { DURATION, EASE, type Bezier } from '@/motion/tokens';
+import { eased } from '@/motion/ease';
+import { DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import { useTier } from '@/store/useAppStore';
 import { firstClearPlacement, labelBox, overlaps, type LabelBox } from './labels';
@@ -140,24 +141,6 @@ function formatScaleFactor(a: number): string {
   if (a >= 0.9995) return '1 (today)';
   if (a < 0.5) return `1 / ${plainOrScientific(1 / a)}`;
   return SIG3.format(a);
-}
-
-/**
- * A motion token's cubic Bézier, evaluated: progress in, eased progress out.
- * Bisection on x(t) = p, then y(t).
- */
-function eased(curve: Bezier, p: number): number {
-  const [x1, y1, x2, y2] = curve;
-  const at = (a: number, b: number, t: number) =>
-    3 * a * t * (1 - t) ** 2 + 3 * b * t * t * (1 - t) + t ** 3;
-  let lo = 0;
-  let hi = 1;
-  for (let i = 0; i < 24; i += 1) {
-    const mid = (lo + hi) / 2;
-    if (at(x1, x2, mid) < p) lo = mid;
-    else hi = mid;
-  }
-  return at(y1, y2, (lo + hi) / 2);
 }
 
 /* ------------------------------------------------------------------ */
