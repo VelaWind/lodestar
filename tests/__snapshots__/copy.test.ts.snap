@@ -513,6 +513,52 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "The Sun is not hot enough for its protons to touch. They fuse anyway, and the reason is quantum.",
     "title": "Why the Sun Shines",
   },
+  "supernovae": {
+    "L1 hook": "A star twenty times the Sun’s mass ends its life in less than a second, and for a few weeks the explosion outshines everything else in its galaxy. The iron in your blood was made that way.",
+    "L2 intuition": "A star is a balancing act. Gravity pulls everything toward the centre; the heat of the core pushes back. Think of a hot-air balloon: as long as the burner runs, the balloon holds its shape and its height. The star’s burner is fusion at the core, and it has run for the Sun’s whole life. Fuel runs out. For a star like the Sun that is undramatic: the core shrinks, the outer layers drift away as a glowing shell, and what is left is a hot, dense ember the size of the Earth that cools for the rest of time. But a star many times heavier burns through its fuel in a few million years and then, in its last day, forges iron at its centre. Iron gives no heat when it fuses. The burner goes out at the centre of a star that weighs more than eight Suns, and the core falls in on itself, at a quarter of the speed of light, until it is as dense as an atomic nucleus and can fall no further. The infalling layers slam into it, and the rebound, driven by a flood of particles from the new core, blows the rest of the star into space. Where the analogy breaks: a balloon with its burner out simply sinks; it does not collapse in a second and rebound. And the balloon’s burner gives out because the fuel is gone, while the star’s core stops because it has made a fuel, iron, that no fusion can burn. There is a second way for a star to explode, with no burner involved at all, and the next layer describes it.",
+    "L3 approximation 0": "Fates are drawn as sharp cuts at 8 and 20 solar masses, for a star of the Sun’s composition. The real boundaries are uncertain by a couple of solar masses, shift with composition and rotation, and some stars above 20 collapse to black holes with no explosion at all.",
+    "L3 approximation 1": "Lifetime and brightness use the main-sequence power laws t ∝ M⁻²·⁵ and L ∝ M³·⁵, good to about a factor of two between 0.5 and 20 solar masses and rougher outside that range.",
+    "L3 approximation 2": "The brightness panel is a Type Ia at its average peak, −19.3, with no dimming by dust. A core-collapse supernova is typically two magnitudes fainter, and no single explosion is exactly average.",
+    "L3 caption": "Slide the star’s birth mass across the line at eight Suns and see its fate change from a quiet ember to a collapse. Then move a supernova of the standard kind nearer and farther and see how far away it would still be visible to the naked eye.",
+    "L4 figure alt": "A ragged, roughly oval cloud on a black starfield: a web of orange and red filaments, green-tinged toward the lower left, wrapped around a pale blue glow that fills the interior.",
+    "L4 real": "A supernova is the explosion of a star, and there are two ways to make one. A core-collapse supernova is the death of a star born with more than about eight times the Sun’s mass. Such a star fuses successively heavier elements in its core, each stage faster than the last, ending with iron; since fusing iron absorbs energy rather than releasing it, the core becomes an inert ball that grows until it passes the Chandrasekhar limit, about 1.4 solar masses, the most that the pressure of packed electrons can hold up. It then collapses in under a second to a neutron star, a sphere about 12 km across, or, for the heaviest stars, straight to a black hole. About 99 percent of the energy released, some 3 × 10⁴⁶ joules, leaves as neutrinos; only one percent goes into the explosion and a hundredth of that into light. Twenty-five of those neutrinos were caught on Earth in February 1987 from SN 1987A in the Large Magellanic Cloud, arriving hours before the light, the only supernova neutrinos ever detected. A Type Ia supernova is different: no massive star, no core collapse. A white dwarf, the ember left by a Sun-like star, gains mass from a companion until it nears the Chandrasekhar limit, and its carbon ignites everywhere at once. The whole star is consumed and nothing is left behind. Because every Type Ia detonates at nearly the same mass, every one reaches nearly the same peak brightness, an absolute magnitude of about −19.3, which makes them the best standard candle in the sky: measure how bright one looks, and you have its distance. It was Type Ia supernovae that revealed the accelerating expansion of the universe in 1998. Most stars will do neither. Below about eight solar masses, which is nearly every star, the end is a planetary nebula and a white dwarf; the Sun will go this way in about five billion years, and the ember will be roughly half its present mass. Between about 8 and 20 solar masses the core leaves a neutron star; above about 20, a black hole, and some of those stars may collapse without any visible explosion. The main sequence lifetime before all this scales steeply with mass: ten billion years for the Sun, a few million for a star of twenty solar masses. Two misconceptions. Stars do not explode because they run out of fuel; only the heavy ones do, and only because iron cannot burn. And the light of a supernova is not the star burning up: for a Type Ia, and for weeks after a core collapse, the glow is powered by the radioactive decay of the nickel forged in the blast, half a solar mass of it in a Type Ia. The mass boundaries here are approximate. The 8 solar-mass line is known to within about one solar mass from the stars seen to explode; the 20 solar-mass line is contested, and the mechanism that turns a collapse into an explosion is still being worked out in three-dimensional simulations. The Crab Nebula, the remains of a core-collapse supernova seen from Earth in 1054. At its centre is a neutron star spinning thirty times a second; the filaments are the star’s outer layers, still expanding at 1 500 km/s. NASA, ESA, J. Hester and A. Loll (Arizona State University)",
+    "L5 intro": null,
+    "L5 note (apparent-magnitude)": "m — how bright the supernova looks from Earth, on the magnitude scale where smaller is brighter; M_{\\text{Ia}} — the peak absolute magnitude of a Type Ia, −19.3, its brightness as it would look from 10 parsecs; d — its distance (your slider). Every factor of ten in distance adds five magnitudes. Worked example, a star like Betelgeuse: M = 18\\,M_\\odot, at d = 168\\,\\text{pc} (550 light-years). t_{\\text{MS}} = 10^{10}\\,\\text{yr} \\times 18^{-2.5} = 10^{10} / 1\\,375 = 7.3\\text{ million years} L = 18^{3.5}\\,L_\\odot = 24\\,700\\,L_\\odot on the main sequence; Betelgeuse has since swollen to about 100 000 L_\\odot Fate: 18\\,M_\\odot is between 8 and 20, so a neutron star, in a core-collapse supernova. If a Type Ia went off at that distance: m = -19.3 + 5\\log_{10}(168 / 10) = -19.3 + 6.1 = -13.2, brighter than the full Moon at −12.7. Betelgeuse’s own explosion, a core collapse, would be about two magnitudes fainter: still visible by day.",
+    "L5 note (lifetime)": "t_{\\text{MS}} — the main-sequence lifetime, the time a star fuses hydrogen steadily; M — the star’s mass at birth (your slider); M_\\odot — the Sun’s mass. Heavier stars have more fuel but burn it far faster, so they live shorter lives.",
+    "L5 note (luminosity)": "L — the star’s brightness on the main sequence; L_\\odot — the Sun’s. Doubling the mass makes a star eleven times brighter, which is why it burns out sooner.",
+    "L6 deeper": "Iron sits at the peak of binding energy per nucleon, so once a core of it has formed, at about 1.5 \\times 10^{9}\\,\\text{K}, no further fusion can support it. Two processes then remove pressure: photodisintegration of iron nuclei into alpha particles and neutrons by the thermal photons, and electron capture on protons, which lowers the electron fraction Y_e and with it the Chandrasekhar mass, M_{\\text{Ch}} = 1.46\\,(Y_e / 0.5)^2\\,M_\\odot. The core collapses on a free-fall time of a few hundred milliseconds until the inner core reaches nuclear density, about 2.7 \\times 10^{17}\\,\\text{kg/m}^3, where the equation of state stiffens and it rebounds. The bounce shock stalls within a few hundred kilometres, drained by photodisintegrating the infalling iron; in the standard picture it is revived by neutrino heating from the hot proto-neutron star, which radiates its 3 \\times 10^{46}\\,\\text{J} of binding energy over about ten seconds, and by convective and hydrodynamic instabilities that keep matter in the heating region longer. Three-dimensional simulations now explode for a range of progenitors, but not all, and the “island” of masses that fail to explode and collapse to black holes is an open question. The light is a separate story from the energy. The kinetic energy of a typical explosion is 10^{44}\\,\\text{J} and the radiated light 10^{42}\\,\\text{J}, one percent of that. For a Type Ia the light curve is powered by the decay chain {}^{56}\\text{Ni} \\to {}^{56}\\text{Co} \\to {}^{56}\\text{Fe}, with half-lives of 6.1 and 77 days, from about 0.6\\,M_\\odot of nickel; the peak brightness scales with the nickel mass, and the width of the light curve with the diffusion time, which is why the Phillips relation between peak luminosity and decline rate can standardise Type Ia peaks to about 0.1 magnitude, or 5 percent in distance. That precision is what made the 1998 acceleration measurement possible and what anchors the far rung of the distance ladder today, including the SH0ES value of H_0 on the high side of the Hubble tension. The Type Ia progenitor itself is less settled than its use: whether the white dwarf accretes from a normal companion or merges with another white dwarf, and whether most detonate below the Chandrasekhar limit through a surface helium flash, are open, and the two channels may both operate. SN 1987A is the anchor of the core-collapse picture. Kamiokande-II, IMB and Baksan recorded 25 neutrinos in about 13 seconds, with a total energy and duration consistent with a proto-neutron star cooling by neutrino emission; the light rose over the following hours. The progenitor, a blue supergiant of about 18\\,M_\\odot, contradicted the expectation of a red supergiant, and the compact remnant was not identified until a 2024 JWST detection of ionised argon at the centre, consistent with a neutron star. Nucleosynthesis divides by type: Type Ia supernovae produce most of the iron-peak elements, core collapses most of the oxygen through calcium, and the heaviest r-process elements such as gold are now attributed mainly to neutron-star mergers, following GW170817 in 2017. The upper mass boundary in the sim, 20\\,M_\\odot, is where the “red supergiant problem” lives: no core-collapse progenitor above about 18\\,M_\\odot has been identified in pre-explosion images, which may mean that heavier stars collapse quietly, or that their late-stage dust hides them.",
+    "L7 reason -> black-holes": "Above about twenty solar masses, this is how the black holes in that module are made.",
+    "L7 reason -> cosmic-distance-ladder": "The Type Ia panel here is the top rung of that ladder, and its 5 percent precision is why the Hubble tension is sharp enough to matter.",
+    "L7 reason -> nebulae": "The Crab is one; that module is about the glowing gas, this one about what made it glow.",
+    "L7 reason -> stellar-fusion": "The fusion that lights the Sun is what a massive star runs through in stages until it reaches iron; that module is where the burner is lit.",
+    "reference 0": {
+      "label": "Smartt 2009, “Progenitors of Core-Collapse Supernovae”, ARA&A 47, 63",
+      "note": "The 8 M☉ lower boundary and the red supergiant problem",
+      "url": "https://doi.org/10.1146/annurev-astro-082708-101737",
+    },
+    "reference 1": {
+      "label": "Janka 2012, “Explosion Mechanisms of Core-Collapse Supernovae”, Annu. Rev. Nucl. Part. Sci. 62, 407",
+      "note": "Collapse, bounce, neutrino heating and the energetics",
+      "url": "https://doi.org/10.1146/annurev-nucl-102711-094901",
+    },
+    "reference 2": {
+      "label": "Kalirai et al. 2008, “The Initial-Final Mass Relation: Direct Constraints at the Low-Mass End”, ApJ 676, 594",
+      "note": "White-dwarf remnant mass, M_f = 0.109 M_i + 0.394 M☉",
+      "url": "https://doi.org/10.1086/527028",
+    },
+    "reference 3": {
+      "label": "Richardson et al. 2014, “Absolute-magnitude Distributions of Supernovae”, AJ 147, 118",
+      "note": "Type Ia peak −19.3 and the two-magnitude gap to core collapse",
+      "url": "https://doi.org/10.1088/0004-6256/147/5/118",
+    },
+    "reference 4": {
+      "label": "Hirata et al. 1987, “Observation of a neutrino burst from the supernova SN1987A”, Phys. Rev. Lett. 58, 1490",
+      "note": "The Kamiokande-II neutrinos",
+      "url": "https://doi.org/10.1103/PhysRevLett.58.1490",
+    },
+    "tagline": "How a star dies depends on one number, its mass. Above a line, it ends in the brightest event in its galaxy.",
+    "title": "Supernovae",
+  },
 }
 `;
 
@@ -562,6 +608,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The top of the flight: where the projectile stops climbing and starts falling back.",
     "title": "Apex",
   },
+  "apparent-magnitude": {
+    "body": "How bright something looks from Earth, on the astronomers’ scale where smaller is brighter: the Sun is −27, the full Moon −13, the faintest naked-eye stars +6.",
+    "title": "Apparent magnitude",
+  },
   "arcsecond": {
     "body": "One 3,600th of a degree: about a coin seen from four kilometres away.",
     "title": "Arcsecond",
@@ -598,6 +648,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A star that brightens and dims on a regular cycle whose length reveals its true brightness, and so its distance.",
     "title": "Cepheid variable",
   },
+  "chandrasekhar-limit": {
+    "body": "About 1.4 solar masses: the most a white dwarf, or a star’s inert core, can weigh before it must collapse.",
+    "title": "Chandrasekhar limit",
+  },
   "cmb-dipole": {
     "body": "The sky is about three thousandths of a degree hotter ahead of us and cooler behind: the fingerprint of our own motion through the background.",
     "title": "CMB dipole",
@@ -609,6 +663,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "comoving": {
     "body": "Distance with cosmic expansion factored out, so it stays fixed for galaxies riding the general flow.",
     "title": "Comoving",
+  },
+  "core-collapse-supernova": {
+    "body": "The explosion of a star above about eight solar masses when its iron core gives way. Leaves a neutron star or a black hole.",
+    "title": "Core-collapse supernova",
   },
   "cosmic-microwave-background": {
     "body": "The glow left over from the hot early universe, now stretched to microwaves and 2.7 K, arriving from every direction.",
@@ -726,6 +784,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The churning of a planet’s molten interior that generates its magnetic field and shields its air.",
     "title": "Magnetic dynamo",
   },
+  "main-sequence": {
+    "body": "The long, steady phase of a star’s life, fusing hydrogen in its core. The Sun is about halfway through its ten billion years of it.",
+    "title": "Main sequence",
+  },
   "matter-radiation-equality": {
     "body": "The moment, about 50 000 years in, when the energy in matter first exceeded the energy in light. Matter has led since.",
     "title": "Matter–radiation equality",
@@ -750,6 +812,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "Three or more bodies all pulling on each other; no formula solves it, only computation.",
     "title": "N-body",
   },
+  "neutron-star": {
+    "body": "The collapsed core of a massive star: about 1.4 solar masses packed into a city-sized sphere, denser than an atomic nucleus.",
+    "title": "Neutron star",
+  },
   "nucleosynthesis": {
     "body": "The few minutes when protons and neutrons fused into helium and traces of deuterium and lithium. Nothing heavier was made until stars.",
     "title": "Big Bang nucleosynthesis",
@@ -765,6 +831,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "photochemistry": {
     "body": "Chemistry driven by sunlight: high-altitude molecules are split apart, and the light fragments escape.",
     "title": "Photochemistry",
+  },
+  "planetary-nebula": {
+    "body": "The glowing shell of gas a Sun-like star sheds at the end of its life, lit by the white dwarf left at its centre. Nothing to do with planets.",
+    "title": "Planetary nebula",
   },
   "post-newtonian": {
     "body": "Corrections added to Newtonian gravity, order by order in speed, to approach Einstein’s full theory.",
@@ -850,6 +920,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "Atmosphere loss by impact: solar-wind particles strike molecules at the top of the air and knock them into space.",
     "title": "Sputtering",
   },
+  "standard-candle": {
+    "body": "An object whose true brightness is known, so its apparent brightness gives its distance. Type Ia supernovae are the brightest ones.",
+    "title": "Standard candle",
+  },
   "standard-deviation": {
     "body": "The statistician’s yardstick for surprise; five of them makes chance a one-in-a-million explanation.",
     "title": "Standard deviation",
@@ -873,6 +947,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "type-ia-supernova": {
     "body": "The explosion of a white dwarf star that has gained too much mass. All reach nearly the same peak brightness, so how bright one looks tells its distance.",
     "title": "Type Ia supernova",
+  },
+  "white-dwarf": {
+    "body": "The dense leftover core of a star like the Sun, about Earth’s size and half the Sun’s mass, held up not by heat but by a quantum rule that limits how tightly electrons can pack.",
+    "title": "White dwarf",
   },
 }
 `;

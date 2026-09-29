@@ -45,6 +45,7 @@ const MODULES = [
   'cosmic-microwave-background',
   'early-universe',
   'stellar-fusion',
+  'supernovae',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2372,6 +2373,79 @@ test('behaviour: stellar fusion readouts follow the sliders, and a term opens by
   assertClean(w, 'stellar fusion behaviour');
 });
 
+/**
+ * The supernovae module, end to end, on every engine.
+ *
+ * At the Sun's mass the star ends as a white dwarf with no collapse; at the
+ * slider's maximum it ends as a black hole. A Type Ia at Betelgeuse's distance
+ * outshines the full Moon, and at the distance slider's maximum needs a
+ * telescope. A glossary term in the real-picture layer opens from the keyboard
+ * alone, and axe finds nothing serious.
+ */
+test('behaviour: supernovae readouts follow both sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/supernovae', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'supernovae at rest');
+
+  const readout = (index: number) => page.locator('#supernovae-readouts dd').nth(index);
+
+  /* Defaults: a Sun-like star, and a Type Ia at 168 pc. */
+  await expect(readout(0), 'fate at one solar mass').toContainText('White dwarf');
+  await expect(readout(4), 'collapse energy at one solar mass').toContainText('none');
+  await expect(readout(5), 'a Type Ia at Betelgeuse’s distance').toContainText('brighter than the full Moon');
+
+  /* The heaviest star. */
+  await page.locator('#p-M').focus();
+  await page.keyboard.press('End');
+  await expect(readout(0), 'fate at the mass maximum').toContainText('Black hole');
+  await expect(readout(4), 'a collapse releases energy').not.toContainText('none');
+
+  /* The farthest supernova. */
+  await page.locator('#p-d').focus();
+  await page.keyboard.press('End');
+  await expect(readout(5), 'a Type Ia at the distance maximum').toContainText('telescope only');
+  await assertNoOverflow(page, 'supernovae at both maxima');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the core-collapse supernova').toBe(
+    'core-collapse-supernova',
+  );
+  const trigger = page.locator('[data-glossary-term="core-collapse-supernova"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="core-collapse-supernova"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('when its iron core gives way');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'supernovae: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '18-supernovae-behaviour');
+  assertClean(w, 'supernovae behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2384,12 +2458,12 @@ test('behaviour: stellar fusion readouts follow the sliders, and a term opens by
  *
  * The planned chips are six, and it is worth writing down why, because the
  * number moves when the backlog does: they point at `cosmic-distance-ladder`
- * three times (twice from older modules, once from the expansion module), at
- * `supernovae` twice (once each from the early-universe and stellar-fusion
- * modules), and at `habitable-zone` once, from stellar-fusion; none of the
- * three is written. The chips that pointed at `expansion-of-the-universe`,
- * `cosmic-microwave-background`, `early-universe` and `stellar-fusion` became
- * live links when those modules were published. Two
+ * four times (twice from older modules, once each from the expansion and
+ * supernovae modules), at `habitable-zone` once, from stellar-fusion, and at
+ * `nebulae` once, from supernovae; none of the three is written. The chips
+ * that pointed at `expansion-of-the-universe`, `cosmic-microwave-background`,
+ * `early-universe`, `stellar-fusion` and `supernovae` became live links when
+ * those modules were published. Two
  * further chips existed until `planetary-atmospheres` was
  * published — a module that was finished and registered but still carried a
  * draft flag, so the index hid it and every link to it degraded to a chip.
@@ -2398,7 +2472,7 @@ test('behaviour: stellar fusion readouts follow the sliders, and a term opens by
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'supernovae', 'habitable-zone'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'habitable-zone', 'nebulae'];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2410,7 +2484,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes eleven modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes twelve modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3096,7 +3170,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All eleven modules now, with no exception branch. `kepler-orbits` carried one
+ * All twelve modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3210,7 +3284,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all thirteen and checks the rendered DOM rather than the
+ * route — so this walks all fourteen and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3236,7 +3310,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all thirteen routes').toBe(13);
+  expect(routes.length, 'all fourteen routes').toBe(14);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3383,7 +3457,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on thirteen fresh loads. Getting this wrong is what the first run of
+   * asserts on fourteen fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();

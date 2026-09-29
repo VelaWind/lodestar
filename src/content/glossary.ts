@@ -396,6 +396,41 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Superposition',
     body: 'A quantum state that is several classical possibilities at once, until a measurement picks one. Tunnelling is a consequence of it.',
   },
+
+  /* Supernovae ----------------------------------------------------- */
+
+  'white-dwarf': {
+    title: 'White dwarf',
+    body: 'The dense leftover core of a star like the Sun, about Earth’s size and half the Sun’s mass, held up not by heat but by a quantum rule that limits how tightly electrons can pack.',
+  },
+  'neutron-star': {
+    title: 'Neutron star',
+    body: 'The collapsed core of a massive star: about 1.4 solar masses packed into a city-sized sphere, denser than an atomic nucleus.',
+  },
+  'core-collapse-supernova': {
+    title: 'Core-collapse supernova',
+    body: 'The explosion of a star above about eight solar masses when its iron core gives way. Leaves a neutron star or a black hole.',
+  },
+  'chandrasekhar-limit': {
+    title: 'Chandrasekhar limit',
+    body: 'About 1.4 solar masses: the most a white dwarf, or a star’s inert core, can weigh before it must collapse.',
+  },
+  'standard-candle': {
+    title: 'Standard candle',
+    body: 'An object whose true brightness is known, so its apparent brightness gives its distance. Type Ia supernovae are the brightest ones.',
+  },
+  'apparent-magnitude': {
+    title: 'Apparent magnitude',
+    body: 'How bright something looks from Earth, on the astronomers’ scale where smaller is brighter: the Sun is −27, the full Moon −13, the faintest naked-eye stars +6.',
+  },
+  'main-sequence': {
+    title: 'Main sequence',
+    body: 'The long, steady phase of a star’s life, fusing hydrogen in its core. The Sun is about halfway through its ten billion years of it.',
+  },
+  'planetary-nebula': {
+    title: 'Planetary nebula',
+    body: 'The glowing shell of gas a Sun-like star sheds at the end of its life, lit by the white dwarf left at its centre. Nothing to do with planets.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */
