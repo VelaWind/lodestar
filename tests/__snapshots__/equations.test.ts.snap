@@ -311,7 +311,10 @@ exports[`inline math in prose > carries every inline-math and mathBlock tex, unc
   "stellar-fusion/math.pp-rate.note#8": "E_0 = (493\\,\\text{keV} \\times (1.35\\,\\text{keV})^2 / 4)^{1/3} = (226\\,\\text{keV}^3)^{1/3} = 6.1\\,\\text{keV}",
   "stellar-fusion/math.pp-rate.note#9": "P = \\exp(-\\sqrt{493 / 6.1}) = \\exp(-9.0) = 1.2 \\times 10^{-4}",
   "stellar-fusion/math.tunnelling.note#0": "P",
-  "stellar-fusion/math.tunnelling.note#1": "E_0",
+  "stellar-fusion/math.tunnelling.note#1": "\\exp(-\\sqrt{E_G / E_0})",
+  "stellar-fusion/math.tunnelling.note#2": "E_0",
+  "stellar-fusion/math.tunnelling.note#3": "T",
+  "stellar-fusion/math.tunnelling.note#4": "E_0",
   "stellar-fusion/real#0": "kT",
   "stellar-fusion/real#1": "T",
   "stellar-fusion/real#2": "k",
@@ -370,7 +373,7 @@ exports[`published equations > renders every equation in both modes, unchanged 1
   "stellar-fusion/gamow-peak/symbols": "E_0 \\;=\\; \\left(\\dfrac{E_G\\,(k\\,T)^{2}}{4}\\right)^{1/3}",
   "stellar-fusion/pp-rate/numbers": "\\varepsilon \\;=\\; 0.241\\,{1.50 \\times 10^{5}\\,\\mathrm{kg/m^3}}\\,X^{2}\\,T_6^{-2/3}\\,\\exp\\!\\left(-33.80\\,T_6^{-1/3}\\right)",
   "stellar-fusion/pp-rate/symbols": "\\varepsilon \\;=\\; 0.241\\,\\rho\\,X^{2}\\,T_6^{-2/3}\\,\\exp\\!\\left(-33.80\\,T_6^{-1/3}\\right)",
-  "stellar-fusion/tunnelling/numbers": "P \\;=\\; \\exp\\!\\left(-\\sqrt{E_G / E_0}\\right)",
-  "stellar-fusion/tunnelling/symbols": "P \\;=\\; \\exp\\!\\left(-\\sqrt{E_G / E_0}\\right)",
+  "stellar-fusion/tunnelling/numbers": "P \\;=\\; \\exp\\!\\left(-\\left(\\dfrac{4\\,E_G^{2}}{(k\\,{1.57 \\times 10^{7}\\,\\mathrm{K}})^{2}}\\right)^{1/6}\\right)",
+  "stellar-fusion/tunnelling/symbols": "P \\;=\\; \\exp\\!\\left(-\\left(\\dfrac{4\\,E_G^{2}}{(k\\,T)^{2}}\\right)^{1/6}\\right)",
 }
 `;

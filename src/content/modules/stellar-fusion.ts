@@ -43,7 +43,7 @@ const stellarFusion: Module = {
         ),
         p(
           'A proton is more mist than ball. Two protons repel each other, and that repulsion is ',
-          'the hill: the closer they get, the steeper it becomes, and the top is a thousand times ',
+          'the hill: the closer they get, the steeper it becomes, and the top is hundreds of times ',
           'higher than the energy a proton in the Sun’s core typically has. Thrown as balls, they ',
           'would never meet. As mist, a tiny wisp of each one is already on the far side, and once ',
           'there they stick, and release energy. The wisp is extraordinarily small. But the Sun’s ',
@@ -106,7 +106,7 @@ const stellarFusion: Module = {
       approximations: [
         prose(
           p(
-            'Only the first step of the proton–proton chain is computed, with the hydrogen fraction fixed at the Sun’s central value of 0.34. The temperature and density sliders scale that one rate.',
+            'Only the first step of the proton–proton chain is computed, with the hydrogen fraction fixed at the Sun’s central value of 0.34. The temperature and density sliders scale that one rate. The upper panel scales each curve to its own maximum, so heights compare shapes, not amounts.',
           ),
         ),
         prose(
@@ -116,7 +116,7 @@ const stellarFusion: Module = {
         ),
         prose(
           p(
-            'The rate formula is the standard fit around solar conditions. Below about 3 million K it overstates the true rate, and above about 20 million K a different chain, the CNO cycle, takes over and is not shown.',
+            'The rate formula is the standard fit around solar conditions. Below about 3 million K it overstates the true rate, and above about 17 million K a different chain, the CNO cycle, takes over and is not shown.',
           ),
         ),
       ],
@@ -128,16 +128,18 @@ const stellarFusion: Module = {
         p(
           'Two protons repel each other electrically, and the ',
           term('Coulomb barrier', 'coulomb-barrier'),
-          ' between them, the energy needed to bring them close enough to touch, is about 1 MeV. ',
-          'The typical energy of a proton in the Sun’s core is ',
+          ' between them, the energy needed to bring them close enough to touch, is about 1 MeV: ',
+          'a million electronvolts, where one electronvolt is the energy an electron gains ',
+          'crossing one volt, and a keV is a thousand of them. The typical energy of a proton in ',
+          'the Sun’s core is ',
           m`kT`,
           ', where ',
           m`T`,
           ' is the temperature, 15.7 million K, and ',
           m`k`,
-          ' is Boltzmann’s constant: about 1.4 keV, seven hundred times too little. Even the ',
-          'fastest protons in the core fall far short. By the rules of classical physics the Sun ',
-          'cannot fuse anything.',
+          ' is Boltzmann’s constant: about 1.35 keV, more than seven hundred times too little. ',
+          'Even the fastest protons in the core fall far short. By the rules of classical physics ',
+          'the Sun cannot fuse anything.',
         ),
         p(
           'It does because of ',
@@ -148,8 +150,9 @@ const stellarFusion: Module = {
           'that energy falls steeply. The product of the two is a narrow hump, the ',
           term('Gamow peak'),
           ', at about 6 keV in the Sun: nearly all fusion happens within a few keV of it. At that ',
-          'energy a collision tunnels through about one time in ten thousand, and only one proton ',
-          'in a hundred has that energy to begin with.',
+          'energy a collision tunnels through about one time in ten thousand, and the supply is ',
+          'thin: compared with the crowd at typical energies, protons at the peak are outnumbered ',
+          'about a hundred to one.',
         ),
         p(
           'The reaction itself is the ',
@@ -168,10 +171,11 @@ const stellarFusion: Module = {
           'turned it around the next year to show stars could fuse. The proof came from ',
           term('solar neutrinos', 'solar-neutrino'),
           ': the pp chain’s neutrinos leave the core unhindered, and the Borexino detector ',
-          'measured them directly in 2014, at the rate the model predicts.',
+          'measured them directly, first in 2014 and comprehensively in 2018, at the rate the ',
+          'model predicts.',
         ),
         p(
-          'Two misconceptions. Fusion is not burning; no oxygen, no chemistry, just nuclei ',
+          'Two misconceptions. Fusion is not burning; no oxygen, no chemistry, nothing but nuclei ',
           'merging. And the Sun is not hot enough for fusion: that is the point, not a mistake. It ',
           'fuses because quantum mechanics lets it, slowly, which is exactly the rate at which a ',
           'star should fuse if it is to last.',
@@ -242,13 +246,19 @@ const stellarFusion: Module = {
         },
         {
           id: 'tunnelling',
-          tex: 'P \\;=\\; \\exp\\!\\left(-\\sqrt{E_G / E_0}\\right)',
+          tex:
+            'P \\;=\\; \\exp\\!\\left(-\\left(\\dfrac{4\\,E_G^{2}}{(k\\,{{T}})^{2}}\\right)^{1/6}\\right)',
           binds: ['T'],
           note: prose(
             p(
               m`P`,
-              ' — the chance that a collision at the Gamow peak tunnels through the barrier. At the ',
-              'Sun’s ',
+              ' — the chance that a collision at the Gamow peak tunnels through the barrier. This is ',
+              m`\exp(-\sqrt{E_G / E_0})`,
+              ' with ',
+              m`E_0`,
+              ' from equation 1 written out, so that ',
+              m`T`,
+              ' appears. At the Sun’s ',
               m`E_0`,
               ' of 6 keV the exponent is −9, so about one collision in ten thousand succeeds.',
             ),
@@ -299,8 +309,8 @@ const stellarFusion: Module = {
               m`\varepsilon = 0.241 \times 1.5 \times 10^{5} \times 0.34^2 \times 0.159 \times 1.4 \times 10^{-6} = 9 \times 10^{-4}\,\text{W/kg}`,
             ),
             p(
-              'Less heat per kilogram than a compost heap. The Sun shines because its core has ',
-              '2 × 10²⁹ kilograms of it.',
+              'Less heat per kilogram than a compost heap. The Sun shines because a few times 10²⁹ ',
+              'kilograms of core are at it at once, and have been for 4.6 billion years.',
             ),
           ),
         },
