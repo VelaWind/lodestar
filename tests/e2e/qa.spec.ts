@@ -44,6 +44,7 @@ const MODULES = [
   'expansion-of-the-universe',
   'cosmic-microwave-background',
   'early-universe',
+  'stellar-fusion',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2293,6 +2294,84 @@ test('behaviour: early universe readouts follow the sliders, and a term opens by
   assertClean(w, 'early universe behaviour');
 });
 
+/** "1.2 × 10⁻⁴" → 1.2e-4, as the sims print scientific readouts. */
+function parseScientific(text: string): number {
+  const digits: Record<string, string> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
+  const match = /([\d.]+)\s*×\s*10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)/.exec(text);
+  if (!match) return Number(text.replace(/,/g, ''));
+  const exponent = Number([...(match[2] ?? '')].map((c) => digits[c] ?? c).join(''));
+  return Number(match[1]) * 10 ** exponent;
+}
+
+/**
+ * The fusion module, end to end, on every engine.
+ *
+ * At the Sun's centre the Gamow peak has to sit near 6 keV; heating the core to
+ * the slider's maximum has to make a collision at the (higher) peak more likely
+ * to tunnel; a glossary term in the real-picture layer opens from the keyboard
+ * alone; and axe finds nothing serious.
+ */
+test('behaviour: stellar fusion readouts follow the sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/stellar-fusion', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'stellar fusion at rest');
+
+  const readout = (index: number) =>
+    page.locator('#stellar-fusion-readouts dd').nth(index).innerText();
+
+  /* The Sun's centre: the Gamow peak near 6 keV. */
+  const peak = Number.parseFloat(await readout(3));
+  expect(peak, 'Gamow peak at the default temperature, keV').toBeGreaterThan(5.5);
+  expect(peak).toBeLessThan(6.5);
+  const tunnelAtSun = parseScientific(await readout(4));
+  expect(tunnelAtSun, 'tunnelling chance parses').toBeGreaterThan(0);
+
+  /* Hotter: the peak moves up, and a collision there tunnels more often. */
+  const T = page.locator('#p-T');
+  await T.focus();
+  await page.keyboard.press('End');
+  await expect.poll(async () => parseScientific(await readout(4)), { message: 'tunnelling at the hottest core' })
+    .toBeGreaterThan(tunnelAtSun);
+  await assertNoOverflow(page, 'stellar fusion at 10⁸ K');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the Coulomb barrier').toBe('coulomb-barrier');
+  const trigger = page.locator('[data-glossary-term="coulomb-barrier"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="coulomb-barrier"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('two nuclei must overcome to touch');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'stellar fusion: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '17-stellar-fusion-behaviour');
+  assertClean(w, 'stellar fusion behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2303,13 +2382,14 @@ test('behaviour: early universe readouts follow the sliders, and a term opens by
  * module that is not published degrades to a chip rather than a dead link, and
  * no draft is reachable from anywhere a reader looks.
  *
- * The planned chips are five, and it is worth writing down why, because the
+ * The planned chips are six, and it is worth writing down why, because the
  * number moves when the backlog does: they point at `cosmic-distance-ladder`
- * three times (twice from older modules, once from the expansion module), and
- * at `stellar-fusion` and `supernovae` once each, both from the early-universe
- * module; none of the three is written. The chips that pointed at
- * `expansion-of-the-universe`, `cosmic-microwave-background` and
- * `early-universe` became live links when those modules were published. Two
+ * three times (twice from older modules, once from the expansion module), at
+ * `supernovae` twice (once each from the early-universe and stellar-fusion
+ * modules), and at `habitable-zone` once, from stellar-fusion; none of the
+ * three is written. The chips that pointed at `expansion-of-the-universe`,
+ * `cosmic-microwave-background`, `early-universe` and `stellar-fusion` became
+ * live links when those modules were published. Two
  * further chips existed until `planetary-atmospheres` was
  * published — a module that was finished and registered but still carried a
  * draft flag, so the index hid it and every link to it degraded to a chip.
@@ -2318,7 +2398,7 @@ test('behaviour: early universe readouts follow the sliders, and a term opens by
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'stellar-fusion', 'supernovae'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder', 'supernovae', 'habitable-zone'];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2330,7 +2410,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes ten modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes eleven modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -2382,7 +2462,7 @@ test('behaviour: the registry publishes ten modules and leaks no drafts', async 
   }
 
   console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
-  expect(planned, 'planned-chip total across every published page').toBe(5);
+  expect(planned, 'planned-chip total across every published page').toBe(6);
 
   assertClean(w, 'registry');
 });
@@ -3016,7 +3096,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All ten modules now, with no exception branch. `kepler-orbits` carried one
+ * All eleven modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3130,7 +3210,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all twelve and checks the rendered DOM rather than the
+ * route — so this walks all thirteen and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3156,7 +3236,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all twelve routes').toBe(12);
+  expect(routes.length, 'all thirteen routes').toBe(13);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3303,7 +3383,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on twelve fresh loads. Getting this wrong is what the first run of
+   * asserts on thirteen fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();

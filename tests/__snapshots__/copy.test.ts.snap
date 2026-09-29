@@ -467,6 +467,52 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "Ten rungs from a proton to the observable universe, and the ratios between them.",
     "title": "Scale of the Universe",
   },
+  "stellar-fusion": {
+    "L1 hook": "By the physics of everyday objects, the Sun is not hot enough to shine: its protons should never get close enough to fuse. They do anyway, because the very small plays by different rules.",
+    "L2 intuition": "Throw a ball at a hill. If it does not have the speed to reach the top, it rolls back, every time; no amount of throwing changes that. Now suppose the ball is not a ball but a puff of mist. Most of it rolls back too. But a wisp drifts through the hill and comes out the far side, as if the hill had not been there. A proton is more mist than ball. Two protons repel each other, and that repulsion is the hill: the closer they get, the steeper it becomes, and the top is hundreds of times higher than the energy a proton in the Sun’s core typically has. Thrown as balls, they would never meet. As mist, a tiny wisp of each one is already on the far side, and once there they stick, and release energy. The wisp is extraordinarily small. But the Sun’s core holds more protons than there are grains of sand on every beach, many times over, and they collide constantly, so even a wisp is enough to light a star. Where the analogy breaks: mist gets through a hill because the hill is porous; there is nothing in the proton’s hill that lets it through. And the proton does not take a path through the barrier. Ask where it is, and until it is measured the answer is not a single place. “Past the barrier” is one of the places, and sometimes that is where it is found.",
+    "L3 approximation 0": "Only the first step of the proton–proton chain is computed, with the hydrogen fraction fixed at the Sun’s central value of 0.34. The temperature and density sliders scale that one rate. The upper panel scales each curve to its own maximum, so heights compare shapes, not amounts.",
+    "L3 approximation 1": "The barrier is bare electrical repulsion down to 1.4 fm and a sharp well inside. Screening by the surrounding electrons, which raises the real rate by a few percent, is left out.",
+    "L3 approximation 2": "The rate formula is the standard fit around solar conditions. Below about 3 million K it overstates the true rate, and above about 17 million K a different chain, the CNO cycle, takes over and is not shown.",
+    "L3 caption": "Heat the core and watch the small window where fusion happens slide to higher energies and open wider. Then look below at how much barrier the protons cross without ever having the energy to climb it.",
+    "L4 figure alt": "The whole Sun as a golden disc on black, its face mottled with darker and brighter patches. Bright active regions near the left and right edges and at lower right trail looping arcs of glowing gas, and fine luminous strands reach out from the rim into the darkness around it.",
+    "L4 real": "Two protons repel each other electrically, and the Coulomb barrier between them, the energy needed to bring them close enough to touch, is about 1 MeV: a million electronvolts, where one electronvolt is the energy an electron gains crossing one volt, and a keV is a thousand of them. The typical energy of a proton in the Sun’s core is kT, where T is the temperature, 15.7 million K, and k is Boltzmann’s constant: about 1.35 keV, more than seven hundred times too little. Even the fastest protons in the core fall far short. By the rules of classical physics the Sun cannot fuse anything. It does because of quantum tunnelling. A proton is described by a wave, and a wave hitting a barrier does not stop dead; it decays inside the barrier, and a small part of it emerges on the other side. The chance of tunnelling rises steeply with the collision energy, while the number of protons with that energy falls steeply. The product of the two is a narrow hump, the Gamow peak, at about 6 keV in the Sun: nearly all fusion happens within a few keV of it. At that energy a collision tunnels through about one time in ten thousand, and the supply is thin: compared with the crowd at typical energies, protons at the peak are outnumbered about a hundred to one. The reaction itself is the proton–proton chain, worked out by Hans Bethe in 1939: four protons become one helium nucleus in three steps, converting 0.7 percent of their mass into 26.7 MeV of energy and two neutrinos. Its first step, two protons fusing into deuterium, is the slowest process in the chain by far, because it also needs one proton to turn into a neutron through the weak force. A given proton in the Sun’s core waits, on average, several billion years for it. That slowness is why the Sun has lasted 4.6 billion years and will last as long again. The idea has a history. Arthur Eddington argued in 1920 that the Sun must run on hydrogen becoming helium, and was told it was not hot enough. George Gamow found the tunnelling formula in 1928, for radioactive decay; Robert Atkinson and Fritz Houtermans turned it around the next year to show stars could fuse. The proof came from solar neutrinos: the pp chain’s neutrinos leave the core unhindered, and the Borexino detector measured them directly, first in 2014 and comprehensively in 2018, at the rate the model predicts. Two misconceptions. Fusion is not burning; no oxygen, no chemistry, nothing but nuclei merging. And the Sun is not hot enough for fusion: that is the point, not a mistake. It fuses because quantum mechanics lets it, slowly, which is exactly the rate at which a star should fuse if it is to last. The rates here come from laboratory cross sections extrapolated down to solar energies, where they cannot be measured directly; the agreed values carry uncertainties of about one percent. The core temperature and density are from the standard solar model, checked against helioseismology and the neutrino flux. The Sun in extreme ultraviolet light, from the Solar Dynamics Observatory. Everything visible here is powered by protons tunnelling into each other in a core the surface hides. NASA/GSFC/Solar Dynamics Observatory",
+    "L5 intro": null,
+    "L5 note (gamow-peak)": "E_0 — the Gamow peak, the collision energy where most fusion happens; E_G — the Gamow energy, 493 keV for two protons, set by their charges and mass; k — Boltzmann’s constant; T — the core temperature (your slider). Hotter cores fuse at higher energies, but only as the cube root of T^2.",
+    "L5 note (pp-rate)": "\\varepsilon — energy released per kilogram per second, W/kg; \\rho — the core density (your slider); X — the hydrogen mass fraction, 0.34 at the Sun’s centre; T_6 — the temperature in millions of kelvin. The exponential is the tunnelling; everything else is bookkeeping. Worked example, the Sun’s centre. T = 1.57 \\times 10^{7}\\,\\text{K}, \\rho = 1.5 \\times 10^{5}\\,\\text{kg/m}^3, X = 0.34. kT = 8.617 \\times 10^{-5}\\,\\text{eV/K} \\times 1.57 \\times 10^{7}\\,\\text{K} = 1.35\\,\\text{keV} E_0 = (493\\,\\text{keV} \\times (1.35\\,\\text{keV})^2 / 4)^{1/3} = (226\\,\\text{keV}^3)^{1/3} = 6.1\\,\\text{keV} P = \\exp(-\\sqrt{493 / 6.1}) = \\exp(-9.0) = 1.2 \\times 10^{-4} T_6 = 15.7: T_6^{-1/3} = 0.399, \\exp(-33.80 \\times 0.399) = 1.4 \\times 10^{-6}, T_6^{-2/3} = 0.159 \\varepsilon = 0.241 \\times 1.5 \\times 10^{5} \\times 0.34^2 \\times 0.159 \\times 1.4 \\times 10^{-6} = 9 \\times 10^{-4}\\,\\text{W/kg} Less heat per kilogram than a compost heap. The Sun shines because a few times 10²⁹ kilograms of core are at it at once, and have been for 4.6 billion years.",
+    "L5 note (tunnelling)": "P — the chance that a collision at the Gamow peak tunnels through the barrier. This is \\exp(-\\sqrt{E_G / E_0}) with E_0 from equation 1 written out, so that T appears. At the Sun’s E_0 of 6 keV the exponent is −9, so about one collision in ten thousand succeeds.",
+    "L6 deeper": "The tunnelling factor comes from the WKB approximation to the Schrödinger equation: the transmission through a barrier V(r) at energy E is \\exp\\!\\left(-2\\int \\sqrt{2m(V - E)}/\\hbar \\; dr\\right) across the classically forbidden region. For a Coulomb potential with the turning point far outside the nucleus, the integral evaluates to \\exp(-2\\pi\\eta), where \\eta = Z_1 Z_2 e^2 / (4\\pi\\varepsilon_0 \\hbar v) is the Sommerfeld parameter and v the relative velocity. Written in terms of energy, 2\\pi\\eta = \\sqrt{E_G/E}, with E_G = 2 m_r c^2 (\\pi\\alpha Z_1 Z_2)^2: 493 keV for two protons, and rising as the square of the charges, which is why heavier nuclei need hotter stars. The reaction rate per pair is \\langle\\sigma v\\rangle = \\int \\sigma(E)\\, v\\, \\varphi(E)\\, dE over the Maxwell–Boltzmann distribution \\varphi. Writing \\sigma(E) = S(E)\\exp(-\\sqrt{E_G/E})/E removes the tunnelling and the geometric 1/E, leaving the astrophysical S-factor, which varies slowly and can be extrapolated from laboratory energies. The integrand \\exp(-E/kT - \\sqrt{E_G/E}) peaks at E_0 = (E_G (kT)^2/4)^{1/3} with a Gaussian width \\Delta = 4\\sqrt{E_0 kT/3}, about 6.6 keV in the Sun, and the rate depends on temperature as T^\\nu with \\nu = (\\tau - 2)/3, \\tau = 3E_0/kT: about T^{3.8} for the pp chain at solar temperatures. For pp, S(0) = 4.01 \\times 10^{-22}\\,\\text{keV·barn} (Adelberger et al. 2011), tiny because the step requires a weak interaction; the corresponding mean life of a proton against fusion in the solar core is about 9 \\times 10^{9} years. The CNO cycle, catalysed by carbon, nitrogen and oxygen, has E_G a hundred times larger and \\nu \\approx 18; it overtakes pp near 1.7 \\times 10^{7}\\,\\text{K} and powers stars above about 1.3 solar masses. Borexino detected the Sun’s CNO neutrinos in 2020, at about one percent of the total. Two effects the sim omits. Electron screening: the plasma’s electrons cluster around each nucleus and lower the barrier by roughly kT × (a few tenths), raising the pp rate by about five percent in the Sun. And the neutrino history: the first solar-neutrino experiments, from 1968, found a third of the predicted flux, the “solar neutrino problem”; the resolution, established by SNO in 2001, was that neutrinos change flavour in flight, which was new physics about neutrinos rather than about the Sun. The standard solar model’s predictions of the core have since been confirmed to a few percent by both neutrinos and helioseismology, though a discrepancy remains between helioseismology and the lower solar metal abundances measured after 2005, the “solar abundance problem”. A note on the cat. Tunnelling works because the proton’s state before measurement is a superposition: a wave with amplitude on both sides of the barrier, not a particle that is secretly on one side. Erwin Schrödinger’s 1935 cat, poisoned or not depending on whether an atom has decayed, was his argument that this could not sensibly be extended to a cat, since nobody has ever seen a superposed cat. The modern answer is decoherence: a cat interacts with its surroundings so fast and so thoroughly that any superposition of its states is destroyed long before anyone looks, while a proton in a collision has no surroundings to speak of for the 10^{-21} seconds that matter. The cat is not in two states. The proton is, and the Sun shines because of it.",
+    "L7 reason -> early-universe": "Fusion ran once before, everywhere at once, for twenty-five minutes; that module shows why it stopped at helium.",
+    "L7 reason -> exoplanets": "Every planet in that module orbits a star powered this way.",
+    "L7 reason -> habitable-zone": "The brightness this rate sets, integrated over a core, is what decides where liquid water can exist.",
+    "L7 reason -> supernovae": "When a core runs out of things to fuse, this is what happens next.",
+    "reference 0": {
+      "label": "Bahcall, Serenelli & Basu 2005, “New Solar Opacities, Abundances, Helioseismology, and Neutrino Fluxes”, ApJ 621, L85",
+      "note": "Standard solar model: central temperature, density and hydrogen fraction",
+      "url": "https://doi.org/10.1086/428929",
+    },
+    "reference 1": {
+      "label": "Adelberger et al. 2011, “Solar fusion cross sections. II. The pp chain and CNO cycles”, Rev. Mod. Phys. 83, 195",
+      "note": "S(0) for pp and the recommended rates",
+      "url": "https://doi.org/10.1103/RevModPhys.83.195",
+    },
+    "reference 2": {
+      "label": "Gamow 1928, “Zur Quantentheorie des Atomkernes”, Z. Phys. 51, 204",
+      "note": "The tunnelling formula",
+      "url": "https://doi.org/10.1007/BF01343196",
+    },
+    "reference 3": {
+      "label": "Bethe 1939, “Energy Production in Stars”, Phys. Rev. 55, 434",
+      "note": "The pp chain and CNO cycle",
+      "url": "https://doi.org/10.1103/PhysRev.55.434",
+    },
+    "reference 4": {
+      "label": "Borexino Collaboration 2018, “Comprehensive measurement of pp-chain solar neutrinos”, Nature 562, 505",
+      "note": "Direct measurement of the pp neutrino flux",
+      "url": "https://doi.org/10.1038/s41586-018-0624-y",
+    },
+    "tagline": "The Sun is not hot enough for its protons to touch. They fuse anyway, and the reason is quantum.",
+    "title": "Why the Sun Shines",
+  },
 }
 `;
 
@@ -556,6 +602,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The sky is about three thousandths of a degree hotter ahead of us and cooler behind: the fingerprint of our own motion through the background.",
     "title": "CMB dipole",
   },
+  "cno-cycle": {
+    "body": "Fusion of hydrogen using carbon, nitrogen and oxygen as catalysts. Slower than the proton–proton chain in the Sun, dominant in heavier, hotter stars.",
+    "title": "CNO cycle",
+  },
   "comoving": {
     "body": "Distance with cosmic expansion factored out, so it stays fixed for galaxies riding the general flow.",
     "title": "Comoving",
@@ -567,6 +617,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "cosmological-redshift": {
     "body": "Redshift caused by space stretching while the light travels: the wave grows by the same factor the universe grew. Distinct from a Doppler shift.",
     "title": "Cosmological redshift",
+  },
+  "coulomb-barrier": {
+    "body": "The electrical repulsion two nuclei must overcome to touch. For two protons, about a million electronvolts; hundreds of times the energy they typically have in the Sun.",
+    "title": "Coulomb barrier",
   },
   "cutoff-frequency": {
     "body": "Where this model stops: the wave frequency at the last stable orbit, just before merger.",
@@ -603,6 +657,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "freeze-out": {
     "body": "When the universe cools below a particle’s rest energy, light can no longer make it in pairs. What exists then is what survives.",
     "title": "Freeze-out",
+  },
+  "gamow-peak": {
+    "body": "The narrow range of collision energies where almost all fusion happens: high enough to tunnel, low enough that some particles actually have it.",
+    "title": "Gamow peak",
   },
   "hot-jupiter": {
     "body": "A gas giant orbiting scorchingly close to its star, circling in days: the easiest kind of planet to find.",
@@ -720,6 +778,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "Time as measured by a clock you carry with you, not by a distant observer.",
     "title": "Proper time",
   },
+  "proton-proton-chain": {
+    "body": "The sequence of reactions that turns four protons into one helium nucleus in stars like the Sun, releasing 26.7 MeV and two neutrinos.",
+    "title": "Proton–proton chain",
+  },
   "pulsar-timing-array": {
     "body": "Millisecond pulsars watched as one galaxy-sized detector: passing waves subtly shift their tick arrivals.",
     "title": "Pulsar timing array",
@@ -727,6 +789,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "quadrupole": {
     "body": "The simplest lopsidedness of a mass arrangement that can radiate gravitational waves; a perfect sphere cannot.",
     "title": "Quadrupole",
+  },
+  "quantum-tunnelling": {
+    "body": "A particle crossing a barrier it does not have the energy to climb. Not a trick of speed: the particle’s position is spread out, and part of that spread lies beyond the wall.",
+    "title": "Quantum tunnelling",
   },
   "quark-gluon-plasma": {
     "body": "Matter too hot for quarks to bind into protons and neutrons. The universe was this for its first twenty microseconds.",
@@ -772,6 +838,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The Sun’s mass used as a unit, about 2 × 10³⁰ kg. A ten-solar-mass hole weighs ten Suns.",
     "title": "Solar mass",
   },
+  "solar-neutrino": {
+    "body": "A neutrino made in the Sun’s core and reaching Earth eight minutes later, unscattered. Detecting them is how fusion in the core was confirmed directly.",
+    "title": "Solar neutrino",
+  },
   "sound-horizon": {
     "body": "How far pressure waves travelled through the hot early universe before it cleared, about 150 megaparsecs today. A fixed ruler that surveys measure against.",
     "title": "Sound horizon",
@@ -787,6 +857,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "strain": {
     "body": "The fractional stretch a passing wave gives any length; dimensionless, and around 10⁻²¹ at Earth.",
     "title": "Strain",
+  },
+  "superposition": {
+    "body": "A quantum state that is several classical possibilities at once, until a measurement picks one. Tunnelling is a consequence of it.",
+    "title": "Superposition",
   },
   "test-particle": {
     "body": "A body so light its own gravity is ignored: it feels the pull without noticeably pulling back.",
