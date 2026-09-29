@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 import blackHoles from '@/content/modules/black-holes';
 import exoplanets from '@/content/modules/exoplanets';
 import cosmicMicrowaveBackground from '@/content/modules/cosmic-microwave-background';
+import earlyUniverse from '@/content/modules/early-universe';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -28,6 +29,7 @@ import scaleOfTheUniverse, { scaleAnchors } from '@/content/modules/scale-of-the
 import { __internals as bh } from '@/sims/black-holes';
 import { __internals as ep } from '@/sims/exoplanets';
 import { __internals as cmb } from '@/sims/cosmic-microwave-background';
+import { __internals as early } from '@/sims/early-universe';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -45,7 +47,7 @@ import {
   observedWavelength,
   redshiftFromVelocity,
 } from '@/physics/cosmology';
-import { H_ALPHA_AIR, KM_S_PER_MPC, T_CMB } from '@/physics/constants';
+import { EV, H_ALPHA_AIR, JULIAN_YEAR, KM_S_PER_MPC, T_CMB } from '@/physics/constants';
 import {
   iscoRadius,
   photonSphereRadius,
@@ -721,6 +723,116 @@ function cmbCases(): Case[] {
   return cases;
 }
 
+/* ------------------------------ early universe ------------------------------- */
+
+const EARLY_HEIGHT = 416;
+
+function earlyUniverseCases(): Case[] {
+  const params = earlyUniverse.layers.play.params;
+  const tParam = paramOf(params, 't');
+  const EParam = paramOf(params, 'E');
+  const curve = early.curveFor(tParam.min, tParam.max);
+  const cases: Case[] = [];
+
+  const scene = (t: number, E: number, units: 'friendly' | 'technical') => ({
+    t,
+    E,
+    tMin: tParam.min,
+    tMax: tParam.max,
+    curve,
+    units,
+  });
+
+  // A time inside every epoch, and the two ends of the slider.
+  const times = [
+    { stop: 'min', value: tParam.min },
+    { stop: '20 µs', value: 2e-5 },
+    { stop: '1 s', value: tParam.default },
+    { stop: '3 min', value: 180 },
+    { stop: '1 h', value: 3600 },
+    { stop: '50 kyr', value: 5e4 * JULIAN_YEAR },
+    { stop: '380 kyr', value: 3.8e5 * JULIAN_YEAR },
+    { stop: '1e13 s', value: 1e13 },
+    { stop: 'max', value: tParam.max },
+  ];
+  // The ends of the energy slider, the electron, and a particle whose line
+  // crosses the curve among the crowded early epochs.
+  const energies = [
+    ...extremes(EParam),
+    { stop: '100 MeV', value: 100e6 * EV },
+  ];
+  for (const t of times) {
+    for (const E of energies) {
+      for (const units of ['friendly', 'technical'] as const) {
+        cases.push({
+          label: `t=${t.stop} E=${E.stop} ${units}`,
+          draw: (ctx, w, h) => early.drawScene(ctx, w, h, scene(t.value, E.value, units)),
+        });
+      }
+    }
+  }
+
+  /*
+   * The two moving labels, asserted by name.
+   *
+   * The particle's energy and "stops being made" follow the E slider across the
+   * whole temperature axis, through the band titles along the top and the dot
+   * riding the curve. Swept a twentieth of a decade at a time, each must be
+   * drawn, clear of every other label, and inside the frame; and a particle
+   * heavier than the chart must say so rather than vanish.
+   */
+  it('keeps the particle labels drawn and clear at every energy', () => {
+    for (let e = Math.log10(EParam.min); e <= Math.log10(EParam.max) + 1e-9; e += 0.05) {
+      const E = Math.min(EParam.max, 10 ** e);
+      for (const units of ['friendly', 'technical'] as const) {
+        for (const width of [246, 390, 900]) {
+          const { ctx, records } = recordingContext();
+          early.drawScene(ctx, width, EARLY_HEIGHT, scene(tParam.default, E, units));
+          const where = `E=${(E / EV / 1e6).toPrecision(3)} MeV ${units} @${width}`;
+          const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+          expect(
+            texts.some((t) => t.endsWith('MeV') || t.endsWith('MeV ↑') || t.includes('above this chart')),
+            `${where}: no energy label`,
+          ).toBe(true);
+          expect(
+            textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+            `${where}: labels overlap`,
+          ).toEqual([]);
+          expect(
+            textOutsideFrame(records, width, EARLY_HEIGHT).map(describeRecord),
+            `${where}: text outside the frame`,
+          ).toEqual([]);
+        }
+      }
+    }
+  });
+
+  it('marks the crossing for a particle on the chart, and says when it is off the top', () => {
+    const texts = (E: number) => {
+      const { ctx, records } = recordingContext();
+      early.drawScene(ctx, 900, EARLY_HEIGHT, scene(tParam.default, E, 'friendly'));
+      return records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    };
+    expect(texts(EParam.default)).toContain('stops being made');
+    expect(texts(EParam.max).some((t) => t.includes('above this chart'))).toBe(true); // 900 px: the full sentence fits
+    expect(texts(EParam.max)).not.toContain('stops being made');
+  });
+
+  it('formats time and scale factor the way the readouts promise', () => {
+    expect(early.formatTime(1)).toBe('1 s');
+    expect(early.formatTime(2e-5)).toBe('20 µs');
+    expect(early.formatTime(180)).toBe('3 min');
+    expect(early.formatTime(3.8e5 * JULIAN_YEAR)).toBe('380 kyr');
+    expect(early.formatTime(13.8e9 * JULIAN_YEAR)).toBe('13.8 Gyr');
+    expect(early.formatScaleFactor(1)).toBe('1 (today)');
+    expect(early.formatScaleFactor(0.9996)).toBe('1 (today)');
+    expect(early.formatScaleFactor(0.25)).toBe('1 / 4');
+    expect(early.formatScaleFactor(0.7)).toBe('0.7');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -733,6 +845,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'planetary-atmospheres', height: 304, cases: atmosphereCases },
   { name: 'expansion-of-the-universe', height: EXPANSION_HEIGHT, cases: expansionCases },
   { name: 'cosmic-microwave-background', height: CMB_HEIGHT, cases: cmbCases },
+  { name: 'early-universe', height: EARLY_HEIGHT, cases: earlyUniverseCases },
 ];
 
 /**
@@ -760,6 +873,7 @@ const MEASURED_PLACEMENT = new Set([
   'planetary-atmospheres',
   'expansion-of-the-universe',
   'cosmic-microwave-background',
+  'early-universe',
 ]);
 
 for (const sim of SIMS) {

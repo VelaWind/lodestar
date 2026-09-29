@@ -110,6 +110,45 @@ export const glossary: Record<string, GlossaryEntry> = {
     body: 'A swirl pattern in the polarization of the microwave background that gravitational waves from the first instant would leave. Searched for; not yet found.',
   },
 
+  /* Early universe ------------------------------------------------- */
+
+  'big-bang': {
+    title: 'Big Bang',
+    body: 'The hot, dense state the whole universe expanded from. Not an explosion at a place; it happened everywhere at once.',
+  },
+  'quark-gluon-plasma': {
+    title: 'Quark–gluon plasma',
+    body: 'Matter too hot for quarks to bind into protons and neutrons. The universe was this for its first twenty microseconds.',
+  },
+  nucleosynthesis: {
+    title: 'Big Bang nucleosynthesis',
+    body: 'The few minutes when protons and neutrons fused into helium and traces of deuterium and lithium. Nothing heavier was made until stars.',
+  },
+  'radiation-era': {
+    title: 'Radiation era',
+    body: 'The first fifty thousand years, when light and neutrinos outweighed matter and set the pace of expansion.',
+  },
+  'matter-radiation-equality': {
+    title: 'Matter–radiation equality',
+    body: 'The moment, about 50 000 years in, when the energy in matter first exceeded the energy in light. Matter has led since.',
+  },
+  'freeze-out': {
+    title: 'Freeze-out',
+    body: 'When the universe cools below a particle’s rest energy, light can no longer make it in pairs. What exists then is what survives.',
+  },
+  'degrees-of-freedom': {
+    title: 'g_*',
+    body: 'The count of particle species light enough to be made at a given temperature, with fermions weighted 7/8. Sets how fast the early universe cooled.',
+  },
+  inflation: {
+    title: 'Inflation',
+    body: 'A proposed burst of exponential expansion before the first microsecond that would explain why the universe is flat and uniform. Supported, not proven.',
+  },
+  'baryon-asymmetry': {
+    title: 'Baryon asymmetry',
+    body: 'For every billion particle–antiparticle pairs that annihilated, about one extra particle survived. That remainder is all the matter there is; why it existed is unknown.',
+  },
+
   /* Escape velocity ------------------------------------------------ */
 
   apex: {
