@@ -952,8 +952,8 @@ function supernovaeCases(): Case[] {
     ...extremes(MParam),
     { stop: '7.9 M☉', value: 7.9 * M_SUN },
     { stop: '18 M☉', value: 18 * M_SUN },
+    { stop: '16 M☉', value: 16 * M_SUN },
     { stop: '20 M☉', value: 20 * M_SUN },
-    { stop: '40 M☉ (lifetime at the floor)', value: 40 * M_SUN },
   ];
   const distances = [
     ...extremes(dParam),
@@ -979,11 +979,13 @@ function supernovaeCases(): Case[] {
   /*
    * Every label, at every mass and distance a reader can reach.
    *
-   * The lifetime dot's label rides the curve across the top panel and drops to
-   * the axis floor above 40 M☉; a fate name too wide for its band moves above
-   * the ribbon. Below, the magnitude dot's label rides the line past all four
+   * The lifetime dot's label rides the curve across the top panel, down to
+   * 1.73 Myr at the slider's 32 M☉; a fate name too wide for its band moves
+   * above the ribbon, and the 16 tick gives up its label where it would touch
+   * 20's. Below, the magnitude dot's label rides the line past all four
    * reference labels and the Andromeda note. Swept a tenth of a decade at a time
-   * on each slider, everything must be drawn, clear and inside the frame.
+   * on each slider, and at each maximum, everything must be drawn, clear and
+   * inside the frame.
    */
   it('keeps every label drawn and clear across both sliders', () => {
     const expected = [
@@ -994,14 +996,20 @@ function supernovaeCases(): Case[] {
       'Venus, −4.6',
       'naked-eye limit, +6',
       'space-telescope limit, about +31',
-      'Andromeda: SN 1885A reached +6',
     ];
+    // Too wide for the narrowest plot, the Andromeda note breaks after its comma.
+    const andromeda = 'Andromeda: SN 1885A, a faint one, reached +6';
+    const andromedaWrapped = ['Andromeda: SN 1885A,', 'a faint one, reached +6'];
     const check = (M: number, d: number, units: 'friendly' | 'technical', width: number) => {
       const { ctx, records } = recordingContext();
       sn.drawScene(ctx, width, SN_HEIGHT, { M, d, units });
       const where = `M=${(M / M_SUN).toPrecision(3)} M☉ d=${d.toPrecision(3)} m ${units} @${width}`;
       const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
       for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        texts.includes(andromeda) || andromedaWrapped.every((line) => texts.includes(line)),
+        `${where}: the Andromeda note is missing`,
+      ).toBe(true);
       expect(
         textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
         `${where}: labels overlap`,
@@ -1016,14 +1024,16 @@ function supernovaeCases(): Case[] {
         for (let e = Math.log10(MParam.min); e <= Math.log10(MParam.max) + 1e-9; e += 0.1) {
           check(Math.min(MParam.max, 10 ** e), dParam.default, units, width);
         }
+        check(MParam.max, dParam.default, units, width);
         for (let e = Math.log10(dParam.min); e <= Math.log10(dParam.max) + 1e-9; e += 0.1) {
           check(MParam.default, Math.min(dParam.max, 10 ** e), units, width);
         }
+        check(MParam.default, dParam.max, units, width);
       }
     }
   });
 
-  it('pins each dot to its axis, hollow, when the value runs off the chart', () => {
+  it('keeps both dots on their charts across the whole of each slider', () => {
     const texts = (M: number, d: number) => {
       const { ctx, records } = recordingContext();
       sn.drawScene(ctx, 900, SN_HEIGHT, { M, d, units: 'friendly' });
@@ -1031,8 +1041,10 @@ function supernovaeCases(): Case[] {
     };
     expect(texts(MParam.default, dParam.default)).toContain('10 Gyr');
     expect(texts(MParam.default, dParam.default)).toContain('−13.2');
-    expect(texts(MParam.max, dParam.default)).toContain('100 kyr, below the axis');
+    expect(texts(MParam.max, dParam.default)).toContain('1.73 Myr');
+    expect(texts(MParam.max, dParam.default).some((t) => t.includes('below the axis'))).toBe(false);
     expect(texts(MParam.default, dParam.min)).toContain('−21.7');
+    expect(texts(MParam.default, dParam.max)).toContain('+20.6');
   });
 
   it('formats the readouts the way the brief promises', () => {

@@ -21,7 +21,7 @@ const ORDER: Fate[] = ['white-dwarf', 'neutron-star', 'black-hole'];
 describe('supernova', () => {
   it('never returns an earlier fate for a larger mass', () => {
     let previous = 0;
-    for (let e = Math.log10(0.5); e <= Math.log10(100) + 1e-9; e += 0.001) {
+    for (let e = Math.log10(0.5); e <= Math.log10(32) + 1e-9; e += 0.001) {
       const index = ORDER.indexOf(fate(10 ** e * M_SUN));
       expect(index, `fate went backwards at ${(10 ** e).toFixed(3)} M☉`).toBeGreaterThanOrEqual(previous);
       previous = index;
@@ -31,7 +31,7 @@ describe('supernova', () => {
 
   it('never leaves a remnant heavier than the star', () => {
     // It jumps at the fate boundaries by design; it must never exceed M.
-    for (let e = Math.log10(0.5); e <= Math.log10(100) + 1e-9; e += 0.001) {
+    for (let e = Math.log10(0.5); e <= Math.log10(32) + 1e-9; e += 0.001) {
       const M = 10 ** e * M_SUN;
       expect(remnantMass(M), `remnant exceeds the star at ${(10 ** e).toFixed(3)} M☉`).toBeLessThanOrEqual(M);
     }

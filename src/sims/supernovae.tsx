@@ -1,7 +1,7 @@
 /**
  * Supernovae — what a star becomes, above; how bright a Type Ia looks, below.
  *
- * Top panel: birth mass on a log axis from half a solar mass to a hundred. A
+ * Top panel: birth mass on a log axis from half a solar mass to 32. A
  * ribbon along the bottom third shows the three fates, cut sharply at 8 and
  * 20 M☉, with the current one highlighted and a cursor at the slider's mass.
  * Above it, the main-sequence lifetime on a log axis, with a dot at the
@@ -179,14 +179,14 @@ const TOP_SHARE = 0.5;
 
 /** The top panel's axes: birth mass in kg, lifetime in s. */
 const M_AXIS_MIN = 0.5 * M_SUN;
-const M_AXIS_MAX = 100 * M_SUN;
+const M_AXIS_MAX = 32 * M_SUN;
 const T_AXIS_MIN = 1e6 * JULIAN_YEAR;
 const T_AXIS_MAX = 1e11 * JULIAN_YEAR;
 
 /** The bottom panel's axes: distance in m, apparent magnitude brightest at the top. */
 const D_AXIS_MIN = 1e17;
 const D_AXIS_MAX = 3e25;
-const MAG_TOP = -20;
+const MAG_TOP = -22;
 const MAG_BOTTOM = 35;
 
 /** Andromeda, m: where SN 1885A, the one supernova seen there, went off. */
@@ -312,6 +312,63 @@ function labelNear(
 }
 
 /**
+ * `labelNear` for a label that may be wider than the plot: on one line when
+ * it fits, otherwise broken after its first comma into two lines placed as one
+ * block, on one plate, clear of everything already drawn.
+ */
+function wrappedLabelNear(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  bounds: LabelBox,
+  obstacles: LabelBox[],
+  extra: LabelBox[] = [],
+): void {
+  const comma = text.indexOf(', ');
+  if (ctx.measureText(text).width + 2 <= bounds.x1 - bounds.x0 || comma < 0) {
+    labelNear(ctx, text, x, y, bounds, obstacles, extra);
+    return;
+  }
+  const lines = [text.slice(0, comma + 1), text.slice(comma + 2)];
+  const LINE = 12;
+  const blockAt = (c: { x: number; y: number; align: CanvasTextAlign }): LabelBox => {
+    const boxes = lines.map((line, i) => labelBox(ctx, line, c.x, c.y + i * LINE, c.align));
+    return {
+      x0: Math.min(...boxes.map((b) => b.x0)),
+      x1: Math.max(...boxes.map((b) => b.x1)),
+      y0: Math.min(...boxes.map((b) => b.y0)),
+      y1: Math.max(...boxes.map((b) => b.y1)),
+    };
+  };
+  const half = Math.max(...lines.map((line) => ctx.measureText(line).width)) / 2;
+  const slid = Math.min(bounds.x1 - half - 1, Math.max(bounds.x0 + half + 1, x));
+  const candidates: { x: number; y: number; align: CanvasTextAlign }[] = [];
+  // Every height in the plot, nearest first, and at each one the block over
+  // its point or pushed to either side: a two-line block is hard to fit, so it
+  // is allowed to go anywhere in the panel.
+  const rows: number[] = [];
+  for (let row = bounds.y0 + 10; row <= bounds.y1; row += 2) rows.push(row);
+  rows.sort((a, b) => Math.abs(a - (y - 21)) - Math.abs(b - (y - 21)));
+  const xs = [slid, bounds.x0 + half + 1, bounds.x1 - half - 1];
+  for (const row of rows) for (const cx of xs) candidates.push({ x: cx, y: row, align: 'center' });
+  const blocked = [...obstacles, ...extra];
+  const fits = candidates.filter((c) => {
+    const box = blockAt(c);
+    return box.x0 >= bounds.x0 && box.x1 <= bounds.x1 && box.y0 >= bounds.y0 && box.y1 <= bounds.y1;
+  });
+  const spot =
+    fits.find((c) => !blocked.some((o) => overlaps(blockAt(c), o, 2))) ??
+    fits[fits.length - 1] ?? { x: (bounds.x0 + bounds.x1) / 2, y: (bounds.y0 + bounds.y1) / 2, align: 'center' as const };
+  const box = blockAt(spot);
+  const ink = ctx.fillStyle;
+  ctx.fillStyle = 'rgba(5,7,12,0.82)';
+  ctx.fillRect(box.x0 - 2, box.y0 - 1, box.x1 - box.x0 + 4, box.y1 - box.y0 + 2);
+  ctx.fillStyle = ink;
+  lines.forEach((line, i) => placeText(ctx, line, spot.x, spot.y + i * LINE, spot.align, obstacles));
+}
+
+/**
  * A reference line's label at its right end, just above the line or just
  * below it; failing both, wherever `labelNear` finds room nearby.
  */
@@ -345,15 +402,20 @@ const LIFETIME_TICKS: [number, string, string][] = [
   [1e11, '100 Gyr', '10¹¹'],
 ];
 
+/**
+ * Mass ticks, in the order their labels claim space: the two fate boundaries
+ * first, then the slider's doublings. 16 and 20 sit a tenth of a decade apart,
+ * so on the narrowest canvas 16 keeps its tick mark and gives up its label.
+ */
 const MASS_TICKS: [number, string][] = [
+  [8, '8'],
+  [20, '20'],
   [0.5, '0.5'],
   [1, '1'],
   [2, '2'],
-  [5, '5'],
-  [8, '8'],
-  [20, '20'],
-  [50, '50'],
-  [100, '100'],
+  [4, '4'],
+  [32, '32'],
+  [16, '16'],
 ];
 
 function drawFates(
@@ -388,7 +450,7 @@ function drawFates(
   ctx.fillStyle = COLORS.inkDim;
   placeText(ctx, 'What a star becomes', PAD.left, 14, 'left', obstacles);
   ctx.fillStyle = COLORS.inkFaint;
-  placeText(ctx, deep ? 't_MS (yr)' : 'how long it shines', PAD.left, 27, 'left', obstacles);
+  placeText(ctx, deep ? 'lifetime (yr)' : 'how long it shines', PAD.left, 27, 'left', obstacles);
 
   /* Lifetime axis, decade gridlines and ticks. */
   ctx.lineWidth = 1;
@@ -445,13 +507,19 @@ function drawFates(
   ctx.strokeStyle = COLORS.edge;
   ctx.lineWidth = 1;
   ctx.fillStyle = COLORS.inkFaint;
+  const tickLabels: LabelBox[] = [];
   for (const [suns, label] of MASS_TICKS) {
     const x = xOf(suns * M_SUN);
     ctx.beginPath();
     ctx.moveTo(x, ribbonBottom);
     ctx.lineTo(x, ribbonBottom + 3);
     ctx.stroke();
-    centredWithin(ctx, label, x, axisY + 13, 0, w, obstacles);
+    const half = ctx.measureText(label).width / 2;
+    const cx = Math.min(w - half, Math.max(half, x));
+    const box = labelBox(ctx, label, cx, axisY + 13, 'center');
+    if (tickLabels.some((placed) => overlaps(box, placed, 2))) continue;
+    tickLabels.push(box);
+    placeText(ctx, label, cx, axisY + 13, 'center', obstacles);
   }
   centredWithin(
     ctx,
@@ -677,7 +745,7 @@ function drawBrightness(
   ctx.fillStyle = COLORS.inkFaint;
   for (const [mag, label] of REFERENCES) labelAtEnd(ctx, label, yOf(mag), plotBox, obstacles, marks);
   ctx.fillStyle = COLORS.inkDim;
-  labelNear(ctx, 'Andromeda: SN 1885A reached +6', xAnd, yAnd, plotBox, obstacles, marks);
+  wrappedLabelNear(ctx, 'Andromeda: SN 1885A, a faint one, reached +6', xAnd, yAnd, plotBox, obstacles, marks);
   ctx.fillStyle = COLORS.warm;
   labelNear(ctx, formatMagnitude(m), xD, yD, plotBox, obstacles, marks);
 }
@@ -816,7 +884,7 @@ export default function SupernovaeSim({ params, values }: SimProps) {
           ref={canvasRef}
           className="absolute inset-0 h-full w-full"
           role="img"
-          aria-label="Above, a star's birth mass on a logarithmic axis from half the Sun's to a hundred times it: a ribbon of three fates, white dwarf below eight solar masses, neutron star to twenty, black hole above, with the current one highlighted, under a falling curve of how long the star shines. Below, how bright a Type Ia supernova looks against its distance, with lines for the full Moon, Venus, the naked-eye limit and the space-telescope limit, and a tick at Andromeda."
+          aria-label="Above, a star's birth mass on a logarithmic axis from half the Sun's to thirty-two times it: a ribbon of three fates, white dwarf below eight solar masses, neutron star to twenty, black hole above, with the current one highlighted, under a falling curve of how long the star shines. Below, how bright a Type Ia supernova looks against its distance, with lines for the full Moon, Venus, the naked-eye limit and the space-telescope limit, and a tick at Andromeda."
           aria-describedby="supernovae-readouts"
         />
       </div>
@@ -828,7 +896,7 @@ export default function SupernovaeSim({ params, values }: SimProps) {
           value={`${remnant.toFixed(2)} M☉${fateNow === 'black-hole' ? ' (rough)' : ''}`}
         />
         <Readout
-          label={deep ? 'Main-sequence lifetime t_MS' : 'How long it shines steadily'}
+          label={deep ? 'Main-sequence lifetime' : 'How long it shines steadily'}
           value={formatYears(lifetime)}
         />
         <Readout label={deep ? 'Luminosity L' : 'How bright it is meanwhile'} value={`${plainOrScientific(luminosity)} L☉`} />
