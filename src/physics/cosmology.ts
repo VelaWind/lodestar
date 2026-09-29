@@ -1,5 +1,6 @@
 /**
- * The expansion of the universe, in the linear regime.
+ * The expansion of the universe, in the linear regime, and the cosmic
+ * microwave background it has been cooling.
  *
  * SI in, SI out: distances in metres, speeds in m/s, the Hubble constant in
  * s⁻¹, wavelengths in metres, times in seconds. km/s/Mpc, nanometres and years
@@ -12,7 +13,7 @@
  * z = v/c rather than 1 + z = a(t₀)/a(t_emit), and light travel time as d/c
  * rather than a lookback time integrated through the expansion history.
  */
-import { C } from './constants';
+import { B_WIEN, C, H, K_B, T_CMB, ZETA_3 } from './constants';
 
 /**
  * Recession velocity, m/s: the Hubble–Lemaître law.
@@ -88,4 +89,123 @@ export { lightTravelTime } from './scale';
  */
 export function hubbleTime(H0_s: number): number {
   return 1 / H0_s;
+}
+
+/* ------------------------------------------------------------------ */
+/* The cosmic microwave background                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Radiation temperature at a redshift, K: expansion stretches every wavelength
+ * by 1 + z, so a blackbody stays one with its temperature scaled by the same
+ * factor.
+ *
+ *     T(z) = T₀ (1 + z)
+ *
+ * @param z redshift, dimensionless
+ */
+export function cmbTemperatureAtRedshift(z: number): number {
+  return T_CMB * (1 + z);
+}
+
+/**
+ * Redshift at which the radiation had a given temperature, dimensionless: the
+ * inverse of `cmbTemperatureAtRedshift`.
+ *
+ *     z = T / T₀ − 1
+ *
+ * Throws below T₀. A temperature colder than today's belongs to the future,
+ * where this relation says nothing, and a negative z would read as a result.
+ *
+ * @param T_K radiation temperature, K
+ */
+export function redshiftAtTemperature(T_K: number): number {
+  if (!(T_K >= T_CMB)) {
+    throw new RangeError(`redshiftAtTemperature: ${T_K} K is below today's ${T_CMB} K`);
+  }
+  return T_K / T_CMB - 1;
+}
+
+/**
+ * Scale factor at which the radiation had a given temperature, dimensionless,
+ * with a = 1 today.
+ *
+ *     a = T₀ / T
+ *
+ * @param T_K radiation temperature, K
+ */
+export function scaleFactorAtTemperature(T_K: number): number {
+  return T_CMB / T_K;
+}
+
+/**
+ * Wavelength of the peak of B_λ, m: Wien's displacement law.
+ *
+ *     λ_peak = b / T
+ *
+ * This is the maximum per unit *wavelength*. The maximum per unit frequency,
+ * of B_ν, falls at a longer wavelength (about 1.76 times longer); the two
+ * curves are different functions and peak in different places.
+ *
+ * @param T_K temperature, K
+ */
+export function wienPeakWavelength(T_K: number): number {
+  return B_WIEN / T_K;
+}
+
+/**
+ * Planck's law per unit frequency, W m⁻² Hz⁻¹ sr⁻¹.
+ *
+ *     B_ν = (2hν³ / c²) / (exp(hν / kT) − 1)
+ *
+ * `expm1` rather than `exp(x) − 1`: in the Rayleigh–Jeans tail x is small and
+ * the subtraction would throw away the digits that matter. At very large x
+ * `expm1` overflows to Infinity and the result is an honest 0.
+ *
+ * @param nu_Hz frequency, Hz
+ * @param T_K   temperature, K
+ */
+export function planckSpectralRadiance(nu_Hz: number, T_K: number): number {
+  const x = (H * nu_Hz) / (K_B * T_K);
+  return (2 * H * nu_Hz ** 3) / C ** 2 / Math.expm1(x);
+}
+
+/**
+ * Planck's law per unit wavelength, W m⁻³ sr⁻¹.
+ *
+ *     B_λ = (2hc² / λ⁵) / (exp(hc / λkT) − 1)
+ *
+ * Related to `planckSpectralRadiance` by B_ν(c/λ) = B_λ(λ) · λ² / c; the unit
+ * suite checks that identity to machine precision.
+ *
+ * @param lambda_m wavelength, m
+ * @param T_K      temperature, K
+ */
+export function planckSpectralRadianceWavelength(lambda_m: number, T_K: number): number {
+  const x = (H * C) / (lambda_m * K_B * T_K);
+  return (2 * H * C ** 2) / lambda_m ** 5 / Math.expm1(x);
+}
+
+/**
+ * Number density of blackbody photons, m⁻³.
+ *
+ *     n_γ = 16π ζ(3) (kT / hc)³
+ *
+ * @param T_K temperature, K
+ */
+export function photonNumberDensity(T_K: number): number {
+  return 16 * Math.PI * ZETA_3 * ((K_B * T_K) / (H * C)) ** 3;
+}
+
+/**
+ * Amplitude of the kinematic dipole, K: how much hotter the sky is straight
+ * ahead than its average, to first order in v/c.
+ *
+ *     ΔT = T v / c
+ *
+ * @param T_K  radiation temperature, K
+ * @param v_ms observer speed relative to the CMB rest frame, m/s
+ */
+export function dipoleAmplitude(T_K: number, v_ms: number): number {
+  return (T_K * v_ms) / C;
 }

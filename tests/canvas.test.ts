@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest';
 
 import blackHoles from '@/content/modules/black-holes';
 import exoplanets from '@/content/modules/exoplanets';
+import cosmicMicrowaveBackground from '@/content/modules/cosmic-microwave-background';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -26,6 +27,7 @@ import scaleOfTheUniverse, { scaleAnchors } from '@/content/modules/scale-of-the
 
 import { __internals as bh } from '@/sims/black-holes';
 import { __internals as ep } from '@/sims/exoplanets';
+import { __internals as cmb } from '@/sims/cosmic-microwave-background';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -43,7 +45,7 @@ import {
   observedWavelength,
   redshiftFromVelocity,
 } from '@/physics/cosmology';
-import { H_ALPHA_AIR, KM_S_PER_MPC } from '@/physics/constants';
+import { H_ALPHA_AIR, KM_S_PER_MPC, T_CMB } from '@/physics/constants';
 import {
   iscoRadius,
   photonSphereRadius,
@@ -616,6 +618,109 @@ function expansionCases(): Case[] {
   return cases;
 }
 
+/* ------------------------ cosmic microwave background ------------------------ */
+
+const CMB_HEIGHT = 416;
+
+function cmbCases(): Case[] {
+  const params = cosmicMicrowaveBackground.layers.play.params;
+  const TMax = paramOf(params, 'T').max;
+  const vMax = paramOf(params, 'v').max;
+  const cases: Case[] = [];
+
+  const scene = (T: number, lambda: number, v: number, units: 'friendly' | 'technical') => ({
+    T,
+    lambda,
+    v,
+    vMax,
+    TMax,
+    units,
+  });
+
+  // The three slider stops each, plus the temperatures where the moving labels
+  // crowd the fixed ones: just above today (the live and "today" peaks nearly
+  // coincide), mid-slide in log T, and last scattering itself.
+  const temperatures = [
+    ...extremes(paramOf(params, 'T')),
+    { stop: 'T0+0.1%', value: T_CMB * 1.001 },
+    { stop: '90 K', value: 90 },
+    { stop: '2973 K', value: 2973 },
+  ];
+  for (const T of temperatures) {
+    for (const lambda of extremes(paramOf(params, 'lambda'))) {
+      for (const v of extremes(paramOf(params, 'v'))) {
+        for (const units of ['friendly', 'technical'] as const) {
+          cases.push({
+            label: `T=${T.stop} lambda=${lambda.stop} v=${v.stop} ${units}`,
+            draw: (ctx, w, h) => cmb.drawScene(ctx, w, h, scene(T.value, lambda.value, v.value, units)),
+          });
+        }
+      }
+    }
+  }
+
+  /*
+   * The peak label, asserted by name at every temperature a reader can reach.
+   *
+   * It is the one label that moves across the whole spectrum panel, from the
+   * millimetre range at T₀ to just past the visible band at 3000 K, so it is
+   * the one most likely to land on "visible light", "today" or "Penzias &
+   * Wilson, 1965" — and the one whose disappearance would matter most.
+   */
+  it('always labels the peak, clear of every other label', () => {
+    for (let e = Math.log10(T_CMB); e <= Math.log10(TMax) + 1e-9; e += 0.05) {
+      const T = Math.min(TMax, 10 ** e);
+      for (const units of ['friendly', 'technical'] as const) {
+        for (const width of [246, 390, 900]) {
+          const { ctx, records } = recordingContext();
+          cmb.drawScene(ctx, width, CMB_HEIGHT, scene(T, paramOf(params, 'lambda').default, vMax / 2, units));
+          const where = `T=${T.toFixed(2)} ${units} @${width}`;
+
+          const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+          expect(
+            texts.some((t) => t.startsWith('peak ')),
+            `${where}: no peak label`,
+          ).toBe(true);
+          expect(
+            textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+            `${where}: labels overlap`,
+          ).toEqual([]);
+          expect(
+            textOutsideFrame(records, width, CMB_HEIGHT).map(describeRecord),
+            `${where}: text outside the frame`,
+          ).toEqual([]);
+        }
+      }
+    }
+  });
+
+  it('draws "today" only once the reader has left it, and a uniform sky at rest', () => {
+    const texts = (T: number, v: number) => {
+      const { ctx, records } = recordingContext();
+      cmb.drawScene(ctx, 700, CMB_HEIGHT, scene(T, paramOf(params, 'lambda').default, v, 'friendly'));
+      return records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    };
+    expect(texts(T_CMB, paramOf(params, 'v').default)).not.toContain('today');
+    expect(texts(3000, paramOf(params, 'v').default)).toContain('today');
+
+    const moving = texts(T_CMB, paramOf(params, 'v').default);
+    expect(moving).toContain('hotter, ahead');
+    expect(moving).toContain('cooler, behind');
+    const still = texts(T_CMB, 0);
+    expect(still).toContain('the same in every direction');
+    expect(still).not.toContain('hotter, ahead');
+    expect(still.some((t) => t.includes('0.00 mK'))).toBe(true);
+  });
+
+  it('formats the peak wavelength in the unit the value warrants', () => {
+    expect(cmb.formatWavelength(1.0632e-3)).toBe('1.06 mm');
+    expect(cmb.formatWavelength(9.66e-7)).toBe('966 nm');
+    expect(cmb.formatWavelength(1.06e-5)).toBe('10.6 µm');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -627,6 +732,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'exoplanets', height: 352, cases: exoplanetCases },
   { name: 'planetary-atmospheres', height: 304, cases: atmosphereCases },
   { name: 'expansion-of-the-universe', height: EXPANSION_HEIGHT, cases: expansionCases },
+  { name: 'cosmic-microwave-background', height: CMB_HEIGHT, cases: cmbCases },
 ];
 
 /**
@@ -653,6 +759,7 @@ const MEASURED_PLACEMENT = new Set([
   'gravitational-waves',
   'planetary-atmospheres',
   'expansion-of-the-universe',
+  'cosmic-microwave-background',
 ]);
 
 for (const sim of SIMS) {

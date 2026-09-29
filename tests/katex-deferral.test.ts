@@ -28,6 +28,7 @@ import blackHoles from '@/content/modules/black-holes';
 import exoplanets from '@/content/modules/exoplanets';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
+import cosmicMicrowaveBackground from '@/content/modules/cosmic-microwave-background';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
 import planetaryAtmospheres from '@/content/modules/planetary-atmospheres';
@@ -45,6 +46,7 @@ const MODULES: Module[] = [
   exoplanets,
   planetaryAtmospheres,
   expansionOfTheUniverse,
+  cosmicMicrowaveBackground,
 ];
 
 /** The tier a reader lands on with nothing persisted — see `useAppStore`. */
