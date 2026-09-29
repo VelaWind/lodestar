@@ -83,9 +83,12 @@ const cosmicMicrowaveBackground: Module = {
           min: T_CMB,
           max: 3000,
           default: T_CMB,
-          step: 0.01, // decades
+          // decades; 304 equal steps, shrunk by one part in 10⁹ so (max − min) / step
+          // rounds up to 304 and the input can reach its maximum. Without the
+          // shrink, floating point leaves it one step short.
+          step: ((Math.log10(3000) - Math.log10(T_CMB)) / 304) * (1 - 1e-9),
           scale: 'log',
-          format: { notation: 'auto', digits: 4 },
+          format: { notation: 'auto', digits: 5 },
         },
         {
           id: 'lambda',

@@ -30,6 +30,8 @@ import {
   type Page,
 } from '@playwright/test';
 import { SITE_ORIGIN } from '../../src/lib/site';
+import { formatWithUnit } from '../../src/lib/format';
+import cosmicMicrowaveBackground from '../../src/content/modules/cosmic-microwave-background';
 
 const MODULES = [
   'escape-velocity',
@@ -2162,14 +2164,14 @@ test('behaviour: microwave background readouts follow the sliders, and a term op
   const T = page.locator('#p-T');
   await T.focus();
   await page.keyboard.press('End');
-  // A range input snaps to min + k·step, and log₁₀(3000) is not on the grid
-  // that starts at log₁₀(T₀): End lands one 0.01-decade step short, near 2988 K.
-  await expect
-    .poll(async () => Number(((await T.getAttribute('aria-valuetext')) ?? '').replace(/[^\d.]/g, '')))
-    .toBeGreaterThan(3000 / 10 ** 0.01 - 1);
+  // The step divides the log range into 304 equal parts, so End reaches the
+  // maximum exactly; the spoken value is whatever the param's own format makes
+  // of 3000 K, computed here by the same function the slider uses.
+  const TParam = cosmicMicrowaveBackground.layers.play.params.find((p) => p.id === 'T')!;
+  await expect(T).toHaveAttribute('aria-valuetext', formatWithUnit(TParam, 3000));
   const z = Number((await readout(0)).replace(/,/g, ''));
-  expect(z, 'at 3000 K the redshift should be near last scattering').toBeGreaterThan(1000);
-  expect(z).toBeLessThan(1200);
+  expect(z, 'at 3000 K the redshift should be at last scattering').toBeGreaterThan(1090);
+  expect(z).toBeLessThan(1110);
   await assertNoOverflow(page, 'microwave background at 3000 K');
 
   /* Standing still: no dipole at all. */
