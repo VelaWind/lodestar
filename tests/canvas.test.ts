@@ -20,6 +20,7 @@ import exoplanets from '@/content/modules/exoplanets';
 import cosmicMicrowaveBackground from '@/content/modules/cosmic-microwave-background';
 import earlyUniverse from '@/content/modules/early-universe';
 import stellarFusion from '@/content/modules/stellar-fusion';
+import supernovae from '@/content/modules/supernovae';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -32,6 +33,7 @@ import { __internals as ep } from '@/sims/exoplanets';
 import { __internals as cmb } from '@/sims/cosmic-microwave-background';
 import { __internals as early } from '@/sims/early-universe';
 import { __internals as fusion } from '@/sims/stellar-fusion';
+import { __internals as sn } from '@/sims/supernovae';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -49,7 +51,17 @@ import {
   observedWavelength,
   redshiftFromVelocity,
 } from '@/physics/cosmology';
-import { EV, H_ALPHA_AIR, JULIAN_YEAR, KM_S_PER_MPC, T_CMB } from '@/physics/constants';
+import {
+  EV,
+  H_ALPHA_AIR,
+  JULIAN_YEAR,
+  KM_S_PER_MPC,
+  LIGHT_YEAR,
+  MEGAPARSEC,
+  M_SUN,
+  PARSEC,
+  T_CMB,
+} from '@/physics/constants';
 import {
   iscoRadius,
   photonSphereRadius,
@@ -923,6 +935,135 @@ function stellarFusionCases(): Case[] {
   return cases;
 }
 
+/* --------------------------------- supernovae -------------------------------- */
+
+const SN_HEIGHT = 544;
+
+function supernovaeCases(): Case[] {
+  const params = supernovae.layers.play.params;
+  const MParam = paramOf(params, 'M');
+  const dParam = paramOf(params, 'd');
+  const cases: Case[] = [];
+
+  // Each slider's ends and default with the other at its default, plus the
+  // review's screenshot stops: the fate boundaries' neighbours, Betelgeuse, and
+  // the distances either side of the naked-eye limit.
+  const masses = [
+    ...extremes(MParam),
+    { stop: '7.9 M☉', value: 7.9 * M_SUN },
+    { stop: '18 M☉', value: 18 * M_SUN },
+    { stop: '16 M☉', value: 16 * M_SUN },
+    { stop: '20 M☉', value: 20 * M_SUN },
+  ];
+  const distances = [
+    ...extremes(dParam),
+    { stop: '10 pc', value: 10 * PARSEC },
+    { stop: '2.5 Mly', value: 2.5e6 * LIGHT_YEAR },
+    { stop: '1 Gpc', value: 1e3 * MEGAPARSEC },
+  ];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const M of masses) {
+      cases.push({
+        label: `M=${M.stop} ${units}`,
+        draw: (ctx, w, h) => sn.drawScene(ctx, w, h, { M: M.value, d: dParam.default, units }),
+      });
+    }
+    for (const d of distances) {
+      cases.push({
+        label: `d=${d.stop} ${units}`,
+        draw: (ctx, w, h) => sn.drawScene(ctx, w, h, { M: MParam.default, d: d.value, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every mass and distance a reader can reach.
+   *
+   * The lifetime dot's label rides the curve across the top panel, down to
+   * 1.73 Myr at the slider's 32 M☉; a fate name too wide for its band moves
+   * above the ribbon, and the 16 tick gives up its label where it would touch
+   * 20's. Below, the magnitude dot's label rides the line past all four
+   * reference labels and the Andromeda note. Swept a tenth of a decade at a time
+   * on each slider, and at each maximum, everything must be drawn, clear and
+   * inside the frame.
+   */
+  it('keeps every label drawn and clear across both sliders', () => {
+    const expected = [
+      'white dwarf',
+      'neutron star',
+      'black hole',
+      'full Moon, −12.7',
+      'Venus, −4.6',
+      'naked-eye limit, +6',
+      'space-telescope limit, about +31',
+    ];
+    // Too wide for the narrowest plot, the Andromeda note breaks after its comma.
+    const andromeda = 'Andromeda: SN 1885A, a faint one, reached +6';
+    const andromedaWrapped = ['Andromeda: SN 1885A,', 'a faint one, reached +6'];
+    const check = (M: number, d: number, units: 'friendly' | 'technical', width: number) => {
+      const { ctx, records } = recordingContext();
+      sn.drawScene(ctx, width, SN_HEIGHT, { M, d, units });
+      const where = `M=${(M / M_SUN).toPrecision(3)} M☉ d=${d.toPrecision(3)} m ${units} @${width}`;
+      const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+      for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        texts.includes(andromeda) || andromedaWrapped.every((line) => texts.includes(line)),
+        `${where}: the Andromeda note is missing`,
+      ).toBe(true);
+      expect(
+        textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+        `${where}: labels overlap`,
+      ).toEqual([]);
+      expect(
+        textOutsideFrame(records, width, SN_HEIGHT).map(describeRecord),
+        `${where}: text outside the frame`,
+      ).toEqual([]);
+    };
+    for (const units of ['friendly', 'technical'] as const) {
+      for (const width of [246, 390, 900]) {
+        for (let e = Math.log10(MParam.min); e <= Math.log10(MParam.max) + 1e-9; e += 0.1) {
+          check(Math.min(MParam.max, 10 ** e), dParam.default, units, width);
+        }
+        check(MParam.max, dParam.default, units, width);
+        for (let e = Math.log10(dParam.min); e <= Math.log10(dParam.max) + 1e-9; e += 0.1) {
+          check(MParam.default, Math.min(dParam.max, 10 ** e), units, width);
+        }
+        check(MParam.default, dParam.max, units, width);
+      }
+    }
+  });
+
+  it('keeps both dots on their charts across the whole of each slider', () => {
+    const texts = (M: number, d: number) => {
+      const { ctx, records } = recordingContext();
+      sn.drawScene(ctx, 900, SN_HEIGHT, { M, d, units: 'friendly' });
+      return records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    };
+    expect(texts(MParam.default, dParam.default)).toContain('10 Gyr');
+    expect(texts(MParam.default, dParam.default)).toContain('−13.2');
+    expect(texts(MParam.max, dParam.default)).toContain('1.73 Myr');
+    expect(texts(MParam.max, dParam.default).some((t) => t.includes('below the axis'))).toBe(false);
+    expect(texts(MParam.default, dParam.min)).toContain('−21.7');
+    expect(texts(MParam.default, dParam.max)).toContain('+20.6');
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    expect(sn.formatYears(1e10 * JULIAN_YEAR)).toBe('10 Gyr');
+    expect(sn.formatYears(7.29e6 * JULIAN_YEAR)).toBe('7.29 Myr');
+    expect(sn.formatYears(1e5 * JULIAN_YEAR)).toBe('100 kyr');
+    expect(sn.formatMagnitude(-13.173)).toBe('−13.2');
+    expect(sn.formatMagnitude(20.64)).toBe('+20.6');
+    expect(sn.formatMagnitude(-0.04)).toBe('0.0');
+    expect(sn.scientific(2.586e46, 2)).toBe('2.6 × 10⁴⁶');
+    expect(sn.brightnessWords(-13.2)).toBe('brighter than the full Moon');
+    expect(sn.brightnessWords(-12.7)).toBe('brighter than Venus');
+    expect(sn.brightnessWords(5.9)).toBe('visible to the naked eye');
+    expect(sn.brightnessWords(6)).toBe('telescope only');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -937,6 +1078,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'cosmic-microwave-background', height: CMB_HEIGHT, cases: cmbCases },
   { name: 'early-universe', height: EARLY_HEIGHT, cases: earlyUniverseCases },
   { name: 'stellar-fusion', height: FUSION_HEIGHT, cases: stellarFusionCases },
+  { name: 'supernovae', height: SN_HEIGHT, cases: supernovaeCases },
 ];
 
 /**
@@ -966,6 +1108,7 @@ const MEASURED_PLACEMENT = new Set([
   'cosmic-microwave-background',
   'early-universe',
   'stellar-fusion',
+  'supernovae',
 ]);
 
 for (const sim of SIMS) {
