@@ -318,7 +318,7 @@ exports[`inline math in prose > carries every inline-math and mathBlock tex, unc
   "stellar-fusion/real#0": "kT",
   "stellar-fusion/real#1": "T",
   "stellar-fusion/real#2": "k",
-  "supernovae/deeper#0": "1.5 \\times 10^{9}\\,\\text{K}",
+  "supernovae/deeper#0": "3 \\times 10^{9}\\,\\text{K}",
   "supernovae/deeper#1": "Y_e",
   "supernovae/deeper#10": "18\\,M_\\odot",
   "supernovae/deeper#11": "20\\,M_\\odot",

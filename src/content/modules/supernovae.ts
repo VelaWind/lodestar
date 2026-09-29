@@ -26,8 +26,8 @@ const supernovae: Module = {
       body: prose(
         p(
           'A star twenty times the Sun’s mass ends its life in less than a second, and for a few ',
-          'weeks the explosion outshines everything else in its galaxy. The iron in your blood was ',
-          'made that way.',
+          'weeks the explosion outshines everything else in its galaxy. Much of the iron in your ',
+          'blood was made that way.',
         ),
       ),
     },
@@ -53,7 +53,7 @@ const supernovae: Module = {
           'new core, blows the rest of the star into space.',
         ),
         p(
-          'Where the analogy breaks: a balloon with its burner out simply sinks; it does not ',
+          'Where the analogy breaks: a balloon with its burner out sinks; it does not ',
           'collapse in a second and rebound. And the balloon’s burner gives out because the fuel ',
           'is gone, while the star’s core stops because it has made a fuel, iron, that no fusion ',
           'can burn. There is a second way for a star to explode, with no burner involved at all, ',
@@ -79,15 +79,16 @@ const supernovae: Module = {
           technicalLabel: 'Initial mass',
           symbol: 'M',
           unit: 'kg',
-          // Half a solar mass (the lightest stars old enough to have died) to 100.
+          // Half a solar mass (the lightest stars old enough to have died) to 32.
           // Default: the Sun.
           min: 0.5 * M_SUN,
-          max: 100 * M_SUN,
+          // 0.5 × 2⁶, so the grid below lands on 0.5, 1, 2, 4, 8, 16 and 32 M☉ exactly
+          max: 32 * M_SUN,
           default: M_SUN,
-          // decades; 230 equal steps, shrunk by one part in 10⁹ so (max − min) / step
-          // rounds up to 230 and the input can reach its maximum. Without the
-          // shrink, floating point leaves it one step short.
-          step: ((Math.log10(100 * M_SUN) - Math.log10(0.5 * M_SUN)) / 230) * (1 - 1e-9),
+          // decades; 30 steps per doubling, shrunk by one part in 10⁹ so
+          // (max − min) / step rounds up to 180 and the input can reach its
+          // maximum. Without the shrink, floating point leaves it one step short.
+          step: (Math.log10(2) / 30) * (1 - 1e-9),
           scale: 'log',
           format: { notation: 'auto', digits: 3, displayUnit: { unit: 'M☉', factor: 1 / M_SUN } },
         },
@@ -121,7 +122,7 @@ const supernovae: Module = {
         ),
         prose(
           p(
-            'Lifetime and brightness use the main-sequence power laws t ∝ M⁻²·⁵ and L ∝ M³·⁵, good to about a factor of two between 0.5 and 20 solar masses and rougher outside that range.',
+            'Lifetime and brightness use the main-sequence power laws t ∝ M⁻²·⁵ and L ∝ M³·⁵, good to about a factor of two between 0.5 and 20 solar masses. Above 20 they overstate how quickly a star burns out, by about a factor of three at the top of the slider, because the brightest stars level off near the limit at which their own light would blow them apart.',
           ),
         ),
         prose(
@@ -146,7 +147,7 @@ const supernovae: Module = {
           ', about 1.4 solar masses, the most that the pressure of packed electrons can hold up. ',
           'It then collapses in under a second to a ',
           term('neutron star'),
-          ', a sphere about 12 km across, or, for the heaviest stars, straight to a black hole. ',
+          ', a sphere about 24 km across, or, for the heaviest stars, straight to a black hole. ',
           'About 99 percent of the energy released, some 3 × 10⁴⁶ joules, leaves as neutrinos; ',
           'only one percent goes into the explosion and a hundredth of that into light. ',
           'Twenty-five of those neutrinos were caught on Earth in February 1987 from SN 1987A in ',
@@ -159,7 +160,8 @@ const supernovae: Module = {
           ' is different: no massive star, no core collapse. A ',
           term('white dwarf'),
           ', the ember left by a Sun-like star, gains mass from a companion until it nears the ',
-          'Chandrasekhar limit, and its carbon ignites everywhere at once. The whole star is ',
+          'Chandrasekhar limit, and its carbon ignites near its centre and a burning front ',
+          'consumes the whole star in about a second. The whole star is ',
           'consumed and nothing is left behind. Because every Type Ia detonates at nearly the ',
           'same mass, every one reaches nearly the same peak brightness, an absolute magnitude of ',
           'about −19.3, which makes them the best ',
@@ -182,9 +184,9 @@ const supernovae: Module = {
         p(
           'Two misconceptions. Stars do not explode because they run out of fuel; only the heavy ',
           'ones do, and only because iron cannot burn. And the light of a supernova is not the ',
-          'star burning up: for a Type Ia, and for weeks after a core collapse, the glow is ',
-          'powered by the radioactive decay of the nickel forged in the blast, half a solar mass ',
-          'of it in a Type Ia.',
+          'star burning up: for a Type Ia, and for months after a core collapse once its first ',
+          'glow fades, the light is powered by the radioactive decay of the nickel forged in the ',
+          'blast, half a solar mass of it in a Type Ia.',
         ),
         p(
           'The mass boundaries here are approximate. The 8 solar-mass line is known to within ',
@@ -309,7 +311,7 @@ const supernovae: Module = {
         p(
           'Iron sits at the peak of binding energy per nucleon, so once a core of it has formed, ',
           'at about ',
-          m`1.5 \times 10^{9}\,\text{K}`,
+          m`3 \times 10^{9}\,\text{K}`,
           ', no further fusion can support it. Two processes then remove pressure: ',
           'photodisintegration of iron nuclei into alpha particles and neutrons by the thermal ',
           'photons, and electron capture on protons, which lowers the electron fraction ',
