@@ -113,13 +113,19 @@ function formatTime(seconds: number): string {
   return `${SIG3.format(years / 1e9)} Gyr`;
 }
 
-/** An energy in J as eV, keV, MeV or GeV, three significant figures. */
+/**
+ * An energy in J as eV, keV, MeV or GeV, three significant figures.
+ *
+ * The switch to the next unit comes at a tenth of it rather than at one, so
+ * the value one second in reads 0.859 MeV, as the prose and the worked example
+ * quote it, rather than 859 keV.
+ */
 function formatEnergy(joules: number): string {
   if (!Number.isFinite(joules) || joules <= 0) return '—';
   const ev = joules / EV;
   if (ev >= 1e9) return `${plainOrScientific(ev / 1e9)} GeV`;
-  if (ev >= 1e6) return `${plainOrScientific(ev / 1e6)} MeV`;
-  if (ev >= 1e3) return `${plainOrScientific(ev / 1e3)} keV`;
+  if (ev >= 1e5) return `${plainOrScientific(ev / 1e6)} MeV`;
+  if (ev >= 1e2) return `${plainOrScientific(ev / 1e3)} keV`;
   return `${plainOrScientific(ev)} eV`;
 }
 
@@ -813,7 +819,7 @@ export default function EarlyUniverseSim({ params, values }: SimProps) {
       </div>
 
       <dl id="early-universe-readouts" className="flex flex-wrap gap-x-7 gap-y-3 border-t border-edge-soft pt-4">
-        <Readout label={deep ? 't' : 'How long after the beginning'} value={formatTime(t)} />
+        <Readout label={deep ? 'Time t' : 'How long after the beginning'} value={formatTime(t)} />
         <Readout
           label={deep ? 'Temperature T' : 'How hot'}
           value={deep ? `${temperature} (kT = ${formatEnergy(K_B * T)})` : temperature}

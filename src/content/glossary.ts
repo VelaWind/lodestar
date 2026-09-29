@@ -137,7 +137,7 @@ export const glossary: Record<string, GlossaryEntry> = {
     body: 'When the universe cools below a particle’s rest energy, light can no longer make it in pairs. What exists then is what survives.',
   },
   'degrees-of-freedom': {
-    title: 'g_*',
+    title: 'Degrees of freedom, g*',
     body: 'The count of particle species light enough to be made at a given temperature, with fermions weighted 7/8. Sets how fast the early universe cooled.',
   },
   inflation: {
