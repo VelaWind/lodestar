@@ -32,6 +32,7 @@
 import type { Module } from '../types';
 import { M_EARTH, R_EARTH } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
+import { logStep } from '../grid';
 
 const planetaryAtmospheres: Module = {
   id: 'planetary-atmospheres',
@@ -144,7 +145,9 @@ const planetaryAtmospheres: Module = {
           min: 50,
           max: 2500,
           default: 1000,
-          step: 0.01,
+          // 170 equal steps of about 0.01 decades, so the maximum is reachable
+          // (1.699 decades is not a whole number of 0.01-decade steps).
+          step: logStep(50, 2500, 170),
           scale: 'log',
           format: { notation: 'auto', digits: 3 },
         },

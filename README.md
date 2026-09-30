@@ -98,7 +98,7 @@ Some files are very large and heavily commented: `sanity.ts` is 2366 lines and t
 
 The maths layer's Numbers view substitutes each slider's value in SI base units, not in the unit the slider shows, so a speed dragged in km/s appears in the equation in m/s; that is a shell change for another pass.
 
-Open physics items from the independent review, left for a ruling: the wormholes module's quantum-inequality sentence (the proposed "about 10⁻²¹ m for a one-metre throat" disagrees with the module's own (ħc/u)^{1/4} estimate, about 9 × 10⁻¹⁸ m, so neither was changed). Seventeen sliders still have a default a fraction of a step off their grid, and the first drag or arrow press snaps them by up to 1.8%; the Hawking-radiation crossover mass is not a grid point of its slider.
+Seventeen sliders still have a default a fraction of a step off their grid, and the first drag or arrow press snaps them by up to 1.8%; the Hawking-radiation crossover mass is not a grid point of its slider.
 
 <!-- site:case-study:end -->
 
