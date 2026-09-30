@@ -12,6 +12,7 @@
 import type { Module } from '../types';
 import { H0_PLANCK_2018, KM_S_PER_MPC, LIGHT_YEAR } from '@/physics/constants';
 import { figure, m, p, prose, term } from '../rich';
+import { logStep } from '../grid';
 
 const expansionOfTheUniverse: Module = {
   id: 'expansion-of-the-universe',
@@ -85,7 +86,9 @@ const expansionOfTheUniverse: Module = {
           min: 1e22,
           max: 3e25,
           default: 3.0857e24,
-          step: 0.01, // decades
+          // decades; 348 equal steps of about 0.01, so the maximum is reachable
+          // (3.477 decades is not a whole number of 0.01-decade steps).
+          step: logStep(1e22, 3e25, 348),
           scale: 'log',
           format: {
             notation: 'auto',

@@ -475,6 +475,7 @@ exports[`inline math in prose > carries every inline-math and mathBlock tex, unc
   "wormholes/deeper#0": "ds^2 = -e^{2\\Phi(r)} c^2 dt^2 + dr^2/(1 - b(r)/r) + r^2 d\\Omega^2",
   "wormholes/deeper#1": "\\Phi",
   "wormholes/deeper#10": "(\\hbar c/u)^{1/4}",
+  "wormholes/deeper#11": "10^{-17}",
   "wormholes/deeper#2": "b",
   "wormholes/deeper#3": "r = b_0",
   "wormholes/deeper#4": "b(b_0) = b_0",
