@@ -33,6 +33,7 @@ import earlyUniverse from '@/content/modules/early-universe';
 import stellarFusion from '@/content/modules/stellar-fusion';
 import supernovae from '@/content/modules/supernovae';
 import habitableZone from '@/content/modules/habitable-zone';
+import nebulae from '@/content/modules/nebulae';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
 import planetaryAtmospheres from '@/content/modules/planetary-atmospheres';
@@ -55,6 +56,7 @@ const MODULES: Module[] = [
   stellarFusion,
   supernovae,
   habitableZone,
+  nebulae,
 ];
 
 /** The tier a reader lands on with nothing persisted — see `useAppStore`. */

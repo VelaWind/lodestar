@@ -89,7 +89,7 @@ function copyOf(module: Module): Record<string, unknown> {
 describe('reader-visible copy', () => {
   it('has modules to pin', () => {
     // A snapshot of nothing passes forever. This is the tripwire under it.
-    expect(published.length, 'no published modules to snapshot').toBe(13);
+    expect(published.length, 'no published modules to snapshot').toBe(14);
   });
 
   it('every published module, word for word', () => {

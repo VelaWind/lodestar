@@ -163,6 +163,36 @@ export const SEFF_MAXGH = 0.343;
 export const SEFF_RECENT_VENUS = 1.776;
 export const SEFF_EARLY_MARS = 0.32;
 
+// H II regions
+/**
+ * Hydrogen case-B recombination coefficient at 10⁴ K, m³/s (2.59 × 10⁻¹³
+ * cm³/s): recombinations to every level but the ground state. Source: Hummer
+ * & Storey 1987, "Recombination-line intensities for hydrogenic ions. I",
+ * MNRAS 224, 801.
+ */
+export const ALPHA_B = 2.59e-19;
+/**
+ * Hydrogen photoionization cross-section at the 13.6 eV threshold, m²
+ * (6.3 × 10⁻¹⁸ cm²). Source: the hydrogenic threshold value, as tabulated in
+ * Osterbrock & Ferland, "Astrophysics of Gaseous Nebulae" (2006), §2.1.
+ */
+export const SIGMA_PHOTO_H = 6.3e-22;
+/**
+ * Ionizing photon rate of an O7 V star, s⁻¹, rounded from log Q ≈ 48.9.
+ * Source: Sternberg, Hoffmann & Pauldrach 2003, "Ionizing Photon Emission
+ * Rates from O- and Early B-Type Stars and Clusters", ApJ 599, 1333.
+ */
+export const Q_O7V = 1e49;
+/** Typical H II region electron temperature, K: the forbidden-line thermostat keeps them near 10⁴ K. */
+export const T_HII = 1e4;
+/**
+ * Isothermal sound speed of ionized gas at 10⁴ K, m/s, rounded: √(k T / μ m_H)
+ * is 1.3 × 10⁴ m/s for pure ionized hydrogen (μ = 0.5) and 1.2 × 10⁴ m/s with
+ * cosmic helium (μ ≈ 0.6); the conventional round 10 km/s of Spitzer's
+ * expansion law is used here.
+ */
+export const C_S_HII = 1.0e4;
+
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**
