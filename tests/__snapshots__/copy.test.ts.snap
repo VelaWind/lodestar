@@ -428,6 +428,52 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "Why orbits are ellipses, why the star sits off-centre, and why speed changes.",
     "title": "Kepler Orbits",
   },
+  "nebulae": {
+    "L1 hook": "On a dark night the middle “star” of Orion’s sword is not a star but a cloud of gas, lit from inside by four newborn suns, and you can see it with the naked eye. It glows the way a neon sign does, and for the same reason.",
+    "L2 intuition": "A neon sign is a glass tube of thin gas with electricity run through it. The electricity knocks electrons off the atoms; when an electron finds its way back, the atom gives off a flash of light at a colour that belongs to that gas and no other. Neon glows orange-red. Fill the tube with something else and you get a different colour. The gas is not burning and not hot in the ordinary sense; it is being poked, and it answers with light. A nebula is a neon sign the size of a solar system, or a thousand of them, with no tube and no wires. The poking is done by starlight, the harsh ultraviolet kind that only very hot, young stars give off in quantity. It strips the electrons from the hydrogen around the star, and every time an electron rejoins an atom the gas flashes. The colours are the colours of hydrogen and of the traces of oxygen and nitrogen mixed in, which is why nearly every nebula in every photograph is the same red and the same green. There is a limit to how far the glow reaches. Each particle of ultraviolet light, a photon, can strip one electron, and every stripped electron eventually finds an atom again and has to be stripped once more. Out to some distance the star supplies enough photons to keep up; beyond it, the gas goes dark. That distance is the size of the glowing bubble, and it is set by two things: how much ultraviolet the star makes, and how thick the gas is. Where the analogy breaks: a sign glows to the ends of its tube, however long, because the current runs the whole way. A nebula’s glow ends where the star’s light runs out, and that edge is sharp. And a sign’s colour is chosen; a nebula’s is not, so the same two colours turn up from the Orion Nebula to galaxies a billion light-years away.",
+    "L3 approximation 0": "The gas is uniform and pure hydrogen, so the glowing region is a perfect sphere. Real nebulae are clumpy, have their gas blown to one side, and their sizes vary from this by a factor of two or so.",
+    "L3 approximation 1": "The star’s ultraviolet is a single number, the count of photons able to ionize hydrogen. Which star it is, and how hot, are folded into that count.",
+    "L3 approximation 2": "The line strengths on the spectrum are typical for a nebula like Orion and do not change with the sliders except in overall brightness. Real ratios vary with temperature, density and how much oxygen and nitrogen the gas holds.",
+    "L3 caption": "Turn the star’s ultraviolet up and down and thicken or thin the gas, and watch the glowing bubble grow and shrink. Then look at the spectrum below to see where the red and the green come from.",
+    "L4 figure alt": "A billowing cloud of glowing gas on a dark starfield: pink and rose light pours from a bright, cream-white core a little left of centre, where a small tight group of stars sits, and spreads into orange-brown ridges to the right and a dark lane of dust at the upper left; a smaller pink-violet bubble sits at the upper left, and scattered blue-white stars dot the whole field.",
+    "L4 real": "The cloud in Orion’s sword is an emission nebula, or in astronomers’ language an H II region: a cloud of hydrogen in which the atoms have been split into protons and electrons, a state called ionization, by the ultraviolet light of hot stars. Only photons with wavelengths shorter than 91.2 nm carry enough energy to ionize hydrogen, and only stars hotter than about 25 000 K, of spectral types O and early B, produce them in quantity. Such stars live for a few million years at most, so an H II region marks a place where massive stars have formed very recently; the four Trapezium stars lighting Orion are less than a million years old, and the whole cloud is still making more. The glow is recombination light. When a free electron rejoins a proton it cascades down through the atom’s energy levels and emits a photon at each step; the step to the second level gives the Balmer series, and its brightest line, Hα at 656 nm, is the red of every nebula photograph. The green comes from oxygen: a forbidden line at 500.7 nm from twice-ionized oxygen, a transition so slow that in a laboratory the atom would be knocked out of the state by a collision long before it could emit, but in gas this thin, a hundred atoms per cubic centimetre, nothing comes along to knock it. To the eye at a telescope a bright nebula looks grey-green, because the eye is most sensitive there; the red belongs to cameras. The size of the glow was worked out by Bengt Strömgren in 1939. Each ionizing photon frees one electron; in gas of density n, electrons and protons recombine at a rate proportional to n^2; the ionized region grows until recombinations throughout its volume exactly consume the star’s supply of photons, and stops there. The result, the Strömgren sphere, has a radius proportional to the cube root of the photon rate divided by n^{2/3}: about 3 parsecs, 10 light-years, for a single O star in gas of 100 atoms per cubic centimetre. The edge is sharp, a transition from ionized to neutral gas only about a hundred astronomical units thick, because a photon entering neutral gas is absorbed within that distance. The ionized gas sits at about 10 000 K, a hundred times hotter than the neutral cloud around it, and its pressure drives the nebula outward at about ten kilometres per second, so real H II regions are not static spheres but expanding, often lopsided blisters on the face of the dark cloud that made their stars. Orion’s is one: the Trapezium sits in a cavity that has broken open toward us. Not every nebula shines this way. A reflection nebula only scatters the light of nearby stars and shows their colour, usually blue; a dark nebula is a cloud thick enough with dust to hide what lies behind it, and it is inside those that stars form; a planetary nebula is the shell shed by a dying Sun-like star, lit by the white dwarf at its centre; and the Crab is the debris of a core-collapse supernova. All are “nebulae” because to the first telescopes they were all the same: a faint smudge. Two misconceptions. Nebulae are not dense: a hundred atoms per cubic centimetre is a better vacuum than almost any laboratory on Earth can make, and a spacecraft flying through Orion would notice nothing. And the colours in the famous images are usually not what an eye would see; the Hubble palette maps sulphur, hydrogen and oxygen lines to red, green and blue to separate them, which turns hydrogen’s red into green. The sim’s formula assumes uniform gas, and real regions are neither uniform nor spherical; their measured sizes scatter around the Strömgren value by a factor of two or so. The photon rates of O stars are themselves model values, uncertain by a factor of about two for a given spectral type. The Orion Nebula, 1 300 light-years away, about 10 light-years across in this view. The four Trapezium stars near the centre supply the ultraviolet; hydrogen gives the red, oxygen the green, and the dark cloud that made the stars fills the background. NASA, ESA, Hubble Space Telescope Orion Treasury Project Team, Massimo Robberto (STScI, ESA)",
+    "L5 intro": null,
+    "L5 note (ionized-mass)": "M — the mass of glowing gas; m_p — the proton mass. Since R_S^3 \\propto Q / n^2, the mass goes as Q / n: a star lights up more gas when the gas is thinner.",
+    "L5 note (recombination-time)": "t_{\\text{rec}} — how long, on average, a proton waits before it captures an electron. If the star switched off, the nebula would fade on this timescale. Worked example, an O7 star in diffuse gas. Q = 10^{49}\\,\\text{photons/s}, n = 10^{8}\\,\\text{m}^{-3} (100 per cm³). R_S = (3 \\times 10^{49} / (4\\pi \\times (10^{8})^2 \\times 2.59 \\times 10^{-19}))^{1/3} = (9.22 \\times 10^{50})^{1/3} = 9.7 \\times 10^{16}\\,\\text{m} = 3.2\\,\\text{pc}, or 10 light-years M = (4/3)\\,\\pi\\,(9.7 \\times 10^{16})^3 \\times 10^{8} \\times 1.67 \\times 10^{-27} = 6.5 \\times 10^{32}\\,\\text{kg} = 325\\,M_\\odot t_{\\text{rec}} = 1 / (10^{8} \\times 2.59 \\times 10^{-19}) = 3.9 \\times 10^{10}\\,\\text{s} = 1 200 years In Orion’s core, at 10⁴ per cm³, the same star’s sphere shrinks to 0.15 pc, half a light-year: the bright heart of the nebula.",
+    "L5 note (stromgren)": "R_S — the Strömgren radius, the size of the ionized sphere; Q — the star’s rate of ionizing photons (your slider); n — the hydrogen number density (your slider); \\alpha_B — the recombination coefficient, 2.59 \\times 10^{-19}\\,\\text{m}^3/\\text{s} at 10 000 K, the rate at which a proton and an electron find each other per unit density. Ten times the density shrinks the bubble by a factor of 4.6.",
+    "L6 deeper": "Ionization balance in a static, uniform, pure-hydrogen nebula equates the star’s ionizing photon rate to the volume recombination rate: Q = \\tfrac{4}{3}\\pi R_S^3\\, n_e n_p \\alpha_B, with n_e = n_p = n for full ionization. \\alpha_B is the case-B coefficient, which excludes recombinations directly to the ground state on the argument that the Lyman-continuum photon they emit is reabsorbed nearby and ionizes another atom; it scales roughly as T^{-0.8} and is 2.59 \\times 10^{-19}\\,\\text{m}^3/\\text{s} at 10^4\\,\\text{K}. The ionization front is thin because the photoionization cross-section at threshold, 6.3 \\times 10^{-22}\\,\\text{m}^2, gives a mean free path 1/(n\\sigma) of order 10^{-3}\\,\\text{pc} at n = 10^8\\,\\text{m}^{-3}; over that distance the neutral fraction rises from below 10^{-3} to near unity. A region that runs out of gas before it runs out of photons is density-bounded and leaks ionizing radiation into the galaxy; the escape fraction from H II regions, of order ten to thirty percent, is one input to how the first galaxies reionized the universe. The sphere does not stay put. Photoionization deposits a few eV per ionization as electron kinetic energy, and the gas is cooled chiefly by the forbidden lines, above all [O III] 500.7 nm, which act as a thermostat holding H II regions between about 7 000 and 10 000 K almost regardless of the star. The ionized gas at 10^4\\,\\text{K} has a pressure some hundred times that of the neutral cloud at 100 K around it, so the region expands behind a shock at roughly its own sound speed, about 10 km/s. Spitzer’s solution for the expansion phase, R(t) = R_S\\,(1 + 7 c_s t / 4 R_S)^{4/7}, is what the sim’s million-year readout evaluates, and it triples the radius of the worked example in that time; it holds until the interior pressure matches the surroundings, or, usually sooner, until the region bursts out of its parent cloud into the lower-density gas beyond, the “champagne flow” that shapes Orion and most others. The forbidden lines also serve as diagnostics: the [S II] 671.6/673.1 nm ratio measures electron density, and the [O III] 436.3/500.7 nm ratio measures temperature, which is how the numbers in the sim are known at all. Because the Hα luminosity of a region counts its recombinations and therefore its ionizing photons, and those come only from stars younger than about 10 Myr, the Hα output of a whole galaxy is a clock on its current star formation: Kennicutt’s calibration, a star formation rate of 7.9 \\times 10^{-42} solar masses per year per erg per second of Hα, is the standard measure of how fast galaxies form stars, from nearby dwarfs to the most distant systems whose H II regions JWST now resolves. Planetary nebulae obey the same physics with a hotter and smaller engine: a white dwarf at 10^5\\,\\text{K} ionizes helium twice over and adds the He II line at 468.6 nm, and its nebula is a few tens of thousands of years from dispersing rather than a few million. The open questions are mostly about what the simple model leaves out: dust inside the region, which absorbs a large share of the ionizing photons and re-radiates them in the infrared; magnetic fields, which can carry as much pressure as the gas; and the clumpiness of real clouds, which lets ionizing photons escape along low-density channels and makes the measured sizes scatter around the Strömgren value.",
+    "L7 reason -> early-universe": "The first stars’ H II regions, grown until they overlapped, are how the universe was reionized after the dark ages of that module.",
+    "L7 reason -> exoplanets": "Stars form inside the dark clouds these regions carve out; every planet in that module began in one.",
+    "L7 reason -> stellar-fusion": "The stars doing the ionizing here are the massive end of what that module describes; their ultraviolet is the surface of a core ten times hotter than the Sun’s.",
+    "L7 reason -> supernovae": "The same stars end that way within a few million years, and a supernova remnant is what an H II region becomes once its star is gone.",
+    "reference 0": {
+      "label": "Strömgren 1939, “The Physical State of Interstellar Hydrogen”, ApJ 89, 526",
+      "note": "The Strömgren sphere",
+      "url": "https://doi.org/10.1086/144074",
+    },
+    "reference 1": {
+      "label": "Hummer & Storey 1987, “Recombination-line intensities for hydrogenic ions. I”, MNRAS 224, 801",
+      "note": "Case-B recombination coefficient",
+      "url": "https://doi.org/10.1093/mnras/224.3.801",
+    },
+    "reference 2": {
+      "label": "Sternberg, Hoffmann & Pauldrach 2003, “Ionizing Photon Emission Rates from O- and Early B-Type Stars and Clusters”, ApJ 599, 1333",
+      "note": "Q for O stars by spectral type",
+      "url": "https://doi.org/10.1086/379506",
+    },
+    "reference 3": {
+      "label": "O’Dell 2001, “The Orion Nebula and its Associated Population”, ARA&A 39, 99",
+      "note": "Orion’s structure, density and blister geometry",
+      "url": "https://doi.org/10.1146/annurev.astro.39.1.99",
+    },
+    "reference 4": {
+      "label": "Kennicutt 1998, “Star Formation in Galaxies Along the Hubble Sequence”, ARA&A 36, 189",
+      "note": "The Hα star-formation-rate calibration",
+      "url": "https://doi.org/10.1146/annurev.astro.36.1.189",
+    },
+    "tagline": "A cloud of gas lit from inside by newborn stars glows the way a neon sign does, and for the same reason.",
+    "title": "Nebulae",
+  },
   "planetary-atmospheres": {
     "L1 hook": "Every world is leaking. Earth loses about three kilograms of hydrogen to space each second. It is happening now, quietly, over your head.",
     "L2 intuition": "Put a handful of ping-pong balls in an open box and shake it. The balls bounce at all different heights — most stay low, a few leap surprisingly high — and if the shaking is vigorous enough, every so often one clears the rim and is gone. An atmosphere is that box. The shaking is heat: the warmer the gas, the faster its molecules dart about, and at any moment a few in the swarm are moving far faster than the rest. The rim is gravity: a world’s escape threshold. Molecules that happen to be in the fast few, headed upward, clear it and never return. Lighter balls bounce higher for the same shake, which is the crucial part: light gases ride the shaking faster than heavy ones, so a world can hold its heavy gases for eternity while its lightest ones drain away. The analogy breaks in one place: the box empties in minutes, because every ball takes its turn near the rim. A planet’s air leaks only from its thin uppermost fringe, and only from the fastest sliver of molecules there, so the draining takes millions to billions of years, a leak measured in geologic time.",
@@ -739,6 +785,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "Whatever is making the expansion speed up rather than slow down. About 70% of the universe’s energy today; its nature is unknown.",
     "title": "Dark energy",
   },
+  "dark-nebula": {
+    "body": "A cloud dense and dusty enough to block the stars behind it. The Horsehead is one; new stars form inside them.",
+    "title": "Dark nebula",
+  },
   "degrees-of-freedom": {
     "body": "The count of particle species light enough to be made at a given temperature, with fermions weighted 7/8. Sets how fast the early universe cooled.",
     "title": "Degrees of freedom, g*",
@@ -750,6 +800,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "eht": {
     "body": "A network of radio dishes across Earth acting as one planet-sized telescope; it photographed M87* and Sagittarius A*.",
     "title": "EHT",
+  },
+  "emission-nebula": {
+    "body": "A cloud of gas made to glow by the ultraviolet light of hot stars inside it. The Orion Nebula is one; astronomers call them H II regions.",
+    "title": "Emission nebula",
   },
   "equilibrium-temperature": {
     "body": "The temperature a planet settles at when the starlight it absorbs balances the heat it radiates, with no atmosphere. Earth’s is 255 K; its surface is 288 K.",
@@ -767,6 +821,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "10⁻¹⁵ metres: the scale of protons and atomic nuclei.",
     "title": "Femtometre",
   },
+  "forbidden-line": {
+    "body": "Light from an atomic transition so slow that in any laboratory the atom is bumped out of the state first. In a nebula, nothing bumps it, so the line shines: the green of oxygen is one.",
+    "title": "Forbidden line",
+  },
   "freeze-out": {
     "body": "When the universe cools below a particle’s rest energy, light can no longer make it in pairs. What exists then is what survives.",
     "title": "Freeze-out",
@@ -778,6 +836,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "greenhouse-effect": {
     "body": "Warming of a surface by an atmosphere that lets sunlight in but absorbs the heat radiated back. Earth’s adds 33 K; Venus’s adds about 500 K.",
     "title": "Greenhouse effect",
+  },
+  "h-ii-region": {
+    "body": "The astronomers’ name for an emission nebula: a region where hydrogen is ionized (H II, as against neutral H I). Wherever massive stars have just formed.",
+    "title": "H II region",
   },
   "habitable-zone": {
     "body": "The range of distances from a star where a planet with an Earth-like atmosphere could keep liquid water on its surface. A statement about temperature, not about life.",
@@ -810,6 +872,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "inspiral": {
     "body": "The final stage of a binary’s life: the orbit shrinking as gravitational waves carry energy away.",
     "title": "Inspiral",
+  },
+  "ionization": {
+    "body": "Knocking the electron off an atom. Ultraviolet light shorter than 91.2 nm can do it to hydrogen; only stars hotter than about 25 000 K make much of it.",
+    "title": "Ionization",
   },
   "isco": {
     "body": "The closest distance at which anything can steadily orbit a black hole; closer than this, it spirals in.",
@@ -951,6 +1017,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The fractional stretching of a light wave between leaving its source and arriving. Positive means longer, redder light.",
     "title": "Redshift",
   },
+  "reflection-nebula": {
+    "body": "A cloud that shines only by scattering the light of nearby stars, and so shows their colour, usually blue. The haze around the Pleiades is one.",
+    "title": "Reflection nebula",
+  },
   "ringdown": {
     "body": "The last vibration of the merged hole, ringing like a struck bell as it settles into shape.",
     "title": "Ringdown",
@@ -998,6 +1068,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "strain": {
     "body": "The fractional stretch a passing wave gives any length; dimensionless, and around 10⁻²¹ at Earth.",
     "title": "Strain",
+  },
+  "stromgren-sphere": {
+    "body": "The sphere of ionized gas a hot star can maintain: the size at which atoms recombine exactly as fast as the star’s ultraviolet re-ionizes them.",
+    "title": "Strömgren sphere",
   },
   "superposition": {
     "body": "A quantum state that is several classical possibilities at once, until a measurement picks one. Tunnelling is a consequence of it.",

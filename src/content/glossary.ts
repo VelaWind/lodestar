@@ -458,6 +458,37 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Tidal locking',
     body: 'A planet turning one face permanently to its star, as the Moon does to Earth. Expected for planets in the habitable zones of red dwarfs.',
   },
+
+  /* Nebulae -------------------------------------------------------- */
+
+  'emission-nebula': {
+    title: 'Emission nebula',
+    body: 'A cloud of gas made to glow by the ultraviolet light of hot stars inside it. The Orion Nebula is one; astronomers call them H II regions.',
+  },
+  'h-ii-region': {
+    title: 'H II region',
+    body: 'The astronomers’ name for an emission nebula: a region where hydrogen is ionized (H II, as against neutral H I). Wherever massive stars have just formed.',
+  },
+  ionization: {
+    title: 'Ionization',
+    body: 'Knocking the electron off an atom. Ultraviolet light shorter than 91.2 nm can do it to hydrogen; only stars hotter than about 25 000 K make much of it.',
+  },
+  'stromgren-sphere': {
+    title: 'Strömgren sphere',
+    body: 'The sphere of ionized gas a hot star can maintain: the size at which atoms recombine exactly as fast as the star’s ultraviolet re-ionizes them.',
+  },
+  'forbidden-line': {
+    title: 'Forbidden line',
+    body: 'Light from an atomic transition so slow that in any laboratory the atom is bumped out of the state first. In a nebula, nothing bumps it, so the line shines: the green of oxygen is one.',
+  },
+  'reflection-nebula': {
+    title: 'Reflection nebula',
+    body: 'A cloud that shines only by scattering the light of nearby stars, and so shows their colour, usually blue. The haze around the Pleiades is one.',
+  },
+  'dark-nebula': {
+    title: 'Dark nebula',
+    body: 'A cloud dense and dusty enough to block the stars behind it. The Horsehead is one; new stars form inside them.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */

@@ -24,6 +24,7 @@ if (import.meta.env.DEV) {
       verifyFusionModel,
       verifySupernovaModel,
       verifyHabitableModel,
+      verifyNebulaModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -39,6 +40,7 @@ if (import.meta.env.DEV) {
       verifyFusionModel();
       verifySupernovaModel();
       verifyHabitableModel();
+      verifyNebulaModel();
     },
   );
 }
