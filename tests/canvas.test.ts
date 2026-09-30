@@ -26,6 +26,7 @@ import nebulae from '@/content/modules/nebulae';
 import cosmicDistanceLadder from '@/content/modules/cosmic-distance-ladder';
 import timeDilation from '@/content/modules/time-dilation';
 import hawkingRadiation from '@/content/modules/hawking-radiation';
+import wormholes from '@/content/modules/wormholes';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -44,6 +45,7 @@ import { __internals as neb } from '@/sims/nebulae';
 import { __internals as cdl } from '@/sims/cosmic-distance-ladder';
 import { __internals as td } from '@/sims/time-dilation';
 import { __internals as hr } from '@/sims/hawking-radiation';
+import { __internals as wh } from '@/sims/wormholes';
 import { massEvaporatingIn, massForHawkingTemperature } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
@@ -76,6 +78,8 @@ import {
   M_MOON,
   M_SUN,
   PARSEC,
+  R_EARTH,
+  R_SUN,
   T_CMB,
 } from '@/physics/constants';
 import {
@@ -1667,6 +1671,119 @@ function hawkingRadiationCases(): Case[] {
   return cases;
 }
 
+/* ---------------------------------- wormholes ---------------------------------- */
+
+const WH_HEIGHT = 544;
+
+function wormholeCases(): Case[] {
+  const bParam = paramOf(wormholes.layers.play.params, 'b0');
+  const cases: Case[] = [];
+
+  // The slider's ends and default, and the review's stops: a doorway, a kilometre,
+  // the Earth's radius and the Sun's.
+  const stops: { stop: string; b0: number }[] = [
+    ...extremes(bParam).map((s) => ({ stop: s.stop, b0: s.value })),
+    { stop: 'a doorway', b0: 1.7 },
+    { stop: 'a kilometre', b0: 1000 },
+    { stop: 'the Earth', b0: R_EARTH },
+    { stop: 'the Sun', b0: R_SUN },
+  ];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const s of stops) {
+      cases.push({
+        label: `b0=${s.stop} ${units}`,
+        draw: (ctx, w, h) => wh.drawScene(ctx, w, h, { b0: s.b0, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every throat a reader can reach.
+   *
+   * The diagram keeps its shape while the ruler's label and the reference
+   * beside the throat change with the scale; below, the dot rides the line past
+   * the three named masses. Swept a tenth of a decade at a time, everything must
+   * be drawn clear and inside the frame, and no text may sit under a dot.
+   */
+  it('keeps every label drawn and clear across the throat range', () => {
+    const expected = [
+      'The shape of the tunnel',
+      'this mouth',
+      'the other mouth',
+      'The negative mass it needs',
+      'the Earth',
+      'Jupiter',
+      'the Sun',
+    ];
+    const check = (b0: number, units: 'friendly' | 'technical', width: number) => {
+      const { ctx, records } = recordingContext();
+      wh.drawScene(ctx, width, WH_HEIGHT, { b0, units });
+      const where = `b0=${b0.toPrecision(3)} ${units} @${width}`;
+      const texts = records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
+      for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+        `${where}: labels overlap`,
+      ).toEqual([]);
+      expect(
+        textOutsideFrame(records, width, WH_HEIGHT).map(describeRecord),
+        `${where}: text outside the frame`,
+      ).toEqual([]);
+      const dots = records.filter((rec) => rec.kind === 'arc' && rec.x1 - rec.x0 <= 12);
+      const covered = records
+        .filter((rec) => rec.kind === 'text')
+        .flatMap((t) =>
+          dots
+            .filter((a) => Math.min(t.x1, a.x1) - Math.max(t.x0, a.x0) > 1 && Math.min(t.y1, a.y1) - Math.max(t.y0, a.y0) > 1)
+            .map((a) => `${describeRecord(t)}  under  ${describeRecord(a)}`),
+        );
+      expect(covered, `${where}: text under a dot`).toEqual([]);
+    };
+    for (const units of ['friendly', 'technical'] as const) {
+      for (const width of [246, 390, 900]) {
+        for (let e = Math.log10(bParam.min); e <= Math.log10(bParam.max) + 1e-9; e += 0.1) {
+          check(Math.min(bParam.max, 10 ** e), units, width);
+        }
+        check(bParam.max, units, width);
+      }
+    }
+  });
+
+  it('labels the ruler and names the reference that suits the scale', () => {
+    const texts = (b0: number, units: 'friendly' | 'technical') => {
+      const { ctx, records } = recordingContext();
+      wh.drawScene(ctx, 900, WH_HEIGHT, { b0, units });
+      return records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
+    };
+    expect(texts(1, 'friendly')).toContain('1 m');
+    expect(texts(1, 'friendly')).toContain('a person');
+    expect(texts(1, 'technical')).toContain('b₀ = 1 m');
+    expect(texts(R_EARTH, 'friendly')).toContain('the Earth');
+    expect(texts(R_EARTH, 'friendly')).toContain('6370 km');
+    expect(texts(R_SUN, 'friendly')).toContain('696,000 km');
+    expect(texts(1000, 'friendly')).not.toContain('a person');
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    expect(wh.formatLength(6.2832)).toBe('6.28 m');
+    expect(wh.formatLength(6.2832e-3)).toBe('6.28 mm');
+    expect(wh.formatLength(0.9983)).toBe('0.998 m');
+    expect(wh.formatLength(0.0628)).toBe('0.0628 m');
+    expect(wh.formatLength(4.0030e7)).toBe('40,000 km');
+    expect(wh.formatLength(9.4248e13)).toBe('630 AU');
+    expect(wh.formatExoticMass(-2.1152e27)).toBe('−2.12 × 10²⁷ kg (minus 1.11 Jupiters)');
+    expect(wh.formatExoticMass(-2.1152e24)).toBe('−2.12 × 10²⁴ kg (minus 0.354 Earths)');
+    expect(wh.formatExoticMass(-2.1152e30)).toBe('−2.12 × 10³⁰ kg (minus 1.06 Suns)');
+    expect(wh.formatExoticMass(-3.1728e40)).toBe('−3.17 × 10⁴⁰ kg (minus 16 billion Suns)');
+    expect(wh.formatDensity(-5.3579e25)).toBe('−5.36 × 10²⁵ kg/m³');
+    expect(wh.formatDensity(-0.2381)).toBe('−0.238 kg/m³');
+    expect(wh.formatCasimirGap(3.08e-18)).toBe('3.08 × 10⁻¹⁸ m (3.66 × 10⁻³ times a proton’s radius)');
+    expect(wh.formatCasimirGap(7.774e-15)).toBe('7.77 × 10⁻¹⁵ m (9.24 times a proton’s radius)');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -1687,6 +1804,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'cosmic-distance-ladder', height: CDL_HEIGHT, cases: ladderCases },
   { name: 'time-dilation', height: TD_HEIGHT, cases: timeDilationCases },
   { name: 'hawking-radiation', height: HR_HEIGHT, cases: hawkingRadiationCases },
+  { name: 'wormholes', height: WH_HEIGHT, cases: wormholeCases },
 ];
 
 /**
@@ -1722,6 +1840,7 @@ const MEASURED_PLACEMENT = new Set([
   'cosmic-distance-ladder',
   'time-dilation',
   'hawking-radiation',
+  'wormholes',
 ]);
 
 for (const sim of SIMS) {
