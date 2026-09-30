@@ -137,13 +137,14 @@ export function hawkingTemperature(M: number): number {
  *
  * This is the Page-type estimate for a hole emitting photons only, integrated
  * from the Stefan–Boltzmann power of a horizon at T_H. It is order-of-magnitude,
- * not a prediction: the coefficient rises once other massless species are
- * included, and falls again as a shrinking hole heats past the mass thresholds
- * where it can emit electrons, then hadrons — Page's full accounting for a
- * non-rotating hole is about ten times faster than the photons-only figure for
- * massless species alone (Page 1976), and faster still once heavier species
- * switch on. Greybody factors and the final, non-semiclassical phase
- * are not modelled at all.
+ * not a prediction, and how far off it is depends on the mass. For holes this
+ * heavy, far too cold to emit neutrinos (which have mass), adding gravitons and
+ * the exact emission factors shortens it roughly twofold: Page 1976's photon
+ * and graviton shares, 19% of 2.011 × 10⁻⁴ ħc⁶/(G²M²), against the naive
+ * photon blackbody's 1/(15360π), a factor of 1.84. A hole hot enough to emit
+ * neutrinos, lighter than about 10²¹ kg, evaporates about ten times faster than
+ * this figure, and faster still once electrons, then hadrons, switch on.
+ * The final, non-semiclassical phase is not modelled at all.
  *
  * It also ignores everything the hole is sitting in. For any hole this module
  * can display, the number is counterfactual: absorbing the CMB alone outweighs

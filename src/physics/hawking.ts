@@ -14,8 +14,10 @@
  *
  * Photons only, as `evaporationTime` is: the power below is the one whose
  * integral gives that lifetime, so the two are consistent by construction.
- * A real hole also emits neutrinos and gravitons, and heavier particles once it
- * is hot enough; the module discloses that this costs about tenfold.
+ * A real hole also emits gravitons; neutrinos, which have mass, only once it is
+ * hotter than their rest energy (lighter than about 10²¹ kg); and heavier
+ * particles once hotter still. The module discloses the cost by mass: about
+ * twofold for a cold hole near a solar mass, tenfold or more for a hot one.
  *
  * The sim, its readouts and the sanity block all read these functions.
  */

@@ -20,7 +20,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Param, ParamValues, SimProps } from '@/content/types';
-import { AU, JULIAN_YEAR, R_EARTH, R_SUN } from '@/physics/constants';
+import { A_NEPTUNE, AU, JULIAN_YEAR, R_EARTH, R_SUN } from '@/physics/constants';
 import {
   PERSON_HEIGHT,
   evaporationTime,
@@ -136,8 +136,8 @@ const COMPARISONS: Comparison[] = [
   { id: 'city', name: 'A city, ~20 km', extent: 2e4 },
   { id: 'earth', name: 'Earth', extent: 2 * R_EARTH },
   { id: 'sun', name: 'The Sun', extent: 2 * R_SUN },
-  // NASA Planetary Fact Sheet: Neptune's semi-major axis, 30.07 AU.
-  { id: 'neptune-orbit', name: 'Neptune’s orbit', extent: 2 * 30.07 * AU },
+  // Neptune's semi-major axis, 30.07 AU (constants.ts, JPL mean element).
+  { id: 'neptune-orbit', name: 'Neptune’s orbit', extent: 2 * A_NEPTUNE },
 ];
 
 /** The comparison closest to the horizon in log space — nearest in *ratio*. */

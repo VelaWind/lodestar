@@ -14,7 +14,7 @@ import { M_SUN, MEGAPARSEC } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
 import { logMinThrough, logStep } from '../grid';
 
-/** The distance slider's top, m, and a bottom that puts GW150914's 410 Mpc on the grid. */
+/** The distance slider's top, m, and a bottom that puts the default, 408 Mpc, on the grid. */
 const D_MAX = 1e26;
 const D_MIN = logMinThrough(1.26e25, D_MAX, 400, 310);
 
@@ -60,7 +60,7 @@ const gravitationalWaves: Module = {
           em('through'),
           ' a medium. A gravitational wave has no medium. It is the distances between things that ',
           'ripple; the “pond” is the geometry you are made of, and when the wave passes, you are ',
-          'momentarily, very slightly, taller and thinner.',
+          'stretched one way and squeezed the other, then the reverse, over and over.',
         ),
       ),
     },
@@ -71,9 +71,11 @@ const gravitationalWaves: Module = {
       caption: prose(
         p(
           'Choose two masses and how far away they collide, then watch the final moments of the ',
-          'spiral. The trace rises in frequency and strength together — the chirp — and the ',
-          'button plays it at its true frequencies, which for black holes sit, by coincidence, in ',
-          'the range of human hearing.',
+          'spiral. The trace rises in frequency and strength together — the chirp — and shows only ',
+          'the final octave, slowed down. The button plays the chirp at true speed and its true ',
+          'frequencies from 30 Hz, where a detector’s band opens (the last six seconds of it, for ',
+          'a pair as light as two neutron stars); for black holes those frequencies sit, by ',
+          'coincidence, in the range of human hearing.',
         ),
       ),
       params: [
@@ -83,8 +85,9 @@ const gravitationalWaves: Module = {
           technicalLabel: 'Primary mass',
           symbol: 'm_1',
           unit: 'kg',
-          // 1 to 100 M_☉ spans the range ground-based detectors work in: from
-          // below a neutron star to the heaviest binary black holes catalogued.
+          // 1 to 100 M_☉ spans most of what ground-based detectors see: from below
+          // a neutron star to black holes as heavy as GW190521's 85 M_☉ primary. A
+          // few catalogued components are heavier than the slider reaches.
           min: 1 * M_SUN,
           max: 100 * M_SUN,
           default: 36 * M_SUN, // GW150914's heavier component
@@ -119,12 +122,13 @@ const gravitationalWaves: Module = {
           technicalLabel: 'Distance',
           symbol: 'd',
           unit: 'm',
-          // About 1e22 m ≈ 0.3 Mpc, just past the Andromeda galaxy; 1e26 m ≈ 3 Gpc,
-          // beyond the most distant merger detected so far. The minimum is nudged
+          // About 1e22 m ≈ 0.3 Mpc, just past the Andromeda galaxy; 1e26 m ≈ 3 Gpc, out
+          // to where many detected mergers lie (GW190521, among the most distant,
+          // was about 5.3 Gpc away). The minimum is nudged
           // 0.4% above 1e22 so the default is step 310 of 400.
           min: D_MIN,
           max: D_MAX,
-          default: 1.26e25, // ≈410 Mpc, GW150914's luminosity distance
+          default: 1.26e25, // 408 Mpc: GW150914's measured 410 Mpc luminosity distance, rounded
           step: logStep(D_MIN, D_MAX, 400), // decades, about 0.01
           scale: 'log',
           format: {
@@ -154,9 +158,9 @@ const gravitationalWaves: Module = {
         ),
         prose(
           p(
-            'The amplitude is averaged over sky position and orientation. A real detector measures F₊h₊ + F×h×: what gets through depends on where the source sits in the antenna pattern and how the orbital plane is tilted to the line of sight, varying the ',
+            'The amplitude is for an optimally oriented source (face-on, directly overhead); averaged over sky position and orientation the detected amplitude is 2/5 of this, and a real source can only be fainter. A real detector measures F₊h₊ + F×h×: how much ',
             term('strain', 'strain'),
-            ' by a factor of a few either way. The readout is an order-of-magnitude figure, not a prediction of what a particular instrument would record.',
+            ' gets through depends on where the source sits in the antenna pattern and how the orbital plane is tilted to the line of sight. The readout is an upper figure, not a prediction of what a particular instrument would record.',
           ),
         ),
         prose(
@@ -206,8 +210,8 @@ const gravitationalWaves: Module = {
           'beams cancel exactly — until a passing wave stretches one arm while squeezing the ',
           'other and light leaks through. LIGO’s two detectors caught the first signal, GW150914, ',
           'on 14 September 2015: the final fifth of a second of two black holes, thirty-six and ',
-          'twenty-nine solar masses, that had spiralled toward each other for the better part of ',
-          'the universe’s age. The wave reached Earth from 1.3 billion light-years away.',
+          'twenty-nine solar masses, that may have spiralled toward each other for billions of ',
+          'years. The wave reached Earth from 1.3 billion light-years away.',
         ),
         p(
           'The signal’s signature is the ',
@@ -220,7 +224,8 @@ const gravitationalWaves: Module = {
         ),
         p(
           'Two years later came the discovery that opened a second field: GW170817, two neutron ',
-          'stars, whose chirp lasted nearly a minute and ended in an explosion telescopes could ',
+          'stars, whose chirp lasted about a hundred seconds in the detectors’ band and ended in ',
+          'an explosion telescopes could ',
           'see. Comparing the wave’s arrival with the light’s showed gravitational waves travel ',
           'at the speed of light to exquisite precision.',
         ),
@@ -229,11 +234,11 @@ const gravitationalWaves: Module = {
           'waves are not sound. They cross empty space, where sound cannot; playing the chirp is ',
           'a ',
           em('sonification'),
-          ', honest only because the frequencies happen to be audible ones. And unlike sound or ',
-          'light from a bulb, what falls off with distance is the wave’s amplitude, as ',
-          m`1/d`,
-          ' rather than ',
+          ', honest only because the frequencies happen to be audible ones. And unlike a ',
+          'telescope, which collects light’s energy (falling as ',
           m`1/d^2`,
+          '), a gravitational-wave detector records the wave’s amplitude itself, which falls as ',
+          m`1/d`,
           ', with the striking consequence that making a detector twice as sensitive reaches ',
           'twice as far, and so eight times as much universe.',
         ),
@@ -320,14 +325,14 @@ const gravitationalWaves: Module = {
               m`\mathcal{M}_c`,
               ' = 28.1 solar masses. At the model’s ',
               term('cutoff frequency', 'cutoff-frequency'),
-              ', 68 Hz, and 408 ',
+              ', 68 Hz, and the default 408 ',
               term('megaparsecs', 'megaparsec'),
-              ', ',
+              ' (GW150914’s measured 410, rounded), an optimally oriented source gives ',
               m`h`,
               ' = 1.3 × 10⁻²¹ — which over a four-kilometre arm is a length change of 5 × 10⁻¹⁸ m, ',
               'about one three-hundredth the width of a proton. Slide both masses down to 1.4 — a ',
-              'neutron-star pair — and the chirp stretches from a fifth of a second to nearly a ',
-              'minute.',
+              'neutron-star pair — and the chirp from 30 Hz to merger stretches from under a third ',
+              'of a second to nearly a minute.',
             ),
           ),
         },
@@ -344,9 +349,10 @@ const gravitationalWaves: Module = {
           'alternatives. Monopole radiation would require the total mass-energy to oscillate; it ',
           'is conserved. Dipole radiation would require the mass dipole’s second derivative (the ',
           'centre of mass) to accelerate; momentum conservation forbids it. The leading ',
-          'radiative term is therefore the third derivative of the mass ',
+          'radiative term is therefore the mass ',
           em('quadrupole'),
-          ', which is why gravitational radiation is so faint and why only violently asymmetric ',
+          ': the strain goes with its second time derivative and the radiated power with the ',
+          'square of its third, which is why gravitational radiation is so faint and why only violently asymmetric ',
           'motion emits usefully: a perfectly spherical collapse, however cataclysmic, radiates ',
           'nothing.',
         ),
@@ -380,8 +386,9 @@ const gravitationalWaves: Module = {
           'The waves were believed in long before they were caught. The Hulse–Taylor binary ',
           'pulsar, found in 1974, is a natural clock in a decaying orbit, and four decades of ',
           'timing show the decay tracking the energy gravitational waves should carry off to ',
-          'better than a percent. That was the indirect proof, and a Nobel prize, twenty years ',
-          'before LIGO’s direct one.',
+          'within 0.2 percent. That was the indirect proof. The 1993 Nobel prize went to the ',
+          'pulsar’s discovery, which opened that test; LIGO’s direct detection came twenty-two ',
+          'years later.',
         ),
         p(
           'What the field is becoming is an instrument. A chirp’s amplitude and its timing ',
@@ -444,9 +451,9 @@ const gravitationalWaves: Module = {
       note: 'Speed-of-gravity constraint',
     },
     {
-      label: 'Weisberg & Taylor 2005, “The Relativistic Binary Pulsar B1913+16”, ASP Conf. 328',
-      url: 'https://arxiv.org/abs/astro-ph/0407149',
-      note: 'Hulse–Taylor orbital decay in layer 6',
+      label: 'Weisberg & Huang 2016, “Relativistic Measurements from Timing the Binary Pulsar PSR B1913+16”, ApJ 829, 55',
+      url: 'https://doi.org/10.3847/0004-637X/829/1/55',
+      note: 'Hulse–Taylor orbital decay in layer 6: 0.9983 ± 0.0016 of the prediction',
     },
     {
       label:
