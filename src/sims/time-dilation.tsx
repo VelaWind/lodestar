@@ -71,6 +71,16 @@ function formatTripTime(seconds: number): string {
   return `${SIG3.format(years / 1e9)} billion years`;
 }
 
+/** A trip's length, or the plain statement that a traveller at rest never arrives. */
+function formatTrip(seconds: number, moving: boolean): string {
+  return moving ? formatTripTime(seconds) : 'never: not moving';
+}
+
+/** The traveller's daily loss, or the plain statement that at rest there is none. */
+function formatDailyLoss(seconds: number, moving: boolean): string {
+  return moving ? formatDuration(seconds) : 'none: not moving';
+}
+
 /** The Lorentz factor to four significant figures: "1.667". */
 function formatGamma(gamma: number): string {
   return Number.isFinite(gamma) ? SIG4.format(gamma) : '—';
@@ -297,6 +307,8 @@ function drawClocks(
   const right = w - PAD.right;
   const gamma = lorentzFactor(view.v);
   const trip = twinTrip(D_PROXIMA, view.v);
+  // At rest the trip never happens: both clocks show the same and stand still.
+  const moving = view.v > 0;
 
   ctx.font = FONT;
   ctx.textBaseline = 'alphabetic';
@@ -312,8 +324,8 @@ function drawClocks(
   const radius = Math.max(16, Math.min((right - left) / 4 - 16, (splitY - 36 - 30 - barBlock - 14) / 2, 70));
   const cy = 36 + radius;
   const faces: [number, string, number, string, string, string][] = [
-    [left + (right - left) * 0.27, 'at home', view.phase, COLORS.home, COLORS.star, formatTripTime(trip.home_s)],
-    [left + (right - left) * 0.73, 'on the ship', view.phase / gamma, COLORS.ship, COLORS.warm, formatTripTime(trip.traveller_s)],
+    [left + (right - left) * 0.27, 'at home', moving ? view.phase : 0, COLORS.home, COLORS.star, formatTrip(trip.home_s, moving)],
+    [left + (right - left) * 0.73, 'on the ship', moving ? view.phase / gamma : 0, COLORS.ship, COLORS.warm, formatTrip(trip.traveller_s, moving)],
   ];
   for (const [cx, name, turns, fill, hand, elapsed] of faces) {
     ctx.fillStyle = COLORS.ink;
@@ -456,7 +468,7 @@ function drawGravity(
   }
 
   ctx.fillStyle = COLORS.ember;
-  labelNear(ctx, rate.toFixed(3), xD, yD, plotBox, obstacles, marks);
+  labelNear(ctx, rate.toFixed(4), xD, yD, plotBox, obstacles, marks);
 }
 
 /**
@@ -499,13 +511,15 @@ function readParam(params: Param[], values: ParamValues, id: string): number {
 type Shown = { v: number; r: number };
 
 /**
- * Slides `shown[key]` to `to` in log space, painting each frame; a changed
- * target cancels the frame in flight.
+ * Slides `shown[key]` to `to`, in log space for a log slider and linearly
+ * otherwise (v starts at rest, where a log has nowhere to begin), painting
+ * each frame; a changed target cancels the frame in flight.
  */
 function slide(
   shown: { current: Shown },
   key: keyof Shown,
   to: number,
+  log: boolean,
   jump: boolean,
   paint: () => void,
 ): (() => void) | undefined {
@@ -515,14 +529,15 @@ function slide(
     paint();
     return undefined;
   }
-  const logFrom = Math.log(from);
-  const logTo = Math.log(to);
+  const a = log ? Math.log(from) : from;
+  const b = log ? Math.log(to) : to;
   let frame = 0;
   let start: number | null = null;
   const tick = (time: number) => {
     if (start === null) start = time;
     const progress = Math.min(1, (time - start) / DURATION.slow);
-    const value = progress >= 1 ? to : Math.exp(logFrom + (logTo - logFrom) * eased(EASE.out, progress));
+    const t = a + (b - a) * eased(EASE.out, progress);
+    const value = progress >= 1 ? to : log ? Math.exp(t) : t;
     shown.current = { ...shown.current, [key]: value };
     paint();
     if (progress < 1) frame = requestAnimationFrame(tick);
@@ -545,6 +560,7 @@ export default function TimeDilationSim({ params, values }: SimProps) {
   const gamma = lorentzFactor(v);
   const dailyLoss = clockDeficit(v) * DAY_S;
   const trip = twinTrip(D_PROXIMA, v);
+  const moving = v > 0;
   const rate = gravitationalRate(M_DEMO_BH, r);
   const hourFarAway = rate > 0 ? HOUR / rate : Infinity;
   const combined = rate / gamma;
@@ -589,8 +605,8 @@ export default function TimeDilationSim({ params, values }: SimProps) {
   }, !reduced);
 
   /* The clocks follow v and the dot follows r. */
-  useEffect(() => slide(shownRef, 'v', v, reduced, paint), [v, reduced, paint]);
-  useEffect(() => slide(shownRef, 'r', r, reduced, paint), [r, reduced, paint]);
+  useEffect(() => slide(shownRef, 'v', v, false, reduced, paint), [v, reduced, paint]);
+  useEffect(() => slide(shownRef, 'r', r, true, reduced, paint), [r, reduced, paint]);
 
   /* Resize-safe: repaint on any container size change, including DPR moves. */
   useEffect(() => {
@@ -617,10 +633,10 @@ export default function TimeDilationSim({ params, values }: SimProps) {
         <Readout label={deep ? 'Lorentz factor γ' : 'How much slower the moving clock runs'} value={formatGamma(gamma)} />
         <Readout
           label={deep ? '(1 − 1/γ) × 1 day' : 'A day at home, the traveller’s clock loses'}
-          value={formatDuration(dailyLoss)}
+          value={formatDailyLoss(dailyLoss, moving)}
         />
-        <Readout label={deep ? '2d/v' : 'Round trip to Proxima Centauri, at home'} value={formatTripTime(trip.home_s)} />
-        <Readout label={deep ? '2d/(γv)' : '…and for the traveller'} value={formatTripTime(trip.traveller_s)} />
+        <Readout label={deep ? '2d/v' : 'Round trip to Proxima Centauri, at home'} value={formatTrip(trip.home_s, moving)} />
+        <Readout label={deep ? '2d/(γv)' : '…and for the traveller'} value={formatTrip(trip.traveller_s, moving)} />
         <Readout
           label={deep ? '√(1 − rₛ/r)' : 'Clock speed this close to the black hole'}
           value={formatRate(rate)}
@@ -656,6 +672,8 @@ export const __internals = {
   drawScene,
   formatDuration,
   formatTripTime,
+  formatTrip,
+  formatDailyLoss,
   formatGamma,
   formatRate,
 };

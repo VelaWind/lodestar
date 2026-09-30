@@ -61,6 +61,7 @@ import {
 } from '@/physics/cosmology';
 import {
   AU,
+  C,
   EV,
   H_ALPHA_AIR,
   JULIAN_YEAR,
@@ -1423,9 +1424,9 @@ function timeDilationCases(): Case[] {
   const views: { stop: string; v: number; r: number; phase: number }[] = [
     ...extremes(vParam).map((s) => ({ stop: `v=${s.stop}`, v: s.value, r: rParam.default, phase: 1 })),
     ...extremes(rParam).map((s) => ({ stop: `r=${s.stop}`, v: vParam.default, r: s.value, phase: 1 })),
-    { stop: 'v=30 m/s', v: 30, r: rParam.default, phase: 1 },
-    { stop: 'v=3874 m/s', v: 3874, r: rParam.default, phase: 1 },
-    { stop: 'v=0.998 c', v: 0.998 * 299_792_458, r: rParam.default, phase: 1 },
+    { stop: 'v=0.001 c', v: 0.001 * C, r: rParam.default, phase: 1 },
+    { stop: 'v=0.998 c', v: 0.998 * C, r: rParam.default, phase: 1 },
+    { stop: 'at rest, mid-loop', v: 0, r: rParam.default, phase: 0.37 },
     { stop: 'r=3 r_s', v: vParam.default, r: 3 * rs, phase: 1 },
     { stop: 'mid-loop', v: vParam.default, r: rParam.default, phase: 0.37 },
     { stop: 'loop start', v: vParam.default, r: rParam.default, phase: 0 },
@@ -1481,9 +1482,9 @@ function timeDilationCases(): Case[] {
     for (const units of ['friendly', 'technical'] as const) {
       for (const width of [246, 390, 900]) {
         for (const phase of [0.37, 1]) {
-          for (let e = Math.log10(vParam.min); e <= Math.log10(vParam.max) + 1e-9; e += 0.1) {
-            check(Math.min(vParam.max, 10 ** e), rParam.default, phase, units, width);
-          }
+          // Rest to the maximum in hundredths of c, then the grid's first and top steps.
+          for (let k = 0; k * 0.01 * C <= vParam.max; k++) check(k * 0.01 * C, rParam.default, phase, units, width);
+          for (const beta of [0.001, 0.995, 0.998]) check(beta * C, rParam.default, phase, units, width);
           check(vParam.max, rParam.default, phase, units, width);
         }
         for (let e = Math.log10(rParam.min); e <= Math.log10(rParam.max) + 1e-9; e += 0.1) {
@@ -1503,7 +1504,24 @@ function timeDilationCases(): Case[] {
     expect(texts).toContain('6.37 years');
   });
 
+  it('stops both clocks together when the traveller is at rest', () => {
+    const { ctx, records } = recordingContext();
+    td.drawScene(ctx, 900, TD_HEIGHT, { v: 0, r: rParam.default, phase: 0.37, units: 'friendly' });
+    const texts = records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
+    expect(texts.filter((t) => t === 'never: not moving')).toHaveLength(2);
+    // Neither face draws an elapsed wedge (one pixel inside the rim), so every
+    // arc wider than a hub is a rim of the same size.
+    const faces = records.filter((rec) => rec.kind === 'arc' && rec.x1 - rec.x0 > 12);
+    expect(faces).toHaveLength(2);
+    expect(faces[0]!.x1 - faces[0]!.x0).toBeCloseTo(faces[1]!.x1 - faces[1]!.x0, 6);
+  });
+
   it('formats the readouts the way the brief promises', () => {
+    expect(td.formatTrip(10.6163 * JULIAN_YEAR, true)).toBe('10.6 years');
+    expect(td.formatTrip(Infinity, false)).toBe('never: not moving');
+    expect(td.formatDailyLoss(0, false)).toBe('none: not moving');
+    expect(td.formatDailyLoss(4.8e-13, true)).toBe('0.48 ps');
+    expect(td.formatGamma(1)).toBe('1.000');
     expect(td.formatGamma(1.6666667)).toBe('1.667');
     expect(td.formatGamma(1 + 6e-18)).toBe('1.000');
     expect(td.formatDuration(4.8e-13)).toBe('0.48 ps');
