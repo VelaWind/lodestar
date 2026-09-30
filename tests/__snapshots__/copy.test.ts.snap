@@ -333,6 +333,53 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "Two black holes fall together, and space itself rings.",
     "title": "Gravitational Waves",
   },
+  "habitable-zone": {
+    "L1 hook": "Put the Earth a third closer to the Sun and its oceans boil away; put it twice as far out and they freeze solid. Every planet found around another star is asked the same first question: does it sit between those two?",
+    "L2 intuition": "Sit by a campfire on a cold night. Too close and your face burns; too far and you shiver; somewhere in between is a ring where it is comfortable, and everyone finds it without being told. Build a bigger fire and the ring moves outward and gets wider. Let the fire die down and it shrinks toward the embers. A star is the fire and a planet is the person. The comfortable ring is the band of distances where the planet is warm enough for water to stay liquid but not so warm that it boils, and it is called the habitable zone. A bright star has a wide zone far out; a dim one has a narrow zone hugging the star. Where a planet sits in that ring decides, before anything else, whether it could have oceans. There is one more thing you can do at a campfire: put on a coat. A coat lets you sit farther out and still be warm. A planet’s coat is its atmosphere, and it can make an enormous difference: Earth’s makes it 33 degrees warmer than it would otherwise be. Where the analogy breaks: a fire warms only the side of you that faces it, while a spinning planet shares the heat around. And a coat only keeps heat in; a thick atmosphere can trap so much that the planet ends up hotter than one nearer the star with no coat at all. Venus, closer to the Sun than we are but wrapped in a coat a hundred times thicker than ours, is hotter than Mercury.",
+    "L3 approximation 0": "The planet is a fast-spinning bare rock that absorbs and radiates evenly, so its temperature is a single number. A real planet has a day side, a night side and weather.",
+    "L3 approximation 1": "The zone edges are the climate-model limits for a Sun-like star, from Kopparapu and colleagues. Around redder or bluer stars they shift by up to about ten percent, which the sim does not model, and outside the range from about a tenth to about ten times the Sun’s brightness they are an extrapolation.",
+    "L3 approximation 2": "The dashed curve adds Earth’s 33 K of greenhouse warming everywhere. A thicker atmosphere adds far more: Venus’s adds 500 K.",
+    "L3 approximation 3": "The length of the year takes the star’s mass from its brightness with the main-sequence rule L ∝ M³·⁵, good to about a factor of two. A real star’s mass is measured, not inferred.",
+    "L3 caption": "Make the star brighter and dimmer and watch the green band slide and stretch. Then move the planet through it, and change how much light it reflects, to see how a world’s temperature is set before its atmosphere has a say.",
+    "L4 figure alt": "The whole Earth, fully lit, on black. Africa runs from the tan Sahara at the top down to the continent’s southern tip, with Arabia at the upper right and Madagascar off the east coast; swirls of white cloud cover the blue ocean around it, and the Antarctic ice cap fills the bottom of the disc.",
+    "L4 real": "The habitable zone is the range of orbital distances at which a planet with an atmosphere like Earth’s could keep liquid water on its surface. The word does the work of a definition and no more: it is about temperature, and it says nothing about whether anything lives there. The zone is set by the star’s luminosity, its total light output, since the light reaching a planet falls with the square of its distance: for the Sun it runs, in the most cautious estimate, from 0.99 to 1.71 astronomical units, and a star four times as bright pushes both edges twice as far out. A planet’s temperature starts from one balance. It absorbs the starlight it does not reflect, and it radiates heat back to space as any warm body does; the temperature at which those match is the equilibrium temperature. The fraction reflected is the Bond albedo: 0.30 for Earth, 0.25 for Mars, 0.77 for cloud-covered Venus. For Earth the balance gives 255 K, or −18 °C, which is the temperature of a frozen world. What lifts it to the 288 K we live at is the greenhouse effect, the atmosphere absorbing outgoing heat and sending part of it back down. Venus’s balance gives 227 K, colder than Earth’s because it reflects so much; its atmosphere then adds 510 K, to a surface of 737 K. That is why the zone edges come from climate models rather than from the simple balance. The inner edge is where an ocean starts to evaporate faster than the extra water vapour can be tolerated: water vapour is itself a greenhouse gas, the warming feeds the evaporation, and the process runs away until the oceans are gone, a runaway greenhouse. The outer edge is where even a thick carbon-dioxide atmosphere can no longer keep the surface above freezing, because carbon dioxide condenses out and reflects sunlight. A more generous pair of edges takes the last time Venus might have had oceans and the time early Mars apparently did. Three in four stars are red dwarfs, fainter than a few hundredths of the Sun, so most habitable zones in the galaxy sit within about a tenth of an astronomical unit of their star, closer than Mercury is to ours. A planet there orbits in days, and gravity locks it so that one side always faces the star, a state called tidal locking. Whether such a planet can hold an atmosphere and spread its heat to the night side is an open question, and the answer will come from the seven planets of TRAPPIST-1, forty light-years away, three of them in the zone, which are the first Earth-sized habitable-zone planets whose air can be studied. Two misconceptions. Being in the zone does not make a planet habitable: the Moon is in the Sun’s zone. And being outside it does not rule out liquid water; Europa and Enceladus have oceans under ice, warmed from within, well beyond the outer edge. The zone is where a planet could have water on its surface, which is where a telescope could see it. The edges are model results and carry about a ten percent uncertainty; different assumptions about clouds move the inner edge between 0.95 and 0.99 AU for the Sun. The Sun has brightened by about 30 percent since it formed, so the zone has been moving outward the whole time, and in about a billion years it will leave the Earth behind. Earth, the one habitable-zone planet known to be inhabited. From 1 AU it receives 1 361 watts per square metre, reflects 30 percent, and would sit at −18 °C without its atmosphere. NASA",
+    "L5 intro": null,
+    "L5 note (equilibrium)": "T_{\\text{eq}} — the equilibrium temperature, with no atmosphere; A — the Bond albedo, the fraction reflected (your slider); \\sigma — the Stefan–Boltzmann constant. The 16 is 4 for the sphere’s area against the disc that catches light, times 4π. Temperature goes as the fourth root, so doubling the light warms a planet by only 19 percent.",
+    "L5 note (flux)": "S — the starlight falling on each square metre of the planet; L — the star’s luminosity (your slider); d — the orbital distance (your slider). Earth receives 1 361 W/m².",
+    "L5 note (zone-edge)": "d_{\\text{edge}} — the distance of a zone edge; S_{\\text{eff}} — the climate-model limit in units of Earth’s flux, 1.014 at the inner edge and 0.343 at the outer for a Sun-like star. The zone scales with the square root of luminosity. Worked example, Earth. L = L_\\odot = 3.83 \\times 10^{26}\\,\\text{W}, d = 1\\,\\text{AU} = 1.496 \\times 10^{11}\\,\\text{m}, A = 0.30. S = 3.83 \\times 10^{26} / (4\\pi \\times (1.496 \\times 10^{11})^2) = 1\\,361\\,\\text{W/m}^2 T_{\\text{eq}} = (0.70 \\times 3.83 \\times 10^{26} / (16\\pi \\times 5.67 \\times 10^{-8} \\times (1.496 \\times 10^{11})^2))^{1/4} = (4.20 \\times 10^{9})^{1/4} = 255\\,\\text{K}, or −18 °C With Earth’s 33 K of greenhouse warming: 288 K, or 15 °C. Inner edge: 1\\,\\text{AU} \\times \\sqrt{1 / 1.014} = 0.99\\,\\text{AU}. Outer edge: 1\\,\\text{AU} \\times \\sqrt{1 / 0.343} = 1.71\\,\\text{AU}. Earth sits at 1.00, Mars at 1.52; Venus, at 0.72, is outside.",
+    "L6 deeper": "The equilibrium temperature follows from energy balance for a body of radius R at distance d: absorbed power (1 - A)\\,L\\,\\pi R^2 / (4\\pi d^2) equals emitted power 4\\pi R^2 \\varepsilon \\sigma T^4, with emissivity \\varepsilon = 1 for a blackbody, giving T_{\\text{eq}} = [(1 - A)\\,L / (16\\pi\\sigma d^2)]^{1/4}. The factor 4 between the intercepting disc and the radiating sphere assumes heat is distributed over the whole surface, which holds for a rapid rotator or a thick atmosphere; a tidally locked airless body radiates from its day side alone and its day side averages 2^{1/4} hotter, its substellar point √2 hotter, while the night side falls toward the cosmic background. The greenhouse offset can be folded in as an effective emissivity \\varepsilon < 1 in the outgoing term: Earth’s 288 K corresponds to \\varepsilon \\approx 0.61. The inner edge is a limit on outgoing radiation. As the surface warms, the lower atmosphere saturates with water vapour, whose infrared opacity caps the thermal flux the planet can emit at the Simpson–Nakajima limit, about 280–300 W/m² for Earth’s gravity; if absorbed sunlight exceeds it, no equilibrium exists and the oceans evaporate entirely. Before that, at a lower flux, the stratosphere becomes wet enough for ultraviolet light to split water and let hydrogen escape to space over a few hundred million years, the moist-greenhouse limit at S_{\\text{eff}} = 1.014 that the sim uses as the conservative inner edge; the runaway proper is at 1.107 for an Earth-mass planet and shifts with mass. The outer edge is the maximum-greenhouse limit: adding CO₂ warms a planet until, at about 8 bar, Rayleigh scattering and condensation reflect more sunlight than the added gas traps, at S_{\\text{eff}} = 0.343 for the Sun. All four edges depend on stellar effective temperature through the albedo of ice and of Rayleigh scattering, which favour the redder light of cooler stars; Kopparapu et al. give polynomial fits in T_{\\text{eff}} - 5780\\,\\text{K}, and the sim’s fixed values are the Sun’s. Three-dimensional climate models move the edges from these one-dimensional limits. Cloud feedbacks push the Sun’s inner edge inward to about 0.95 AU, and for tidally locked planets the permanent cloud deck over the substellar point reflects so much light that the inner edge for red dwarfs moves inward by about a factor of two in flux. Red-dwarf zones carry other problems the sim omits: the star’s luminosity falls by a factor of ten or more during its first hundred million years, so a planet now in the zone spent its youth inside the runaway limit and may have lost its water before it had a chance; flares and stellar wind erode atmospheres at those distances; and the zone itself, within about 0.05 AU for the faintest stars, is deep enough in the star’s gravity that any planet is locked. Whether locked planets keep an atmosphere is the question JWST is now putting to the TRAPPIST-1 planets, with the two innermost so far showing no thick atmosphere at all. Finally, the zone moves. Main-sequence stars brighten as their cores convert hydrogen to helium; the Sun’s luminosity has risen about 30 percent since the zero-age main sequence, so the “continuously habitable zone” over the past four billion years is narrower than the present one, and the present inner edge will reach 1 AU in roughly a billion years, long before the Sun leaves the main sequence. The faint young Sun paradox, that early Earth had liquid water under a Sun 25 percent dimmer, is usually resolved by a thicker CO₂ or methane atmosphere then, which is the greenhouse coat of the analogy doing exactly its job.",
+    "L7 reason -> exoplanets": "Every planet found by the transits in that module is placed on this axis first; a period and a star’s mass give the distance, and the distance gives the verdict.",
+    "L7 reason -> kepler-orbits": "The orbital distance here is the semi-major axis there; the two sliders are one quantity.",
+    "L7 reason -> planetary-atmospheres": "The zone assumes a planet keeps its air; that module is about whether it can.",
+    "L7 reason -> stellar-fusion": "The luminosity slider here is what that module’s fusion rate becomes at the surface of a star.",
+    "reference 0": {
+      "label": "Kopparapu et al. 2013, “Habitable Zones around Main-sequence Stars: New Estimates”, ApJ 765, 131",
+      "note": "The S_eff limits and their T_eff dependence; the erratum (ApJ 770, 82) gives the corrected inner edges",
+      "url": "https://doi.org/10.1088/0004-637X/765/2/131",
+    },
+    "reference 1": {
+      "label": "Kopparapu et al. 2014, “Habitable Zones around Main-sequence Stars: Dependence on Planetary Mass”, ApJL 787, L29",
+      "note": "Runaway greenhouse limit 1.107 for Earth mass and its mass dependence",
+      "url": "https://doi.org/10.1088/2041-8205/787/2/L29",
+    },
+    "reference 2": {
+      "label": "Kasting, Whitmire & Reynolds 1993, “Habitable Zones around Main Sequence Stars”, Icarus 101, 108",
+      "note": "The modern definition and the moist and maximum greenhouse limits",
+      "url": "https://doi.org/10.1006/icar.1993.1010",
+    },
+    "reference 3": {
+      "label": "Prša et al. 2016, “Nominal Values for Selected Solar and Planetary Quantities: IAU 2015 Resolution B3”, AJ 152, 41",
+      "note": "S☉ = 1361 W/m² and L☉",
+      "url": "https://doi.org/10.3847/0004-6256/152/2/41",
+    },
+    "reference 4": {
+      "label": "Gillon et al. 2017, “Seven temperate terrestrial planets around the nearby ultracool dwarf star TRAPPIST-1”, Nature 542, 456",
+      "note": "The TRAPPIST-1 system",
+      "url": "https://doi.org/10.1038/nature21360",
+    },
+    "tagline": "Around every star there is a ring where water can stay liquid. Being in it is where the question starts, not where it ends.",
+    "title": "The Habitable Zone",
+  },
   "kepler-orbits": {
     "L1 hook": "A planet close to its star races; far away, it crawls. The rule tying the two together took humanity two thousand years of sky-watching to find — and it fits on one line.",
     "L2 intuition": "Watch a child on a swing. Fastest at the very bottom of the arc, slowest at the top of each rise: speed and height trading into each other, back and forth, in a rhythm that repeats exactly. A planet on a stretched orbit runs the same trade with its star. Falling inward, it gains speed, moving fastest at its closest approach. Climbing away, it spends that speed again, drifting slowest at the far end of its path. Then the cycle repeats, and the time it takes (the orbit’s period) comes out the same every single lap. The analogy breaks in one place: a swing needs pushing, because its bearings and the air steal a little energy every pass. An orbit has nothing to rub against. The trade repeats exactly, for millions of years, with nothing driving it.",
@@ -644,6 +691,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A shortening of the light wave: it arrives bluer than it left. Seen from galaxies approaching us faster than expansion carries them away.",
     "title": "Blueshift",
   },
+  "bond-albedo": {
+    "body": "The fraction of starlight a planet reflects back to space, over all wavelengths. Earth 0.30, Venus 0.77, the Moon 0.12.",
+    "title": "Bond albedo",
+  },
   "cepheid-variable": {
     "body": "A star that brightens and dims on a regular cycle whose length reveals its true brightness, and so its distance.",
     "title": "Cepheid variable",
@@ -700,6 +751,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A network of radio dishes across Earth acting as one planet-sized telescope; it photographed M87* and Sagittarius A*.",
     "title": "EHT",
   },
+  "equilibrium-temperature": {
+    "body": "The temperature a planet settles at when the starlight it absorbs balances the heat it radiates, with no atmosphere. Earth’s is 255 K; its surface is 288 K.",
+    "title": "Equilibrium temperature",
+  },
   "ergosphere": {
     "body": "A region just outside a spinning hole’s horizon where space itself is dragged around; orbital energy can be extracted there.",
     "title": "Ergosphere",
@@ -719,6 +774,14 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "gamow-peak": {
     "body": "The narrow range of collision energies where almost all fusion happens: high enough to tunnel, low enough that some particles actually have it.",
     "title": "Gamow peak",
+  },
+  "greenhouse-effect": {
+    "body": "Warming of a surface by an atmosphere that lets sunlight in but absorbs the heat radiated back. Earth’s adds 33 K; Venus’s adds about 500 K.",
+    "title": "Greenhouse effect",
+  },
+  "habitable-zone": {
+    "body": "The range of distances from a star where a planet with an Earth-like atmosphere could keep liquid water on its surface. A statement about temperature, not about life.",
+    "title": "Habitable zone",
   },
   "hot-jupiter": {
     "body": "A gas giant orbiting scorchingly close to its star, circling in days: the easiest kind of planet to find.",
@@ -892,6 +955,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The last vibration of the merged hole, ringing like a struck bell as it settles into shape.",
     "title": "Ringdown",
   },
+  "runaway-greenhouse": {
+    "body": "What happens when a planet gets warm enough that its evaporating oceans trap more heat, which evaporates more ocean, until the oceans are gone. Venus, probably.",
+    "title": "Runaway greenhouse",
+  },
   "scale-factor": {
     "body": "A single number, a, recording how stretched the universe is compared with today, when a = 1. Any wavelength of light grows in step with it.",
     "title": "Scale factor",
@@ -943,6 +1010,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "tidal-force": {
     "body": "The difference in gravity’s pull between the near and far side of an object, stretching it along its length.",
     "title": "Tidal force",
+  },
+  "tidal-locking": {
+    "body": "A planet turning one face permanently to its star, as the Moon does to Earth. Expected for planets in the habitable zones of red dwarfs.",
+    "title": "Tidal locking",
   },
   "type-ia-supernova": {
     "body": "The explosion of a white dwarf star that has gained too much mass. All reach nearly the same peak brightness, so how bright one looks tells its distance.",
