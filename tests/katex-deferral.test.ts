@@ -36,6 +36,7 @@ import habitableZone from '@/content/modules/habitable-zone';
 import nebulae from '@/content/modules/nebulae';
 import cosmicDistanceLadder from '@/content/modules/cosmic-distance-ladder';
 import timeDilation from '@/content/modules/time-dilation';
+import hawkingRadiation from '@/content/modules/hawking-radiation';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
 import planetaryAtmospheres from '@/content/modules/planetary-atmospheres';
@@ -61,6 +62,7 @@ const MODULES: Module[] = [
   nebulae,
   cosmicDistanceLadder,
   timeDilation,
+  hawkingRadiation,
 ];
 
 /** The tier a reader lands on with nothing persisted — see `useAppStore`. */

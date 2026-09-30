@@ -539,6 +539,29 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Closed timelike curve',
     body: 'A path through spacetime that returns to its own past. Some solutions of general relativity contain them; none has ever been found in nature.',
   },
+
+  /* Hawking radiation ---------------------------------------------- */
+
+  'hawking-radiation': {
+    title: 'Hawking radiation',
+    body: 'Faint thermal glow predicted from every black hole by quantum theory. The smaller the hole, the hotter the glow; for any known black hole it is far too faint to detect.',
+  },
+  'hawking-temperature': {
+    title: 'Hawking temperature',
+    body: 'The temperature of a black hole’s glow, inversely proportional to its mass: 60 billionths of a kelvin for the Sun’s mass, a hundred billion kelvin for a mountain’s.',
+  },
+  'primordial-black-hole': {
+    title: 'Primordial black hole',
+    body: 'A black hole that might have formed in the first second of the universe, from a dense clump rather than a dying star, and could have any mass. None has been found.',
+  },
+  'negative-heat-capacity': {
+    title: 'Negative heat capacity',
+    body: 'Getting hotter by losing energy. Black holes do it: as one radiates it shrinks, and as it shrinks it heats up, so evaporation runs faster and faster.',
+  },
+  'analogue-gravity': {
+    title: 'Analogue gravity',
+    body: 'Laboratory systems, such as a flowing fluid with a point sound cannot escape, that mimic a black hole’s horizon closely enough to show Hawking-like radiation.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */
