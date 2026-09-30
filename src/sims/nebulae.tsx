@@ -158,6 +158,8 @@ const Q_BRIGHTEST = 1e50;
 const N_ORION_CORE = 1e10;
 /** How close to an O7 star the live star must be for the Orion marker, as a factor. */
 const ORION_FACTOR = 3;
+/** How far inside the y axis the dot is held at the density minimum, px. */
+const DOT_INSET = 6;
 /** The expansion readout's age, s. */
 const EXPANSION_AGE = 1e6 * JULIAN_YEAR;
 /** The defaults the spectrum's brightness is measured against. */
@@ -412,7 +414,9 @@ function drawBubble(
 
   /* The dot at the slider's density. Off the chart, it sits on the edge, hollow. */
   const R = stromgrenRadius(view.Q, view.n);
-  const xD = xOf(view.n);
+  // At the density minimum the dot would sit on the y axis, against the tick
+  // labels; it is held a few pixels inside so it clears them.
+  const xD = Math.max(xOf(view.n), plotLeft + DOT_INSET);
   const offChart = R > R_AXIS_MAX || R < R_AXIS_MIN;
   const yD = R > R_AXIS_MAX ? plotTop : R < R_AXIS_MIN ? plotBottom : yOf(R);
   ctx.fillStyle = COLORS.ember;
@@ -734,7 +738,7 @@ export default function NebulaeSim({ params, values }: SimProps) {
         <Readout label={deep ? 'Strömgren radius' : 'How far the glow reaches'} value={formatRadius(R, units)} />
         <Readout label={deep ? 'Ionized mass' : 'How much gas is lit'} value={formatSolarMasses(mass)} />
         <Readout label={deep ? 'Recombination time' : 'How long an atom stays ionized'} value={formatYears(tRec)} />
-        <Readout label={deep ? 'Ionization-front thickness' : 'How sharp the edge is'} value={formatFront(front, R)} />
+        <Readout label={deep ? 'Ionization-front thickness, one mean free path' : 'How sharp the edge is'} value={formatFront(front, R)} />
         <Readout
           label={deep ? 'Spitzer expansion at 1 Myr' : 'Where it will be in a million years'}
           value={formatRadius(later, units)}
