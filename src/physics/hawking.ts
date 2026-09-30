@@ -104,9 +104,14 @@ export function emissionBand(M_kg: number): string {
 /**
  * Whether a hole of mass M, sitting in today's microwave background, loses more
  * than it absorbs. Hotter than the background, it shrinks; colder, it grows.
+ * At the crossover mass itself the two flows cancel; "equal" means within a
+ * part in 10⁹, so the crossover computed by `massForHawkingTemperature(T_CMB)`
+ * reads as balanced despite floating-point round trip.
  *
  * @param M_kg mass, kg
  */
-export function netWithCMB(M_kg: number): 'shrinking' | 'growing' {
-  return hawkingTemperature(M_kg) > T_CMB ? 'shrinking' : 'growing';
+export function netWithCMB(M_kg: number): 'shrinking' | 'growing' | 'balanced' {
+  const t = hawkingTemperature(M_kg);
+  if (Math.abs(t - T_CMB) <= 1e-9 * T_CMB) return 'balanced';
+  return t > T_CMB ? 'shrinking' : 'growing';
 }

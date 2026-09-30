@@ -155,7 +155,8 @@ function formatLifetime(seconds: number): string {
 }
 
 /** The net readout: the comparison with the background, then the verdict. */
-function formatNet(verdict: 'shrinking' | 'growing'): string {
+function formatNet(verdict: 'shrinking' | 'growing' | 'balanced'): string {
+  if (verdict === 'balanced') return 'as warm as the background: in balance';
   return verdict === 'shrinking' ? 'hotter than the background: shrinking' : 'colder than the background: growing';
 }
 
@@ -684,7 +685,7 @@ function slide(
   return () => cancelAnimationFrame(frame);
 }
 
-export default function HawkingRadiationSim({ params, values }: SimProps) {
+export default function HawkingRadiationSim({ params, values, setValue }: SimProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const reduced = useReducedMotion();
   const tier = useTier();
@@ -768,6 +769,17 @@ export default function HawkingRadiationSim({ params, values }: SimProps) {
           value={formatLifetime(lifetime)}
         />
       </dl>
+
+      {/* The crossover mass falls between two slider stops (0.34 of a step
+          from the nearer), so no drag can land on it. This sets it exactly,
+          from the physics code, not from a typed-in number. */}
+      <button
+        type="button"
+        onClick={() => setValue('M', M_CROSSOVER)}
+        className="flex items-center gap-2 self-start rounded-md border border-edge bg-void-500 px-3 py-2 font-ui text-xs text-ink-dim transition-colors hover:border-star/40 hover:text-ink"
+      >
+        Set to the crossover mass
+      </button>
     </div>
   );
 }
@@ -798,4 +810,5 @@ export const __internals = {
   formatPower,
   formatLifetime,
   formatNet,
+  M_CROSSOVER,
 };

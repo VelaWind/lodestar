@@ -53,7 +53,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 857 tests in 22 files
+npm test           # vitest, 859 tests in 22 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
@@ -96,9 +96,9 @@ The browser suite is separate: `playwright.config.ts` defines five projects (Chr
 
 Some files are very large and heavily commented: `sanity.ts` is 2367 lines and the largest simulation, supernovae, 927, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
 
-The maths layer's Numbers view substitutes each slider's value in SI base units, not in the unit the slider shows, so a speed dragged in km/s appears in the equation in m/s; that is a shell change for another pass.
+The maths layer's Numbers view substitutes each slider's value in SI base units, because the constants in the equations are SI; a "where" line under each equation gives the slider's own reading (v₀ = 8 km/s beside 8000 m/s in the formula) for every substituted value shown in another unit.
 
-Seventeen sliders still have a default a fraction of a step off their grid, and the first drag or arrow press snaps them by up to 1.8%; the Hawking-radiation crossover mass is not a grid point of its slider.
+Seventeen sliders still have a default a fraction of a step off their grid, and the first drag or arrow press snaps them by up to 1.8%.
 
 <!-- site:case-study:end -->
 

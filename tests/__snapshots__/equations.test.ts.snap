@@ -502,6 +502,40 @@ exports[`inline math in prose > carries every inline-math and mathBlock tex, unc
 }
 `;
 
+exports[`published equations > links each substituted non-SI slider to its display value, and omits SI ones 1`] = `
+{
+  "cosmic-distance-ladder/distance-modulus": "d = 162,000 light-years",
+  "cosmic-distance-ladder/inferred-h0": "\\delta = 0.000 mag",
+  "cosmic-distance-ladder/parallax": "d = 162,000 light-years",
+  "cosmic-microwave-background/dipole": "v = 370 km/s",
+  "early-universe/freeze-out": "mc^2 = 0.511 MeV",
+  "escape-velocity/apex": "v_0 = 8 km/s",
+  "exoplanets/transit-depth": "R_p = 11 R⊕; R_\\star = 1 R☉",
+  "exoplanets/transit-duration": "R_\\star = 1 R☉; R_p = 11 R⊕; a = 0.05 AU",
+  "expansion-of-the-universe/hubble-time": "H_0 = 67.4 km/s/Mpc",
+  "expansion-of-the-universe/recession-velocity": "H_0 = 67.4 km/s/Mpc; d = 326 million light-years",
+  "expansion-of-the-universe/redshift": "H_0 = 67.4 km/s/Mpc; d = 326 million light-years; v_{\\text{pec}} = 0 km/s",
+  "gravitational-waves/chirp-mass": "m_1 = 36 M☉; m_2 = 29 M☉",
+  "gravitational-waves/strain": "d = 408 Mpc",
+  "habitable-zone/equilibrium": "L = 1 L☉; d = 1 AU",
+  "habitable-zone/flux": "L = 1 L☉; d = 1 AU",
+  "habitable-zone/zone-edge": "L = 1 L☉",
+  "nebulae/ionized-mass": "n = 100 per cm³",
+  "nebulae/recombination-time": "n = 100 per cm³",
+  "nebulae/stromgren": "Q = 1.00 × 10⁴⁹ photons/s; n = 100 per cm³",
+  "planetary-atmospheres/retention-criterion": "M = 1 M⊕; R = 1 R⊕",
+  "stellar-fusion/gamow-peak": "T = 15.7 million K",
+  "stellar-fusion/pp-rate": "\\rho = 150 g/cm³",
+  "stellar-fusion/tunnelling": "T = 15.7 million K",
+  "supernovae/apparent-magnitude": "d = 548 light-years",
+  "supernovae/lifetime": "M = 1 M☉",
+  "supernovae/luminosity": "M = 1 M☉",
+  "time-dilation/gravity": "r = 44.3 km",
+  "time-dilation/lorentz": "v = 239,800 km/s",
+  "time-dilation/twin": "v = 239,800 km/s",
+}
+`;
+
 exports[`published equations > renders every equation in both modes, unchanged 1`] = `
 {
   "black-holes/schwarzschild-radius/numbers": "r_s \\;=\\; \\dfrac{2G\\,{1.99 \\times 10^{31}\\,\\mathrm{kg}}}{c^{2}}",
