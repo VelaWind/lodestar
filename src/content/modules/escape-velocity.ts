@@ -115,7 +115,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'The body is perfectly spherical and does not rotate. Sphericity costs almost nothing (a uniform sphere pulls exactly as a point mass would, so the formula is exact for one) but rotation does: launching eastward from Earth’s equator is worth about 0.47 km/s of free speed, and the equatorial bulge shifts surface gravity by roughly 0.5%.',
+            'The body is perfectly spherical and does not rotate. Sphericity costs almost nothing (a uniform sphere pulls exactly as a point mass would, so the formula is exact for one) but rotation does: launching eastward from Earth’s equator is worth about 0.47 km/s of free speed, and rotation and the bulge together lower equatorial gravity by about 0.5%.',
           ),
         ),
         prose(
@@ -125,7 +125,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'Newtonian gravity only. Above roughly 0.3c the relativistic result departs from this one. At the Schwarzschild radius the Newtonian formula returns exactly c, which is a coincidence of the algebra rather than a derivation (see Going deeper).',
+            'Newtonian gravity only. Curiously, general relativity gives the same formula for the speed an observer hovering at radius r would measure, but what r and speed mean changes, and inside r_s no speed is enough (see Going deeper).',
           ),
         ),
         prose(
@@ -135,7 +135,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 40 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the apex, where it is slowest.',
+            'Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 36 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the apex, where it is slowest.',
           ),
         ),
         prose(
@@ -311,7 +311,7 @@ const escapeVelocity: Module = {
           'altitude. An isolated two-body system: in reality, escaping Earth’s well only delivers ',
           'you into the Sun’s; leaving the Solar System from Earth’s surface takes about 16.6 km/s ',
           'once Earth’s orbital motion is spent wisely. A non-rotating body: Earth’s equator ',
-          'donates 0.47 km/s eastward for free, which is why launch sites crowd the equator. A ',
+          'donates 0.47 km/s eastward for free, which is why launch sites favour low latitudes. A ',
           'vacuum: atmospheric drag makes an actual 11 km/s surface launch a fireball, so quoted ',
           'escape velocities are surface values applied, in practice, from above the atmosphere. ',
           'And Newtonian gravity throughout.',
@@ -325,9 +325,16 @@ const escapeVelocity: Module = {
           term('Schwarzschild radius', 'schwarzschild-radius'),
           ' of general relativity. Michell in 1784 and ',
           'Laplace after him ran this argument and predicted “dark stars.” The numerical agreement ',
-          'is a coincidence: the Newtonian picture of light as a projectile that decelerates is ',
-          'wrong twice over, in ways that cancel. In relativity nothing slows the light; inside ',
-          'the horizon there are no outgoing paths at all.',
+          'is the right answer reached by the wrong physics: the Newtonian picture of light as a ',
+          'projectile that decelerates is wrong. In relativity nothing slows the light; inside the ',
+          'horizon there are no outgoing paths at all. What does carry over is the formula itself: ',
+          'an observer hovering at radius ',
+          m`r`,
+          ' would measure the escape speed as exactly ',
+          m`\sqrt{2GM/r}`,
+          ', reaching ',
+          m`c`,
+          ' at the horizon.',
         ),
         p(
           'Atmospheric escape, by contrast, is a live research field. The mechanisms — ',

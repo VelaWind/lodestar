@@ -93,7 +93,7 @@ function formatSpeed(mps: number): string {
  * avoid: an expert spots it in seconds, and a beginner has no way to.
  *
  * Strictly `R < r_s`. At `R = r_s` the Newtonian escape speed equals c exactly,
- * which is the famous coincidence the going-deeper layer is about — that case
+ * which is the agreement the going-deeper layer is about — that case
  * is interesting rather than broken, and says so there instead.
  */
 function collapseNote(M: number, R: number): string | null {

@@ -262,7 +262,7 @@ export const E_QCD = 200e6 * EV;
 
 // Wormholes
 /** Proton charge radius, m. Source: CODATA 2018, r_p = 0.8414(19) fm. */
-export const PROTON_RADIUS = 8.41e-16;
+export const PROTON_RADIUS = 0.8414e-15;
 /**
  * Nuclear density, kg/m³, rounded: the density inside a heavy nucleus. The
  * saturation density of nuclear matter is 0.14–0.16 nucleons per fm³, which is
@@ -272,7 +272,7 @@ export const PROTON_RADIUS = 8.41e-16;
 export const NUCLEAR_DENSITY = 2.3e17;
 
 export const M_EARTH = 5.972_2e24; // kg
-export const R_EARTH = 6.371e6; // m, mean radius
+export const R_EARTH = 6.371e6; // m, IUGG mean radius (6371.0 km); NASA Earth Fact Sheet
 /**
  * The Moon, which the atmospheres module leans on twice: once for the retention
  * criterion it narrowly passes, and once as Titan’s near-twin in gravity.
@@ -311,12 +311,15 @@ export const R_JUPITER = 6.991_1e7; // m, volumetric mean radius
  */
 export const M_JUPITER = 1.898_13e27;
 /**
- * Orbital semi-major axes of Mercury and Neptune, m, for the wormholes sim's
- * reference sizes. Source: NASA Planetary Fact Sheets (D. R. Williams, NASA
- * GSFC) — 57.909 × 10⁶ km and 4495.1 × 10⁶ km.
+ * Orbital semi-major axes of Mercury and Neptune, m. Sources: NASA Mercury
+ * Fact Sheet (D. R. Williams, NASA GSFC), 57.909 × 10⁶ km; and for Neptune the
+ * J2000 mean element from JPL's "Approximate Positions of the Planets"
+ * (Standish & Williams), 30.069 922 76 AU, the conventional 30.07 AU. Neptune's
+ * osculating semi-major axis wanders; NASA's fact sheet quotes 30.18 AU for a
+ * different epoch, so the mean element is the one to use for a fixed figure.
  */
 export const A_MERCURY = 5.790_9e10;
-export const A_NEPTUNE = 4.495_1e12;
+export const A_NEPTUNE = 30.069_922_76 * AU;
 
 // Scale
 export const OBSERVABLE_UNIVERSE_RADIUS = 4.4e26; // m, ≈46.5 billion ly

@@ -56,7 +56,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   ergosphere: {
     title: 'Ergosphere',
-    body: 'A region just outside a spinning hole’s horizon where space itself is dragged around; orbital energy can be extracted there.',
+    body: 'A region just outside a spinning hole’s horizon where space itself is dragged around; the hole’s rotational energy can be extracted there.',
   },
   'proper-time': {
     title: 'Proper time',
@@ -301,7 +301,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   barycentre: {
     title: 'Barycentre',
-    body: 'The shared centre of mass two bodies actually orbit; for a star and planet it sits just off the star’s centre.',
+    body: 'The shared centre of mass two bodies actually orbit; usually inside the star, though for the Sun and Jupiter just outside its surface.',
   },
   'angular-momentum': {
     title: 'Angular momentum',
@@ -336,7 +336,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'magnetic-dynamo': {
     title: 'Magnetic dynamo',
-    body: 'The churning of a planet’s molten interior that generates its magnetic field and shields its air.',
+    body: 'The churning of a planet’s molten interior that generates its magnetic field, which deflects the solar wind but may not protect the air on net.',
   },
   'maxwell-boltzmann': {
     title: 'Maxwell–Boltzmann',

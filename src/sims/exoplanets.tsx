@@ -7,7 +7,8 @@
  * exactly under the crossing that causes it — which is the whole idea of the
  * method, and is worth showing rather than asserting.
  *
- * The axis covers the transit and half again either side, not a whole orbit.
+ * The axis covers the transit and its own length again either side, not a
+ * whole orbit.
  * That is a real choice and it is disclosed beside the sim: at the default
  * settings the transit is 3% of the period, and for an Earth analogue 0.15%, so
  * an axis spanning one orbit would render the dip one pixel wide. What the frame
@@ -469,7 +470,7 @@ export default function ExoplanetsSim({ params, values }: SimProps) {
       <p className="font-ui text-[0.7rem] leading-relaxed text-ink-faint">
         {shape.transits ? (
           <>
-            The axis covers the transit and half again either side —{' '}
+            The axis covers the transit and its own length again either side —{' '}
             <span className="font-mono text-ember">{formatHours(WINDOW_SPAN * shape.total)}</span> of
             a {formatPeriod(shape.period)} orbit
             {reduced

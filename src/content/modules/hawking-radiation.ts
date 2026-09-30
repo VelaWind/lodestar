@@ -87,7 +87,7 @@ const hawkingRadiation: Module = {
       approximations: [
         prose(
           p(
-            'Power and lifetime count light only. A real hole also emits neutrinos and gravitons, which multiplies its power about tenfold, and heavier particles once it is hot enough, which raises it further; the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
+            'Power and lifetime count light only, and what that leaves out depends on the mass. A cold, heavy hole, near a solar mass, also emits gravitons but no neutrinos, which have mass, and the exact emission factors make it evaporate about twice as fast. A hot hole, lighter than about 10²¹ kg, emits neutrinos too, which multiplies its power about tenfold, and heavier particles once it is hotter still, which raises it further; the mountain-mass example is one of these, and the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
           ),
         ),
         prose(
@@ -282,8 +282,10 @@ const hawkingRadiation: Module = {
           'low-frequency emission and differ by spin, so that a non-rotating hole emits, per unit ',
           'energy, most in neutrinos, then photons, then gravitons (Page 1976). The photons-only ',
           'coefficients used in the sim are an order-of-magnitude account; Page’s full calculation for ',
-          'a hole emitting only massless particles gives a lifetime about a tenth as long, and ',
-          'heavier species shorten it further once ',
+          'a hole emitting only massless particles gives a lifetime about a tenth as long. That ',
+          'holds for a hole hot enough to treat neutrinos as massless; a hole too cold to emit them, ',
+          'near a solar mass, gains only about a factor of two from gravitons and the exact ',
+          'emission factors. Heavier species shorten it further once ',
           m`kT`,
           ' passes their rest energies.',
         ),

@@ -107,7 +107,7 @@ const exoplanets: Module = {
           symbol: 'R_\\star',
           unit: 'm',
           // 0.1 R_☉ is an M dwarf barely larger than Jupiter; 10 R_☉ is a
-          // subgiant. Independent of mass on purpose: a transit measures the
+          // giant. Independent of mass on purpose: a transit measures the
           // radius ratio, and nothing about the star's mass enters the depth.
           min: 0.1 * R_SUN,
           max: 10 * R_SUN,
@@ -149,7 +149,8 @@ const exoplanets: Module = {
           technicalLabel: 'Orbital distance',
           symbol: 'a',
           unit: 'm',
-          // About 0.01 AU is inside the shortest known periods; 5 AU is Jupiter's
+          // 0.01 AU around a Sun is an 8.8 h orbit (known periods reach about
+          // 4 h, around smaller stars); 5 AU is Jupiter's
           // distance, where a transit lasts a day and repeats once a decade. The
           // minimum is 0.00998 AU, so the default is step 70 of 270.
           min: A_MIN,
@@ -169,7 +170,7 @@ const exoplanets: Module = {
           p(
             'The stellar disc is uniformly bright. It is not: a star is limb-darkened, dimmer at the edge than at the centre, because looking at the limb you see higher and cooler layers. So a real ',
             term('light curve', 'light-curve'),
-            ' has no corners: the planet blocks less light as it first crosses the dim limb, and the shoulders of this trapezoid are rounded off. Fitting that curvature is how limb-darkening coefficients are measured, and getting it wrong biases the planet radius by a few percent.',
+            ' has no corners: the planet blocks less light as it first crosses the dim limb, and the shoulders of this trapezoid are rounded off. The straight shoulders are a simplification even for a uniform disc: the overlap of two circles does not grow in proportion to time, so a true ingress is curved at its ends. Fitting that curvature is how limb-darkening coefficients are measured, and getting it wrong biases the planet radius by a few percent.',
           ),
         ),
         prose(
@@ -186,7 +187,7 @@ const exoplanets: Module = {
         ),
         prose(
           p(
-            'The planet is opaque, spherical and contributes no light of its own. Real hot Jupiters emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are oblate enough to matter.',
+            'The planet is opaque, spherical and contributes no light of its own. Real hot Jupiters emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are tidally stretched enough to matter.',
           ),
         ),
         prose(
@@ -196,7 +197,7 @@ const exoplanets: Module = {
         ),
         prose(
           p(
-            'The frame shows the transit and half again either side, not the whole orbit. At the default settings the transit is 3% of the period, and for an Earth around a Sun it is 0.15%: an axis spanning one orbit would draw the dip a pixel wide. What is inside the frame is to scale (the planet against the star, and its speed across the disc); the axis simply stops at the edges of the event.',
+            'The frame shows the transit and its own length again either side, not the whole orbit. At the default settings the transit is 3% of the period, and for an Earth around a Sun it is 0.15%: an axis spanning one orbit would draw the dip a pixel wide. What is inside the frame is to scale (the planet against the star, and its speed across the disc); the axis simply stops at the edges of the event.',
           ),
         ),
         prose(
@@ -233,16 +234,17 @@ const exoplanets: Module = {
           'HD 209458 b, was caught dimming its star by about 1.5% right on the wobble’s ',
           'schedule. Then the strategy scaled: NASA’s Kepler telescope stared at one patch of ',
           '150,000 stars for four years, and found planets in such numbers that the count now ',
-          'exceeds six thousand, most of them transit discoveries. Rocky worlds between ',
-          'Earth’s size and Neptune’s, a kind our own system lacks, turned out to be the most ',
-          'common find of all.',
+          'exceeds six thousand, most of them transit discoveries. Worlds between Earth’s size ',
+          'and Neptune’s (some rocky super-Earths, some gas-wrapped sub-Neptunes), a kind our ',
+          'own system lacks, turned out to be the most common find of all.',
         ),
         p(
           'Transits have a built-in blind spot: the orbit must be edge-on to us. For a planet ',
           'like Earth around a star like the Sun, that alignment is roughly a 1-in-213 accident. ',
           'Every count is therefore a floor: for each transiting world, a couple of hundred ',
-          'siblings hide at other tilts, and correcting for this is how we know the galaxy holds ',
-          'more planets than stars.',
+          'siblings hide at other tilts. Correcting for this turns Kepler’s tally into ',
+          'occurrence rates, and together with microlensing surveys, which count planets on ',
+          'wider orbits, those rates show the galaxy holds more planets than stars.',
         ),
         p(
           'The misconception to retire is that a transit shows a silhouette. Nothing is resolved; ',
@@ -373,7 +375,8 @@ const exoplanets: Module = {
           term('eclipsing binary', 'eclipsing-binary'),
           ' blended into the same ',
           'pixel fakes a transit convincingly, and early surveys drowned in such impostors: ',
-          'Kepler’s candidates outnumber its confirmed planets still. Vetting is statistical ',
+          'nearly two thousand of Kepler’s candidates remain unconfirmed a decade after the ',
+          'mission ended. Vetting is statistical ',
           'and multi-instrument: the odd-even depth test (a binary’s alternating eclipses ',
           'differ), the hunt for a secondary dip at half-phase, and mass limits from the wobble ',
           'method. When both methods land on the same object, they compound: the transit gives ',

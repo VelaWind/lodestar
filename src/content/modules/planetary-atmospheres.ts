@@ -94,8 +94,8 @@ const planetaryAtmospheres: Module = {
           technicalLabel: 'Planet mass',
           symbol: 'M',
           unit: 'kg',
-          // 1e22 kg is a shade lighter than the Moon; 1e28 is about five
-          // Jupiters, past which a body is a brown dwarf rather than a planet.
+          // 1e22 kg is about seven times lighter than the Moon; 1e28 is about
+          // five Jupiters, well short of the ~13 M_J brown-dwarf boundary.
           min: 1e22,
           max: 1e28,
           default: M_EARTH,
@@ -113,7 +113,7 @@ const planetaryAtmospheres: Module = {
           technicalLabel: 'Planet radius',
           symbol: 'R',
           unit: 'm',
-          // 1e6 m is smaller than any round body in the Solar System; 1e8 m is
+          // 1e6 m is larger than Ceres and several round moons; 1e8 m is
           // larger than Jupiter. Mass and radius are independent sliders on
           // purpose — density is the thing they disagree about, and a reader
           // should be able to build an impossible planet and see what it costs.
@@ -132,7 +132,7 @@ const planetaryAtmospheres: Module = {
           id: 'T',
           // Deliberately not "how hot is it?": this is the temperature of the
           // thin outermost air where escape happens, which on Earth runs some
-          // 500–1500 K depending on where the Sun is in its cycle, while the
+          // 600–1500 K depending on where the Sun is in its cycle, while the
           // ground sits at 288 K. A label implying the surface would make the
           // slider read as nonsense to anyone who knows the number.
           friendlyLabel: 'How hot is the top of the atmosphere?',
@@ -157,19 +157,19 @@ const planetaryAtmospheres: Module = {
           p(
             'The verdict is a rule of thumb, not a flux. Real Jeans escape is a rate computed at the exobase (the altitude where a molecule stops colliding on its way out) and it depends *exponentially* on the ',
             term('escape parameter', 'escape-parameter'),
-            ', so a planet does not flip from keeping a gas to losing it at a threshold; it loses it a thousand times faster per unit of λ. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.',
+            ', so a planet does not flip from keeping a gas to losing it at a threshold: each unit of λ cuts the loss rate by a factor of about e (≈2.7), and ten units cut it by more than ten thousand. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.',
           ),
         ),
         prose(
           p(
-            'One temperature stands for the whole exosphere. A real one varies with latitude, with local time, and by a factor of three over the solar cycle: Earth’s thermosphere runs about 500 K at solar minimum and 1500 K at maximum, so the same planet sits at different places on this chart depending on the decade.',
+            'One temperature stands for the whole exosphere. A real one varies with latitude, with local time, and by more than a factor of two over the solar cycle: Earth’s thermosphere runs roughly 600–700 K at solar minimum and up to 1500 K at maximum, so the same planet sits at different places on this chart depending on the decade.',
           ),
         ),
         prose(
           p(
             'Only thermal escape is modelled. The mechanisms that actually stripped Mars are missing: hydrodynamic outflow, in which an escaping light gas drags heavier ones with it; solar-wind stripping of an unmagnetised upper atmosphere; ',
             term('sputtering', 'sputtering'),
-            '; and impact erosion. That is why a body can fail this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept (see Going deeper).',
+            '; and impact erosion. That is why a body can pass this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept (see Going deeper).',
           ),
         ),
         prose(
@@ -202,7 +202,7 @@ const planetaryAtmospheres: Module = {
         ),
         p(
           'Escape happens from the atmosphere’s top: the ',
-          em('exosphere'),
+          em('exobase'),
           ', the altitude where the air is so thin that a molecule flying upward will likely never ',
           'hit another. From there, any molecule in the distribution’s fast tail that exceeds the ',
           'escape velocity simply leaves. This slow molecular evaporation is ',
@@ -224,13 +224,17 @@ const planetaryAtmospheres: Module = {
         p(
           'The rule of thumb sorts most of the Solar System cleanly. Earth holds its nitrogen, ',
           'oxygen, and carbon dioxide with room to spare. But hydrogen and helium sit below the ',
-          'line, which is why our air has essentially none of the universe’s two most common gases. ',
-          'The helium in a party balloon, once popped, is beginning a one-way trip off the planet. ',
+          'line, which is part of why our air has essentially none of the universe’s two most ',
+          'common gases; the other part is that Earth, too small to capture the nebula’s gas as ',
+          'it formed, never held much of them in the first place. The helium in a party balloon, ',
+          'once popped, is beginning a one-way trip off the planet, though mostly not by this ',
+          'thermal route: most of the helium escaping today goes as ions, flowing out along the ',
+          'magnetic field over the poles. ',
           'Run the sliders at the Moon’s values and its daytime surface, and carbon dioxide narrowly ',
           'passes — yet the Moon is bare, a first warning that heat is not the only thief: the solar ',
           'wind, stripping molecules away one by one over billions of years, finishes off whatever ',
-          'a small world’s gravity can technically hold. Titan, barely stronger than the Moon ',
-          'gravitationally but brutally cold, keeps a nitrogen atmosphere denser than ours, the ',
+          'a small world’s gravity can technically hold. Titan, with an escape speed barely ',
+          'above the Moon’s but brutally cold, keeps a nitrogen atmosphere denser than ours, the ',
           'pairing this site’s escape-velocity module promised. And Jupiter clears the bar even for ',
           'hydrogen itself, which is how it stayed a gas giant.',
         ),
@@ -261,7 +265,7 @@ const planetaryAtmospheres: Module = {
           height: 657,
           alt: 'The curved edge of Titan, an orange atmosphere fading upward into a thin detached blue haze layer.',
           caption:
-            'Titan’s edge, photographed by Cassini: an atmosphere with half again Earth’s surface pressure, held by a moon with a seventh of Earth’s gravity. It survives because Titan is cold: at 94 kelvin, nitrogen’s thermal tail never reaches escape speed. The detached blue layer is photochemical haze.',
+            'Titan’s edge, photographed by Cassini: an atmosphere with half again Earth’s surface pressure, held by a moon with a seventh of Earth’s gravity. It survives because Titan is cold: at the roughly 150 K of its upper atmosphere, nitrogen’s thermal tail barely reaches escape speed. The detached blue layer is photochemical haze.',
           credit: 'NASA/JPL-Caltech/Space Science Institute',
         }),
       ),
@@ -349,9 +353,11 @@ const planetaryAtmospheres: Module = {
           ' — dragging heavier gases with it; early Venus, Earth, and Mars all likely shed ',
           'primordial hydrogen this way, and it is happening in real time on close-in exoplanets: ',
           'the hot giant HD 209458 b trails an escaping hydrogen cloud detected in transit, an ',
-          'atmosphere observably boiling off. Worlds without a protective magnetic field face ',
+          'atmosphere observably boiling off. Worlds without a magnetic field face ',
           em('solar-wind stripping'),
-          ', the mechanism MAVEN measured at Mars. And large impacts can blast off atmosphere ',
+          ', the mechanism MAVEN measured at Mars, though whether a field protects an ',
+          'atmosphere on net is disputed (it also channels ions out over the poles), and Venus ',
+          'keeps 92 bar without one. And large impacts can blast off atmosphere ',
           'wholesale. Mars is the compound case: too small to hold interior heat, it lost its ',
           term('magnetic dynamo', 'magnetic-dynamo'),
           ', and the wind plus its weak gravity did the rest. The evidence is ',
