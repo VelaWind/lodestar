@@ -22,6 +22,7 @@ import earlyUniverse from '@/content/modules/early-universe';
 import stellarFusion from '@/content/modules/stellar-fusion';
 import supernovae from '@/content/modules/supernovae';
 import habitableZone from '@/content/modules/habitable-zone';
+import nebulae from '@/content/modules/nebulae';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -36,6 +37,7 @@ import { __internals as early } from '@/sims/early-universe';
 import { __internals as fusion } from '@/sims/stellar-fusion';
 import { __internals as sn } from '@/sims/supernovae';
 import { __internals as hz } from '@/sims/habitable-zone';
+import { __internals as neb } from '@/sims/nebulae';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -1180,6 +1182,124 @@ function habitableZoneCases(): Case[] {
   return cases;
 }
 
+/* ----------------------------------- nebulae ----------------------------------- */
+
+const NEB_HEIGHT = 544;
+
+function nebulaeCases(): Case[] {
+  const params = nebulae.layers.play.params;
+  const QParam = paramOf(params, 'Q');
+  const nParam = paramOf(params, 'n');
+  const cases: Case[] = [];
+
+  // Each slider's ends and default with the other at its default, the review's
+  // screenshot stops, and the two corners where the dot leaves the chart.
+  const views: { stop: string; Q: number; n: number }[] = [
+    ...extremes(QParam).map((s) => ({ stop: `Q=${s.stop}`, Q: s.value, n: nParam.default })),
+    ...extremes(nParam).map((s) => ({ stop: `n=${s.stop}`, Q: QParam.default, n: s.value })),
+    { stop: '(1e45, 1e6)', Q: 1e45, n: 1e6 },
+    { stop: '(1e50, 1e11)', Q: 1e50, n: 1e11 },
+    { stop: '(1e49, 1e10)', Q: 1e49, n: 1e10 },
+    { stop: '(1e46, 1e8)', Q: 1e46, n: 1e8 },
+    { stop: '(1e50, 1e6) off the top', Q: 1e50, n: 1e6 },
+    { stop: '(1e45, 1e11) off the bottom', Q: 1e45, n: 1e11 },
+  ];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const v of views) {
+      cases.push({
+        label: `${v.stop} ${units}`,
+        draw: (ctx, w, h) => neb.drawScene(ctx, w, h, { Q: v.Q, n: v.n, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every setting a reader can reach.
+   *
+   * The dot's radius label rides the live line; the faint lines' labels sit
+   * mid-way along their visible stretch; the schematic's front label follows
+   * the disc as it grows. Below, all eight line names stack above the bars.
+   * Swept a tenth of a decade at a time on each slider, everything must be
+   * drawn, clear and inside the frame, and no text may sit under a dot.
+   */
+  it('keeps every label drawn and clear across both sliders', () => {
+    const expected = [
+      'faintest star',
+      'brightest star',
+      'ionization front',
+      'Hβ 486.1',
+      '[O III] 495.9',
+      '[O III] 500.7',
+      '[N II] 654.8',
+      'Hα 656.3',
+      '[N II] 658.3',
+      '[S II] 671.6',
+      '[S II] 673.1',
+    ];
+    const check = (Q: number, n: number, units: 'friendly' | 'technical', width: number) => {
+      const { ctx, records } = recordingContext();
+      neb.drawScene(ctx, width, NEB_HEIGHT, { Q, n, units });
+      const where = `Q=${Q.toPrecision(3)} n=${n.toPrecision(3)} ${units} @${width}`;
+      const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+      for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+        `${where}: labels overlap`,
+      ).toEqual([]);
+      expect(
+        textOutsideFrame(records, width, NEB_HEIGHT).map(describeRecord),
+        `${where}: text outside the frame`,
+      ).toEqual([]);
+      // Dots only: the schematic's ionized disc is a large arc a label may sit on.
+      const dots = records.filter((r) => r.kind === 'arc' && r.x1 - r.x0 <= 12);
+      const covered = records
+        .filter((r) => r.kind === 'text')
+        .flatMap((t) =>
+          dots
+            .filter((a) => Math.min(t.x1, a.x1) - Math.max(t.x0, a.x0) > 1 && Math.min(t.y1, a.y1) - Math.max(t.y0, a.y0) > 1)
+            .map((a) => `${describeRecord(t)}  under  ${describeRecord(a)}`),
+        );
+      expect(covered, `${where}: text under a dot`).toEqual([]);
+    };
+    for (const units of ['friendly', 'technical'] as const) {
+      for (const width of [246, 390, 900]) {
+        for (let e = Math.log10(QParam.min); e <= Math.log10(QParam.max) + 1e-9; e += 0.1) {
+          check(Math.min(QParam.max, 10 ** e), nParam.default, units, width);
+        }
+        for (let e = Math.log10(nParam.min); e <= Math.log10(nParam.max) + 1e-9; e += 0.1) {
+          check(QParam.default, Math.min(nParam.max, 10 ** e), units, width);
+        }
+        check(QParam.max, nParam.min, units, width);
+        check(QParam.min, nParam.max, units, width);
+      }
+    }
+  });
+
+  it('marks Orion’s core only for an O7-like star', () => {
+    const texts = (Q: number) => {
+      const { ctx, records } = recordingContext();
+      neb.drawScene(ctx, 900, NEB_HEIGHT, { Q, n: nParam.default, units: 'friendly' });
+      return records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    };
+    expect(texts(QParam.default)).toContain('Orion’s core');
+    expect(texts(QParam.default)).toContain('10.3 ly');
+    expect(texts(1e46)).not.toContain('Orion’s core');
+    expect(texts(1e50)).not.toContain('Orion’s core');
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    const R = 3.1539 * PARSEC;
+    expect(neb.formatRadius(R, 'friendly')).toBe('10.3 light-years');
+    expect(neb.formatRadius(R, 'technical')).toBe('3.15 pc');
+    expect(neb.formatSolarMasses(324.8 * M_SUN)).toBe('325 M☉');
+    expect(neb.formatYears(1223.5 * JULIAN_YEAR)).toBe('1,220 years');
+    expect(neb.formatFront(1.587e13, R)).toBe('1.6 × 10⁻⁴ of the radius (106 AU)');
+    expect(neb.dominantLine()).toBe('green-teal, from oxygen at 500.7 nm');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -1196,6 +1316,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'stellar-fusion', height: FUSION_HEIGHT, cases: stellarFusionCases },
   { name: 'supernovae', height: SN_HEIGHT, cases: supernovaeCases },
   { name: 'habitable-zone', height: HZ_HEIGHT, cases: habitableZoneCases },
+  { name: 'nebulae', height: NEB_HEIGHT, cases: nebulaeCases },
 ];
 
 /**
@@ -1227,6 +1348,7 @@ const MEASURED_PLACEMENT = new Set([
   'stellar-fusion',
   'supernovae',
   'habitable-zone',
+  'nebulae',
 ]);
 
 for (const sim of SIMS) {
