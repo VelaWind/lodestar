@@ -115,11 +115,12 @@ function formatRadius(metres: number): string {
   return `${formatSig3(metres / perUnit)} ${unit}`;
 }
 
-/** An energy in J as eV, keV, MeV or GeV, three significant figures. */
+/** An energy in J as eV, keV, MeV, GeV or TeV, three significant figures. */
 function formatEnergy(joules: number): string {
   if (!(joules > 0) || !Number.isFinite(joules)) return '—';
   const eV = joules / EV;
   const rounded = Number(eV.toPrecision(3));
+  if (rounded >= 1e12) return `${formatSig3(eV / 1e12)} TeV`;
   if (rounded >= 1e9) return `${formatSig3(eV / 1e9)} GeV`;
   if (rounded >= 1e6) return `${formatSig3(eV / 1e6)} MeV`;
   if (rounded >= 1e3) return `${formatSig3(eV / 1e3)} keV`;

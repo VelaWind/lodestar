@@ -1650,6 +1650,9 @@ function hawkingRadiationCases(): Case[] {
     expect(hr.formatTemperature(6.1703e-8)).toBe('6.17 × 10⁻⁸ K');
     expect(hr.formatTemperature(2.7255)).toBe('2.73 K');
     expect(hr.formatEnergy(1.694e-12)).toBe('10.6 MeV');
+    expect(hr.formatEnergy(1.694e-5)).toBe('106 TeV');
+    expect(hr.formatEnergy(7.4e-6)).toBe('46.2 TeV');
+    expect(hr.formatEnergy(1.6e-7)).toBe('999 GeV');
     expect(hr.formatEnergy(3.76e-23)).toBe('2.35 × 10⁻⁴ eV');
     expect(hr.formatPower(3.5616e8)).toBe('356 million W');
     expect(hr.formatLifetime(0.0841)).toBe('84.1 ms');
