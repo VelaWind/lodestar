@@ -698,6 +698,52 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "How a star dies depends on one number, its mass. Above a line, it ends in the brightest event in its galaxy.",
     "title": "Supernovae",
   },
+  "time-dilation": {
+    "L1 hook": "An astronaut who spends a year on the Space Station comes home about nine thousandths of a second younger than if they had stayed on the ground. That is time travel, and it is the only kind physics is sure of.",
+    "L2 intuition": "Picture a car that can only ever drive at exactly 100 kilometres an hour. Point it due north and all of that speed goes into getting north. Turn it a little east and it still does 100, but now some of the speed goes east, so it makes less progress north. Turn it fully east and it makes no northward progress at all. Everything in the universe is like that car, except that one of the directions is time. Sitting still, all your “speed” goes into moving through time, and your clock ticks at its fullest rate. Start moving through space and some of it is taken from your motion through time, so your clock ticks more slowly than the clock of someone who stayed put. At everyday speeds the share taken is too tiny to notice. Near the speed of light it is most of it. Gravity slows clocks too, for a different reason: time itself runs more slowly deep down in gravity than high up. A clock on the floor runs slower than one on the ceiling, by an amount only the best atomic clocks can see. Near a black hole the difference becomes enormous. Where the analogy breaks: the car’s directions are ordinary directions on a map, but time is not quite like the others, and the rule for sharing the speed between them has a minus sign in it where a map has a plus. That is why no traveller can ever reach the speed of light, and why the slowing grows without limit as they approach it rather than simply topping out.",
+    "L3 approximation 0": "The trip is flown at one steady speed, with the turnaround at Proxima taken as instant. A real ship would spend part of the trip speeding up and slowing down, and the gap between the clocks would be a little smaller.",
+    "L3 approximation 1": "The black hole is a single non-spinning one of ten solar masses, and the clock hovers in place. A spinning black hole, or a clock falling or orbiting, runs at a different rate.",
+    "L3 approximation 2": "The combined rate multiplies the two effects, which holds when the speed is measured by someone hovering at the same spot.",
+    "L3 caption": "Send a traveller to the nearest star and back at different speeds and compare the two clocks when they meet again. Then lower a clock toward a black hole and watch how slowly it ticks, seen from far away.",
+    "L4 figure alt": "The International Space Station seen from a departing spacecraft, set against the blue curve of Earth with white clouds below and black space above: a long central truss carrying four pairs of copper-coloured solar wings, white radiators, and the pressurised modules running down the middle.",
+    "L4 real": "What the sim shows is time dilation: clocks running at different rates for different observers. Albert Einstein derived the first kind in 1905 from two starting points, that the laws of physics are the same for everyone moving steadily and that everyone measures the same speed of light. A clock moving at speed v runs slow by the Lorentz factor, \\gamma, which is 1 at rest, 1.25 at 60 percent of the speed of light, 1.67 at 80 percent, and grows without limit as v approaches c. Each clock measures its own proper time, the time that has actually passed along its own path, and two clocks that separate and meet again can disagree about it. That is the twin paradox. A traveller who flies to Proxima Centauri, 4.25 light-years away, at 80 percent of the speed of light and comes straight back finds that 10.6 years have passed on Earth and 6.4 on board. It is not a contradiction, although each twin sees the other’s clock run slow while they are moving apart: only the traveller turns around, so only the traveller’s path through space and time is bent, and a bent path between the same two meetings records less time than the straight one. The second kind, gravitational time dilation, came with general relativity, Einstein’s theory of gravity, in 1915. A clock deeper in gravity runs slower than one higher up. At Earth’s surface the effect is about seven parts in ten billion against a clock far away in space. Near a black hole it grows: at one and a half times the radius of its event horizon, the surface from which nothing returns, a hovering clock runs at 58 percent of the rate of a distant one, and a clock at the horizon would appear from far away to stop. Both effects are measured. Muons, unstable particles made when cosmic rays strike the upper atmosphere, live 2.2 microseconds at rest, long enough to travel about 660 metres; yet they reach the ground from fifteen kilometres up, because at their speeds their clocks run ten to thirty times slow. In 1971 Joseph Hafele and Richard Keating flew caesium clocks around the world on airliners and found them out of step with clocks at the US Naval Observatory by the predicted tens of nanoseconds. In 1959 Robert Pound and Glen Rebka measured the gravitational shift over the 22.5-metre height of a Harvard tower, and in 2010 optical clocks at NIST detected it between two clocks 33 centimetres apart in height. The effect you use daily is in your phone. GPS satellites orbit 20 000 kilometres up at 3.9 kilometres per second. Their speed makes their clocks lose 7 microseconds a day; their height, higher in Earth’s gravity, makes them gain 46. Net, they run 38 microseconds a day fast, and since a position is worked out from light-travel times, an error of 38 microseconds a day would grow into about ten kilometres of position error per day. The satellites’ clocks are set to tick slow before launch to compensate. Two misconceptions. Time dilation is not a clock malfunctioning: every process runs slower together, the traveller’s heartbeat included, so the traveller feels nothing unusual. And it is not an illusion caused by the time light takes to arrive; that delay is corrected for in every one of these measurements, and what remains is real, as the returning twin’s birthday shows. The International Space Station, 420 km up and moving at 7.7 km/s. Its speed slows its clocks by about 28 microseconds a day and its height speeds them up by 4, so its crew age about 24 microseconds a day less than people on the ground. NASA",
+    "L5 intro": null,
+    "L5 note (gravity)": "d\\tau/dt — how fast a clock hovering at distance r runs compared with one far away; r_s — the Schwarzschild radius, the size of the event horizon, 2GM/c^2, 29.5 km for a black hole of ten solar masses; r — the clock’s distance from the centre (your slider). Worked example, a GPS satellite. Orbit radius r = 2.656 \\times 10^{7}\\,\\text{m}; Earth’s radius R = 6.371 \\times 10^{6}\\,\\text{m}; GM = 3.986 \\times 10^{14}\\,\\text{m}^3/\\text{s}^2. Speed: v = \\sqrt{GM / r} = \\sqrt{3.986 \\times 10^{14} / 2.656 \\times 10^{7}} = 3\\,874\\,\\text{m/s}. Loss from speed per day: v^2 / (2c^2) \\times 86\\,400\\,\\text{s} = (3\\,874)^2 / (2 \\times (2.998 \\times 10^{8})^2) \\times 86\\,400 = 8.35 \\times 10^{-11} \\times 86\\,400 = 7.2\\,\\mu\\text{s}. Gain from height per day: GM/c^2 \\times (1/R - 1/r) \\times 86\\,400\\,\\text{s} = 4.435 \\times 10^{-3} \\times (1.570 \\times 10^{-7} - 3.765 \\times 10^{-8}) \\times 86\\,400 = 45.7\\,\\mu\\text{s}. Net: 45.7 - 7.2 = 38.5\\,\\mu\\text{s} a day fast. Light covers 11.5 km in that time.",
+    "L5 note (lorentz)": "\\gamma — the Lorentz factor; v — the traveller’s speed (your slider); c — the speed of light. A moving clock ticks once for every \\gamma ticks of a clock at rest.",
+    "L5 note (twin)": "\\tau — the time that passes for the traveller on the round trip; d — the distance to Proxima Centauri, 4.25 light-years. At home the trip takes 2d/v; on board it takes \\gamma times less.",
+    "L6 deeper": "In special relativity the proper time along a worldline is \\tau = \\int \\sqrt{1 - v(t)^2/c^2}\\,dt, the Minkowski length of the path divided by c. Between two fixed events the inertial path maximises it; every other path, with any acceleration, records less. The twin paradox is this statement about path length, and the acceleration matters only in that it is what makes the traveller’s path not straight: the time difference is set by the speeds along the whole path, not by the turnaround itself, which could be made arbitrarily brief without changing the result. Each twin’s observations are symmetric while both move inertially; the asymmetry is the traveller’s change of inertial frame, across which the traveller’s notion of “now” at Earth jumps forward by years. Gravitational time dilation follows from the equivalence principle before any field equation: a clock at the top of an accelerating rocket runs fast relative to one at the bottom by the fractional amount gh/c^2, and an observer at rest in a gravitational field is such an accelerating observer. For a static clock outside a non-rotating mass, the Schwarzschild metric gives d\\tau/dt = \\sqrt{1 - r_s/r}, which reduces to 1 - GM/(rc^2) in weak fields. The GPS system corrects for both effects at the design level: the satellites’ 10.23 MHz reference is offset before launch by −4.465 parts in 10^{10} to 10.22999999543 MHz, and the receivers apply a further correction for the orbits’ small eccentricity, up to about 46 ns, and for the Sagnac effect of Earth’s rotation during signal travel (Ashby 2003). Today’s optical lattice clocks, stable to parts in 10^{18}, see the gravitational shift across a single centimetre of height, which makes them instruments for measuring the shape of Earth’s gravity field. Backward time travel is a different matter. General relativity permits spacetimes containing a closed timelike curve, a path that returns to its own past: Kurt Gödel’s rotating universe of 1949, the interior of a spinning Kerr black hole beyond its inner horizon, and traversable wormholes of the kind Michael Morris and Kip Thorne described in 1988, which could be turned into time machines by moving one mouth relative to the other. Each requires something not known to exist: a whole universe rotating, a region inside a black hole that is likely unstable, or matter with negative energy density in amounts no known physics supplies. Stephen Hawking’s chronology protection conjecture of 1992 proposes that quantum effects always prevent such curves from forming, since the quantum fields near an incipient time machine appear to grow without bound; it is not proven. Paradoxes of the grandfather kind are usually handled by requiring self-consistency, the Novikov principle that the only histories that occur are those in which nothing changes the past. None of this has an observation behind it. The dilation of the first five layers has been measured every day for decades; the time machines of this paragraph are solutions to equations, and whether nature allows them is open.",
+    "L7 reason -> black-holes": "The bottom panel here is the clock near the horizon that module describes; its Schwarzschild radius is the r_s in equation 3.",
+    "L7 reason -> escape-velocity": "The depth of gravity that slows clocks is the same quantity: r_s/r is v_esc²/c², so the clock rate is √(1 − v_esc²/c²).",
+    "L7 reason -> gravitational-waves": "Time dilation is one effect of curved spacetime; that module is the curvature rippling outward.",
+    "L7 reason -> kepler-orbits": "The GPS orbit in the worked example is a Kepler orbit, and its speed follows from that module’s law.",
+    "reference 0": {
+      "label": "Einstein 1905, “Zur Elektrodynamik bewegter Körper”, Annalen der Physik 322, 891",
+      "note": "Special relativity and the slowing of moving clocks",
+      "url": "https://doi.org/10.1002/andp.19053221004",
+    },
+    "reference 1": {
+      "label": "Hafele & Keating 1972, “Around-the-World Atomic Clocks: Observed Relativistic Time Gains”, Science 177, 168",
+      "note": "Clocks flown on airliners",
+      "url": "https://doi.org/10.1126/science.177.4044.168",
+    },
+    "reference 2": {
+      "label": "Pound & Rebka 1960, “Apparent Weight of Photons”, Phys. Rev. Lett. 4, 337",
+      "note": "Gravitational shift over 22.5 m",
+      "url": "https://doi.org/10.1103/PhysRevLett.4.337",
+    },
+    "reference 3": {
+      "label": "Chou et al. 2010, “Optical Clocks and Relativity”, Science 329, 1630",
+      "note": "Both effects measured at everyday speeds and a 33 cm height difference",
+      "url": "https://doi.org/10.1126/science.1192720",
+    },
+    "reference 4": {
+      "label": "Ashby 2003, “Relativity in the Global Positioning System”, Living Rev. Relativ. 6, 1",
+      "note": "GPS clock corrections: the 38 μs/day and the frequency offset",
+      "url": "https://doi.org/10.12942/lrr-2003-1",
+    },
+    "tagline": "Moving clocks run slow, and so do clocks deep in gravity. It is the one kind of time travel physics is sure of.",
+    "title": "Time Dilation",
+  },
 }
 `;
 
@@ -799,6 +845,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "About 1.4 solar masses: the most a white dwarf, or a star’s inert core, can weigh before it must collapse.",
     "title": "Chandrasekhar limit",
   },
+  "closed-timelike-curve": {
+    "body": "A path through spacetime that returns to its own past. Some solutions of general relativity contain them; none has ever been found in nature.",
+    "title": "Closed timelike curve",
+  },
   "cmb-dipole": {
     "body": "The sky is about three thousandths of a degree hotter ahead of us and cooler behind: the fingerprint of our own motion through the background.",
     "title": "CMB dipole",
@@ -891,6 +941,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The narrow range of collision energies where almost all fusion happens: high enough to tunnel, low enough that some particles actually have it.",
     "title": "Gamow peak",
   },
+  "gravitational-time-dilation": {
+    "body": "Clocks deeper in gravity run slower. A clock on the ground loses about 60 microseconds a day against one far out in space.",
+    "title": "Gravitational time dilation",
+  },
   "greenhouse-effect": {
     "body": "Warming of a surface by an atmosphere that lets sunlight in but absorbs the heat radiated back. Earth’s adds 33 K; Venus’s adds about 500 K.",
     "title": "Greenhouse effect",
@@ -970,6 +1024,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "limb": {
     "body": "The visible edge of a star’s or planet’s disc.",
     "title": "Limb",
+  },
+  "lorentz-factor": {
+    "body": "γ = 1/√(1 − v²/c²): how much slower a moving clock runs. 1.000000000005 at motorway speed, 1.67 at 80 percent of light speed, and without limit as speed nears c.",
+    "title": "Lorentz factor",
   },
   "luminosity-distance": {
     "body": "Distance inferred from how much a signal has faded on its way here.",
@@ -1158,6 +1216,14 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "tidal-locking": {
     "body": "A planet turning one face permanently to its star, as the Moon does to Earth. Expected for planets in the habitable zones of red dwarfs.",
     "title": "Tidal locking",
+  },
+  "time-dilation": {
+    "body": "Clocks running at different rates for different observers: slower when moving fast, and slower deep in gravity. Measured with atomic clocks on aircraft, satellites and a staircase.",
+    "title": "Time dilation",
+  },
+  "twin-paradox": {
+    "body": "A twin who travels and returns is younger than the one who stayed. Not a contradiction: only the traveller changed direction, so the two paths through spacetime differ.",
+    "title": "Twin paradox",
   },
   "type-ia-supernova": {
     "body": "The explosion of a white dwarf star that has gained too much mass. All reach nearly the same peak brightness, so how bright one looks tells its distance.",
