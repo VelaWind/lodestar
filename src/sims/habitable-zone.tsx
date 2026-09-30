@@ -29,7 +29,6 @@ import {
   GREENHOUSE_EARTH,
   JULIAN_YEAR,
   L_SUN,
-  M_SUN,
   S_SUN,
   SEFF_EARLY_MARS,
   SEFF_MAXGH,
@@ -39,6 +38,7 @@ import {
 import {
   VERDICT_LABELS,
   equilibriumTemperature,
+  massFromLuminosity,
   stellarFlux,
   surfaceTemperatureEarthLike,
   zoneEdge,
@@ -119,10 +119,25 @@ function formatFlux(flux: number): string {
   return `${plainOrScientific(flux)} W/m² (${times} × Earth’s)`;
 }
 
-/** A temperature in K with Celsius beside it: "255 K (−18.4 °C)". */
+/**
+ * A temperature in K with Celsius beside it: "255 K (−18 °C)".
+ *
+ * The Celsius figure is converted from the kelvin figure as shown, three
+ * significant figures, and kept to the same decimal place, so the two agree
+ * on the page: 255 K is −18 °C, not the −18.6 of the unrounded 254.6 K.
+ */
 function formatKelvinCelsius(kelvin: number): string {
-  if (!Number.isFinite(kelvin)) return '—';
-  return `${plainOrScientific(kelvin)} K (${plainOrScientific(kelvin - 273.15)} °C)`;
+  if (!Number.isFinite(kelvin) || kelvin <= 0) return '—';
+  const shown = Number(kelvin.toPrecision(3));
+  const places = Math.min(2, Math.max(0, 2 - Math.floor(Math.log10(shown))));
+  // In whole hundredths of a degree, so the .x5 that every one-decimal kelvin
+  // figure leaves after subtracting 273.15 rounds half away from zero, not by
+  // whichever side of the tie binary floating point lands on.
+  const hundredths = Math.round(shown * 100) - 27_315;
+  const unit = 10 ** (2 - places);
+  const rounded = (Math.sign(hundredths) * Math.round(Math.abs(hundredths) / unit) * unit) / 100;
+  const celsius = new Intl.NumberFormat('en', { minimumFractionDigits: places, maximumFractionDigits: places });
+  return `${plainOrScientific(kelvin)} K (${minus(celsius.format(rounded))} °C)`;
 }
 
 /** An orbital period in s as years, or days below one year: three significant figures. */
@@ -430,6 +445,11 @@ function drawZone(
    * the panel and clear of every label already placed.
    */
   const panel: LabelBox = { x0: plotLeft, x1: plotRight, y0: bandTop, y1: axisY };
+  // The planet is drawn last, on top, so its box is reserved first: no label
+  // placed below may sit under the dot.
+  const xP = xOf(view.d);
+  const planet: LabelBox = { x0: xP - 6, x1: xP + 6, y0: midY - 6, y1: midY + 6 };
+  const blocked = (box: LabelBox) => [...obstacles, planet].some((o) => overlaps(box, o, 2));
   const named = (text: string, x0: number, x1: number, rows: number[]) => {
     if (x1 - x0 < 1) return;
     const half = ctx.measureText(text).width / 2;
@@ -438,16 +458,15 @@ function drawZone(
       .map((y) => ({ x, y, align: 'center' as const }))
       .find(
         (c) =>
-          inside(ctx, text, c, panel) &&
-          !obstacles.some((o) => overlaps(labelBox(ctx, text, c.x, c.y, c.align), o, 2)),
+          inside(ctx, text, c, panel) && !blocked(labelBox(ctx, text, c.x, c.y, c.align)),
       );
     if (!spot) return;
     ctx.fillStyle = COLORS.zoneInk;
     platedText(ctx, text, spot, obstacles);
   };
-  named('liquid water likely', conIn, conOut, [bandTop + 12]);
-  named('possible', optIn, conIn, [bandTop + 26, bandTop + 40]);
-  named('possible', conOut, optOut, [bandTop + 26, bandTop + 40]);
+  named('liquid water possible', conIn, conOut, [bandTop + 12]);
+  named('at the edge', optIn, conIn, [bandTop + 26, bandTop + 40]);
+  named('at the edge', conOut, optOut, [bandTop + 26, bandTop + 40]);
 
   /* At Deep, the four edges' distances, wherever each fits. */
   if (deep) {
@@ -466,16 +485,15 @@ function drawZone(
       const spot = [0, -12, -24, -36]
         .map((dy) => ({ x, y: y + dy, align: 'center' as const }))
         .find(
-        (c) =>
-          inside(ctx, text, c, { x0: plotLeft, x1: plotRight, y0: bandTop, y1: axisY }) &&
-          !obstacles.some((o) => overlaps(labelBox(ctx, text, c.x, c.y, c.align), o, 2)),
-      );
+          (c) =>
+            inside(ctx, text, c, { x0: plotLeft, x1: plotRight, y0: bandTop, y1: axisY }) &&
+            !blocked(labelBox(ctx, text, c.x, c.y, c.align)),
+        );
       if (spot) platedText(ctx, text, spot, obstacles);
     }
   }
 
-  /* The planet. */
-  const xP = xOf(view.d);
+  /* The planet, over everything else in the panel. */
   const T = equilibriumTemperature(view.L, view.d, view.A);
   ctx.fillStyle = planetColour(T);
   ctx.beginPath();
@@ -713,7 +731,7 @@ export default function HabitableZoneSim({ params, values }: SimProps) {
   const flux = stellarFlux(L, d);
   const Teq = equilibriumTemperature(L, d, A);
   const Tsurface = surfaceTemperatureEarthLike(Teq);
-  const year = period(M_SUN, d);
+  const year = period(massFromLuminosity(L), d);
 
   /** The values the panels are drawn at, which trail the sliders while they slide. */
   const shownRef = useRef<Shown>({ L, d, A });
@@ -771,12 +789,12 @@ export default function HabitableZoneSim({ params, values }: SimProps) {
         <Readout label={deep ? 'Conservative edges' : 'The zone runs from'} value={formatEdges(inner, outer)} />
         <Readout label={deep ? 'Stellar flux S' : 'Light reaching the planet'} value={formatFlux(flux)} />
         <Readout
-          label={deep ? 'Equilibrium temperature T_eq' : 'Temperature with no atmosphere'}
+          label={deep ? 'Equilibrium temperature' : 'Temperature with no atmosphere'}
           value={formatKelvinCelsius(Teq)}
         />
-        <Readout label={deep ? 'T_eq + 33 K' : 'With an Earth-like atmosphere'} value={formatKelvinCelsius(Tsurface)} />
+        <Readout label={deep ? 'Equilibrium plus 33 K' : 'With an Earth-like atmosphere'} value={formatKelvinCelsius(Tsurface)} />
         <Readout
-          label={deep ? 'Orbital period, for a Sun-mass star' : 'How long a year is'}
+          label={deep ? 'Orbital period, star mass from L' : 'How long a year is'}
           value={formatPeriod(year)}
         />
       </dl>
