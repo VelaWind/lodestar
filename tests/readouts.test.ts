@@ -74,7 +74,7 @@ describe('the collapse warning', () => {
   });
 
   it('does not appear at the horizon exactly, nor above it', () => {
-    // R = r_s is the coincidence the going-deeper layer is about: the Newtonian
+    // R = r_s is the agreement the going-deeper layer is about: the Newtonian
     // escape speed equals c there. Interesting, not broken.
     const rs = schwarzschildRadius(M.max);
     expect(collapseNote(M.max, rs), 'exactly at r_s').toBeNull();

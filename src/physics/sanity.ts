@@ -635,8 +635,9 @@ export function verifyBlackHoleModel(): CheckBlock {
  *      figure catches it.
  *   2. Strain at the default distance, evaluated at 100 Hz, is of order 10⁻²¹.
  *      Asserted as an exponent rather than a value — the amplitude formula is
- *      sky- and orientation-averaged, so demanding better than an order of
- *      magnitude would be testing an average against a specific.
+ *      for an optimally oriented source, which a real detection only ever falls
+ *      short of, so demanding better than an order of magnitude would be testing
+ *      a best case against a specific one.
  *   3. Time to merger for a 28 M_☉ chirp mass, against the published length of
  *      the chirp this is modelled on: LIGO's observed GW150914 signal ran about
  *      0.2 s from 35 Hz. Asserted at that frequency and against that number,
@@ -671,7 +672,7 @@ export function verifyGravitationalWaveModel(): CheckBlock {
   /* GW150914's published component masses, and the module's default distance. */
   const m1 = 36 * M_SUN;
   const m2 = 29 * M_SUN;
-  const distance = 1.26e25; // m, ≈410 Mpc
+  const distance = 1.26e25; // m, 408 Mpc: GW150914's 410 Mpc, rounded
   const mc = chirpMass(m1, m2);
 
   /* 1 — chirp mass. */
@@ -689,10 +690,10 @@ export function verifyGravitationalWaveModel(): CheckBlock {
   const hOk = hExponent === -21;
   results.push(
     asserted(
-      'Strain of GW150914 at 410 Mpc, evaluated at 100 Hz',
+      'Strain of GW150914 at the default 408 Mpc, evaluated at 100 Hz',
       'h = (4/d)(GM_c/c²)^(5/3)(πf/c)^(2/3)',
       `computed ${significant(h100)} (10^${hExponent})  ·  expected order 10^-21` +
-        `  ·  sky- and orientation-averaged, so the order is the claim`,
+        `  ·  optimally oriented, so the order is the claim`,
       hOk,
     ),
   );

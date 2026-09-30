@@ -11,8 +11,10 @@
  * What this file models, stated plainly, is a rule of thumb. It compares two
  * speeds and reports which is larger by how much. Real Jeans escape is a flux,
  * computed at the exobase, and it depends *exponentially* on the escape
- * parameter — so a planet does not switch from keeping a gas to losing it at a
- * threshold, it loses it a thousand times faster per unit of λ. The criterion
+ * parameter, going as (1+λ)e^(−λ) — so a planet does not switch from keeping a
+ * gas to losing it at a threshold: each unit of λ cuts the loss rate by a
+ * factor of about e (≈2.7), and ten units cut it by more than ten thousand
+ * across the band the verdicts use. The criterion
  * below is the standard pedagogical stand-in for that exponential, and the
  * module says so beside the simulation.
  *
@@ -98,7 +100,10 @@ export type Retention = 'retains' | 'marginal' | 'loses';
  * The band between 4.5 and 6 is where the rule stops being useful and the real
  * answer depends on the exobase temperature, the solar cycle, and four billion
  * years of history — so it is reported as its own verdict rather than rounded to
- * one side. Helium on Earth sits there, and Earth is indeed losing it.
+ * one side. Helium on Earth sits there, and Earth is indeed losing it, though
+ * mostly by non-thermal routes (polar wind, ion outflow) rather than Jeans
+ * escape. Earth's lack of hydrogen and helium is also only partly this
+ * verdict: it never kept the nebular gas in the first place.
  */
 export interface RetentionResult {
   /** v_esc / v_th, dimensionless. */

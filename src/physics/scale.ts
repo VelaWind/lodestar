@@ -15,7 +15,7 @@
  * in separate sections below; nothing in the display section may be used to
  * compute, and nothing in the computation section formats.
  */
-import { C } from './constants';
+import { C, JULIAN_YEAR } from './constants';
 
 /* ------------------------------- computation ------------------------------- */
 
@@ -53,8 +53,6 @@ const SIG3 = new Intl.NumberFormat('en', { maximumSignificantDigits: 3 });
 const MINUTE = 60;
 const HOUR = 3_600;
 const DAY = 86_400;
-/** Julian year, s — the same definition `constants.ts` uses for LIGHT_YEAR. */
-const YEAR = 3.155_76e7;
 
 /**
  * Sub-second SI prefixes, smallest first. `limit` is the upper bound of each
@@ -97,9 +95,9 @@ export function formatLightTravelTime(seconds: number): string {
   if (seconds < 2 * MINUTE) return `${SIG3.format(seconds)} s`;
   if (seconds < 2 * HOUR) return `${SIG3.format(seconds / MINUTE)} min`;
   if (seconds < 2 * DAY) return `${SIG3.format(seconds / HOUR)} hours`;
-  if (seconds < 2 * YEAR) return `${SIG3.format(seconds / DAY)} days`;
+  if (seconds < 2 * JULIAN_YEAR) return `${SIG3.format(seconds / DAY)} days`;
 
-  const years = seconds / YEAR;
+  const years = seconds / JULIAN_YEAR;
   if (years >= 1e9) return `${SIG3.format(years / 1e9)} billion years`;
   if (years >= 1e6) return `${SIG3.format(years / 1e6)} million years`;
   return `${SIG3.format(years)} years`;

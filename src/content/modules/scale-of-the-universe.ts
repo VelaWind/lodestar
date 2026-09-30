@@ -16,9 +16,10 @@
  */
 import type { Module } from '../types';
 import {
-  AU,
+  A_NEPTUNE,
   LIGHT_YEAR,
   OBSERVABLE_UNIVERSE_RADIUS,
+  PROTON_RADIUS,
   R_EARTH,
   R_SUN,
 } from '@/physics/constants';
@@ -37,16 +38,12 @@ import { logMinThrough, logStep } from '../grid';
  * this module quotes, each with a citation the reader can follow.
  */
 
-/** CODATA 2018 recommended value: proton rms charge radius, 0.8414(19) fm. */
-const PROTON_CHARGE_RADIUS = 0.8414e-15; // m
 /** CODATA 2018 recommended value: Bohr radius a₀ = 5.291 772 109 03 × 10⁻¹¹ m. */
 const BOHR_RADIUS = 5.291_772_109_03e-11; // m
 /** OpenStax Anatomy & Physiology 2e §18.3: erythrocytes are about 7.5 µm across. */
 const RED_BLOOD_CELL_DIAMETER = 7.5e-6; // m
 /** NCD-RisC 2016: global mean adult height, ≈1.70 m (men) / 1.59 m (women). */
 const HUMAN_HEIGHT = 1.7; // m
-/** NASA Planetary Fact Sheet: Neptune's semi-major axis, 30.07 AU. */
-const NEPTUNE_SEMI_MAJOR_AXIS = 30.07 * AU; // m
 /** Gaia DR3 parallax 768.07 mas → 1.3020 pc = 4.2465 ly. */
 const PROXIMA_DISTANCE = 4.2465 * LIGHT_YEAR; // m
 /** Stellar disc, ~100 000 ly across — a convention, see the sizeNote. */
@@ -82,7 +79,7 @@ export const scaleAnchors: ScaleAnchor[] = [
   {
     id: 'proton',
     name: 'Proton',
-    size: 2 * PROTON_CHARGE_RADIUS,
+    size: 2 * PROTON_RADIUS,
     sizeNote:
       'Twice the root-mean-square charge radius. A proton has no surface — only a distribution of charge that thins out — so this is a width, not an edge. The radius was contested for a decade: measurements on muonic hydrogen disagreed with electron-based ones by about 4%, the smaller value won, and CODATA 2018 adopted 0.8414 fm.',
     comparison: '',
@@ -122,25 +119,25 @@ export const scaleAnchors: ScaleAnchor[] = [
     sizeNote:
       'Mean diameter, twice the mean radius. Earth is an oblate spheroid: the equatorial diameter runs about 43 km larger than the polar one.',
     comparison: 'About 7.5 million people head to toe.',
-    source: 'IAU 2015 Resolution B3 nominal terrestrial radius',
+    source: 'IUGG mean Earth radius (6,371 km); NASA Earth Fact Sheet',
   },
   {
     id: 'sun',
     name: 'Sun',
     size: 2 * R_SUN,
     sizeNote:
-      'Diameter of the photosphere, twice the nominal solar radius. The Sun has no solid surface; the photosphere is simply where it stops being opaque.',
+      'Diameter of the photosphere, twice the nominal solar radius. The Sun has no solid surface; the photosphere is where it stops being opaque.',
     comparison: '109 Earths across the Sun.',
     source: 'IAU 2015 Resolution B3 nominal solar radius',
   },
   {
     id: 'neptune-orbit',
     name: 'Neptune’s orbit',
-    size: 2 * NEPTUNE_SEMI_MAJOR_AXIS,
+    size: 2 * A_NEPTUNE,
     sizeNote:
-      'Diameter of the orbit — twice the 30.07 AU semi-major axis. A span of empty space, not an object: the planet at the edge of it is four thousand times smaller than the Sun at the centre.',
+      'Diameter of the orbit — twice the 30.07 AU semi-major axis. A span of empty space, not an object: the planet at the edge of it is about thirty times narrower than the Sun at the centre.',
     comparison: 'About 6,500 Suns across the orbit.',
-    source: 'NASA Planetary Fact Sheet',
+    source: 'JPL approximate mean orbital elements (J2000)',
   },
   {
     id: 'proxima-centauri',
@@ -260,7 +257,7 @@ const scaleOfTheUniverse: Module = {
         ),
         prose(
           p(
-            'Quantum objects have no sharp edge. The proton figure is twice a charge radius and the atom figure is twice an orbital expectation value; both are conventions about where a distribution has thinned out enough to stop counting, not measurements of a boundary.',
+            'Quantum objects have no sharp edge. The proton figure is twice a charge radius and the atom figure is twice the most probable electron distance; both are conventions about where a distribution has thinned out enough to stop counting, not measurements of a boundary.',
           ),
         ),
         prose(
@@ -315,8 +312,8 @@ const scaleOfTheUniverse: Module = {
           em('observable universe'),
           ' is about 93 billion light-years across — yet the universe is 13.8 billion years ',
           'old. The two numbers coexist because space itself has been expanding while the light ',
-          'travelled: the galaxies whose ancient light reaches us today have been carried, by ',
-          'that expansion, to some 46 billion light-years away by now. And the common ',
+          'travelled: the matter whose earliest light reaches us today is now some 46 billion ',
+          'light-years away. And the common ',
           'misconception is in the name: the observable universe is not the universe. It is the ',
           'part from which light has had time to reach us: a horizon, not a wall. What lies ',
           'beyond is larger, possibly without limit, and genuinely unknown.',
@@ -336,7 +333,7 @@ const scaleOfTheUniverse: Module = {
           height: 1280,
           alt: 'Thousands of galaxies of varied colours, shapes and sizes scattered across a black field of sky.',
           caption:
-            'The Hubble Ultra Deep Field: eleven days of accumulated exposure on a patch of sky about one-thirteenth the width of the full Moon. Nearly every smudge and spiral is a galaxy of billions of stars, some seen as they were more than twelve billion years ago.',
+            'The Hubble Ultra Deep Field: eleven days of accumulated exposure on a patch of sky about one-tenth the width of the full Moon. Nearly every smudge and spiral is a galaxy of billions of stars, some seen as they were more than twelve billion years ago.',
           credit: 'NASA, ESA, and S. Beckwith (STScI) and the HUDF Team',
         }),
       ),
@@ -451,7 +448,7 @@ const scaleOfTheUniverse: Module = {
         {
           moduleId: 'expansion-of-the-universe',
           reason:
-            'Why the visible universe is seven times wider than its age suggests: the expansion that stretches the top rungs of the ladder.',
+            'Why the visible universe is more than three times wider than its age suggests: the expansion that stretches the top rungs of the ladder.',
         },
         {
           moduleId: 'cosmic-distance-ladder',
