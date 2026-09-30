@@ -86,10 +86,103 @@ export function formatValue(param: Param, si: number): string {
   return formatNumber(value, param.format);
 }
 
-/** "6.37e6 m" — value and unit, for sliders and readouts. */
+/* ------------------------------ reader display ------------------------------ */
+
+/** A true minus sign, U+2212. A hyphen-minus reads as a dash and is spoken as one. */
+const MINUS = '−';
+
+const SUPERSCRIPT_DIGITS: Record<string, string> = {
+  '-': '⁻',
+  '0': '⁰',
+  '1': '¹',
+  '2': '²',
+  '3': '³',
+  '4': '⁴',
+  '5': '⁵',
+  '6': '⁶',
+  '7': '⁷',
+  '8': '⁸',
+  '9': '⁹',
+};
+
+/** Swap a leading hyphen-minus for U+2212, and drop the sign from a displayed zero. */
+function trueMinus(text: string): string {
+  if (!text.startsWith('-')) return text;
+  return /[1-9]/.test(text) ? `${MINUS}${text.slice(1)}` : text.slice(1);
+}
+
+/** "1.00 × 10⁴⁹": the mantissa to `digits` significant figures, renormalised if rounding carries it to 10. */
+function superscriptScientific(value: number, digits: number): string {
+  let exp = Math.floor(Math.log10(Math.abs(value)));
+  const places = Math.max(0, digits - 1);
+  if (Math.abs(Number((value / 10 ** exp).toFixed(places))) >= 10) exp += 1;
+  const power = String(exp)
+    .split('')
+    .map((ch) => SUPERSCRIPT_DIGITS[ch] ?? ch)
+    .join('');
+  return `${trueMinus((value / 10 ** exp).toFixed(places))} × 10${power}`;
+}
+
+/** Number words for the large band, largest first: [threshold, divisor, word]. */
+const NUMBER_WORDS: [number, number, string][] = [
+  [1e12, 1e12, 'trillion'],
+  [1e9, 1e9, 'billion'],
+  [1e6, 1e6, 'million'],
+];
+
+/**
+ * A slider's value as a reader sees and hears it. Never JavaScript e-notation,
+ * never a hyphen for a minus.
+ *
+ * 'auto', by the value after rounding to the param's significant digits (so a
+ * value that rounds up across a band edge is shown in the band it rounds into):
+ *   - 0.01 ≤ |v| < 10⁴: plain, trailing zeros trimmed, as before ("548", "0.3");
+ *   - 10⁴ ≤ |v| < 10⁶: plain with thousands separators ("162,000");
+ *   - 10⁶ ≤ |v| < 10¹⁵: digits and a number word ("1.62 million", "3.17 billion");
+ *   - otherwise: mantissa × 10 with a superscript exponent ("1.00 × 10⁴⁹").
+ * 'fixed': exactly the requested decimals, so 0 at three digits is "0.000".
+ * 'scientific': plain inside the skill's 0.01–10 000 band, as before, and the
+ * superscript form outside it.
+ *
+ * Display only. The equation path (`siValueToTex`) keeps its own formatter, so
+ * nothing substituted into a formula changes.
+ */
+function formatForReader(value: number, fmt: ParamFormat | undefined): string {
+  const digits = fmt?.digits ?? DEFAULT_DIGITS;
+  const notation = fmt?.notation ?? 'auto';
+
+  if (!Number.isFinite(value)) return '—';
+  if (notation === 'fixed') {
+    // toFixed itself turns exponential at 10²¹; no fixed-notation param comes near.
+    return Math.abs(value) >= 1e21 ? superscriptScientific(value, digits) : trueMinus(value.toFixed(digits));
+  }
+  if (value === 0) return '0';
+
+  if (notation === 'scientific') {
+    const plain = plainDecimalInBand(value, digits);
+    return plain !== null ? trueMinus(plain) : superscriptScientific(value, digits);
+  }
+
+  const rounded = Number(value.toPrecision(digits));
+  const abs = Math.abs(rounded);
+  if (abs >= 0.01 && abs < 1e4) return trueMinus(rounded.toString());
+  if (abs >= 1e4 && abs < 1e6) {
+    return trueMinus(new Intl.NumberFormat('en', { maximumSignificantDigits: digits }).format(rounded));
+  }
+  if (abs >= 1e6 && abs < 1e15) {
+    const [, divisor, word] = NUMBER_WORDS.find(([threshold]) => abs >= threshold)!;
+    return `${trueMinus(Number((rounded / divisor).toPrecision(digits)).toString())} ${word}`;
+  }
+  return superscriptScientific(value, digits);
+}
+
+/**
+ * "1.62 million light-years" — value and unit, for the slider's visible value
+ * and its aria-valuetext, which read the same string.
+ */
 export function formatWithUnit(param: Param, si: number): string {
   const { value, unit } = toDisplay(param, si);
-  const n = formatNumber(value, param.format);
+  const n = formatForReader(value, param.format);
   return unit ? `${n} ${unit}` : n;
 }
 
