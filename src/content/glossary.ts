@@ -516,6 +516,29 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Hubble flow',
     body: 'Distances great enough that a galaxy’s recession swamps its own motion, so that speed tracks distance: beyond about 50 megaparsecs.',
   },
+
+  /* Time dilation -------------------------------------------------- */
+
+  'time-dilation': {
+    title: 'Time dilation',
+    body: 'Clocks running at different rates for different observers: slower when moving fast, and slower deep in gravity. Measured with atomic clocks on aircraft, satellites and a staircase.',
+  },
+  'lorentz-factor': {
+    title: 'Lorentz factor',
+    body: 'γ = 1/√(1 − v²/c²): how much slower a moving clock runs. 1.000000000005 at motorway speed, 1.67 at 80 percent of light speed, and without limit as speed nears c.',
+  },
+  'twin-paradox': {
+    title: 'Twin paradox',
+    body: 'A twin who travels and returns is younger than the one who stayed. Not a contradiction: only the traveller changed direction, so the two paths through spacetime differ.',
+  },
+  'gravitational-time-dilation': {
+    title: 'Gravitational time dilation',
+    body: 'Clocks deeper in gravity run slower. A clock on the ground loses about 60 microseconds a day against one far out in space.',
+  },
+  'closed-timelike-curve': {
+    title: 'Closed timelike curve',
+    body: 'A path through spacetime that returns to its own past. Some solutions of general relativity contain them; none has ever been found in nature.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */

@@ -220,6 +220,25 @@ export const D_LMC = 49.59e3 * PARSEC;
 /** A typical galaxy peculiar velocity, m/s: about 300 km/s against the Hubble flow. */
 export const V_PEC_TYPICAL = 3e5;
 
+// Time dilation
+/** One day, s, exact: 24 × 3600. */
+export const DAY_S = 86_400;
+/**
+ * GPS orbital radius (semi-major axis), m: 26 560 km, about 20 200 km above the
+ * surface. Source: Ashby 2003, "Relativity in the Global Positioning System",
+ * Living Rev. Relativ. 6, 1.
+ */
+export const R_GPS = 2.656e7;
+/**
+ * Distance to Proxima Centauri, m: 4.2465 light-years (Gaia DR3 parallax
+ * 768.07 mas). Source: Gaia Collaboration 2023, A&A 674, A1.
+ */
+export const D_PROXIMA = 4.2465 * LIGHT_YEAR;
+/** The time-dilation sim's black hole, kg: ten solar masses, non-spinning, a typical stellar remnant. */
+export const M_DEMO_BH = 10 * M_SUN;
+/** Mean muon lifetime at rest, s. Source: Particle Data Group, Review of Particle Physics (2024). */
+export const MUON_LIFETIME = 2.1969811e-6;
+
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**

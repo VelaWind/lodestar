@@ -49,6 +49,7 @@ const MODULES = [
   'habitable-zone',
   'nebulae',
   'cosmic-distance-ladder',
+  'time-dilation',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2666,6 +2667,85 @@ test('behaviour: distance-ladder readouts follow both sliders, and a term opens 
   assertClean(w, 'distance ladder behaviour');
 });
 
+/**
+ * The time-dilation module, end to end, on every engine.
+ *
+ * At the defaults, 0.8 c and the photon sphere, γ is 1.667 and the traveller's
+ * round trip to Proxima is 6.37 years. At rest there is no daily loss and γ is
+ * 1; one step below the maximum, 0.998 c, γ is 15.82. Just outside the horizon
+ * a clock runs at under a tenth of the distant rate. A glossary term opens
+ * from the keyboard, and axe finds nothing serious.
+ */
+test('behaviour: time-dilation readouts follow both sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/time-dilation', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'time dilation at rest');
+
+  const readout = (index: number) => page.locator('#time-dilation-readouts dd').nth(index);
+
+  /* Defaults: the twin trip at 0.8 c. */
+  await expect(readout(0), 'γ at 0.8 c').toHaveText('1.667');
+  await expect(readout(3), 'the traveller’s round trip').toContainText('6.37');
+
+  /* At rest there is no loss to report, and γ is exactly 1. */
+  const v = page.locator('#p-v');
+  await v.focus();
+  await page.keyboard.press('Home');
+  await expect(readout(1), 'daily loss at rest').toContainText('none');
+  await expect(readout(0), 'γ at rest').toHaveText('1.000');
+
+  /* 0.998 c is a grid point: one step down from the maximum of 0.999 c. */
+  await page.keyboard.press('End');
+  await page.keyboard.press('ArrowLeft');
+  await expect(readout(0), 'γ at 0.998 c').toHaveText('15.82');
+
+  /* Just outside the horizon. */
+  const r = page.locator('#p-r');
+  await r.focus();
+  await page.keyboard.press('Home');
+  await expect
+    .poll(async () => Number.parseFloat(await readout(4).innerText()), { message: 'clock rate at 1.01 r_s' })
+    .toBeLessThan(0.1);
+  await assertNoOverflow(page, 'time dilation at the horizon');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be time dilation').toBe('time-dilation');
+  const trigger = page.locator('[data-glossary-term="time-dilation"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="time-dilation"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('Clocks running at different rates');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'time dilation: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '22-time-dilation-behaviour');
+  assertClean(w, 'time dilation behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2705,7 +2785,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes fifteen modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes sixteen modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3391,7 +3471,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All fifteen modules now, with no exception branch. `kepler-orbits` carried one
+ * All sixteen modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3505,7 +3585,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all seventeen and checks the rendered DOM rather than the
+ * route — so this walks all eighteen and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3531,7 +3611,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all seventeen routes').toBe(17);
+  expect(routes.length, 'all eighteen routes').toBe(18);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3678,7 +3758,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on seventeen fresh loads. Getting this wrong is what the first run of
+   * asserts on eighteen fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
