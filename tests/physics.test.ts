@@ -56,7 +56,7 @@ const BLOCKS: { run: () => CheckBlock; checks: number }[] = [
   { run: verifySupernovaModel, checks: 9 },
   { run: verifyHabitableModel, checks: 11 },
   { run: verifyNebulaModel, checks: 7 },
-  { run: verifyLadderModel, checks: 11 },
+  { run: verifyLadderModel, checks: 12 },
 ];
 
 /** Runs a block without its console output, which CI does not need to read. */
@@ -91,9 +91,9 @@ for (const { run, checks } of BLOCKS) {
 }
 
 describe('suite integrity', () => {
-  it('has 104 checks across sixteen blocks', () => {
+  it('has 105 checks across sixteen blocks', () => {
     const total = BLOCKS.reduce((n, b) => n + b.checks, 0);
-    expect(total).toBe(104);
+    expect(total).toBe(105);
     expect(BLOCKS).toHaveLength(16);
   });
 

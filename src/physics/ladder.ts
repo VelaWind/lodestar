@@ -133,7 +133,9 @@ export interface Rung {
  * precision wanted.
  */
 export const RUNGS: readonly Rung[] = [
-  { id: 'parallax', label: 'Parallax (Gaia)', dMin_m: 1 * PARSEC, dMax_m: 10e3 * PARSEC },
+  // To 3 kpc: where Gaia's bright-star precision is still a few percent; beyond
+  // it the precision readout carries the story.
+  { id: 'parallax', label: 'Parallax (Gaia)', dMin_m: 1 * PARSEC, dMax_m: 3e3 * PARSEC },
   { id: 'cepheids', label: 'Cepheids', dMin_m: 1e3 * PARSEC, dMax_m: 50 * MEGAPARSEC },
   { id: 'type-ia', label: 'Type Ia supernovae', dMin_m: 10 * MEGAPARSEC, dMax_m: 3e3 * MEGAPARSEC },
   { id: 'hubble-flow', label: 'Hubble flow', dMin_m: 50 * MEGAPARSEC, dMax_m: 3e3 * MEGAPARSEC },
