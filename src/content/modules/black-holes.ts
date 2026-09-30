@@ -115,7 +115,7 @@ const blackHoles: Module = {
         ),
         prose(
           p(
-            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: including other massless species and the particles a shrinking hole becomes hot enough to emit shortens it by a factor of a few. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
+            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: including neutrinos and gravitons shortens it about tenfold, and the heavier particles a shrinking hole becomes hot enough to emit shorten it further. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
           ),
         ),
         prose(

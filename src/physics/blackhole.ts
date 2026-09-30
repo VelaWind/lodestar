@@ -140,8 +140,9 @@ export function hawkingTemperature(M: number): number {
  * not a prediction: the coefficient rises once other massless species are
  * included, and falls again as a shrinking hole heats past the mass thresholds
  * where it can emit electrons, then hadrons — Page's full accounting for a
- * non-rotating hole is roughly a factor of two to three faster than the
- * photons-only figure. Greybody factors and the final, non-semiclassical phase
+ * non-rotating hole is about ten times faster than the photons-only figure for
+ * massless species alone (Page 1976), and faster still once heavier species
+ * switch on. Greybody factors and the final, non-semiclassical phase
  * are not modelled at all.
  *
  * It also ignores everything the hole is sitting in. For any hole this module
