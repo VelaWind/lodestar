@@ -51,8 +51,8 @@ const nebulae: Module = {
           'every nebula in every photograph is the same red and the same green.',
         ),
         p(
-          'There is a limit to how far the glow reaches. Each ultraviolet photon can strip one ',
-          'electron, and every stripped electron eventually finds an atom again and has to be ',
+          'There is a limit to how far the glow reaches. Each particle of ultraviolet light, a ',
+          'photon, can strip one electron, and every stripped electron eventually finds an atom again and has to be ',
           'stripped once more. Out to some distance the star supplies enough photons to keep up; ',
           'beyond it, the gas goes dark. That distance is the size of the glowing bubble, and it is ',
           'set by two things: how much ultraviolet the star makes, and how thick the gas is.',
@@ -83,7 +83,7 @@ const nebulae: Module = {
           technicalLabel: 'Ionizing photon rate',
           symbol: 'Q',
           unit: 's^{-1}',
-          // A B3 star to the brightest O stars. Default: an O7 star, roughly the
+          // An early B star to the brightest O stars. Default: an O7 star, roughly the
           // brightest star in Orion. Five decades exactly; the maximum is
           // reachable with a 0.01-decade step.
           min: 1e45,
@@ -171,9 +171,9 @@ const nebulae: Module = {
           ', has a radius proportional to the cube root of the photon rate divided by ',
           m`n^{2/3}`,
           ': about 3 parsecs, 10 light-years, for a single O star in gas of 100 atoms per cubic ',
-          'centimetre. The edge is sharp, a transition from ionized to neutral gas only a few ',
+          'centimetre. The edge is sharp, a transition from ionized to neutral gas only about a ',
           'hundred astronomical units thick, because a photon entering neutral gas is absorbed ',
-          'within that distance. The ionized gas sits at about 10 000 K, ten times hotter than the ',
+          'within that distance. The ionized gas sits at about 10 000 K, a hundred times hotter than the ',
           'neutral cloud around it, and its pressure drives the nebula outward at about ten ',
           'kilometres per second, so real H II regions are not static spheres but expanding, often ',
           'lopsided blisters on the face of the dark cloud that made their stars. Orion’s is one: ',
@@ -194,8 +194,8 @@ const nebulae: Module = {
           'smudge.',
         ),
         p(
-          'Two misconceptions. Nebulae are not dense: a hundred atoms per cubic centimetre is a far ',
-          'better vacuum than any laboratory on Earth can make, and a spacecraft flying through ',
+          'Two misconceptions. Nebulae are not dense: a hundred atoms per cubic centimetre is a ',
+          'better vacuum than almost any laboratory on Earth can make, and a spacecraft flying through ',
           'Orion would notice nothing. And the colours in the famous images are usually not what an ',
           'eye would see; the Hubble palette maps sulphur, hydrogen and oxygen lines to red, green ',
           'and blue to separate them, which turns hydrogen’s red into green.',
@@ -301,7 +301,7 @@ const nebulae: Module = {
               ', or 10 light-years',
             ),
             p(
-              m`M = (4/3)\,\pi\,(9.7 \times 10^{16})^3 \times 10^{8} \times 1.67 \times 10^{-27} = 6.5 \times 10^{32}\,\text{kg} = 330\,M_\odot`,
+              m`M = (4/3)\,\pi\,(9.7 \times 10^{16})^3 \times 10^{8} \times 1.67 \times 10^{-27} = 6.5 \times 10^{32}\,\text{kg} = 325\,M_\odot`,
             ),
             p(
               m`t_{\text{rec}} = 1 / (10^{8} \times 2.59 \times 10^{-19}) = 3.9 \times 10^{10}\,\text{s}`,
@@ -380,7 +380,7 @@ const nebulae: Module = {
           'engine: a white dwarf at ',
           m`10^5\,\text{K}`,
           ' ionizes helium twice over and adds the He II line at 468.6 nm, and its nebula is a few ',
-          'thousand years from dispersing rather than a few million. The open questions are mostly ',
+          'tens of thousands of years from dispersing rather than a few million. The open questions are mostly ',
           'about what the simple model leaves out: dust inside the region, which absorbs a large ',
           'share of the ionizing photons and re-radiates them in the infrared; magnetic fields, ',
           'which can carry as much pressure as the gas; and the clumpiness of real clouds, which ',
