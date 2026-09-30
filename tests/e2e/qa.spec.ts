@@ -801,8 +801,25 @@ test('equation toggle substitutes live values', async ({ page }) => {
   ).not.toMatch(/extesc|arepsilon|infty|sqrt\{/);
   expect(note, 'the first note should render v_esc').toContain('esc');
 
+  // The "where" line links the SI value in the formula to the slider's own unit.
+  // Only the apex equation substitutes a param shown in another unit (v₀ in km/s).
+  const where = page.locator('[data-equation-where]');
+  await expect(where, 'one where line: the apex equation').toHaveCount(1);
+  await expect(where).toHaveAttribute('data-equation-where', 'apex');
+  await expect(where).toContainText('8 km/s');
+  const viewport = page.viewportSize();
+  const whereBox = await where.boundingBox();
+  expect(whereBox, 'where line has no layout box').not.toBeNull();
+  expect(
+    whereBox!.x + whereBox!.width,
+    'the where line should fit inside the viewport',
+  ).toBeLessThanOrEqual((viewport?.width ?? Infinity) + 0.5);
+
   await assertNoOverflow(page, 'escape-velocity math layer in numbers mode');
   await shot(page, '12-equation-numbers');
+
+  await page.getByRole('button', { name: 'symbols', exact: true }).click();
+  await expect(where, 'symbols mode shows no where line').toHaveCount(0);
   assertClean(w, 'equation toggle');
 });
 
@@ -2022,7 +2039,7 @@ const GAS_VERDICTS: [string, string][] = [
   ['CO₂', 'retained'],
 ];
 
-test('behaviour: every gas chip selects, redraws and keeps its verdict', async ({ page }) => {
+test('behaviour: every gas chip selects, redraws and keeps its verdict @cross-engine', async ({ page }) => {
   const w = watch(page);
   await page.goto('/m/planetary-atmospheres', { waitUntil: 'domcontentloaded' });
   await settle(page, 900);
@@ -2782,6 +2799,17 @@ test('behaviour: hawking-radiation readouts follow the mass, and a term opens by
   await page.keyboard.press('Home');
   await expect(readout(3), 'emission at 10⁵ kg').toContainText('quarks');
   await assertNoOverflow(page, 'hawking radiation at a hundred tonnes');
+
+  /* The crossover mass sits between slider stops; its button, pressed from the
+     keyboard, sets it exactly, and the temperature then reads as the CMB's. */
+  const crossover = page
+    .locator('#layer-panel-play')
+    .getByRole('button', { name: 'Set to the crossover mass', exact: true });
+  await crossover.focus();
+  await expect(crossover, 'the crossover button should take focus').toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(readout(1), 'temperature at the crossover mass').toHaveText(/^2\.73 K(\s|$)/);
+  await expect(readout(2), 'net with the background at the crossover').toContainText('in balance');
 
   /* A glossary term, reached and opened with the keyboard alone. */
   await openLayer(page, 'real');
