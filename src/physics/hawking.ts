@@ -15,7 +15,7 @@
  * Photons only, as `evaporationTime` is: the power below is the one whose
  * integral gives that lifetime, so the two are consistent by construction.
  * A real hole also emits neutrinos and gravitons, and heavier particles once it
- * is hot enough; the module discloses the factor of a few this costs.
+ * is hot enough; the module discloses that this costs about tenfold.
  *
  * The sim, its readouts and the sanity block all read these functions.
  */

@@ -26,8 +26,8 @@ const supernovae: Module = {
       body: prose(
         p(
           'A star twenty times the Sun’s mass ends its life in less than a second, and for a few ',
-          'weeks the explosion outshines everything else in its galaxy. Much of the iron in your ',
-          'blood was made that way.',
+          'weeks the explosion shines as bright as hundreds of millions of Suns. Some of the iron ',
+          'in your blood was made that way.',
         ),
       ),
     },
@@ -38,8 +38,9 @@ const supernovae: Module = {
         p(
           'A star is a balancing act. Gravity pulls everything toward the centre; the heat of the ',
           'core pushes back. Think of a hot-air balloon: as long as the burner runs, the balloon ',
-          'holds its shape and its height. The star’s burner is fusion at the core, and it has run ',
-          'for the Sun’s whole life.',
+          'holds its shape and its height. The star’s burner is fusion at the core, light atoms ',
+          'merging into heavier ones and giving off heat as they do, and it has run for the Sun’s ',
+          'whole life.',
         ),
         p(
           'Fuel runs out. For a star like the Sun that is undramatic: the core shrinks, the outer ',
@@ -48,7 +49,8 @@ const supernovae: Module = {
           'through its fuel in a few million years and then, in its last day, forges iron at its ',
           'centre. Iron gives no heat when it fuses. The burner goes out at the centre of a star ',
           'that weighs more than eight Suns, and the core falls in on itself, at a quarter of the ',
-          'speed of light, until it is as dense as an atomic nucleus and can fall no further. The ',
+          'speed of light, until it is as dense as an atomic nucleus, the tiny, heavy heart of an ',
+          'atom, and can fall no further. The ',
           'infalling layers slam into it, and the rebound, driven by a flood of particles from the ',
           'new core, blows the rest of the star into space.',
         ),
@@ -79,8 +81,9 @@ const supernovae: Module = {
           technicalLabel: 'Initial mass',
           symbol: 'M',
           unit: 'kg',
-          // Half a solar mass (the lightest stars old enough to have died) to 32.
-          // Default: the Sun.
+          // Half a solar mass to 32. Stars below about 0.9 M☉ have not yet had time to
+          // die (a 0.5 M☉ star lives about 57 billion years); their fate is the
+          // prediction, and the sim discloses it. Default: the Sun.
           min: 0.5 * M_SUN,
           // 0.5 × 2⁶, so the grid below lands on 0.5, 1, 2, 4, 8, 16 and 32 M☉ exactly
           max: 32 * M_SUN,
@@ -130,6 +133,11 @@ const supernovae: Module = {
             'The brightness panel is a Type Ia at its average peak, −19.3, with no dimming by dust. A core-collapse supernova is typically two magnitudes fainter, and no single explosion is exactly average.',
           ),
         ),
+        prose(
+          p(
+            'Stars below about 0.9 solar masses have not yet had time to die; their fate shown here is the prediction.',
+          ),
+        ),
       ],
     },
 
@@ -149,7 +157,7 @@ const supernovae: Module = {
           term('neutron star'),
           ', a sphere about 24 km across, or, for the heaviest stars, straight to a black hole. ',
           'About 99 percent of the energy released, some 3 × 10⁴⁶ joules, leaves as neutrinos; ',
-          'only one percent goes into the explosion and a hundredth of that into light. ',
+          'well under one percent goes into the explosion and about a hundredth of that into light. ',
           'Twenty-five of those neutrinos were caught on Earth in February 1987 from SN 1987A in ',
           'the Large Magellanic Cloud, arriving hours before the light, the only supernova ',
           'neutrinos ever detected.',
@@ -171,7 +179,7 @@ const supernovae: Module = {
         ),
         p(
           'Most stars will do neither. Below about eight solar masses, which is nearly every star, ',
-          'the end is a ',
+          'the end is, or for the lightest will be, a ',
           term('planetary nebula'),
           ' and a white dwarf; the Sun will go this way in about five billion years, and the ember ',
           'will be roughly half its present mass. Between about 8 and 20 solar masses the core ',
@@ -186,7 +194,7 @@ const supernovae: Module = {
           'ones do, and only because iron cannot burn. And the light of a supernova is not the ',
           'star burning up: for a Type Ia, and for months after a core collapse once its first ',
           'glow fades, the light is powered by the radioactive decay of the nickel forged in the ',
-          'blast, half a solar mass of it in a Type Ia.',
+          'blast, about 0.6 of a solar mass of it in a Type Ia.',
         ),
         p(
           'The mass boundaries here are approximate. The 8 solar-mass line is known to within ',

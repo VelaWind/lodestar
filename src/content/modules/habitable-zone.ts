@@ -127,7 +127,7 @@ const habitableZone: Module = {
         ),
         prose(
           p(
-            'The zone edges are the climate-model limits for a Sun-like star, from Kopparapu and colleagues. Around redder or bluer stars they shift by up to about ten percent, which the sim does not model, and outside the range from about a tenth to about ten times the Sun’s brightness they are an extrapolation.',
+            'The zone edges are the climate-model limits for a Sun-like star, from Kopparapu and colleagues. Around redder or bluer stars they shift, by up to about a quarter in distance for the coolest red dwarfs, most at the outer edge, which the sim does not model, and outside the range from about a tenth to about ten times the Sun’s brightness they are an extrapolation.',
           ),
         ),
         prose(
@@ -179,8 +179,8 @@ const habitableZone: Module = {
           'feeds the evaporation, and the process runs away until the oceans are gone, a ',
           term('runaway greenhouse'),
           '. The outer edge is where even a thick carbon-dioxide atmosphere can no longer keep ',
-          'the surface above freezing, because carbon dioxide condenses out and reflects ',
-          'sunlight. A more generous pair of edges takes the last time Venus might have had ',
+          'the surface above freezing, because a still thicker carbon-dioxide atmosphere scatters ',
+          'away more sunlight than it traps. A more generous pair of edges takes the last time Venus might have had ',
           'oceans and the time early Mars apparently did.',
         ),
         p(
@@ -206,8 +206,9 @@ const habitableZone: Module = {
         p(
           'The edges are model results and carry about a ten percent uncertainty; different ',
           'assumptions about clouds move the inner edge between 0.95 and 0.99 AU for the Sun. The ',
-          'Sun has brightened by about 30 percent since it formed, so the zone has been moving ',
-          'outward the whole time, and in about a billion years it will leave the Earth behind.',
+          'Sun was about 30 percent dimmer when it formed, so the zone has been moving outward ',
+          'the whole time. The conservative inner edge already sits just inside Earth’s orbit; ',
+          'the runaway-greenhouse limit reaches 1 AU in roughly a billion years.',
         ),
         /*
          * Source: https://www.nasa.gov/image-article/blue-marble-image-of-earth-from-apollo-17/
@@ -385,12 +386,14 @@ const habitableZone: Module = {
         p(
           'Finally, the zone moves. ',
           term('Main-sequence', 'main-sequence'),
-          ' stars brighten as their cores convert hydrogen to helium; the Sun’s luminosity has ',
-          'risen about 30 percent since the zero-age main sequence, so the “continuously ',
-          'habitable zone” over the past four billion years is narrower than the present one, ',
-          'and the present inner edge will reach 1 AU in roughly a billion years, long before the ',
-          'Sun leaves the main sequence. The faint young Sun paradox, that early Earth had liquid ',
-          'water under a Sun 25 percent dimmer, is usually resolved by a thicker CO₂ or methane ',
+          ' stars brighten as their cores convert hydrogen to helium; the Sun was about 30 percent ',
+          'dimmer on the zero-age main sequence, so the “continuously habitable ',
+          'zone” over the past four billion years is narrower than the present one. The ',
+          'conservative inner edge already sits just inside Earth’s orbit, and the ',
+          'runaway-greenhouse limit reaches 1 AU in roughly a billion years, long before the Sun ',
+          'leaves the main sequence. The faint young Sun paradox, that early Earth had liquid ',
+          'water four billion years ago under a Sun then about 25 percent dimmer than today, is ',
+          'usually resolved by a thicker CO₂ or methane ',
           'atmosphere then, which is the greenhouse coat of the analogy doing exactly its job.',
         ),
       ),

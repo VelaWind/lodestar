@@ -17,7 +17,7 @@ const nebulae: Module = {
   id: 'nebulae',
   title: 'Nebulae',
   tagline:
-    'A cloud of gas lit from inside by newborn stars glows the way a neon sign does, and for the same reason.',
+    'A cloud of gas lit from inside by newborn stars glows the way a neon sign does: its atoms are driven to give off light in colours all their own.',
   status: 'published',
 
   layers: {
@@ -27,7 +27,7 @@ const nebulae: Module = {
         p(
           'On a dark night the middle “star” of Orion’s sword is not a star but a cloud of gas, lit ',
           'from inside by four newborn suns, and you can see it with the naked eye. It glows the way ',
-          'a neon sign does, and for the same reason.',
+          'a neon sign does: its gas is driven to give off light in colours all its own.',
         ),
       ),
     },
@@ -37,8 +37,9 @@ const nebulae: Module = {
       body: prose(
         p(
           'A neon sign is a glass tube of thin gas with electricity run through it. The electricity ',
-          'knocks electrons off the atoms; when an electron finds its way back, the atom gives off a ',
-          'flash of light at a colour that belongs to that gas and no other. Neon glows orange-red. ',
+          'drives fast electrons into the atoms, bumping them into a higher-energy state; as each ',
+          'settles back it gives off a flash of light at a colour that belongs to that gas and no ',
+          'other. Neon glows orange-red. ',
           'Fill the tube with something else and you get a different colour. The gas is not burning ',
           'and not hot in the ordinary sense; it is being poked, and it answers with light.',
         ),
@@ -46,7 +47,9 @@ const nebulae: Module = {
           'A nebula is a neon sign the size of a solar system, or a thousand of them, with no tube ',
           'and no wires. The poking is done by starlight, the harsh ultraviolet kind that only very ',
           'hot, young stars give off in quantity. It strips the electrons from the hydrogen around ',
-          'the star, and every time an electron rejoins an atom the gas flashes. The colours are the ',
+          'the star, and the gas then glows both ways at once: hydrogen flashes as electrons rejoin ',
+          'it, and oxygen flashes after being bumped by the loose electrons, just like the sign. The ',
+          'colours are the ',
           'colours of hydrogen and of the traces of oxygen and nitrogen mixed in, which is why nearly ',
           'every nebula in every photograph is the same red and the same green.',
         ),
@@ -142,8 +145,8 @@ const nebulae: Module = {
           term('ionization'),
           ', by the ultraviolet light of hot stars. Only photons with wavelengths shorter than 91.2 ',
           'nm carry enough energy to ionize hydrogen, and only stars hotter than about 25 000 K, of ',
-          'spectral types O and early B, produce them in quantity. Such stars live for a few million ',
-          'years at most, so an H II region marks a place where massive stars have formed very ',
+          'spectral types O and early B, produce them in quantity. Such stars live a few million ',
+          'years for O stars, and at most a few tens of millions for early B stars, so an H II region marks a place where massive stars have formed very ',
           'recently; the four Trapezium stars lighting Orion are less than a million years old, and ',
           'the whole cloud is still making more.',
         ),
@@ -396,12 +399,12 @@ const nebulae: Module = {
         {
           moduleId: 'stellar-fusion',
           reason:
-            'The stars doing the ionizing here are the massive end of what that module describes; their ultraviolet is the surface of a core ten times hotter than the Sun’s.',
+            'The stars doing the ionizing here are the massive end of what that module describes; their ultraviolet comes from the surface of a star whose core is more than twice as hot as the Sun’s.',
         },
         {
           moduleId: 'supernovae',
           reason:
-            'The same stars end that way within a few million years, and a supernova remnant is what an H II region becomes once its star is gone.',
+            'The same stars end that way within a few million years, and their supernovae are what finally blow apart the clouds these regions light.',
         },
         {
           moduleId: 'early-universe',

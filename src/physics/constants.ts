@@ -310,6 +310,13 @@ export const R_JUPITER = 6.991_1e7; // m, volumetric mean radius
  * why a mass in kilograms is the least precise form of this number.
  */
 export const M_JUPITER = 1.898_13e27;
+/**
+ * Orbital semi-major axes of Mercury and Neptune, m, for the wormholes sim's
+ * reference sizes. Source: NASA Planetary Fact Sheets (D. R. Williams, NASA
+ * GSFC) — 57.909 × 10⁶ km and 4495.1 × 10⁶ km.
+ */
+export const A_MERCURY = 5.790_9e10;
+export const A_NEPTUNE = 4.495_1e12;
 
 // Scale
 export const OBSERVABLE_UNIVERSE_RADIUS = 4.4e26; // m, ≈46.5 billion ly
