@@ -64,7 +64,7 @@ const timeDilation: Module = {
           'time is not quite like the others, and the rule for sharing the speed between them has a ',
           'minus sign in it where a map has a plus. That is why no traveller can ever reach the ',
           'speed of light, and why the slowing grows without limit as they approach it rather than ',
-          'simply topping out.',
+          'topping out.',
         ),
       ),
     },
@@ -86,15 +86,13 @@ const timeDilation: Module = {
           technicalLabel: 'Speed',
           symbol: 'v',
           unit: 'm/s',
-          // Walking pace to 0.99999 of light speed. Default 0.8 c, the twin example.
-          min: 1,
-          max: 0.99999 * C,
+          // Rest to 0.999 of light speed in thousandths of c, so 0.8 c and 0.998 c are exact
+          // grid points. Everyday speeds are covered by the GPS worked example.
+          min: 0,
+          max: 0.999 * C,
           default: 0.8 * C,
-          // decades; 848 equal steps, shrunk by one part in 10⁹ so (max − min) / step
-          // rounds up to 848 and the input can reach its maximum. Without the
-          // shrink, floating point leaves it one step short.
-          step: ((Math.log10(0.99999 * C) - Math.log10(1)) / 848) * (1 - 1e-9),
-          scale: 'log',
+          step: 0.001 * C,
+          scale: 'linear',
           format: { notation: 'auto', digits: 4, displayUnit: { unit: 'km/s', factor: 1e-3 } },
         },
         {
@@ -186,7 +184,7 @@ const timeDilation: Module = {
           'yet they reach the ground from fifteen kilometres up, because at their speeds their clocks ',
           'run ten to thirty times slow. In 1971 Joseph Hafele and Richard Keating flew caesium ',
           'clocks around the world on airliners and found them out of step with clocks at the US ',
-          'Naval Observatory by the predicted tens of nanoseconds. In 1959 Robert Pound and Glen ',
+          'Naval Observatory by the predicted tens to hundreds of nanoseconds. In 1959 Robert Pound and Glen ',
           'Rebka measured the gravitational shift over the 22.5-metre height of a Harvard tower, and ',
           'in 2010 optical clocks at NIST detected it between two clocks 33 centimetres apart in ',
           'height.',

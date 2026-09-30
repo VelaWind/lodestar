@@ -2671,8 +2671,8 @@ test('behaviour: distance-ladder readouts follow both sliders, and a term opens 
  * The time-dilation module, end to end, on every engine.
  *
  * At the defaults, 0.8 c and the photon sphere, γ is 1.667 and the traveller's
- * round trip to Proxima is 6.37 years. At walking pace the daily loss is still
- * a real number of picoseconds, not a cancelled zero; just outside the horizon
+ * round trip to Proxima is 6.37 years. At rest there is no daily loss and γ is
+ * 1; one step below the maximum, 0.998 c, γ is 15.82. Just outside the horizon
  * a clock runs at under a tenth of the distant rate. A glossary term opens
  * from the keyboard, and axe finds nothing serious.
  */
@@ -2691,13 +2691,17 @@ test('behaviour: time-dilation readouts follow both sliders, and a term opens by
   await expect(readout(0), 'γ at 0.8 c').toHaveText('1.667');
   await expect(readout(3), 'the traveller’s round trip').toContainText('6.37');
 
-  /* Walking pace: the loss survives as picoseconds. */
+  /* At rest there is no loss to report, and γ is exactly 1. */
   const v = page.locator('#p-v');
   await v.focus();
   await page.keyboard.press('Home');
-  await expect(readout(1), 'daily loss at 1 m/s').toContainText(/\d(\.\d+)? (ps|fs)$/);
-  await expect(readout(1), 'daily loss at 1 m/s').not.toHaveText('0');
-  await expect(readout(1)).not.toHaveText('0 s');
+  await expect(readout(1), 'daily loss at rest').toContainText('none');
+  await expect(readout(0), 'γ at rest').toHaveText('1.000');
+
+  /* 0.998 c is a grid point: one step down from the maximum of 0.999 c. */
+  await page.keyboard.press('End');
+  await page.keyboard.press('ArrowLeft');
+  await expect(readout(0), 'γ at 0.998 c').toHaveText('15.82');
 
   /* Just outside the horizon. */
   const r = page.locator('#p-r');
