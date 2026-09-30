@@ -64,8 +64,8 @@ const hawkingRadiation: Module = {
       caption: prose(
         p(
           'Make the black hole lighter and heavier and watch its glow heat up and cool down. Find the ',
-          'mass where it is exactly as warm as the rest of the universe, and then the mass that would ',
-          'be ending its life right about now.',
+          'mass where it goes from shrinking to growing, and then the mass that would be ending its ',
+          'life right about now.',
         ),
       ),
       params: [
@@ -87,7 +87,7 @@ const hawkingRadiation: Module = {
       approximations: [
         prose(
           p(
-            'Power and lifetime count light only. A real hole also emits neutrinos, gravitons and, once hot enough, every heavier particle, which roughly doubles to triples its power and shortens its life to match; the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
+            'Power and lifetime count light only. A real hole also emits neutrinos, gravitons and, once hot enough, every heavier particle, which multiplies its power about tenfold, and more once it is hot enough for heavier particles; the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
           ),
         ),
         prose(
@@ -118,7 +118,7 @@ const hawkingRadiation: Module = {
           term('cosmic microwave background'),
           ', the 2.7 K glow that fills space; so every known black hole absorbs more than it emits, and ',
           'grows. The crossover, a hole exactly as warm as the background, is at 4.5 × 10²² kg, about ',
-          'two-thirds of the Moon’s mass, squeezed into a sphere a tenth of a millimetre across.',
+          'three-fifths of the Moon’s mass, squeezed into a sphere a tenth of a millimetre across.',
         ),
         p(
           'Lighter holes are hotter than their surroundings and shrink, and because a black hole has ',
@@ -144,7 +144,7 @@ const hawkingRadiation: Module = {
         ),
         p(
           'Hawking radiation itself has never been detected from any black hole; for the ones we know ',
-          'of it is billions of times too faint. What has been seen is its analogue. In ',
+          'of it is far too faint ever to detect. What has been seen is its analogue. In ',
           term('analogue gravity'),
           ', a flowing fluid can contain a point beyond which sound cannot travel upstream, a horizon ',
           'for sound; in 2016 Jeff Steinhauer measured Hawking-like pairs of sound waves emitted at ',
@@ -280,7 +280,7 @@ const hawkingRadiation: Module = {
           'low-frequency emission and differ by spin, so that a non-rotating hole emits, per unit ',
           'energy, most in neutrinos, then photons, then gravitons (Page 1976). The photons-only ',
           'coefficients used in the sim are an order-of-magnitude account; Page’s full calculation for ',
-          'a hole emitting only massless particles gives a lifetime roughly a third shorter, and ',
+          'a hole emitting only massless particles gives a lifetime about a tenth as long, and ',
           'heavier species shorten it further once ',
           m`kT`,
           ' passes their rest energies.',
@@ -299,7 +299,8 @@ const hawkingRadiation: Module = {
           'The negative heat capacity follows from ',
           m`T \propto 1/M`,
           ': a hole in a box of radiation is in unstable equilibrium, and a hole in the real universe, ',
-          'colder than the CMB, grows until the universe cools below it, at which point the ',
+          'colder than the microwave background, grows until the universe cools below it, at which ',
+          'point the ',
           'evaporation clock begins.',
         ),
         p(
@@ -318,8 +319,9 @@ const hawkingRadiation: Module = {
           'Observationally, the limits on primordial black hole abundance around 5 × 10¹¹ kg come from ',
           'the extragalactic gamma-ray background and from the ',
           'non-detection of bursts by very-high-energy gamma-ray observatories such as HAWC and ',
-          'H.E.S.S.; holes of 10¹⁰–10¹¹ kg would have evaporated during or after nucleosynthesis and ',
-          'are constrained by the abundances of light elements. Between about 10¹⁴ and 10²⁰ kg, ',
+          'H.E.S.S.; holes lighter than about 10¹⁰ kg would have evaporated during or soon after ',
+          'nucleosynthesis and are constrained by the abundances of light elements, and those of ',
+          '10¹⁰–10¹¹ kg by distortions of the microwave background. Between about 10¹⁴ and 10²⁰ kg, ',
           'microlensing and other limits leave a window where primordial holes could still be all of ',
           'the dark matter, provided some early-universe mechanism, perhaps during or after ',
           term('inflation'),
