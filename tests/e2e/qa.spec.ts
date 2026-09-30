@@ -47,6 +47,7 @@ const MODULES = [
   'stellar-fusion',
   'supernovae',
   'habitable-zone',
+  'nebulae',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2513,6 +2514,82 @@ test('behaviour: habitable-zone verdict follows the distance, and a term opens b
   assertClean(w, 'habitable zone behaviour');
 });
 
+/**
+ * The nebulae module, end to end, on every engine.
+ *
+ * At the defaults, an O7 star in gas of 100 atoms per cm³, the glow reaches
+ * 10.3 light-years; denser gas shrinks it and a brighter star grows it. A
+ * glossary term in the real-picture layer opens from the keyboard alone, and
+ * axe finds nothing serious.
+ */
+test('behaviour: nebulae radius follows both sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/nebulae', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'nebulae at rest');
+
+  const radius = page.locator('#nebulae-readouts dd').first();
+  const radiusValue = async () => parseScientific((await radius.innerText()).replace(/\s*light-years$/, ''));
+
+  /* Defaults: an O7 star in diffuse gas. */
+  await expect(radius, 'radius at the defaults').toContainText('10.3 light-years');
+  const atDefault = await radiusValue();
+
+  /* Denser gas: a smaller bubble. */
+  const n = page.locator('#p-n');
+  await n.focus();
+  await page.keyboard.press('End');
+  await expect.poll(radiusValue, { message: 'radius at the density maximum' }).toBeLessThan(atDefault);
+  await page.keyboard.press('Home');
+  await expect.poll(radiusValue, { message: 'radius back at the density minimum' }).toBeGreaterThan(atDefault);
+
+  /* Back to the default density, then the brightest star: a bigger bubble. */
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await settle(page, 600);
+  await expect(radius, 'radius at the defaults after reload').toContainText('10.3 light-years');
+  const Q = page.locator('#p-Q');
+  await Q.focus();
+  await page.keyboard.press('End');
+  await expect.poll(radiusValue, { message: 'radius at the photon-rate maximum' }).toBeGreaterThan(atDefault);
+  await assertNoOverflow(page, 'nebulae at the brightest star');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the emission nebula').toBe('emission-nebula');
+  const trigger = page.locator('[data-glossary-term="emission-nebula"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="emission-nebula"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('The Orion Nebula is one');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'nebulae: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '20-nebulae-behaviour');
+  assertClean(w, 'nebulae behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2523,14 +2600,13 @@ test('behaviour: habitable-zone verdict follows the distance, and a term opens b
  * module that is not published degrades to a chip rather than a dead link, and
  * no draft is reachable from anywhere a reader looks.
  *
- * The planned chips are five, and it is worth writing down why, because the
- * number moves when the backlog does: they point at `cosmic-distance-ladder`
- * four times (twice from older modules, once each from the expansion and
- * supernovae modules), and at `nebulae` once, from supernovae; neither is
- * written. The chips that pointed at `expansion-of-the-universe`,
- * `cosmic-microwave-background`, `early-universe`, `stellar-fusion`,
- * `supernovae` and `habitable-zone` became live links when those modules
- * were published. Two
+ * The planned chips are four, and it is worth writing down why, because the
+ * number moves when the backlog does: they all point at
+ * `cosmic-distance-ladder`, twice from older modules and once each from the
+ * expansion and supernovae modules, and it is not written. The chips that
+ * pointed at `expansion-of-the-universe`, `cosmic-microwave-background`,
+ * `early-universe`, `stellar-fusion`, `supernovae`, `habitable-zone` and
+ * `nebulae` became live links when those modules were published. Two
  * further chips existed until `planetary-atmospheres` was
  * published — a module that was finished and registered but still carried a
  * draft flag, so the index hid it and every link to it degraded to a chip.
@@ -2539,7 +2615,7 @@ test('behaviour: habitable-zone verdict follows the distance, and a term opens b
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder', 'nebulae'];
+const PLANNED_TARGETS = ['cosmic-distance-ladder'];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2551,7 +2627,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes thirteen modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes fourteen modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -2603,7 +2679,7 @@ test('behaviour: the registry publishes thirteen modules and leaks no drafts', a
   }
 
   console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
-  expect(planned, 'planned-chip total across every published page').toBe(5);
+  expect(planned, 'planned-chip total across every published page').toBe(4);
 
   assertClean(w, 'registry');
 });
@@ -3237,7 +3313,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All thirteen modules now, with no exception branch. `kepler-orbits` carried one
+ * All fourteen modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3351,7 +3427,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all fifteen and checks the rendered DOM rather than the
+ * route — so this walks all sixteen and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3377,7 +3453,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all fifteen routes').toBe(15);
+  expect(routes.length, 'all sixteen routes').toBe(16);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3524,7 +3600,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on fifteen fresh loads. Getting this wrong is what the first run of
+   * asserts on sixteen fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
