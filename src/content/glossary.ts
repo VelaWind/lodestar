@@ -562,6 +562,33 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Analogue gravity',
     body: 'Laboratory systems, such as a flowing fluid with a point sound cannot escape, that mimic a black hole’s horizon closely enough to show Hawking-like radiation.',
   },
+
+  /* Wormholes ------------------------------------------------------ */
+
+  wormhole: {
+    title: 'Wormhole',
+    body: 'A tunnel through space joining two distant places, allowed by general relativity. None has ever been observed, and holding one open would need matter with negative energy.',
+  },
+  'einstein-rosen-bridge': {
+    title: 'Einstein–Rosen bridge',
+    body: 'The wormhole hidden in the mathematics of a simple black hole, found in 1935. It pinches shut faster than light can cross it, so nothing can travel through.',
+  },
+  'exotic-matter': {
+    title: 'Exotic matter',
+    body: 'Matter with negative energy density, the ingredient a traversable wormhole needs. Tiny amounts appear in quantum effects; the large amounts a wormhole would need have never been seen.',
+  },
+  'casimir-effect': {
+    title: 'Casimir effect',
+    body: 'A small attraction between two metal plates very close together, caused by the vacuum between them having slightly less energy than the vacuum outside. Measured since 1997.',
+  },
+  'white-hole': {
+    title: 'White hole',
+    body: 'A black hole run backwards in time: a region nothing can enter and from which things can only leave. Allowed by the equations, unstable, and never observed.',
+  },
+  'energy-condition': {
+    title: 'Energy condition',
+    body: 'A rule that ordinary matter obeys, such as never having negative energy density. Wormholes need these rules broken.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */

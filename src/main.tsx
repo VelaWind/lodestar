@@ -28,6 +28,7 @@ if (import.meta.env.DEV) {
       verifyLadderModel,
       verifyRelativityModel,
       verifyHawkingModel,
+      verifyWormholeModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -47,6 +48,7 @@ if (import.meta.env.DEV) {
       verifyLadderModel();
       verifyRelativityModel();
       verifyHawkingModel();
+      verifyWormholeModel();
     },
   );
 }

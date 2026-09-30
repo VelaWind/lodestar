@@ -51,6 +51,7 @@ const MODULES = [
   'cosmic-distance-ladder',
   'time-dilation',
   'hawking-radiation',
+  'wormholes',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2816,6 +2817,72 @@ test('behaviour: hawking-radiation readouts follow the mass, and a term opens by
   assertClean(w, 'hawking radiation behaviour');
 });
 
+/**
+ * The wormholes module, end to end, on every engine.
+ *
+ * At the default, a one-metre throat, the negative mass needed is about a
+ * Jupiter, the Casimir plates would sit a fraction of a proton's radius apart,
+ * and the status readout says no such thing has been seen. At a hundred AU the
+ * mass runs to Suns. A glossary term opens from the keyboard, and axe finds
+ * nothing serious.
+ */
+test('behaviour: wormholes readouts follow the throat, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/wormholes', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'wormholes at rest');
+
+  const readout = (index: number) => page.locator('#wormholes-readouts dd').nth(index);
+
+  /* Default: a one-metre throat. */
+  await expect(readout(1), 'exotic mass at one metre').toContainText('Jupiter');
+  await expect(readout(3), 'Casimir gap at one metre').toContainText('proton');
+  await expect(readout(4), 'observational status').toHaveText(/^No/);
+
+  /* A hundred AU: Suns. */
+  const b0 = page.locator('#p-b0');
+  await b0.focus();
+  await page.keyboard.press('End');
+  await expect(readout(1), 'exotic mass at 1.5 × 10¹³ m').toContainText('Suns');
+  await assertNoOverflow(page, 'wormholes at a hundred AU');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be wormhole').toBe('wormhole');
+  const trigger = page.locator('[data-glossary-term="wormhole"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="wormhole"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('A tunnel through space');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'wormholes: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '24-wormholes-behaviour');
+  assertClean(w, 'wormholes behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2855,7 +2922,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes seventeen modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes eighteen modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3541,7 +3608,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All seventeen modules now, with no exception branch. `kepler-orbits` carried one
+ * All eighteen modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3655,7 +3722,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all nineteen and checks the rendered DOM rather than the
+ * route — so this walks all twenty and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3681,7 +3748,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all nineteen routes').toBe(19);
+  expect(routes.length, 'all twenty routes').toBe(20);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3828,7 +3895,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on nineteen fresh loads. Getting this wrong is what the first run of
+   * asserts on twenty fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
