@@ -48,6 +48,7 @@ const MODULES = [
   'supernovae',
   'habitable-zone',
   'nebulae',
+  'cosmic-distance-ladder',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -1187,8 +1188,8 @@ for (const [name, path] of A11Y_PAGES) {
  * reveal by clicking has to be audited in the state they reveal it in.
  */
 test('accessibility: a module page with every layer expanded @cross-engine', async ({ page }) => {
-  // This module links to `cosmic-distance-ladder`, which is backlog rather than
-  // draft, so the chip does not vanish the day another module is published.
+  // This module's connections are all published now; it is audited expanded
+  // for its approximations summary and its deeper layers.
   await page.goto('/m/gravitational-waves', { waitUntil: 'domcontentloaded' });
   await settle(page, 1_000);
 
@@ -1212,10 +1213,12 @@ test('accessibility: a module page with every layer expanded @cross-engine', asy
   await page.getByRole('button', { name: /^approximations/i }).click();
   await settle(page, 700);
 
-  // Assert the two elements are actually here, or this test passes by auditing
-  // a page that happens not to contain what it was written for.
+  // Assert the elements are actually here, or this test passes by auditing a
+  // page that happens not to contain what it was written for. The planned chip
+  // it once audited no longer exists anywhere: with the backlog empty, every
+  // connection is a live link, so the assertion is now that none is showing.
   const planned = page.getByText('planned', { exact: true });
-  await expect(planned, 'no planned connection chip on this page').toBeVisible();
+  await expect(planned, 'a planned chip is showing, but the backlog is empty').toHaveCount(0);
   await expect(
     page.getByRole('button', { name: /^approximations/i }),
     'no approximations summary on this page',
@@ -2590,6 +2593,79 @@ test('behaviour: nebulae radius follows both sliders, and a term opens by keyboa
   assertClean(w, 'nebulae behaviour');
 });
 
+/**
+ * The distance-ladder module, end to end, on every engine.
+ *
+ * At the default, the Large Magellanic Cloud, only Cepheids reach; at 1 pc
+ * parallax does, and at a gigaparsec Type Ia supernovae and the Hubble flow.
+ * An offset of 0.175 mag turns Planck's H₀ into 73.1. A glossary term in the
+ * real-picture layer opens from the keyboard alone, and axe finds nothing
+ * serious.
+ */
+test('behaviour: distance-ladder readouts follow both sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/cosmic-distance-ladder', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'distance ladder at rest');
+
+  const readout = (index: number) => page.locator('#cosmic-distance-ladder-readouts dd').nth(index);
+
+  /* The default: the LMC, Cepheid territory only. */
+  await expect(readout(0), 'methods at the LMC').toHaveText('Cepheids');
+
+  /* Nearest and farthest. */
+  const d = page.locator('#p-d');
+  await d.focus();
+  await page.keyboard.press('Home');
+  await expect(readout(0), 'methods at 1 pc').toContainText('Parallax');
+  await page.keyboard.press('End');
+  await expect(readout(0), 'methods at 1 Gpc').toContainText('Type Ia');
+  await expect(readout(0), 'methods at 1 Gpc').toContainText('Hubble flow');
+  await assertNoOverflow(page, 'distance ladder at 1 Gpc');
+
+  /* The tension: 35 steps of 0.005 mag is δ = 0.175. */
+  const delta = page.locator('#p-delta');
+  await delta.focus();
+  for (let i = 0; i < 35; i += 1) await page.keyboard.press('ArrowRight');
+  await expect(readout(6), 'H₀ at δ = 0.175').toContainText('73.1');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be the cosmic distance ladder').toBe('cosmic-distance-ladder');
+  const trigger = page.locator('[data-glossary-term="cosmic-distance-ladder"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="cosmic-distance-ladder"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('each calibrated by the one below it');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'distance ladder: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '21-cosmic-distance-ladder-behaviour');
+  assertClean(w, 'distance ladder behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2600,13 +2676,15 @@ test('behaviour: nebulae radius follows both sliders, and a term opens by keyboa
  * module that is not published degrades to a chip rather than a dead link, and
  * no draft is reachable from anywhere a reader looks.
  *
- * The planned chips are four, and it is worth writing down why, because the
- * number moves when the backlog does: they all point at
- * `cosmic-distance-ladder`, twice from older modules and once each from the
- * expansion and supernovae modules, and it is not written. The chips that
- * pointed at `expansion-of-the-universe`, `cosmic-microwave-background`,
+ * The planned chips are none, and it is worth writing down why, because the
+ * number moves when the backlog does: every connection on the site now points
+ * at a published module. The last four chips pointed at
+ * `cosmic-distance-ladder`, from the gravitational-waves, scale, expansion and
+ * supernovae modules, and became live links when it was published, as the
+ * chips for `expansion-of-the-universe`, `cosmic-microwave-background`,
  * `early-universe`, `stellar-fusion`, `supernovae`, `habitable-zone` and
- * `nebulae` became live links when those modules were published. Two
+ * `nebulae` did before it. The list below stays, empty, so that a module
+ * linking to one not yet written is still checked against it. Two
  * further chips existed until `planetary-atmospheres` was
  * published — a module that was finished and registered but still carried a
  * draft flag, so the index hid it and every link to it degraded to a chip.
@@ -2615,7 +2693,7 @@ test('behaviour: nebulae radius follows both sliders, and a term opens by keyboa
  * that *exists* is the failure this pairs with `tests/content.test.ts`, which
  * asserts the same rule against the registry rather than the rendered page.
  */
-const PLANNED_TARGETS = ['cosmic-distance-ladder'];
+const PLANNED_TARGETS: string[] = [];
 
 /** The same rule `src/lib/titles.ts` applies, restated so the page is checked
  *  against an expectation rather than against its own implementation. */
@@ -2627,7 +2705,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes fourteen modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes fifteen modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -2679,7 +2757,7 @@ test('behaviour: the registry publishes fourteen modules and leaks no drafts', a
   }
 
   console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
-  expect(planned, 'planned-chip total across every published page').toBe(4);
+  expect(planned, 'planned-chip total across every published page').toBe(0);
 
   assertClean(w, 'registry');
 });
@@ -3313,7 +3391,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All fourteen modules now, with no exception branch. `kepler-orbits` carried one
+ * All fifteen modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3427,7 +3505,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all sixteen and checks the rendered DOM rather than the
+ * route — so this walks all seventeen and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3453,7 +3531,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all sixteen routes').toBe(16);
+  expect(routes.length, 'all seventeen routes').toBe(17);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3600,7 +3678,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on sixteen fresh loads. Getting this wrong is what the first run of
+   * asserts on seventeen fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
