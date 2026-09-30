@@ -23,6 +23,7 @@ import stellarFusion from '@/content/modules/stellar-fusion';
 import supernovae from '@/content/modules/supernovae';
 import habitableZone from '@/content/modules/habitable-zone';
 import nebulae from '@/content/modules/nebulae';
+import cosmicDistanceLadder from '@/content/modules/cosmic-distance-ladder';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -38,6 +39,7 @@ import { __internals as fusion } from '@/sims/stellar-fusion';
 import { __internals as sn } from '@/sims/supernovae';
 import { __internals as hz } from '@/sims/habitable-zone';
 import { __internals as neb } from '@/sims/nebulae';
+import { __internals as cdl } from '@/sims/cosmic-distance-ladder';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -1300,6 +1302,109 @@ function nebulaeCases(): Case[] {
   return cases;
 }
 
+/* ---------------------------- cosmic distance ladder ---------------------------- */
+
+const CDL_HEIGHT = 544;
+
+function ladderCases(): Case[] {
+  const params = cosmicDistanceLadder.layers.play.params;
+  const dParam = paramOf(params, 'd');
+  const deltaParam = paramOf(params, 'delta');
+  const cases: Case[] = [];
+
+  // Each slider's ends and default with the other at its default, and the
+  // review's screenshot stops.
+  const views: { stop: string; d: number; delta: number }[] = [
+    ...extremes(dParam).map((s) => ({ stop: `d=${s.stop}`, d: s.value, delta: deltaParam.default })),
+    ...extremes(deltaParam).map((s) => ({ stop: `δ=${s.stop}`, d: dParam.default, delta: s.value })),
+    { stop: 'd=8.2 kpc', d: 8.2e3 * PARSEC, delta: 0 },
+    { stop: 'd=16.5 Mpc', d: 16.5e6 * PARSEC, delta: 0 },
+    { stop: 'δ=0.175', d: dParam.default, delta: 0.175 },
+  ];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const v of views) {
+      cases.push({
+        label: `${v.stop} ${units}`,
+        draw: (ctx, w, h) => cdl.drawScene(ctx, w, h, { d: v.d, delta: v.delta, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every setting a reader can reach.
+   *
+   * The cursor sweeps the rungs and the landmarks as d moves, and a rung name
+   * that does not fit inside its bar is placed beside it; below, the dot's
+   * value rides the curve past both band labels. Swept a tenth of a decade at
+   * a time in d and in 0.02 mag steps in δ, everything must be drawn, clear
+   * and inside the frame, and no text may sit under the dot.
+   */
+  it('keeps every label drawn and clear across both sliders', () => {
+    const expected = ['Parallax (Gaia)', 'Cepheids', 'Type Ia supernovae', 'Hubble flow', 'CMB (no ladder)', 'the ladder, 2022'];
+    const check = (d: number, delta: number, units: 'friendly' | 'technical', width: number) => {
+      const { ctx, records } = recordingContext();
+      cdl.drawScene(ctx, width, CDL_HEIGHT, { d, delta, units });
+      const where = `d=${(d / PARSEC).toPrecision(3)} pc δ=${delta.toFixed(3)} ${units} @${width}`;
+      const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+      for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+        `${where}: labels overlap`,
+      ).toEqual([]);
+      expect(
+        textOutsideFrame(records, width, CDL_HEIGHT).map(describeRecord),
+        `${where}: text outside the frame`,
+      ).toEqual([]);
+      const dots = records.filter((r) => r.kind === 'arc' && r.x1 - r.x0 <= 12);
+      const covered = records
+        .filter((r) => r.kind === 'text')
+        .flatMap((t) =>
+          dots
+            .filter((a) => Math.min(t.x1, a.x1) - Math.max(t.x0, a.x0) > 1 && Math.min(t.y1, a.y1) - Math.max(t.y0, a.y0) > 1)
+            .map((a) => `${describeRecord(t)}  under  ${describeRecord(a)}`),
+        );
+      expect(covered, `${where}: text under a dot`).toEqual([]);
+    };
+    for (const units of ['friendly', 'technical'] as const) {
+      for (const width of [246, 390, 900]) {
+        for (let e = Math.log10(dParam.min); e <= Math.log10(dParam.max) + 1e-9; e += 0.1) {
+          check(Math.min(dParam.max, 10 ** e), deltaParam.default, units, width);
+        }
+        check(dParam.max, deltaParam.default, units, width);
+        for (let delta = deltaParam.min; delta <= deltaParam.max + 1e-9; delta += 0.02) {
+          check(dParam.default, Math.min(deltaParam.max, delta), units, width);
+        }
+      }
+    }
+  });
+
+  it('names the landmarks where there is room', () => {
+    const { ctx, records } = recordingContext();
+    cdl.drawScene(ctx, 900, CDL_HEIGHT, { d: dParam.default, delta: 0, units: 'friendly' });
+    const texts = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    for (const name of ['Proxima Centauri', 'Galactic centre', 'LMC', 'Andromeda', 'Virgo Cluster', 'Coma Cluster']) {
+      expect(texts, `"${name}" should fit at 900 px`).toContain(name);
+    }
+    expect(texts).toContain('calibration passes up');
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    expect(cdl.formatMethods(dParam.default)).toBe('Cepheids');
+    expect(cdl.formatMethods(dParam.max)).toBe('Type Ia supernovae, Hubble flow');
+    expect(cdl.formatParallax(AU / (49.59e3 * PARSEC))).toBe('20.2 µas');
+    expect(cdl.formatParallax(AU / PARSEC)).toBe('1 arcsec');
+    expect(cdl.formatPrecision(0.0202)).toBe('2.0 %');
+    expect(cdl.formatPrecision(1.3)).toBe('worse than 100 %: too far');
+    expect(cdl.formatOwnMotion(0.089)).toBe('8.9 %');
+    expect(cdl.formatOwnMotion(90)).toBe('more than the expansion itself');
+    expect(cdl.formatMagnitude(13.268)).toBe('+13.3');
+    expect(cdl.formatMagnitude(-0.823)).toBe('−0.8');
+    expect(cdl.formatH0(73.07 * KM_S_PER_MPC)).toBe('73.1 km/s/Mpc');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -1317,6 +1422,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'supernovae', height: SN_HEIGHT, cases: supernovaeCases },
   { name: 'habitable-zone', height: HZ_HEIGHT, cases: habitableZoneCases },
   { name: 'nebulae', height: NEB_HEIGHT, cases: nebulaeCases },
+  { name: 'cosmic-distance-ladder', height: CDL_HEIGHT, cases: ladderCases },
 ];
 
 /**
@@ -1349,6 +1455,7 @@ const MEASURED_PLACEMENT = new Set([
   'supernovae',
   'habitable-zone',
   'nebulae',
+  'cosmic-distance-ladder',
 ]);
 
 for (const sim of SIMS) {

@@ -193,6 +193,33 @@ export const T_HII = 1e4;
  */
 export const C_S_HII = 1.0e4;
 
+// Distance ladder
+/** One arcsecond in radians, exact: π / (180 × 3600). */
+export const ARCSEC = Math.PI / 648_000;
+/**
+ * Leavitt law in V, M_V = a + b (log₁₀ P − 1) with P in days: slope b in
+ * magnitudes per dex of period, zero point a the absolute magnitude at 10 days.
+ * Source: Benedict et al. 2007, "Hubble Space Telescope Fine Guidance Sensor
+ * Parallaxes of Galactic Cepheid Variable Stars: Period-Luminosity Relations",
+ * AJ 133, 1810 (b = −2.43 ± 0.12, a = −4.05 ± 0.02).
+ */
+export const LEAVITT_SLOPE = -2.43;
+export const LEAVITT_ZERO_POINT = -4.05;
+/**
+ * Gaia DR3 parallax precision for bright stars (G ≲ 15), rad: about 20 µas.
+ * Source: Gaia Collaboration 2023, "Gaia Data Release 3: Summary of the
+ * content and survey properties", A&A 674, A1.
+ */
+export const GAIA_PARALLAX_SIGMA = 20e-6 * ARCSEC;
+/**
+ * Distance to the Large Magellanic Cloud, m: 49.59 ± 0.55 kpc from detached
+ * eclipsing binaries. Source: Pietrzyński et al. 2019, "A distance to the
+ * Large Magellanic Cloud that is precise to one per cent", Nature 567, 200.
+ */
+export const D_LMC = 49.59e3 * PARSEC;
+/** A typical galaxy peculiar velocity, m/s: about 300 km/s against the Hubble flow. */
+export const V_PEC_TYPICAL = 3e5;
+
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**
@@ -261,6 +288,13 @@ export const H0_PLANCK_2018 = 67.4 * KM_S_PER_MPC;
  * the Hubble Constant", ApJL 934, L7 (SH0ES) — 73.04 ± 1.04 km/s/Mpc.
  */
 export const H0_SH0ES_2022 = 73.04 * KM_S_PER_MPC;
+/**
+ * One-sigma uncertainties on the two H₀ values above, s⁻¹: Planck 2018's
+ * ± 0.5 km/s/Mpc (Planck Collaboration 2020, A&A 641, A6, TT,TE,EE+lowE+lensing)
+ * and SH0ES 2022's ± 1.04 km/s/Mpc (Riess et al. 2022).
+ */
+export const H0_PLANCK_2018_SIGMA = 0.5 * KM_S_PER_MPC;
+export const H0_SH0ES_2022_SIGMA = 1.04 * KM_S_PER_MPC;
 /**
  * Hydrogen Balmer-alpha (Hα, H I n = 3 → 2), wavelength in air, m.
  *
