@@ -2022,5 +2022,16 @@ export function verifyLadderModel(): CheckBlock {
     ),
   );
 
+  /* 12 — and only Cepheids reach the Galactic centre, past parallax's few-percent range. */
+  const centre = rungsAt(8.2e3 * PARSEC).map((rung) => rung.id);
+  results.push(
+    asserted(
+      'Rungs at the Galactic centre',
+      'd within [dMin, dMax]',
+      `computed ${centre.join(', ') || 'none'}  ·  expected cepheids`,
+      centre.join() === 'cepheids',
+    ),
+  );
+
   return emit('distance-ladder checks', results);
 }

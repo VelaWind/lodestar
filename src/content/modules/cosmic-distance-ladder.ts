@@ -292,7 +292,7 @@ const cosmicDistanceLadder: Module = {
               ', so a 30-day Cepheid there looks ',
               m`-5.21 + 18.48 = +13.3`,
               ', easy for a modest telescope; a Type Ia there would be −0.8, brighter than every star ',
-              'in the sky but three.',
+              'in the night sky except Sirius.',
             ),
             p(
               'The tension: with ',

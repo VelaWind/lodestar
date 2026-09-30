@@ -127,6 +127,12 @@ function formatPrecision(fraction: number): string {
   return fraction > 1 ? 'worse than 100 %: too far' : formatPercent(fraction);
 }
 
+/** A galaxy's own motion as a share of its recession, or a plain statement past 100 %. */
+function formatOwnMotion(fraction: number): string {
+  if (!Number.isFinite(fraction)) return '—';
+  return fraction > 1 ? 'more than the expansion itself' : formatPercent(fraction);
+}
+
 /** A magnitude to one decimal, signed, with a true minus: "−0.8", "+13.3". */
 function formatMagnitude(m: number): string {
   if (!Number.isFinite(m)) return '—';
@@ -531,9 +537,17 @@ function drawCalibration(
   obstacles: LabelBox[],
 ): void {
   const deep = view.units === 'technical';
+  ctx.font = FONT;
+  // The y-axis title on one line where it fits, otherwise broken after "reports"
+  // onto a second, with the plot moved down a row to make room.
+  const yTitle = deep ? 'H₀ (km/s/Mpc)' : 'expansion rate the ladder reports (km/s per Mpc)';
+  const yTitleLines =
+    ctx.measureText(yTitle).width <= w - PAD.left - PAD.right
+      ? [yTitle]
+      : ['expansion rate the ladder reports', '(km/s per Mpc)'];
   const plotLeft = PLOT_LEFT;
   const plotRight = w - PAD.right;
-  const plotTop = splitY + 38;
+  const plotTop = splitY + 38 + (yTitleLines.length - 1) * 12;
   const plotBottom = h - 36;
   const plotW = plotRight - plotLeft;
   const plotH = plotBottom - plotTop;
@@ -548,7 +562,9 @@ function drawCalibration(
   ctx.fillStyle = COLORS.inkDim;
   placeText(ctx, 'What a calibration error does to H₀', PAD.left, splitY + 16, 'left', obstacles);
   ctx.fillStyle = COLORS.inkFaint;
-  placeText(ctx, deep ? 'H₀ (km/s/Mpc)' : 'expansion rate the ladder reports', PAD.left, splitY + 29, 'left', obstacles);
+  for (const [i, line] of yTitleLines.entries()) {
+    placeText(ctx, line, PAD.left, splitY + 29 + i * 12, 'left', obstacles);
+  }
 
   /* The two measurements, as bands. */
   const band = (centre: number, sigma: number, fill: string) => {
@@ -776,7 +792,7 @@ export default function CosmicDistanceLadderSim({ params, values }: SimProps) {
         <Readout label={deep ? 'Type Ia apparent magnitude' : 'How bright a Type Ia looks'} value={formatMagnitude(mTypeIa)} />
         <Readout
           label={deep ? '300 km/s against expansion' : 'How much a galaxy’s own motion could fool you'}
-          value={formatPercent(share)}
+          value={formatOwnMotion(share)}
         />
         <Readout label={deep ? 'Inferred H₀' : 'Expansion rate the ladder would report'} value={formatH0(H0)} />
       </dl>
@@ -807,6 +823,7 @@ export const __internals = {
   formatParallax,
   formatPrecision,
   formatPercent,
+  formatOwnMotion,
   formatMagnitude,
   formatH0,
 };

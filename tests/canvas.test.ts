@@ -1395,6 +1395,8 @@ function ladderCases(): Case[] {
     expect(cdl.formatParallax(AU / PARSEC)).toBe('1 arcsec');
     expect(cdl.formatPrecision(0.0202)).toBe('2.0 %');
     expect(cdl.formatPrecision(1.3)).toBe('worse than 100 %: too far');
+    expect(cdl.formatOwnMotion(0.089)).toBe('8.9 %');
+    expect(cdl.formatOwnMotion(90)).toBe('more than the expansion itself');
     expect(cdl.formatMagnitude(13.268)).toBe('+13.3');
     expect(cdl.formatMagnitude(-0.823)).toBe('−0.8');
     expect(cdl.formatH0(73.07 * KM_S_PER_MPC)).toBe('73.1 km/s/Mpc');
