@@ -1104,7 +1104,9 @@ function habitableZoneCases(): Case[] {
    * label rides the solid curve below, and the dashed curve's label follows
    * that curve as L and A move it. Swept a tenth of a decade at a time on L
    * and d, and in tenths on A, everything must be drawn, clear and inside
-   * the frame.
+   * the frame, and no text may sit under a drawn dot: the star, the planet in
+   * the top panel (which the Deep edge labels once slid under) or the planet's
+   * dot on the curve below.
    */
   it('keeps every label drawn and clear across all three sliders', () => {
     const expected = ['water freezes', 'water boils, at Earth’s pressure', 'with an Earth-like atmosphere'];
@@ -1122,6 +1124,15 @@ function habitableZoneCases(): Case[] {
         textOutsideFrame(records, width, HZ_HEIGHT).map(describeRecord),
         `${where}: text outside the frame`,
       ).toEqual([]);
+      const dots = records.filter((r) => r.kind === 'arc');
+      const covered = records
+        .filter((r) => r.kind === 'text')
+        .flatMap((t) =>
+          dots
+            .filter((a) => Math.min(t.x1, a.x1) - Math.max(t.x0, a.x0) > 1 && Math.min(t.y1, a.y1) - Math.max(t.y0, a.y0) > 1)
+            .map((a) => `${describeRecord(t)}  under  ${describeRecord(a)}`),
+        );
+      expect(covered, `${where}: text under a dot`).toEqual([]);
     };
     for (const units of ['friendly', 'technical'] as const) {
       for (const width of [246, 390, 900]) {
@@ -1146,7 +1157,7 @@ function habitableZoneCases(): Case[] {
       hz.drawScene(ctx, 900, HZ_HEIGHT, { L, d, A: AParam.default, units });
       return records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
     };
-    expect(texts(LParam.default, dParam.default)).toContain('liquid water likely');
+    expect(texts(LParam.default, dParam.default)).toContain('liquid water possible');
     expect(texts(LParam.default, dParam.default)).toContain('255 K');
     // At 0.01 AU from the Sun the planet is at 2 550 K, far above the 700 K axis.
     expect(texts(LParam.default, dParam.min)).toContain('2,550 K');
@@ -1158,7 +1169,10 @@ function habitableZoneCases(): Case[] {
     expect(hz.formatEdges(0.9931 * AU, 1.7075 * AU)).toBe('0.993 to 1.71 AU');
     expect(hz.formatFlux(1361.17)).toBe('1,360 W/m² (1.00 × Earth’s)');
     expect(hz.formatFlux(1.361e8)).toBe('1.36 × 10⁸ W/m² (1.0 × 10⁵ × Earth’s)');
-    expect(hz.formatKelvinCelsius(254.59)).toBe('255 K (−18.6 °C)');
+    expect(hz.formatKelvinCelsius(254.59)).toBe('255 K (−18 °C)');
+    expect(hz.formatKelvinCelsius(287.59)).toBe('288 K (15 °C)');
+    expect(hz.formatKelvinCelsius(2546)).toBe('2,550 K (2,277 °C)');
+    expect(hz.formatKelvinCelsius(45.26)).toBe('45.3 K (−227.9 °C)');
     expect(hz.formatPeriod(365.25 * 86_400)).toBe('1 year');
     expect(hz.formatPeriod(10 * 86_400)).toBe('10 days');
   });

@@ -12,6 +12,7 @@ import {
   AU,
   GREENHOUSE_EARTH,
   L_SUN,
+  M_SUN,
   SEFF_EARLY_MARS,
   SEFF_MAXGH,
   SEFF_MOIST,
@@ -65,6 +66,19 @@ export function surfaceTemperatureEarthLike(T_eq_K: number): number {
  */
 export function zoneEdge(L_W: number, sEff: number): number {
   return AU * Math.sqrt(L_W / L_SUN / sEff);
+}
+
+/**
+ * A main-sequence star's mass from its luminosity, kg: the mass–luminosity
+ * rule L ∝ M^3.5 turned around, good to about a factor of two and disclosed
+ * beside the sim. Used only for the year readout.
+ *
+ *     M = M☉ · (L / L☉)^(1/3.5)
+ *
+ * @param L_W luminosity of the star, W
+ */
+export function massFromLuminosity(L_W: number): number {
+  return M_SUN * (L_W / L_SUN) ** (1 / 3.5);
 }
 
 export type Verdict = 'inside' | 'optimistic' | 'too-hot' | 'too-cold';

@@ -116,6 +116,7 @@ import {
 } from './supernova';
 import {
   equilibriumTemperature,
+  massFromLuminosity,
   stellarFlux,
   surfaceTemperatureEarthLike,
   zoneEdge,
@@ -1740,6 +1741,29 @@ export function verifyHabitableModel(): CheckBlock {
       `computed ${significant(dim)} AU  ·  expected 0.0993 AU`,
       relativeError(dim, 0.0993),
       0.005,
+    ),
+  );
+
+  /* 10 — the mass–luminosity rule gives the Sun back exactly. */
+  const sunMass = massFromLuminosity(L_SUN) / M_SUN;
+  results.push(
+    toleranced(
+      'Mass of a 1 L☉ star',
+      'M = M☉ · (L / L☉)^(1/3.5)',
+      `computed ${significant(sunMass)} M☉  ·  expected 1 M☉`,
+      relativeError(sunMass, 1),
+      1e-9,
+    ),
+  );
+
+  /* 11 — a red dwarf a hundred times fainter. */
+  const dwarfMass = massFromLuminosity(0.01 * L_SUN) / M_SUN;
+  results.push(
+    asserted(
+      'Mass of a 0.01 L☉ star',
+      'M = M☉ · (L / L☉)^(1/3.5)',
+      `computed ${significant(dwarfMass)} M☉  ·  expected 0.25 … 0.29 M☉`,
+      dwarfMass >= 0.25 && dwarfMass <= 0.29,
     ),
   );
 

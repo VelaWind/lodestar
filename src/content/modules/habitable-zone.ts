@@ -127,12 +127,17 @@ const habitableZone: Module = {
         ),
         prose(
           p(
-            'The zone edges are the climate-model limits for a Sun-like star, from Kopparapu and colleagues. Around redder or bluer stars they shift by up to about ten percent, which the sim does not model.',
+            'The zone edges are the climate-model limits for a Sun-like star, from Kopparapu and colleagues. Around redder or bluer stars they shift by up to about ten percent, which the sim does not model, and outside the range from about a tenth to about ten times the Sun’s brightness they are an extrapolation.',
           ),
         ),
         prose(
           p(
             'The dashed curve adds Earth’s 33 K of greenhouse warming everywhere. A thicker atmosphere adds far more: Venus’s adds 500 K.',
+          ),
+        ),
+        prose(
+          p(
+            'The length of the year takes the star’s mass from its brightness with the main-sequence rule L ∝ M³·⁵, good to about a factor of two. A real star’s mass is measured, not inferred.',
           ),
         ),
       ],
@@ -181,9 +186,9 @@ const habitableZone: Module = {
         p(
           'Three in four stars are ',
           term('red dwarfs', 'red-dwarf'),
-          ', fainter than a hundredth of the Sun, so most habitable zones in the galaxy sit ',
-          'within a few hundredths of an astronomical unit of their star, closer than Mercury is ',
-          'to ours. A planet there orbits in days, and gravity locks it so that one side always ',
+          ', fainter than a few hundredths of the Sun, so most habitable zones in the galaxy sit ',
+          'within about a tenth of an astronomical unit of their star, closer than Mercury is to ',
+          'ours. A planet there orbits in days, and gravity locks it so that one side always ',
           'faces the star, a state called ',
           term('tidal locking'),
           '. Whether such a planet can hold an atmosphere and spread its heat to the night side ',
@@ -290,14 +295,14 @@ const habitableZone: Module = {
               'Worked example, Earth. ',
               m`L = L_\odot = 3.83 \times 10^{26}\,\text{W}`,
               ', ',
-              m`d = 1\,\text{AU} = 1.50 \times 10^{11}\,\text{m}`,
+              m`d = 1\,\text{AU} = 1.496 \times 10^{11}\,\text{m}`,
               ', ',
               m`A = 0.30`,
               '.',
             ),
-            p(m`S = 3.83 \times 10^{26} / (4\pi \times (1.50 \times 10^{11})^2) = 1\,361\,\text{W/m}^2`),
+            p(m`S = 3.83 \times 10^{26} / (4\pi \times (1.496 \times 10^{11})^2) = 1\,361\,\text{W/m}^2`),
             p(
-              m`T_{\text{eq}} = (0.70 \times 3.83 \times 10^{26} / (16\pi \times 5.67 \times 10^{-8} \times (1.50 \times 10^{11})^2))^{1/4} = (4.20 \times 10^{9})^{1/4} = 255\,\text{K}`,
+              m`T_{\text{eq}} = (0.70 \times 3.83 \times 10^{26} / (16\pi \times 5.67 \times 10^{-8} \times (1.496 \times 10^{11})^2))^{1/4} = (4.20 \times 10^{9})^{1/4} = 255\,\text{K}`,
               ', or −18 °C',
             ),
             p('With Earth’s 33 K of greenhouse warming: 288 K, or 15 °C.'),
@@ -334,9 +339,9 @@ const habitableZone: Module = {
           '. The factor 4 between the intercepting disc and the radiating sphere assumes heat is ',
           'distributed over the whole surface, which holds for a rapid rotator or a thick ',
           'atmosphere; a tidally locked airless body radiates from its day side alone and its ',
-          'substellar point runs ',
+          'day side averages ',
           m`2^{1/4}`,
-          ' hotter, while the night side falls toward the cosmic background. The greenhouse ',
+          ' hotter, its substellar point √2 hotter, while the night side falls toward the cosmic background. The greenhouse ',
           'offset can be folded in as an effective emissivity ',
           m`\varepsilon < 1`,
           ' in the outgoing term: Earth’s 288 K corresponds to ',
