@@ -260,6 +260,17 @@ export const E_MUON_REST = 105.6583755e6 * EV;
  */
 export const E_QCD = 200e6 * EV;
 
+// Wormholes
+/** Proton charge radius, m. Source: CODATA 2018, r_p = 0.8414(19) fm. */
+export const PROTON_RADIUS = 8.41e-16;
+/**
+ * Nuclear density, kg/m³, rounded: the density inside a heavy nucleus. The
+ * saturation density of nuclear matter is 0.14–0.16 nucleons per fm³, which is
+ * 2.3–2.7 × 10¹⁷ kg/m³; the lower, commonly quoted round figure is used, since
+ * it serves only as a comparison ("a few hundred million times" in the module).
+ */
+export const NUCLEAR_DENSITY = 2.3e17;
+
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**
