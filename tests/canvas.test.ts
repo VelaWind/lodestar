@@ -46,7 +46,7 @@ import { __internals as cdl } from '@/sims/cosmic-distance-ladder';
 import { __internals as td } from '@/sims/time-dilation';
 import { __internals as hr } from '@/sims/hawking-radiation';
 import { __internals as wh } from '@/sims/wormholes';
-import { massEvaporatingIn, massForHawkingTemperature } from '@/physics/hawking';
+import { massEvaporatingIn, massForHawkingTemperature, netWithCMB } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -83,6 +83,7 @@ import {
   T_CMB,
 } from '@/physics/constants';
 import {
+  hawkingTemperature,
   iscoRadius,
   photonSphereRadius,
   schwarzschildRadius,
@@ -1666,6 +1667,20 @@ function hawkingRadiationCases(): Case[] {
     expect(hr.formatLifetime(2.1e67 * JULIAN_YEAR)).toBe('2.10 × 10⁶⁷ years');
     expect(hr.formatNet('shrinking')).toBe('hotter than the background: shrinking');
     expect(hr.formatNet('growing')).toBe('colder than the background: growing');
+    expect(hr.formatNet('balanced')).toBe('as warm as the background: in balance');
+  });
+
+  it('the crossover button sets a mass whose temperature reads as the CMB, and no slider stop does', () => {
+    const M = paramOf(hawkingRadiation.layers.play.params, 'M');
+    expect(hr.M_CROSSOVER).toBe(massForHawkingTemperature(T_CMB));
+    expect(hr.formatTemperature(hawkingTemperature(hr.M_CROSSOVER))).toBe(
+      hr.formatTemperature(T_CMB),
+    );
+    expect(netWithCMB(hr.M_CROSSOVER)).toBe('balanced');
+    // The reason the button exists: the nearest stop reads a different temperature.
+    const k = Math.round((Math.log10(hr.M_CROSSOVER) - Math.log10(M.min)) / M.step);
+    const nearest = 10 ** (Math.log10(M.min) + k * M.step);
+    expect(hr.formatTemperature(hawkingTemperature(nearest))).not.toBe(hr.formatTemperature(T_CMB));
   });
 
   return cases;
