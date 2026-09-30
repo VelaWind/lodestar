@@ -12,6 +12,16 @@
 import type { Module } from '../types';
 import { AU, M_SUN, R_EARTH, R_JUPITER, R_SUN } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
+import { logMinThrough, logStep } from '../grid';
+
+/*
+ * Slider bottoms nudged by under 1% so each default is exactly a grid point,
+ * with the top fixed and reachable (src/content/grid.ts).
+ */
+const MSTAR_MAX = 10 * M_SUN;
+const MSTAR_MIN = logMinThrough(M_SUN, MSTAR_MAX, 210, 110);
+const A_MAX = 5 * AU;
+const A_MIN = logMinThrough(0.05 * AU, A_MAX, 270, 70);
 
 const exoplanets: Module = {
   id: 'exoplanets',
@@ -74,14 +84,15 @@ const exoplanets: Module = {
           technicalLabel: 'Stellar mass',
           symbol: 'M_\\star',
           unit: 'kg',
-          // 0.08 M_☉ is the hydrogen-burning limit at the bottom of the red
+          // About 0.08 M_☉ is the hydrogen-burning limit at the bottom of the red
           // dwarfs; 10 M_☉ is a young B star. Mass sets only the period here —
           // the depth does not care how heavy the star is, which is itself worth
-          // discovering with the slider.
-          min: 0.08 * M_SUN,
-          max: 10 * M_SUN,
+          // discovering with the slider. The minimum is 0.0794 M_☉, so the Sun is
+          // step 110 of 210.
+          min: MSTAR_MIN,
+          max: MSTAR_MAX,
           default: M_SUN,
-          step: 0.01, // decades
+          step: logStep(MSTAR_MIN, MSTAR_MAX, 210), // decades, about 0.01
           scale: 'log',
           format: {
             notation: 'auto',
@@ -117,7 +128,10 @@ const exoplanets: Module = {
           unit: 'm',
           // Half an Earth to two Jupiters: the whole range transit surveys
           // return, from the sub-Earths Kepler found around quiet dwarfs to the
-          // inflated hot Jupiters that dominate the early catalogues.
+          // inflated hot Jupiters that dominate the early catalogues. The default
+          // is a fraction of a step off this grid; putting it on would change the
+          // step by 0.3%, which the keyboard contract (0.05 decades a press) does
+          // not allow on this short slider.
           min: 0.5 * R_EARTH,
           max: 2 * R_JUPITER,
           default: R_JUPITER,
@@ -135,12 +149,13 @@ const exoplanets: Module = {
           technicalLabel: 'Orbital distance',
           symbol: 'a',
           unit: 'm',
-          // 0.01 AU is inside the shortest known periods; 5 AU is Jupiter's
-          // distance, where a transit lasts a day and repeats once a decade.
-          min: 0.01 * AU,
-          max: 5 * AU,
+          // About 0.01 AU is inside the shortest known periods; 5 AU is Jupiter's
+          // distance, where a transit lasts a day and repeats once a decade. The
+          // minimum is 0.00998 AU, so the default is step 70 of 270.
+          min: A_MIN,
+          max: A_MAX,
           default: 0.05 * AU, // a hot Jupiter, which is what the method found first
-          step: 0.01,
+          step: logStep(A_MIN, A_MAX, 270), // decades, about 0.01
           scale: 'log',
           format: {
             notation: 'auto',

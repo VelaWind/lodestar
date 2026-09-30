@@ -119,6 +119,11 @@ const stellarFusion: Module = {
             'The rate formula is the standard fit around solar conditions. Below about 3 million K it overstates the true rate, and above about 17 million K a different chain, the CNO cycle, takes over and is not shown.',
           ),
         ),
+        prose(
+          p(
+            'The chain’s later branches, which roughly double the central rate, are left out; the worked example comes out about half the standard solar model’s value.',
+          ),
+        ),
       ],
     },
 
@@ -157,7 +162,8 @@ const stellarFusion: Module = {
         p(
           'The reaction itself is the ',
           term('proton–proton chain', 'proton-proton-chain'),
-          ', worked out by Hans Bethe in 1939: four protons become one helium nucleus in three ',
+          ', worked out by Hans Bethe and Charles Critchfield in 1938: four protons become one ',
+          'helium nucleus in three ',
           'steps, converting 0.7 percent of their mass into 26.7 MeV of energy and two neutrinos. ',
           'Its first step, two protons fusing into deuterium, is the slowest process in the chain ',
           'by far, because it also needs one proton to turn into a neutron through the weak force. ',
@@ -384,9 +390,9 @@ const stellarFusion: Module = {
         ),
         p(
           'Two effects the sim omits. Electron screening: the plasma’s electrons cluster around ',
-          'each nucleus and lower the barrier by roughly ',
-          m`kT`,
-          ' × (a few tenths), raising the pp rate by about five percent in the Sun. And the ',
+          'each nucleus and lower the barrier by about ',
+          m`0.05\,kT`,
+          ', raising the pp rate by about five percent in the Sun. And the ',
           'neutrino history: the first solar-neutrino experiments, from 1968, found a third of the ',
           'predicted flux, the “solar neutrino problem”; the resolution, established by SNO in ',
           '2001, was that neutrinos change flavour in flight, which was new physics about ',
@@ -405,7 +411,7 @@ const stellarFusion: Module = {
           'interacts with its surroundings so fast and so thoroughly that any superposition of its ',
           'states is destroyed long before anyone looks, while a proton in a collision has no ',
           'surroundings to speak of for the ',
-          m`10^{-21}`,
+          m`10^{-19}`,
           ' seconds that matter. The cat is not in two states. The proton is, and the Sun shines ',
           'because of it.',
         ),
@@ -456,9 +462,9 @@ const stellarFusion: Module = {
       note: 'The tunnelling formula',
     },
     {
-      label: 'Bethe 1939, “Energy Production in Stars”, Phys. Rev. 55, 434',
-      url: 'https://doi.org/10.1103/PhysRev.55.434',
-      note: 'The pp chain and CNO cycle',
+      label: 'Bethe & Critchfield 1938, “The Formation of Deuterons by Proton Combination”, Phys. Rev. 54, 248',
+      url: 'https://doi.org/10.1103/PhysRev.54.248',
+      note: 'The proton–proton chain',
     },
     {
       label:

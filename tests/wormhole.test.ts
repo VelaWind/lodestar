@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import { casimirGapForThroat, embeddingHeight, exoticMass, throatDensity } from '@/physics/wormhole';
 
-/** Throat radii across the slider, a millimetre to a hundred AU, one decade apart. */
+/** Throat radii across the slider, a millimetre to 10¹³ m (about seventy AU), one decade apart. */
 const RADII = Array.from({ length: 17 }, (_, i) => 10 ** (i - 3));
 
 describe('wormhole', () => {

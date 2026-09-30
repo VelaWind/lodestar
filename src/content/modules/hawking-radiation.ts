@@ -26,7 +26,7 @@ const hawkingRadiation: Module = {
         p(
           'A black hole with the mass of a mountain would be about the size of a proton, a hundred ',
           'billion degrees hot, and slowly boiling away. None has ever been found, but nothing rules ',
-          'them out.',
+          'out a few.',
         ),
       ),
     },
@@ -87,7 +87,7 @@ const hawkingRadiation: Module = {
       approximations: [
         prose(
           p(
-            'Power and lifetime count light only. A real hole also emits neutrinos, gravitons and, once hot enough, every heavier particle, which multiplies its power about tenfold, and more once it is hot enough for heavier particles; the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
+            'Power and lifetime count light only. A real hole also emits neutrinos and gravitons, which multiplies its power about tenfold, and heavier particles once it is hot enough, which raises it further; the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
           ),
         ),
         prose(
@@ -124,8 +124,9 @@ const hawkingRadiation: Module = {
           'Lighter holes are hotter than their surroundings and shrink, and because a black hole has ',
           term('negative heat capacity'),
           ', getting hotter as it loses energy, the shrinking runs away. The time to evaporate grows as ',
-          'the cube of the mass: the Sun’s mass would take about 10⁶⁷ years, a mountain’s a few ',
-          'trillion years, and a hole of about 5 × 10¹¹ kg, counting every particle it can emit, would ',
+          'the cube of the mass: counting light only, the Sun’s mass would take about 10⁶⁷ years and ',
+          'a mountain’s a few trillion years, and a hole of about 5 × 10¹¹ kg, counting every ',
+          'particle it can emit, would ',
           'be finishing just now, 13.8 billion years after the Big Bang. At that mass it is smaller than ',
           'an atomic nucleus. In its last second it releases the energy of millions of megatons, mostly ',
           'as gamma rays and particles.',
@@ -147,8 +148,9 @@ const hawkingRadiation: Module = {
           'of it is far too faint ever to detect. What has been seen is its analogue. In ',
           term('analogue gravity'),
           ', a flowing fluid can contain a point beyond which sound cannot travel upstream, a horizon ',
-          'for sound; in 2016 Jeff Steinhauer measured Hawking-like pairs of sound waves emitted at ',
-          'such a horizon in an ultracold gas of atoms, with the thermal character the theory predicts.',
+          'for sound; in 2016 Jeff Steinhauer’s group measured entangled Hawking-like pairs of sound ',
+          'waves at such a horizon in an ultracold gas of atoms, and in 2019 showed that their ',
+          'spectrum is thermal, at the predicted temperature.',
         ),
         p(
           'Two misconceptions. The popular picture of particle pairs popping up at the horizon, one ',
@@ -286,7 +288,7 @@ const hawkingRadiation: Module = {
           ' passes their rest energies.',
         ),
         p(
-          'The thermodynamics is exact in form. Bekenstein’s entropy, ',
+          'The thermodynamics is exact in form. The Bekenstein–Hawking entropy, ',
           m`S = kA/(4\ell_P^2)`,
           ', a quarter of the horizon area in Planck units, together with ',
           m`T_H`,
@@ -319,9 +321,9 @@ const hawkingRadiation: Module = {
           'Observationally, the limits on primordial black hole abundance around 5 × 10¹¹ kg come from ',
           'the extragalactic gamma-ray background and from the ',
           'non-detection of bursts by very-high-energy gamma-ray observatories such as HAWC and ',
-          'H.E.S.S.; holes lighter than about 10¹⁰ kg would have evaporated during or soon after ',
-          'nucleosynthesis and are constrained by the abundances of light elements, and those of ',
-          '10¹⁰–10¹¹ kg by distortions of the microwave background. Between about 10¹⁴ and 10²⁰ kg, ',
+          'H.E.S.S.; holes of about 10⁶–10¹⁰ kg, evaporating after nucleosynthesis, are constrained ',
+          'by light-element abundances, and those of 10¹⁰–10¹¹ kg by their imprint on the microwave ',
+          'background. Between about 10¹⁴ and 10²⁰ kg, ',
           'microlensing and other limits leave a window where primordial holes could still be all of ',
           'the dark matter, provided some early-universe mechanism, perhaps during or after ',
           term('inflation'),
@@ -361,14 +363,9 @@ const hawkingRadiation: Module = {
 
   references: [
     {
-      label: 'Hawking 1974, “Black hole explosions?”, Nature 248, 30',
-      url: 'https://doi.org/10.1038/248030a0',
-      note: 'The prediction',
-    },
-    {
       label: 'Hawking 1975, “Particle creation by black holes”, Commun. Math. Phys. 43, 199',
       url: 'https://doi.org/10.1007/BF02345020',
-      note: 'The derivation',
+      note: 'The derivation of the prediction announced in Nature in 1974',
     },
     {
       label:
@@ -386,6 +383,12 @@ const hawkingRadiation: Module = {
         'Steinhauer 2016, “Observation of quantum Hawking radiation and its entanglement in an analogue black hole”, Nature Physics 12, 959',
       url: 'https://doi.org/10.1038/nphys3863',
       note: 'The analogue measurement',
+    },
+    {
+      label:
+        'Muñoz de Nova, Golubkov, Kolobov & Steinhauer 2019, “Observation of thermal Hawking radiation and its temperature in an analogue black hole”, Nature 569, 688',
+      url: 'https://doi.org/10.1038/s41586-019-1241-0',
+      note: 'The analogue spectrum is thermal, at the predicted temperature',
     },
   ],
 };

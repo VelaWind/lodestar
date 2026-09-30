@@ -1721,6 +1721,15 @@ function wormholeCases(): Case[] {
       const where = `b0=${b0.toPrecision(3)} ${units} @${width}`;
       const texts = records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
       for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      // At every throat some reference is drawn beside it for scale. "the Earth",
+      // "Jupiter" and "the Sun" also name the lower panel's lines, so count those
+      // only when they appear twice.
+      const once = ['a grain of sand', 'a coin', 'a person', 'a house', 'a football pitch', 'a mountain', 'a city', 'the Moon', 'Mercury’s orbit', 'Earth’s orbit', 'Neptune’s orbit'];
+      const twice = ['the Earth', 'Jupiter', 'the Sun'];
+      expect(
+        texts.some((t) => once.includes(t)) || twice.some((name) => texts.filter((t) => t === name).length >= 2),
+        `${where}: no reference drawn for scale`,
+      ).toBe(true);
       expect(
         textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
         `${where}: labels overlap`,
@@ -1759,9 +1768,12 @@ function wormholeCases(): Case[] {
     expect(texts(1, 'friendly')).toContain('a person');
     expect(texts(1, 'technical')).toContain('b₀ = 1 m');
     expect(texts(R_EARTH, 'friendly')).toContain('the Earth');
-    expect(texts(R_EARTH, 'friendly')).toContain('6370 km');
-    expect(texts(R_SUN, 'friendly')).toContain('696,000 km');
+    expect(texts(R_EARTH, 'friendly')).toContain('1 Earth radius');
+    expect(texts(R_SUN, 'friendly')).toContain('109 Earth radii');
     expect(texts(1000, 'friendly')).not.toContain('a person');
+    expect(texts(1000, 'friendly')).toContain('a mountain');
+    expect(texts(1e-3, 'friendly')).toContain('a grain of sand');
+    expect(texts(1e13, 'friendly')).toContain('Neptune’s orbit');
   });
 
   it('formats the readouts the way the brief promises', () => {
@@ -1777,7 +1789,13 @@ function wormholeCases(): Case[] {
     expect(wh.formatExoticMass(-3.1728e40)).toBe('−3.17 × 10⁴⁰ kg (minus 16 billion Suns)');
     expect(wh.formatDensity(-5.3579e25)).toBe('−5.36 × 10²⁵ kg/m³');
     expect(wh.formatDensity(-0.2381)).toBe('−0.238 kg/m³');
-    expect(wh.formatCasimirGap(3.08e-18)).toBe('3.08 × 10⁻¹⁸ m (3.66 × 10⁻³ times a proton’s radius)');
+    expect(wh.formatCasimirGap(3.08e-18)).toBe('3.08 × 10⁻¹⁸ m (1/273 of a proton’s radius)');
+    expect(wh.formatCasimirGap(9.74e-17)).toBe('9.74 × 10⁻¹⁷ m (0.116 times a proton’s radius)');
+    expect(wh.formatRadius(1)).toBe('1 m');
+    expect(wh.formatRadius(1e-3)).toBe('1 mm');
+    expect(wh.formatRadius(R_EARTH)).toBe('1 Earth radius');
+    expect(wh.formatRadius(R_SUN)).toBe('109 Earth radii');
+    expect(wh.formatRadius(1e13)).toBe('66.8 AU');
     expect(wh.formatCasimirGap(7.774e-15)).toBe('7.77 × 10⁻¹⁵ m (9.24 times a proton’s radius)');
   });
 
