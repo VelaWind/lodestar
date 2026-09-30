@@ -489,6 +489,33 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Dark nebula',
     body: 'A cloud dense and dusty enough to block the stars behind it. The Horsehead is one; new stars form inside them.',
   },
+
+  /* Distance ladder ------------------------------------------------ */
+
+  'cosmic-distance-ladder': {
+    title: 'Cosmic distance ladder',
+    body: 'The chain of methods for measuring distances in space, each calibrated by the one below it, from parallax in our neighbourhood to supernovae billions of light-years away.',
+  },
+  parallax: {
+    title: 'Parallax',
+    body: 'The shift of a nearby star against the distant background as Earth moves around the Sun. One arcsecond of shift means one parsec, 3.26 light-years, away.',
+  },
+  'leavitt-law': {
+    title: 'Leavitt law',
+    body: 'The rule, found by Henrietta Swan Leavitt in 1912, that brighter Cepheid variables pulse more slowly. Timing one gives its true brightness.',
+  },
+  'absolute-magnitude': {
+    title: 'Absolute magnitude',
+    body: 'How bright a star would look from a standard distance of 10 parsecs. The Sun’s is +4.8; a 30-day Cepheid’s is about −5.2.',
+  },
+  'distance-modulus': {
+    title: 'Distance modulus',
+    body: 'Apparent minus absolute magnitude, 5 log₁₀(d / 10 pc). Each 5 magnitudes is a factor of ten in distance.',
+  },
+  'hubble-flow': {
+    title: 'Hubble flow',
+    body: 'Distances great enough that a galaxy’s recession swamps its own motion, so that speed tracks distance: beyond about 50 megaparsecs.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */
