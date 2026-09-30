@@ -2822,8 +2822,8 @@ test('behaviour: hawking-radiation readouts follow the mass, and a term opens by
  *
  * At the default, a one-metre throat, the negative mass needed is about a
  * Jupiter, the Casimir plates would sit a fraction of a proton's radius apart,
- * and the status readout says no such thing has been seen. At a hundred AU the
- * mass runs to Suns. A glossary term opens from the keyboard, and axe finds
+ * and the status readout says no such thing has been seen. At about seventy AU
+ * the mass runs to Suns. A glossary term opens from the keyboard, and axe finds
  * nothing serious.
  */
 test('behaviour: wormholes readouts follow the throat, and a term opens by keyboard @cross-engine', async ({
@@ -2838,16 +2838,18 @@ test('behaviour: wormholes readouts follow the throat, and a term opens by keybo
   const readout = (index: number) => page.locator('#wormholes-readouts dd').nth(index);
 
   /* Default: a one-metre throat. */
-  await expect(readout(1), 'exotic mass at one metre').toContainText('Jupiter');
-  await expect(readout(3), 'Casimir gap at one metre').toContainText('proton');
-  await expect(readout(4), 'observational status').toHaveText(/^No/);
+  await expect(readout(0), 'throat radius at one metre').toHaveText('1 m');
+  await expect(readout(2), 'exotic mass at one metre').toContainText('Jupiter');
+  await expect(readout(4), 'Casimir gap at one metre').toContainText('proton');
+  await expect(readout(5), 'observational status').toHaveText(/^No/);
 
-  /* A hundred AU: Suns. */
+  /* About seventy AU: Suns. */
   const b0 = page.locator('#p-b0');
   await b0.focus();
   await page.keyboard.press('End');
-  await expect(readout(1), 'exotic mass at 1.5 × 10¹³ m').toContainText('Suns');
-  await assertNoOverflow(page, 'wormholes at a hundred AU');
+  await expect(readout(2), 'exotic mass at 10¹³ m').toContainText('Suns');
+  await expect(readout(0), 'throat radius at 10¹³ m').toHaveText('66.8 AU');
+  await assertNoOverflow(page, 'wormholes at about seventy AU');
 
   /* A glossary term, reached and opened with the keyboard alone. */
   await openLayer(page, 'real');
@@ -3718,8 +3720,12 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 /* ------------------------------------------------------------------ */
 
 /**
- * The repository is private, so a link to it is a 404 with the reader's name
- * on it.
+ * No route links the repository, and /about says where the code is.
+ *
+ * The repository was private when this test was written, so a link to it was a
+ * 404. It is public now, and /about says so in words; the codebase still holds
+ * no link to it, so the site still carries none, and this test keeps it that way
+ * until a link is added on purpose.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
  * route — so this walks all twenty and checks the rendered DOM rather than the
@@ -3731,9 +3737,10 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * repository freely and should: they are read by people who already have it.
  *
  * The second half is the other side of the same claim. Removing the link left
- * the site silent about why, so About now says the repository is private and
- * that access is available on request — and the owner found that sentence
- * missing from the rendered page, because it had never been written. Checking
+ * the site silent about where the code is, so About says so — first that access
+ * was on request, now that the code is public on GitHub. The first version of
+ * that sentence was once missing from the rendered page, because it had never
+ * been written. Checking
  * "no link" without checking "and here is what to do instead" is how that gap
  * survived a release: the absence was asserted, the replacement was not. Both
  * halves live in one test so neither can be satisfied alone.
@@ -3745,7 +3752,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * Chromium-only by omission of the `@cross-engine` tag — an href is an href on
  * every engine, and this is about content rather than rendering.
  */
-test('no route links the private repo, and /about says access is on request', async ({ page }) => {
+test('no route links the repo, and /about says the code is public on GitHub', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
   expect(routes.length, 'all twenty routes').toBe(20);
@@ -3773,10 +3780,8 @@ test('no route links the private repo, and /about says access is on request', as
       // rendered where a reader meets it, which is exactly what a logged-out
       // check of the page looks at.
       const main = await page.locator('main').innerText();
-      expect(
-        main,
-        '/about must tell a reader who cannot open the repository how to ask',
-      ).toContain('available to reviewers on request');
+      expect(main, '/about must tell a reader where the code is').toContain('public on GitHub');
+      expect(main, 'the old private-repository sentence is back').not.toContain('on request');
 
       // The seam this shipped alongside. The paragraph said "the division of
       // labour" twice across a sentence boundary; the phrase must not come back.

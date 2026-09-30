@@ -17,7 +17,7 @@ const cosmicDistanceLadder: Module = {
   id: 'cosmic-distance-ladder',
   title: 'The Cosmic Distance Ladder',
   tagline:
-    'Every distance to a galaxy rests on a shorter one, all the way down to the width of Earth’s orbit.',
+    'Almost every distance to a galaxy rests on a shorter one, all the way down to the width of Earth’s orbit.',
   status: 'published',
 
   layers: {
@@ -25,7 +25,7 @@ const cosmicDistanceLadder: Module = {
     hook: {
       body: prose(
         p(
-          'Every distance to a galaxy you have ever read was measured by standing on a shorter ',
+          'Almost every distance to a galaxy you have ever read was measured by standing on a shorter ',
           'one. At the bottom of the stack is the trick your eyes use to judge how far away your ',
           'thumb is.',
         ),
@@ -188,13 +188,14 @@ const cosmicDistanceLadder: Module = {
           'calibration from one method to the next through objects that both can reach. And ',
           '“standard candle” does not mean identical: no two Cepheids or supernovae are exactly as ',
           'bright as each other, but each obeys a rule, period for Cepheids and the shape of the ',
-          'light curve for supernovae, that makes its brightness predictable to a few percent.',
+          'light curve for supernovae, that makes its brightness predictable to about ten percent, ',
+          'which pins each distance to about five percent.',
         ),
         p(
           'Today the top of the ladder gives H₀ = 73.0 ± 1.0 km/s/Mpc, while the cosmic microwave ',
           'background, which uses no ladder at all, predicts 67.4 ± 0.5. The difference, the Hubble ',
           'tension, is what a calibration error of 0.17 magnitudes would produce: the candles ',
-          'assumed 17 percent fainter than they are. Whether there is such an error is the open ',
+          'about 17 percent brighter than assumed. Whether there is such an error is the open ',
           'question, and the sim’s second slider is that question.',
         ),
         /*

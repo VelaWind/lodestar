@@ -23,6 +23,7 @@ import {
   R_SUN,
 } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
+import { logMinThrough, logStep } from '../grid';
 
 /* ------------------------------------------------------------------ */
 /* Cited inputs                                                        */
@@ -171,6 +172,10 @@ export const scaleAnchors: ScaleAnchor[] = [
   },
 ];
 
+/** The size slider's top, m, and a bottom that puts the human rung on the grid (src/content/grid.ts). */
+const S_MAX = 2 * OBSERVABLE_UNIVERSE_RADIUS;
+const S_MIN = logMinThrough(HUMAN_HEIGHT, S_MAX, 4194, 1523);
+
 const scaleOfTheUniverse: Module = {
   id: 'scale-of-the-universe',
   title: 'Scale of the Universe',
@@ -228,14 +233,16 @@ const scaleOfTheUniverse: Module = {
           technicalLabel: 'Scale',
           symbol: 's',
           unit: 'm',
-          // A femtometre is below the smallest rung, so the ladder opens with
-          // room beneath the proton rather than starting hard against it.
-          min: 1e-15,
-          max: 2 * OBSERVABLE_UNIVERSE_RADIUS,
+          // About a femtometre is below the smallest rung, so the ladder opens with
+          // room beneath the proton rather than starting hard against it. The
+          // minimum is nudged 0.4% below 1e-15 so the human rung is step 1523 of
+          // 4194, and the maximum is reachable.
+          min: S_MIN,
+          max: S_MAX,
           // Start at the human rung: the one size on the ladder the reader
           // already has an intuition for.
           default: HUMAN_HEIGHT,
-          step: 0.01, // decades
+          step: logStep(S_MIN, S_MAX, 4194), // decades, about 0.01
           scale: 'log',
           format: { notation: 'scientific', digits: 3 },
         },

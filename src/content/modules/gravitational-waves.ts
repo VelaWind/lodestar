@@ -12,6 +12,11 @@
 import type { Module } from '../types';
 import { M_SUN, MEGAPARSEC } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
+import { logMinThrough, logStep } from '../grid';
+
+/** The distance slider's top, m, and a bottom that puts GW150914's 410 Mpc on the grid. */
+const D_MAX = 1e26;
+const D_MIN = logMinThrough(1.26e25, D_MAX, 400, 310);
 
 const gravitationalWaves: Module = {
   id: 'gravitational-waves',
@@ -114,12 +119,13 @@ const gravitationalWaves: Module = {
           technicalLabel: 'Distance',
           symbol: 'd',
           unit: 'm',
-          // 1e22 m ≈ 0.3 Mpc, just past the Andromeda galaxy; 1e26 m ≈ 3 Gpc,
-          // beyond the most distant merger detected so far.
-          min: 1e22,
-          max: 1e26,
+          // About 1e22 m ≈ 0.3 Mpc, just past the Andromeda galaxy; 1e26 m ≈ 3 Gpc,
+          // beyond the most distant merger detected so far. The minimum is nudged
+          // 0.4% above 1e22 so the default is step 310 of 400.
+          min: D_MIN,
+          max: D_MAX,
           default: 1.26e25, // ≈410 Mpc, GW150914's luminosity distance
-          step: 0.01,
+          step: logStep(D_MIN, D_MAX, 400), // decades, about 0.01
           scale: 'log',
           format: {
             notation: 'auto',

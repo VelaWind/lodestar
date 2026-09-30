@@ -12,6 +12,11 @@
 import type { Module } from '../types';
 import { M_SUN } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
+import { logMinThrough, logStep } from '../grid';
+
+/** The mass slider's top, kg, and a bottom that puts 10 M☉ on the grid. */
+const BH_MAX = 1.3e41;
+const BH_MIN = logMinThrough(10 * M_SUN, BH_MAX, 1111, 130);
 
 const blackHoles: Module = {
   id: 'black-holes',
@@ -74,15 +79,17 @@ const blackHoles: Module = {
           technicalLabel: 'Mass',
           symbol: 'M',
           unit: 'kg',
-          // 1e30 kg ≈ 0.5 M_☉, below the ~2.2 M_☉ Tolman–Oppenheimer–Volkoff
+          // About 1e30 kg ≈ 0.5 M_☉, below the ~2.2 M_☉ Tolman–Oppenheimer–Volkoff
           // limit but a legitimate horizon for the geometry; 1.3e41 kg ≈ 65
           // billion M_☉, covering TON 618 at the top of the quasar mass range.
-          min: 1e30,
-          max: 1.3e41,
+          // The minimum is nudged 0.5% below 1e30 so the default is step 130 of
+          // 1111 exactly (src/content/grid.ts), and the maximum is reachable.
+          min: BH_MIN,
+          max: BH_MAX,
           // 10 M_☉ — a typical stellar-mass hole, and the mass at which the
           // tidal readout is at its most vivid.
           default: 10 * M_SUN,
-          step: 0.01, // decades
+          step: logStep(BH_MIN, BH_MAX, 1111), // decades, about 0.01
           scale: 'log',
           format: { notation: 'scientific', digits: 3 },
         },
@@ -295,7 +302,7 @@ const blackHoles: Module = {
           '; radiating makes it hotter, so an evaporating hole runs away, ending in a flash. But ',
           'the temperatures are absurdly low (sixty billionths of a kelvin for one solar mass) ',
           'and every known black hole is colder than the 2.7 K microwave background around it. ',
-          'They are all, for now, net absorbers: nothing in the present universe is evaporating. ',
+          'They are all, for now, net absorbers: no known black hole is evaporating. ',
           'Only after the cosmos cools below a hole’s temperature does the ',
           m`10^{67}`,
           '-year countdown genuinely begin, and the crossover mass (a hole as warm as today’s ',

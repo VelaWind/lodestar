@@ -10,7 +10,7 @@
  *
  *   - Before the stitch, the radiation-era relation between time and
  *     temperature, t = √(90 ħ³ c⁵ / (32 π³ G g_*)) / (kT)², with g_* switched
- *     in four steps. Matter and dark energy are negligible this early.
+ *     in steps. Matter and dark energy are negligible this early.
  *   - After it, the standard ΛCDM expansion integrated numerically with the
  *     Planck 2018 densities, and T = T₀ / a.
  *
@@ -45,15 +45,29 @@ export interface GStarRow {
 /**
  * g_* and g_s, hottest first.
  *
- * Massless neutrinos, three species; the lattice-QCD crossover treated as a
- * step at 170 MeV. Above it: photons, gluons, u, d, s quarks, electrons, muons
- * and neutrinos (61.75). Down to 100 MeV: pions in place of quarks and gluons
+ * Massless neutrinos, three species; each heavy particle switched off as a step
+ * near its mass, and the lattice-QCD crossover treated as a step at 170 MeV.
+ * Above 175 GeV the whole standard model is relativistic (106.75); the top
+ * quark drops out below that (96.25), the Higgs below 125 GeV (95.25), the W
+ * and Z below about 90 GeV (86.25), the bottom quark below 4.5 GeV (75.75), and
+ * the charm quark and tau together below about 1.5 GeV (61.75). Cumulative
+ * values and thresholds follow Husdal 2016, "On Effective Degrees of Freedom in
+ * the Early Universe", Galaxies 4, 78 (arXiv:1609.04979), rounded to the
+ * particle masses.
+ *
+ * Below 1.5 GeV: photons, gluons, u, d, s quarks, electrons, muons and
+ * neutrinos (61.75). Down to 100 MeV: pions in place of quarks and gluons
  * (17.25). Down to 0.5 MeV: photons, electrons and neutrinos (10.75). Below:
  * photons, plus neutrinos at (4/11)^(1/3) of the photon temperature (3.36 for
  * energy, 3.91 for entropy). The real functions are smooth; the sim's
- * approximation disclosure says so.
+ * approximation disclosure says so, and where the time stalls at each step.
  */
 export const G_STAR: readonly GStarRow[] = [
+  { kTmin_J: 175e9 * EV, gStar: 106.75, gS: 106.75 },
+  { kTmin_J: 125e9 * EV, gStar: 96.25, gS: 96.25 },
+  { kTmin_J: 90e9 * EV, gStar: 95.25, gS: 95.25 },
+  { kTmin_J: 4.5e9 * EV, gStar: 86.25, gS: 86.25 },
+  { kTmin_J: 1.5e9 * EV, gStar: 75.75, gS: 75.75 },
   { kTmin_J: 170e6 * EV, gStar: 61.75, gS: 61.75 },
   { kTmin_J: 100e6 * EV, gStar: 17.25, gS: 17.25 },
   { kTmin_J: 0.5e6 * EV, gStar: 10.75, gS: 10.75 },

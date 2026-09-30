@@ -12,6 +12,11 @@
 import type { Module } from '../types';
 import { AU, M_SUN } from '@/physics/constants';
 import { em, figure, m, p, prose, term } from '../rich';
+import { logMinThrough, logStep } from '../grid';
+
+/** The star-mass slider's top, kg, and a bottom that puts the Sun on the grid. */
+const M_STAR_MAX = 1e32;
+const M_STAR_MIN = logMinThrough(M_SUN, M_STAR_MAX, 282, 112);
 
 const keplerOrbits: Module = {
   id: 'kepler-orbits',
@@ -69,12 +74,13 @@ const keplerOrbits: Module = {
           technicalLabel: 'Central mass',
           symbol: 'M',
           unit: 'kg',
-          // 1.5e29 kg ≈ 0.075 M_sun, the hydrogen-burning limit at the bottom of
-          // the red dwarfs; 1e32 kg ≈ 50 M_sun, into the massive O stars.
-          min: 1.5e29,
-          max: 1e32,
+          // About 1.5e29 kg ≈ 0.075 M_sun, the hydrogen-burning limit at the bottom
+          // of the red dwarfs; 1e32 kg ≈ 50 M_sun, into the massive O stars. The
+          // minimum is nudged 0.3% above 1.5e29 so the Sun is step 112 of 282.
+          min: M_STAR_MIN,
+          max: M_STAR_MAX,
           default: M_SUN,
-          step: 0.01, // decades
+          step: logStep(M_STAR_MIN, M_STAR_MAX, 282), // decades, about 0.01
           scale: 'log',
           format: { notation: 'scientific', digits: 3 },
         },
