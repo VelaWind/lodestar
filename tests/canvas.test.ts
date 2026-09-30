@@ -24,6 +24,7 @@ import supernovae from '@/content/modules/supernovae';
 import habitableZone from '@/content/modules/habitable-zone';
 import nebulae from '@/content/modules/nebulae';
 import cosmicDistanceLadder from '@/content/modules/cosmic-distance-ladder';
+import timeDilation from '@/content/modules/time-dilation';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -40,6 +41,7 @@ import { __internals as sn } from '@/sims/supernovae';
 import { __internals as hz } from '@/sims/habitable-zone';
 import { __internals as neb } from '@/sims/nebulae';
 import { __internals as cdl } from '@/sims/cosmic-distance-ladder';
+import { __internals as td } from '@/sims/time-dilation';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -1405,6 +1407,118 @@ function ladderCases(): Case[] {
   return cases;
 }
 
+/* -------------------------------- time dilation -------------------------------- */
+
+const TD_HEIGHT = 544;
+
+function timeDilationCases(): Case[] {
+  const params = timeDilation.layers.play.params;
+  const vParam = paramOf(params, 'v');
+  const rParam = paramOf(params, 'r');
+  const cases: Case[] = [];
+  const rs = rParam.default / 1.5;
+
+  // Each slider's ends and default with the other at its default, the review's
+  // screenshot stops, and the looping clocks part-way and at the trip's end.
+  const views: { stop: string; v: number; r: number; phase: number }[] = [
+    ...extremes(vParam).map((s) => ({ stop: `v=${s.stop}`, v: s.value, r: rParam.default, phase: 1 })),
+    ...extremes(rParam).map((s) => ({ stop: `r=${s.stop}`, v: vParam.default, r: s.value, phase: 1 })),
+    { stop: 'v=30 m/s', v: 30, r: rParam.default, phase: 1 },
+    { stop: 'v=3874 m/s', v: 3874, r: rParam.default, phase: 1 },
+    { stop: 'v=0.998 c', v: 0.998 * 299_792_458, r: rParam.default, phase: 1 },
+    { stop: 'r=3 r_s', v: vParam.default, r: 3 * rs, phase: 1 },
+    { stop: 'mid-loop', v: vParam.default, r: rParam.default, phase: 0.37 },
+    { stop: 'loop start', v: vParam.default, r: rParam.default, phase: 0 },
+  ];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const v of views) {
+      cases.push({
+        label: `${v.stop} ${units}`,
+        draw: (ctx, w, h) => td.drawScene(ctx, w, h, { v: v.v, r: v.r, phase: v.phase, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every setting a reader can reach.
+   *
+   * The clocks' elapsed times change width with the speed, the bar's value
+   * rides its fill, and below, the dot's label rides the curve past the three
+   * guide labels. Swept a tenth of a decade at a time on each slider, at the
+   * loop's end and part-way through, everything must be drawn, clear and
+   * inside the frame, and no text may sit under a dot or a clock's hub.
+   */
+  it('keeps every label drawn and clear across both sliders', () => {
+    const expected = ['Two clocks, one trip', 'at home', 'on the ship', 'Clocks near a black hole'];
+    const check = (v: number, r: number, phase: number, units: 'friendly' | 'technical', width: number) => {
+      const { ctx, records } = recordingContext();
+      td.drawScene(ctx, width, TD_HEIGHT, { v, r, phase, units });
+      const where = `v=${v.toPrecision(3)} r=${r.toPrecision(3)} phase=${phase} ${units} @${width}`;
+      const texts = records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
+      for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        texts.some((t) => t.startsWith('for every hour at home')),
+        `${where}: the bar's caption is missing`,
+      ).toBe(true);
+      expect(
+        textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+        `${where}: labels overlap`,
+      ).toEqual([]);
+      expect(
+        textOutsideFrame(records, width, TD_HEIGHT).map(describeRecord),
+        `${where}: text outside the frame`,
+      ).toEqual([]);
+      const dots = records.filter((rec) => rec.kind === 'arc' && rec.x1 - rec.x0 <= 12);
+      const covered = records
+        .filter((rec) => rec.kind === 'text')
+        .flatMap((t) =>
+          dots
+            .filter((a) => Math.min(t.x1, a.x1) - Math.max(t.x0, a.x0) > 1 && Math.min(t.y1, a.y1) - Math.max(t.y0, a.y0) > 1)
+            .map((a) => `${describeRecord(t)}  under  ${describeRecord(a)}`),
+        );
+      expect(covered, `${where}: text under a dot`).toEqual([]);
+    };
+    for (const units of ['friendly', 'technical'] as const) {
+      for (const width of [246, 390, 900]) {
+        for (const phase of [0.37, 1]) {
+          for (let e = Math.log10(vParam.min); e <= Math.log10(vParam.max) + 1e-9; e += 0.1) {
+            check(Math.min(vParam.max, 10 ** e), rParam.default, phase, units, width);
+          }
+          check(vParam.max, rParam.default, phase, units, width);
+        }
+        for (let e = Math.log10(rParam.min); e <= Math.log10(rParam.max) + 1e-9; e += 0.1) {
+          check(vParam.default, Math.min(rParam.max, 10 ** e), 1, units, width);
+        }
+        check(vParam.default, rParam.max, 1, units, width);
+      }
+    }
+  });
+
+  it('names the marked radii where there is room', () => {
+    const { ctx, records } = recordingContext();
+    td.drawScene(ctx, 900, TD_HEIGHT, { v: vParam.default, r: rParam.default, phase: 1, units: 'friendly' });
+    const texts = records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
+    for (const name of ['event horizon', 'photon sphere', 'innermost stable orbit']) expect(texts).toContain(name);
+    expect(texts).toContain('10.6 years');
+    expect(texts).toContain('6.37 years');
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    expect(td.formatGamma(1.6666667)).toBe('1.667');
+    expect(td.formatGamma(1 + 6e-18)).toBe('1.000');
+    expect(td.formatDuration(4.8e-13)).toBe('0.48 ps');
+    expect(td.formatDuration(7.21e-6)).toBe('7.21 µs');
+    expect(td.formatDuration(36_180)).toBe('10.1 h');
+    expect(td.formatTripTime(10.6163 * JULIAN_YEAR)).toBe('10.6 years');
+    expect(td.formatTripTime(13.9 * 86_400)).toBe('13.9 days');
+    expect(td.formatTripTime(8.05e8 * JULIAN_YEAR)).toBe('805 million years');
+    expect(td.formatRate(0.57735)).toBe('0.5774');
+    expect(td.formatRate(0)).toBe('stopped, seen from far away');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -1423,6 +1537,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'habitable-zone', height: HZ_HEIGHT, cases: habitableZoneCases },
   { name: 'nebulae', height: NEB_HEIGHT, cases: nebulaeCases },
   { name: 'cosmic-distance-ladder', height: CDL_HEIGHT, cases: ladderCases },
+  { name: 'time-dilation', height: TD_HEIGHT, cases: timeDilationCases },
 ];
 
 /**
@@ -1456,6 +1571,7 @@ const MEASURED_PLACEMENT = new Set([
   'habitable-zone',
   'nebulae',
   'cosmic-distance-ladder',
+  'time-dilation',
 ]);
 
 for (const sim of SIMS) {
