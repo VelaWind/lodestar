@@ -25,6 +25,7 @@ if (import.meta.env.DEV) {
       verifySupernovaModel,
       verifyHabitableModel,
       verifyNebulaModel,
+      verifyLadderModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -41,6 +42,7 @@ if (import.meta.env.DEV) {
       verifySupernovaModel();
       verifyHabitableModel();
       verifyNebulaModel();
+      verifyLadderModel();
     },
   );
 }
