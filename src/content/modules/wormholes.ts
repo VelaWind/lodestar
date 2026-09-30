@@ -26,8 +26,8 @@ const wormholes: Module = {
       body: prose(
         p(
           'Einstein’s equations allow a tunnel through space: step into one end and out of the other, ',
-          'light-years away, a few paces later. Nothing forbids it except one ingredient that nobody has ',
-          'ever found in quantity.',
+          'light-years away, a few paces later. Nothing proven forbids it, but it needs one ingredient ',
+          'that nobody has ever found in quantity.',
         ),
       ),
     },
@@ -79,14 +79,14 @@ const wormholes: Module = {
           technicalLabel: 'Throat radius',
           symbol: 'b_0',
           unit: 'm',
-          // A millimetre to a hundred AU. Default: one metre, wide enough to step through.
+          // A millimetre to about seventy AU. Default: one metre, wide enough to step through.
           min: 1e-3,
-          max: 1.5e13,
+          max: 1e13,
           default: 1,
-          // decades; 1618 equal steps, shrunk by one part in 10⁹ so (max − min) / step
-          // rounds up to 1618 and the input can reach its maximum. At 0.01 decades the
-          // range, 16.18 decades, ends 1.4% short of the maximum.
-          step: ((Math.log10(1.5e13) - Math.log10(1e-3)) / 1618) * (1 - 1e-9),
+          // decades; 1600 steps of 0.01, shrunk by one part in 10¹² so (max − min) / step
+          // rounds up to 1600 and the input can reach its maximum. The shrink is kept that
+          // small so the default, 300 steps up, stays on the grid to a part in 10¹¹.
+          step: ((Math.log10(1e13) - Math.log10(1e-3)) / 1600) * (1 - 1e-12),
           scale: 'log',
           format: { notation: 'auto', digits: 3, displayUnit: { unit: 'm', factor: 1 } },
         },
@@ -107,6 +107,11 @@ const wormholes: Module = {
             'The drawing is the usual embedding diagram: space around the throat shown as a curved surface, with one dimension left out so it can be drawn. There is no higher dimension that the tunnel bends through.',
           ),
         ),
+        prose(
+          p(
+            'The negative mass quoted is the exotic matter’s density added up over all space; from outside, this wormhole has no net mass at all. A traveller moving through still feels sideways tidal forces.',
+          ),
+        ),
       ],
     },
 
@@ -117,8 +122,9 @@ const wormholes: Module = {
           'A ',
           term('wormhole'),
           ' is a solution of general relativity in which two separate regions of space are joined by a ',
-          'throat. The first was found in 1935 by Albert Einstein and Nathan Rosen, inside the ',
-          'mathematics of the simplest black hole: the full solution contains two outside regions joined ',
+          'throat. Its geometry was first noticed by Ludwig Flamm in 1916 and made explicit in 1935 by ',
+          'Albert Einstein and Nathan Rosen, inside the mathematics of the simplest black hole: the ',
+          'full solution contains two outside regions joined ',
           'at the horizon, an ',
           term('Einstein–Rosen bridge', 'einstein-rosen-bridge'),
           '. In 1962 Robert Fuller and John Wheeler showed it cannot be crossed. The throat opens and ',
@@ -274,9 +280,11 @@ const wormholes: Module = {
           m`\Phi`,
           ' and a shape function ',
           m`b`,
-          ' whose minimum, ',
+          '; the throat is the smallest radius, ',
+          m`r = b_0`,
+          ', where ',
           m`b(b_0) = b_0`,
-          ', is the throat. Keeping the throat open requires the flare-out condition, that the embedded ',
+          '. Keeping the throat open requires the flare-out condition, that the embedded ',
           'surface widen away from the throat, which through the Einstein equations forces the null ',
           'energy condition to fail there: along some light rays, the energy density plus pressure is ',
           'negative. This is general, not a feature of one model; Hochberg and Visser showed it holds for ',
@@ -302,9 +310,9 @@ const wormholes: Module = {
           m`(\hbar c/u)^{1/4}`,
           '. Applied to wormholes, they imply that exotic matter from quantum fields must sit in a band ',
           'only a few Planck lengths thick, or else that the throat is itself microscopic. The averaged ',
-          'null energy condition, integrated along complete light rays, is believed to hold for quantum ',
-          'fields in flat space and forbids the simplest traversable wormholes outright; proposals that ',
-          'evade it use quantum effects that are nonlocal or need special geometries. In 2017 Ping Gao, ',
+          'null energy condition, integrated along complete light rays, is proven for quantum fields in ',
+          'flat space. Its achronal version in curved spacetime, if it holds, rules out any wormhole ',
+          'that is a shortcut; proposals that evade it use quantum effects that are nonlocal or need special geometries. In 2017 Ping Gao, ',
           'Daniel Jafferis and Aron Wall found a wormhole made traversable by a coupling between its two ',
           'mouths in anti-de Sitter space, a model universe used in quantum gravity; it transmits ',
           'signals, but more slowly than going around the outside, so it offers no shortcut.',

@@ -66,7 +66,8 @@ const expansionOfTheUniverse: Module = {
       simKey: 'expansion-of-the-universe',
       caption: prose(
         p(
-          'Drag the galaxy farther away and watch the line in its light slide toward red. Then ',
+          'Drag the galaxy farther away and watch the line in its light, the one sharp colour its ',
+          'hydrogen gives off, slide toward red. Then ',
           'give the galaxy some motion of its own and see how close it has to be before that ',
           'motion wins.',
         ),
@@ -185,7 +186,8 @@ const expansionOfTheUniverse: Module = {
           ' it arrives at 669 nm. This is a ',
           term('cosmological redshift'),
           ': the wave was lengthened by space stretching while the light was in flight. It is ',
-          'not a Doppler shift, the change in pitch of a passing siren, though at small ',
+          'usually described not as a Doppler shift, the change in pitch of a passing siren, though ',
+          'at small ',
           m`z`,
           ' the two give the same number and the sim treats them as the same. A galaxy moving ',
           'toward us fast enough shows a ',
@@ -241,7 +243,7 @@ const expansionOfTheUniverse: Module = {
           height: 909,
           alt: 'A black field scattered with smooth, pale golden oval galaxies of different sizes, the largest just right of centre, with a tilted bluish spiral galaxy at upper left and hundreds of tiny orange specks, far more distant galaxies, filling the background.',
           caption:
-            'The Coma Cluster, about 320 million light-years away and the sim’s starting point. Every galaxy in it is receding from us at roughly 6 700 km/s; the redshift of the whole cluster was one of the first measured.',
+            'The Coma Cluster, about 320 million light-years away and the sim’s starting point. The cluster as a whole recedes at about 6 900 km/s, and its galaxies swarm around that by roughly 1 000 km/s; the redshift of the whole cluster was one of the first measured.',
           credit:
             'NASA, ESA, and the Hubble Heritage Team (STScI/AURA). Acknowledgment: D. Carter (Liverpool John Moores University) and the Coma HST ACS Treasury Team.',
         }),
@@ -313,7 +315,7 @@ const expansionOfTheUniverse: Module = {
               m`t_H = 1 / (2.18 \times 10^{-18}\,\text{s}^{-1}) = 4.58 \times 10^{17}\,\text{s}`,
               ' = 14.5 billion years',
             ),
-            p('Coma’s measured redshift is 0.023; the small difference is its peculiar velocity.'),
+            p('Coma’s measured redshift is 0.023; the gap is within the uncertainty of the 100 Mpc distance assumed here.'),
           ),
         },
       ],

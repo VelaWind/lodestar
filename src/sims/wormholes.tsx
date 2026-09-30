@@ -6,8 +6,8 @@
  * downward from the throat circle, with rings at the throat, part-way out and
  * at each mouth. The drawing is scaled so the throat is always the same size on
  * screen, so what changes with the slider is the ruler across the throat and
- * which reference, a person, the Earth or the Sun, is the right size to show
- * beside it at that scale.
+ * which reference, from a grain of sand to Neptune's orbit, is nearest the
+ * throat's size at that scale.
  *
  * Bottom panel: the size of the negative mass the throat needs against its
  * radius, log–log, with the Earth, Jupiter and the Sun marked, and a dot at
@@ -23,7 +23,19 @@
  */
 import { useCallback, useEffect, useRef } from 'react';
 import type { Param, ParamValues, SimProps } from '@/content/types';
-import { AU, M_EARTH, M_JUPITER, M_SUN, PROTON_RADIUS, R_EARTH, R_SUN } from '@/physics/constants';
+import {
+  A_MERCURY,
+  A_NEPTUNE,
+  AU,
+  M_EARTH,
+  M_JUPITER,
+  M_SUN,
+  PROTON_RADIUS,
+  R_EARTH,
+  R_JUPITER,
+  R_MOON,
+  R_SUN,
+} from '@/physics/constants';
 import { PERSON_HEIGHT } from '@/physics/blackhole';
 import {
   casimirGapForThroat,
@@ -120,6 +132,22 @@ function formatLength(metres: number): string {
   return `${formatSig3(metres / AU)} AU`;
 }
 
+/**
+ * The throat's radius in the most natural unit: mm, m or km below the Earth's
+ * radius, Earth radii up to a tenth of an AU, and AU beyond. The slider itself
+ * reads in metres, since a param has one display unit; this readout and the
+ * ruler carry the friendlier unit.
+ */
+function formatRadius(metres: number): string {
+  if (!(metres > 0) || !Number.isFinite(metres)) return '—';
+  if (metres < R_EARTH) return formatLength(metres);
+  if (metres < 0.1 * AU) {
+    const n = formatSig3(metres / R_EARTH);
+    return `${n} ${n === '1' ? 'Earth radius' : 'Earth radii'}`;
+  }
+  return `${formatSig3(metres / AU)} AU`;
+}
+
 /** The comparison bodies, largest first: [mass in kg, plural name]. */
 const BODIES: [number, string][] = [
   [M_SUN, 'Suns'],
@@ -145,10 +173,17 @@ function formatDensity(kgPerM3: number): string {
   return `${formatSig3(kgPerM3)} kg/m³`;
 }
 
-/** The Casimir gap in m, then as a multiple of the proton's radius. */
+/**
+ * The Casimir gap in m, then against the proton's radius: a multiple when it is
+ * at least a hundredth of one, and "1/N of" below that, so the comparison never
+ * needs a power of ten ("1/273 of a proton’s radius").
+ */
 function formatCasimirGap(metres: number): string {
   if (!(metres > 0) || !Number.isFinite(metres)) return '—';
-  return `${formatSig3(metres)} m (${formatSig3(metres / PROTON_RADIUS)} times a proton’s radius)`;
+  const ratio = metres / PROTON_RADIUS;
+  const comparison =
+    ratio < 0.01 ? `1/${formatSig3(1 / ratio)} of a proton’s radius` : `${formatSig3(ratio)} times a proton’s radius`;
+  return `${formatSig3(metres)} m (${comparison})`;
 }
 
 const STATUS = 'No. Allowed by the equations, never seen.';
@@ -187,17 +222,11 @@ const TILT = 0.22;
 const THROAT_SHARE = 0.1;
 
 /** The axes' ranges, display only: throat radius in m, mass in kg. */
-const B_AXIS: [number, number] = [1e-3, 1.5e13];
+const B_AXIS: [number, number] = [1e-3, 1e13];
 const M_AXIS: [number, number] = [1e23, 1e41];
 
-const B_TICKS: [number, string][] = [
-  [1e-3, '1 mm'],
-  [1, '1 m'],
-  [1e3, '1 km'],
-  [1e6, '1,000 km'],
-  [1e9, `${powerOfTen(6)} km`],
-  [AU, '1 AU'],
-];
+/** Throat-radius ticks, labelled by the same formatter as the readouts. */
+const B_TICKS: [number, string][] = [1e-3, 1, 1e3, 1e6, 1e9, AU].map((b0) => [b0, formatLength(b0)]);
 const M_TICKS = [1e25, 1e30, 1e35, 1e40];
 const LEVELS: [number, string][] = [
   [M_EARTH, 'the Earth'],
@@ -365,6 +394,81 @@ function drawDisc(ctx: CanvasRenderingContext2D, cx: number, cy: number, radius:
   ctx.stroke();
 }
 
+type Shape = 'disc' | 'ring' | 'person' | 'house' | 'pitch' | 'mountain';
+
+interface Reference {
+  /** The dimension drawn, m: a diameter, a height or a length. */
+  size: number;
+  name: string;
+  shape: Shape;
+}
+
+/**
+ * Things to set the throat against, smallest first. The everyday sizes are
+ * round display figures; the astronomical ones come from the constants. No two
+ * neighbours differ by more than a factor of 83 (the Sun to Mercury's orbit),
+ * and a reference is shown anywhere from 2 px to the panel's width, a window of
+ * more than a hundred even on the narrowest canvas, so one always fits.
+ */
+const REFERENCES: readonly Reference[] = [
+  { size: 1e-3, name: 'a grain of sand', shape: 'disc' },
+  { size: 0.025, name: 'a coin', shape: 'disc' },
+  { size: PERSON_HEIGHT, name: 'a person', shape: 'person' },
+  { size: 10, name: 'a house', shape: 'house' },
+  { size: 105, name: 'a football pitch', shape: 'pitch' },
+  { size: 5e3, name: 'a mountain', shape: 'mountain' },
+  { size: 5e4, name: 'a city', shape: 'ring' },
+  { size: 2 * R_MOON, name: 'the Moon', shape: 'disc' },
+  { size: 2 * R_EARTH, name: 'the Earth', shape: 'disc' },
+  { size: 2 * R_JUPITER, name: 'Jupiter', shape: 'disc' },
+  { size: 2 * R_SUN, name: 'the Sun', shape: 'disc' },
+  { size: 2 * A_MERCURY, name: 'Mercury’s orbit', shape: 'ring' },
+  { size: 2 * AU, name: 'Earth’s orbit', shape: 'ring' },
+  { size: 2 * A_NEPTUNE, name: 'Neptune’s orbit', shape: 'ring' },
+];
+
+/** A reference shape `px` across (or tall), centred at (cx, cy). */
+function drawReference(ctx: CanvasRenderingContext2D, shape: Shape, cx: number, cy: number, px: number): void {
+  if (shape === 'person') {
+    drawPerson(ctx, cx, cy, px);
+    return;
+  }
+  if (shape === 'disc') {
+    drawDisc(ctx, cx, cy, px / 2);
+    return;
+  }
+  ctx.fillStyle = COLORS.body;
+  ctx.strokeStyle = COLORS.warm;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  if (shape === 'ring') {
+    ctx.arc(cx, cy, px / 2, 0, TAU);
+    ctx.stroke();
+    return;
+  }
+  if (shape === 'house') {
+    const top = cy - px / 2;
+    ctx.moveTo(cx - px / 2, top + 0.4 * px);
+    ctx.lineTo(cx, top);
+    ctx.lineTo(cx + px / 2, top + 0.4 * px);
+    ctx.lineTo(cx + 0.4 * px, top + 0.4 * px);
+    ctx.lineTo(cx + 0.4 * px, top + px);
+    ctx.lineTo(cx - 0.4 * px, top + px);
+    ctx.lineTo(cx - 0.4 * px, top + 0.4 * px);
+    ctx.closePath();
+  } else if (shape === 'pitch') {
+    const h = (px * 68) / 105;
+    ctx.rect(cx - px / 2, cy - h / 2, px, h);
+  } else {
+    ctx.moveTo(cx - px / 2, cy + 0.225 * px);
+    ctx.lineTo(cx, cy - 0.225 * px);
+    ctx.lineTo(cx + px / 2, cy + 0.225 * px);
+    ctx.closePath();
+  }
+  ctx.fill();
+  ctx.stroke();
+}
+
 function drawTunnel(ctx: CanvasRenderingContext2D, w: number, splitY: number, view: View, obstacles: LabelBox[]): void {
   const deep = view.units === 'technical';
   ctx.font = FONT;
@@ -411,15 +515,28 @@ function drawTunnel(ctx: CanvasRenderingContext2D, w: number, splitY: number, vi
   }
   ring(ctx, cx, cy, throat, COLORS.ember, 1.5);
 
-  /* The reference that suits this scale, if any: a person, the Earth or the Sun, drawn at the throat. */
-  const tallest = 2 * zMouth * throat;
-  const references: { size: number; name: string; draw: () => void }[] = [
-    { size: PERSON_HEIGHT * scale, name: 'a person', draw: () => drawPerson(ctx, cx, cy, PERSON_HEIGHT * scale) },
-    { size: 2 * R_EARTH * scale, name: 'the Earth', draw: () => drawDisc(ctx, cx, cy, R_EARTH * scale) },
-    { size: 2 * R_SUN * scale, name: 'the Sun', draw: () => drawDisc(ctx, cx, cy, R_SUN * scale) },
-  ];
-  const shown = references.find((ref) => ref.size >= 6 && ref.size <= tallest);
-  shown?.draw();
+  /*
+   * The reference nearest the throat's size, drawn at the throat: of those
+   * between 2 px and the panel's width at this scale, the one closest in log to
+   * the throat's diameter. Anything larger than the panel's height is clipped
+   * to the panel.
+   */
+  const maxPx = w - PAD.left - PAD.right;
+  let shown: { ref: Reference; px: number } | undefined;
+  for (const ref of REFERENCES) {
+    const px = ref.size * scale;
+    if (px < 2 || px > maxPx) continue;
+    const off = Math.abs(Math.log(px / (2 * throat)));
+    if (!shown || off < Math.abs(Math.log(shown.px / (2 * throat)))) shown = { ref, px };
+  }
+  if (shown) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 20, w, splitY - 22);
+    ctx.clip();
+    drawReference(ctx, shown.ref.shape, cx, cy, shown.px);
+    ctx.restore();
+  }
 
   /* The ruler: centre to rim along the throat, with end ticks. */
   ctx.strokeStyle = COLORS.ink;
@@ -442,7 +559,7 @@ function drawTunnel(ctx: CanvasRenderingContext2D, w: number, splitY: number, vi
   placeFirstClear(ctx, 'the other mouth', [{ x: cx, y: mouthBottom + 13, align: 'center' }], frame, obstacles, []);
 
   ctx.fillStyle = COLORS.ember;
-  const rulerText = deep ? `b₀ = ${formatLength(b0)}` : formatLength(b0);
+  const rulerText = deep ? `b₀ = ${formatRadius(b0)}` : formatRadius(b0);
   const below = cy + TILT * throat + 12;
   placeFirstClear(
     ctx,
@@ -460,10 +577,12 @@ function drawTunnel(ctx: CanvasRenderingContext2D, w: number, splitY: number, vi
 
   if (shown) {
     ctx.fillStyle = COLORS.warm;
-    const half = shown.size / 2;
-    labelNear(ctx, shown.name, cx - throat * 0.5, cy - Math.min(half, throat), frame, obstacles, [
-      { x0: cx - half, x1: cx + half, y0: cy - half, y1: cy + half },
-    ]);
+    const half = shown.px / 2;
+    // A reference about the throat's size or smaller is an obstacle for its own label;
+    // a larger one is only an outline behind the funnel, and its label sits on it.
+    const own: LabelBox[] =
+      half <= 3 * throat ? [{ x0: cx - half, x1: cx + half, y0: cy - half, y1: cy + half }] : [];
+    labelNear(ctx, shown.ref.name, cx, Math.max(frame.y0 + 12, cy - Math.min(half, throat)), frame, obstacles, own);
   }
 }
 
@@ -737,12 +856,13 @@ export default function WormholesSim({ params, values }: SimProps) {
           ref={canvasRef}
           className="absolute inset-0 h-full w-full"
           role="img"
-          aria-label="Above, the embedding diagram of a wormhole: two funnels, one opening upward and one downward, joined at a narrow circular throat, with a ruler across the throat showing its radius and, where it fits at that scale, a person, the Earth or the Sun drawn for size. Below, the negative mass needed to hold the throat open against its radius, rising in a straight line on logarithmic axes past the masses of the Earth, Jupiter and the Sun."
+          aria-label="Above, the embedding diagram of a wormhole: two funnels, one opening upward and one downward, joined at a narrow circular throat, with a ruler across the throat showing its radius and something of similar size drawn at the throat for scale, from a grain of sand to Neptune's orbit. Below, the negative mass needed to hold the throat open against its radius, rising in a straight line on logarithmic axes past the masses of the Earth, Jupiter and the Sun."
           aria-describedby="wormholes-readouts"
         />
       </div>
 
       <dl id="wormholes-readouts" className="flex flex-wrap gap-x-7 gap-y-3 border-t border-edge-soft pt-4">
+        <Readout label={deep ? 'Throat radius' : 'How wide the throat is'} value={formatRadius(b0)} />
         <Readout label={deep ? 'Throat circumference' : 'Around the throat'} value={formatLength(circumference)} />
         <Readout label={deep ? 'Exotic mass' : 'Negative mass needed'} value={formatExoticMass(mass)} />
         <Readout label={deep ? 'Throat density' : 'How negative, at the throat'} value={formatDensity(density)} />
@@ -777,6 +897,7 @@ export const __internals = {
   drawScene,
   formatSig3,
   formatLength,
+  formatRadius,
   formatExoticMass,
   formatDensity,
   formatCasimirGap,

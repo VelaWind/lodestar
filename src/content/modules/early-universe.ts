@@ -12,6 +12,11 @@
 import type { Module } from '../types';
 import { C, EV, JULIAN_YEAR, M_ELECTRON } from '@/physics/constants';
 import { figure, m, p, prose, term } from '../rich';
+import { logMinThrough, logStep } from '../grid';
+
+/** The particle slider's top, J, and a bottom that puts the electron on the grid. */
+const E_MAX = 1e-7;
+const E_MIN = logMinThrough(M_ELECTRON * C * C, E_MAX, 800, 191);
 
 const earlyUniverse: Module = {
   id: 'early-universe',
@@ -26,7 +31,7 @@ const earlyUniverse: Module = {
       body: prose(
         p(
           'One second after it began, the entire universe was ten billion degrees, hotter than ',
-          'the centre of any star. Every proton in your body was already there, and had been for ',
+          'the centre of any star. Every proton and neutron in your body was already there, and had been for ',
           'most of that second.',
         ),
       ),
@@ -94,13 +99,13 @@ const earlyUniverse: Module = {
           technicalLabel: 'Particle rest energy',
           symbol: 'mc^2',
           unit: 'J',
-          // About 6 keV to 600 GeV. Default is the electron, 0.511 MeV. The range is
-          // exactly eight decades, so a 0.01-decade step reaches the maximum as it
-          // is; the shrunk-step trick the time slider needs is not needed here.
-          min: 1e-15,
-          max: 1e-7,
+          // About 6 keV to 600 GeV, in 800 steps of about 0.01 decades. Default is the
+          // electron, 0.511 MeV; the minimum is nudged 1% above 1e-15 J so it is step
+          // 191 exactly (src/content/grid.ts), and the maximum is reachable.
+          min: E_MIN,
+          max: E_MAX,
           default: M_ELECTRON * C * C,
-          step: 0.01, // decades
+          step: logStep(E_MIN, E_MAX, 800), // decades
           scale: 'log',
           format: { notation: 'auto', digits: 3, displayUnit: { unit: 'MeV', factor: 1 / (1e6 * EV) } },
         },
@@ -108,17 +113,17 @@ const earlyUniverse: Module = {
       approximations: [
         prose(
           p(
-            'Before about 100 seconds the sim uses the radiation-era formula with the particle count switched in three steps, at 170, 100 and 0.5 MeV. Real transitions are gradual and the epoch boundaries are drawn sharp; the small flat notch near ten to twenty microseconds is an artefact of the steps, and times there are uncertain by about a factor of two.',
+            'For the first two minutes the sim uses the simple rule for a universe whose energy is almost all light, in which the temperature falls as one over the square root of time. The rule depends on how many kinds of particle are in the mix, and the sim changes that count in sudden steps as each kind stops being made, at particle energies of 170, 100 and 0.5 MeV (millions of electronvolts, the energy unit of particle physics) and, for the heavier particles on the second slider, at their masses. Real transitions are gradual and the epoch boundaries are drawn sharp. Where the particle count changes in a step, the clock stalls briefly: near 11–20 µs, 58–74 µs and 3–5 s the temperature shown is held flat, and times there are uncertain by up to a factor of two.',
           ),
         ),
         prose(
           p(
-            'After that it follows the standard model of cosmology, ΛCDM, with Planck 2018 densities, and treats neutrinos as massless.',
+            'After two minutes it follows the standard model of the expanding universe, with the amounts of matter, dark energy and light measured by the Planck satellite in 2018, and treats neutrinos as massless.',
           ),
         ),
         prose(
           p(
-            '‘Being made’ means the light’s typical energy, kT, is above the particle’s rest energy, mc². Real freeze-out is a race between reaction rates and expansion, and happens somewhat later than that line.',
+            '‘Being made’ means the light’s typical energy, kT, is above the particle’s rest energy, mc², the energy locked in its mass. In reality a particle stops being made in a race between how fast particles collide and how fast the universe expands, and that happens somewhat later than the line.',
           ),
         ),
       ],
@@ -146,7 +151,7 @@ const earlyUniverse: Module = {
           term('Big Bang nucleosynthesis', 'nucleosynthesis'),
           ': protons and neutrons fused into deuterium, then helium, so that a quarter of the ',
           'ordinary matter by mass has been helium ever since, with traces of lithium. Nothing ',
-          'heavier was made. Every other element came later, from stars.',
+          'heavier was made. Almost every other element came later, most of it from stars.',
         ),
         p(
           'Then, for a long time, little happened. Light outweighed matter for the first fifty ',
@@ -180,7 +185,7 @@ const earlyUniverse: Module = {
           'the space we are in was part of it. And the “beginning” in the sim is not time zero. ',
           'General relativity, Einstein’s theory of gravity, predicts a singularity there, a point ',
           'where its equations stop working, which is a limit of the theory rather than a known ',
-          'event. The earliest moment of which the universe itself keeps a record is the first ',
+          'event. The earliest moment whose physical conditions we can check directly is the first ',
           'second: the neutron-to-proton ratio froze then, and the helium it went on to make is ',
           'still measurable.',
         ),
@@ -332,10 +337,12 @@ const earlyUniverse: Module = {
           m`T_c \approx 155\,\text{MeV}`,
           ', where quarks bind into hadrons, ',
           m`g_* \approx 61.75`,
-          ' with u, d and s quarks and gluons; between the pion and electron mass scales, 10.75; ',
-          'today, with photons and three massless neutrinos, 3.36. The sim switches ',
+          ' with u, d and s quarks and gluons, rising to 106.75 above the top-quark mass, where ',
+          'every standard-model particle is relativistic; between the pion and electron mass ',
+          'scales, 10.75; today, with photons and three massless neutrinos, 3.36. The sim switches ',
           m`g_*`,
-          ' in steps at 170, 100 and 0.5 MeV; the real function is smooth, and the lattice-QCD ',
+          ' in steps: at 175, 125 and 90 GeV and 4.5 and 1.5 GeV as the heavy particles drop out, ',
+          'then at 170, 100 and 0.5 MeV; the real function is smooth, and the lattice-QCD ',
           'tabulation of Borsányi et al. (2016) is the standard reference.',
         ),
         p(
@@ -429,7 +436,7 @@ const earlyUniverse: Module = {
         {
           moduleId: 'supernovae',
           reason:
-            'Every element heavier than lithium was made in stars and scattered by these; that module follows the heavy elements.',
+            'Most elements heavier than helium were forged in stars and spread by their deaths, supernovae among them; that module follows the heavy elements.',
         },
       ],
     },

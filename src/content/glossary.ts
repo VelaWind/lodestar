@@ -83,7 +83,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'last-scattering': {
     title: 'Surface of last scattering',
-    body: 'The shell of sky, at redshift about 1090, from which the microwave background light set out. Not an edge of the universe; the farthest point light can come from.',
+    body: 'The shell of sky, at redshift about 1090, from which the microwave background light set out. Not an edge of the universe; the farthest we can see with light, because before it the universe was opaque.',
   },
   blackbody: {
     title: 'Blackbody',
@@ -107,7 +107,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'b-modes': {
     title: 'B-modes',
-    body: 'A swirl pattern in the polarization of the microwave background that gravitational waves from the first instant would leave. Searched for; not yet found.',
+    body: 'A swirl pattern in the polarization of the microwave background. The primordial kind, left by gravitational waves from the first instant, is not yet found; a kind made by lensing has been seen since 2013.',
   },
 
   /* Early universe ------------------------------------------------- */
@@ -525,7 +525,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'lorentz-factor': {
     title: 'Lorentz factor',
-    body: 'γ = 1/√(1 − v²/c²): how much slower a moving clock runs. 1.000000000005 at motorway speed, 1.67 at 80 percent of light speed, and without limit as speed nears c.',
+    body: 'γ = 1/√(1 − v²/c²): how much slower a moving clock runs. 1.000000000000005 at motorway speed, 1.67 at 80 percent of light speed, and without limit as speed nears c.',
   },
   'twin-paradox': {
     title: 'Twin paradox',
