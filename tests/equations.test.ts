@@ -22,7 +22,7 @@ import type { ParamValues } from '@/content/types';
 import { formatWithUnit, siValueToTex } from '@/lib/format';
 import { damageReason, mathNodesOf } from './helpers/mathNodes';
 
-const { substitute } = __internals;
+const { substitute, whereEntries } = __internals;
 const published = moduleList.filter((m) => m.status === 'published');
 
 describe('published equations', () => {
@@ -47,6 +47,32 @@ describe('published equations', () => {
     }
 
     expect(rendered).toMatchSnapshot();
+  });
+
+  it('links each substituted non-SI slider to its display value, and omits SI ones', () => {
+    const lines: Record<string, string> = {};
+
+    for (const module of published) {
+      const params = module.layers.play.params;
+      const byId = new Map(params.map((p) => [p.id, p]));
+      const values: ParamValues = Object.fromEntries(params.map((p) => [p.id, p.default]));
+
+      for (const equation of module.layers.math.equations) {
+        const entries = whereEntries(equation.tex, byId, values);
+        for (const e of entries) {
+          const param = byId.get(e.id)!;
+          expect(param.format?.displayUnit?.unit, `${module.id}/${equation.id} lists ${e.id}`).not.toBe(
+            param.unit,
+          );
+          expect(e.shown).toBe(formatWithUnit(param, param.default));
+        }
+        if (entries.length > 0) {
+          lines[`${module.id}/${equation.id}`] = entries.map((e) => `${e.symbol} = ${e.shown}`).join('; ');
+        }
+      }
+    }
+
+    expect(lines).toMatchSnapshot();
   });
 
   it('leaves no unresolved placeholder', () => {

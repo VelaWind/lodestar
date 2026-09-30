@@ -43,6 +43,33 @@ function substitute(
   });
 }
 
+/**
+ * The substituted params whose slider shows a unit other than SI, in order of
+ * first appearance, each with the value as its slider displays it.
+ *
+ * Numbers mode has to substitute SI, because the constants in the equation are
+ * SI (see `siValueToTex`). A reader who set r to 6,371 km then finds
+ * 6.37 × 10⁶ m in the formula; this is the line that joins the two. A param
+ * already shown in SI needs no such link and is left out.
+ */
+function whereEntries(
+  tex: string,
+  byId: Map<string, Param>,
+  values: ParamValues,
+): { id: string; symbol: string; shown: string }[] {
+  const seen = new Set<string>();
+  const out: { id: string; symbol: string; shown: string }[] = [];
+  for (const [, id] of tex.matchAll(PLACEHOLDER)) {
+    if (id === undefined || seen.has(id)) continue;
+    seen.add(id);
+    const param = byId.get(id);
+    const du = param?.format?.displayUnit;
+    if (!param || !du || du.unit === param.unit) continue;
+    out.push({ id, symbol: param.symbol, shown: formatWithUnit(param, values[id] ?? param.default) });
+  }
+  return out;
+}
+
 interface Props {
   layer: EquationLayer;
   /** The module's params — shared with layer 3, not a copy. */
@@ -77,11 +104,29 @@ export function EquationBlock({ layer, params, values }: Props) {
         </span>
       </div>
 
-      {layer.equations.map((eq) => (
+      {layer.equations.map((eq) => {
+        const where = mode === 'numbers' ? whereEntries(eq.tex, byId, values) : [];
+        return (
         <figure key={eq.id} className="space-y-3">
           <div className="overflow-x-auto rounded-lg border border-edge-soft bg-void-800/40 px-5 py-6">
             <Tex tex={substitute(eq.tex, byId, values, mode)} display className="text-ink" />
           </div>
+
+          {where.length > 0 && (
+            <p
+              data-equation-where={eq.id}
+              className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-ui text-xs text-ink-faint"
+            >
+              <span>where</span>
+              {where.map((w) => (
+                <span key={w.id} className="flex items-baseline gap-1.5">
+                  <Tex tex={w.symbol} className="text-ink-dim" />
+                  <span>=</span>
+                  <span className="font-mono tabular-nums text-ember/80">{w.shown}</span>
+                </span>
+              ))}
+            </p>
+          )}
 
           {eq.binds.length > 0 && (
             <div className="flex flex-wrap gap-x-4 gap-y-1.5">
@@ -115,7 +160,8 @@ export function EquationBlock({ layer, params, values }: Props) {
             </figcaption>
           )}
         </figure>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -128,4 +174,4 @@ export function EquationBlock({ layer, params, values }: Props) {
  * change to number formatting shows up there as a diff on every shipped
  * equation rather than as a surprise on the page.
  */
-export const __internals = { substitute };
+export const __internals = { substitute, whereEntries };
