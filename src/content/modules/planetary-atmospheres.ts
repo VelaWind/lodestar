@@ -242,7 +242,8 @@ const planetaryAtmospheres: Module = {
           'Then there is Mars, which the rule of thumb gets ',
           em('wrong'),
           ', and instructively. Run the sliders at Mars values and carbon dioxide reads as ',
-          'marginal-to-retained; the real Mars is nearly airless. The gap is the fingerprint of ',
+          'comfortably retained (a ratio near 16 at Mars’s ~250 K exobase); the real Mars keeps ',
+          'less than one percent of Earth’s surface pressure. The gap is the fingerprint of ',
           'escape routes this simple picture omits, and the going-deeper layer is about them.',
         ),
         /*
