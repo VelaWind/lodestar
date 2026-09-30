@@ -239,6 +239,27 @@ export const M_DEMO_BH = 10 * M_SUN;
 /** Mean muon lifetime at rest, s. Source: Particle Data Group, Review of Particle Physics (2024). */
 export const MUON_LIFETIME = 2.1969811e-6;
 
+// Hawking radiation
+/**
+ * Age of the universe, s: 13.80 billion years. Source: Planck Collaboration
+ * 2020, "Planck 2018 results VI: Cosmological parameters", A&A 641, A6 —
+ * 13.787 ± 0.020 Gyr, rounded to the figure the modules quote.
+ */
+export const AGE_UNIVERSE = 13.8e9 * JULIAN_YEAR;
+/** One megaton of TNT, J: 4.184 × 10¹⁵, by definition (a thousand tonnes at 4.184 GJ each). */
+export const MEGATON_TNT = 4.184e15;
+/** Electron rest energy, J. Source: CODATA 2018, m_e c² = 0.510 998 950 00(15) MeV. */
+export const E_ELECTRON_REST = 0.51099895e6 * EV;
+/** Muon rest energy, J. Source: CODATA 2018, m_μ c² = 105.658 3755(23) MeV. */
+export const E_MUON_REST = 105.6583755e6 * EV;
+/**
+ * The QCD scale, J: about 200 MeV, the rough temperature above which a hot
+ * body emits quarks and gluons rather than only leptons and photons. An order
+ * of magnitude, not a measurement (Λ_QCD ≈ 200–300 MeV; PDG 2024, "Quantum
+ * chromodynamics").
+ */
+export const E_QCD = 200e6 * EV;
+
 export const M_EARTH = 5.972_2e24; // kg
 export const R_EARTH = 6.371e6; // m, mean radius
 /**

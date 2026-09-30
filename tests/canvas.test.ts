@@ -25,6 +25,7 @@ import habitableZone from '@/content/modules/habitable-zone';
 import nebulae from '@/content/modules/nebulae';
 import cosmicDistanceLadder from '@/content/modules/cosmic-distance-ladder';
 import timeDilation from '@/content/modules/time-dilation';
+import hawkingRadiation from '@/content/modules/hawking-radiation';
 import escapeVelocity from '@/content/modules/escape-velocity';
 import expansionOfTheUniverse from '@/content/modules/expansion-of-the-universe';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
@@ -42,6 +43,8 @@ import { __internals as hz } from '@/sims/habitable-zone';
 import { __internals as neb } from '@/sims/nebulae';
 import { __internals as cdl } from '@/sims/cosmic-distance-ladder';
 import { __internals as td } from '@/sims/time-dilation';
+import { __internals as hr } from '@/sims/hawking-radiation';
+import { massEvaporatingIn, massForHawkingTemperature } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
 import { __internals as gw } from '@/sims/gravitational-waves';
@@ -60,6 +63,7 @@ import {
   redshiftFromVelocity,
 } from '@/physics/cosmology';
 import {
+  AGE_UNIVERSE,
   AU,
   C,
   EV,
@@ -69,6 +73,7 @@ import {
   LIGHT_YEAR,
   L_SUN,
   MEGAPARSEC,
+  M_MOON,
   M_SUN,
   PARSEC,
   T_CMB,
@@ -1537,6 +1542,131 @@ function timeDilationCases(): Case[] {
   return cases;
 }
 
+/* ------------------------------- hawking radiation ----------------------------- */
+
+const HR_HEIGHT = 544;
+
+function hawkingRadiationCases(): Case[] {
+  const mParam = paramOf(hawkingRadiation.layers.play.params, 'M');
+  const cases: Case[] = [];
+
+  // The slider's ends and default, and the review's stops: a second's hole, the
+  // hole finishing now, the background crossover, the Moon and the Sun.
+  const stops: { stop: string; M: number }[] = [
+    ...extremes(mParam).map((s) => ({ stop: s.stop, M: s.value })),
+    { stop: 'one second left', M: massEvaporatingIn(1) },
+    { stop: 'finishing now', M: massEvaporatingIn(AGE_UNIVERSE) },
+    { stop: 'as warm as the background', M: massForHawkingTemperature(T_CMB) },
+    { stop: 'the Moon', M: M_MOON },
+    { stop: 'the Sun', M: M_SUN },
+  ];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const s of stops) {
+      cases.push({
+        label: `M=${s.stop} ${units}`,
+        draw: (ctx, w, h) => hr.drawScene(ctx, w, h, { M: s.M, units }),
+      });
+    }
+  }
+
+  /*
+   * Every label, at every mass a reader can reach.
+   *
+   * The two dots ride their curves across 26 decades, past the background and
+   * age-of-the-universe lines and their labels, the named sides of the
+   * crossover and the reference names under the axis. Swept a tenth of a decade
+   * at a time, everything must be drawn clear and inside the frame, and no text
+   * may sit under a dot.
+   */
+  it('keeps every label drawn and clear across the mass range', () => {
+    const expected = ['How hot it glows', 'How long it lasts'];
+    const check = (M: number, units: 'friendly' | 'technical', width: number) => {
+      const { ctx, records } = recordingContext();
+      hr.drawScene(ctx, width, HR_HEIGHT, { M, units });
+      const where = `M=${M.toPrecision(3)} ${units} @${width}`;
+      const texts = records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
+      for (const label of expected) expect(texts, `${where}: "${label}" missing`).toContain(label);
+      expect(
+        texts.some((t) => t.includes('2.7 K')),
+        `${where}: the background line is unlabelled`,
+      ).toBe(true);
+      expect(texts, `${where}: the age line is unlabelled`).toContain('the age of the universe');
+      expect(
+        textCollisions(records).map(([a, b]) => `${describeRecord(a)}  overprints  ${describeRecord(b)}`),
+        `${where}: labels overlap`,
+      ).toEqual([]);
+      expect(
+        textOutsideFrame(records, width, HR_HEIGHT).map(describeRecord),
+        `${where}: text outside the frame`,
+      ).toEqual([]);
+      const dots = records.filter((rec) => rec.kind === 'arc' && rec.x1 - rec.x0 <= 12);
+      const covered = records
+        .filter((rec) => rec.kind === 'text')
+        .flatMap((t) =>
+          dots
+            .filter((a) => Math.min(t.x1, a.x1) - Math.max(t.x0, a.x0) > 1 && Math.min(t.y1, a.y1) - Math.max(t.y0, a.y0) > 1)
+            .map((a) => `${describeRecord(t)}  under  ${describeRecord(a)}`),
+        );
+      expect(covered, `${where}: text under a dot`).toEqual([]);
+    };
+    for (const units of ['friendly', 'technical'] as const) {
+      for (const width of [246, 390, 900]) {
+        for (let e = Math.log10(mParam.min); e <= Math.log10(mParam.max) + 1e-9; e += 0.1) {
+          check(Math.min(mParam.max, 10 ** e), units, width);
+        }
+        check(mParam.max, units, width);
+      }
+    }
+  });
+
+  it('names the sides, the background and the reference masses where there is room', () => {
+    const { ctx, records } = recordingContext();
+    hr.drawScene(ctx, 900, HR_HEIGHT, { M: mParam.default, units: 'friendly' });
+    const texts = records.filter((rec) => rec.kind === 'text').map((rec) => rec.text ?? '');
+    for (const name of [
+      'the microwave background, 2.7 K',
+      'shrinking today',
+      'growing today',
+      'a mountain',
+      'the Moon',
+      'the Sun',
+      'the age of the universe',
+      'mass',
+      'temperature',
+      'time to evaporate, if left alone',
+    ]) {
+      expect(texts).toContain(name);
+    }
+    expect(texts).toContain('123 billion K');
+    expect(texts).toContain('2.67 × 10¹² years');
+  });
+
+  it('formats the readouts the way the brief promises', () => {
+    expect(hr.formatRadius(1.4852e-15)).toBe('1.49 fm');
+    expect(hr.formatRadius(6.686e-5)).toBe('66.9 µm');
+    expect(hr.formatRadius(2953)).toBe('2.95 km');
+    expect(hr.formatRadius(1.4852e-22)).toBe('1.49 × 10⁻⁷ fm');
+    expect(hr.formatTemperature(1.2269e11)).toBe('123 billion K');
+    expect(hr.formatTemperature(6.1703e-8)).toBe('6.17 × 10⁻⁸ K');
+    expect(hr.formatTemperature(2.7255)).toBe('2.73 K');
+    expect(hr.formatEnergy(1.694e-12)).toBe('10.6 MeV');
+    expect(hr.formatEnergy(1.694e-5)).toBe('106 TeV');
+    expect(hr.formatEnergy(7.4e-6)).toBe('46.2 TeV');
+    expect(hr.formatEnergy(1.6e-7)).toBe('999 GeV');
+    expect(hr.formatEnergy(3.76e-23)).toBe('2.35 × 10⁻⁴ eV');
+    expect(hr.formatPower(3.5616e8)).toBe('356 million W');
+    expect(hr.formatLifetime(0.0841)).toBe('84.1 ms');
+    expect(hr.formatLifetime(0.997)).toBe('997 ms');
+    expect(hr.formatLifetime(13.8e9 * JULIAN_YEAR)).toBe('13.8 billion years');
+    expect(hr.formatLifetime(2.665e12 * JULIAN_YEAR)).toBe('2.67 × 10¹² years');
+    expect(hr.formatLifetime(2.1e67 * JULIAN_YEAR)).toBe('2.10 × 10⁶⁷ years');
+    expect(hr.formatNet('shrinking')).toBe('hotter than the background: shrinking');
+    expect(hr.formatNet('growing')).toBe('colder than the background: growing');
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -1556,6 +1686,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'nebulae', height: NEB_HEIGHT, cases: nebulaeCases },
   { name: 'cosmic-distance-ladder', height: CDL_HEIGHT, cases: ladderCases },
   { name: 'time-dilation', height: TD_HEIGHT, cases: timeDilationCases },
+  { name: 'hawking-radiation', height: HR_HEIGHT, cases: hawkingRadiationCases },
 ];
 
 /**
@@ -1590,6 +1721,7 @@ const MEASURED_PLACEMENT = new Set([
   'nebulae',
   'cosmic-distance-ladder',
   'time-dilation',
+  'hawking-radiation',
 ]);
 
 for (const sim of SIMS) {

@@ -50,6 +50,7 @@ const MODULES = [
   'nebulae',
   'cosmic-distance-ladder',
   'time-dilation',
+  'hawking-radiation',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2746,6 +2747,75 @@ test('behaviour: time-dilation readouts follow both sliders, and a term opens by
   assertClean(w, 'time dilation behaviour');
 });
 
+/**
+ * The Hawking-radiation module, end to end, on every engine.
+ *
+ * At the default, a mountain's mass, the hole is hotter than the microwave
+ * background and shrinking, and hot enough to emit electrons. At five Suns it
+ * is colder than the background and growing; at a hundred tonnes it is hot
+ * enough to emit quarks. A glossary term opens from the keyboard, and axe finds
+ * nothing serious.
+ */
+test('behaviour: hawking-radiation readouts follow the mass, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/hawking-radiation', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'hawking radiation at rest');
+
+  const readout = (index: number) => page.locator('#hawking-radiation-readouts dd').nth(index);
+
+  /* Default: a mountain's mass. */
+  await expect(readout(2), 'net with the background at 10¹² kg').toContainText('shrinking');
+  await expect(readout(3), 'emission at 10¹² kg').toContainText('electrons');
+
+  /* Five Suns: colder than the background. */
+  const M = page.locator('#p-M');
+  await M.focus();
+  await page.keyboard.press('End');
+  await expect(readout(2), 'net with the background at 10³¹ kg').toContainText('growing');
+
+  /* A hundred tonnes: hot enough for quarks. */
+  await page.keyboard.press('Home');
+  await expect(readout(3), 'emission at 10⁵ kg').toContainText('quarks');
+  await assertNoOverflow(page, 'hawking radiation at a hundred tonnes');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be Hawking radiation').toBe('hawking-radiation');
+  const trigger = page.locator('[data-glossary-term="hawking-radiation"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="hawking-radiation"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('Faint thermal glow');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'hawking radiation: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '23-hawking-radiation-behaviour');
+  assertClean(w, 'hawking radiation behaviour');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2785,7 +2855,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes sixteen modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes seventeen modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3471,7 +3541,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All sixteen modules now, with no exception branch. `kepler-orbits` carried one
+ * All seventeen modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3585,7 +3655,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * on it.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all eighteen and checks the rendered DOM rather than the
+ * route — so this walks all nineteen and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3611,7 +3681,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the private repo, and /about says access is on request', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all eighteen routes').toBe(18);
+  expect(routes.length, 'all nineteen routes').toBe(19);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3758,7 +3828,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on eighteen fresh loads. Getting this wrong is what the first run of
+   * asserts on nineteen fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
