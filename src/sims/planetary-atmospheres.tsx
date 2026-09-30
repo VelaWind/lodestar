@@ -360,7 +360,7 @@ export default function PlanetaryAtmospheresSim({ params, values }: SimProps) {
       <p className="font-ui text-[0.75rem] leading-relaxed text-ink-faint">
         The dot on each chip is that gas's verdict at these settings: blue retained, amber
         marginal, grey lost. The rule is a threshold on one ratio, not a calculation of how fast a
-        gas actually leaves — real escape is exponential in that ratio, so the band in the middle
+        gas actually leaves — real escape is exponential in that ratio squared, so the band in the middle
         is where the rule stops answering and history takes over.
       </p>
     </div>

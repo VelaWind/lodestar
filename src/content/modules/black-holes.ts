@@ -52,10 +52,9 @@ const blackHoles: Module = {
           'light’s speed.',
         ),
         p(
-          'The analogy breaks in one telling place: the fish feels the current, but you would ',
-          'feel nothing at the line. No jolt, no marker, no change in your own physics: the ',
-          'crossing is invisible to the one who crosses it, and that strange fact is genuine ',
-          'relativity, not a defect of the picture.',
+          'The analogy breaks in one telling place: the fish feels the current, but nothing marks ',
+          'the line itself. For a big enough hole you would cross it without noticing, and that ',
+          'strange fact is genuine relativity, not a defect of the picture.',
         ),
       ),
     },
@@ -122,7 +121,7 @@ const blackHoles: Module = {
         ),
         prose(
           p(
-            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: including neutrinos and gravitons shortens it about tenfold, and the heavier particles a shrinking hole becomes hot enough to emit shorten it further. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
+            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: for holes this heavy, far too cold to emit neutrinos (which have mass), adding gravitons and the exact emission factors shortens it roughly twofold. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
           ),
         ),
         prose(
@@ -163,7 +162,7 @@ const blackHoles: Module = {
           em('Supermassive'),
           ' holes sit in galactic centres: our own galaxy’s, Sagittarius A*, weighs 4.15 million ',
           'Suns (its horizon would sit nine Suns deep) and M87’s giant reaches 6.5 billion, a ',
-          'horizon four times wider than Neptune’s whole distance from our Sun. Both have been ',
+          'horizon whose radius is four times Neptune’s distance from our Sun. Both have been ',
           'photographed by the ',
           term('Event Horizon Telescope', 'eht'),
           ': the images show a bright ring of hot ',
@@ -288,7 +287,7 @@ const blackHoles: Module = {
           m`0.5 r_s`,
           ', photon orbits split by direction, and an ',
           em(term('ergosphere', 'ergosphere')),
-          ' appears from which orbital energy can be extracted. ',
+          ' appears from which the hole’s rotational energy can be extracted. ',
           term('Accretion-disc', 'accretion-disc'),
           ' spectra and the ',
           'EHT ring shapes are read against Kerr, not Schwarzschild, templates.',
@@ -313,8 +312,9 @@ const blackHoles: Module = {
           'imprint of what fell in, so a hole that evaporates completely seems to erase ',
           'information. Quantum mechanics forbids that. Hawking held for decades that the ',
           'information is lost; the 1997 Maldacena duality argued it cannot be; and ',
-          'replica-wormhole calculations since 2019 have recovered, from gravity itself, the Page ',
-          'curve that unitarity demands. The emerging consensus is that information escapes, ',
+          'replica-wormhole calculations since 2019 have recovered, from gravity itself and in ',
+          'simplified models of quantum gravity, the Page curve that unitarity demands. The ',
+          'emerging consensus is that information escapes, ',
           'with no consensus mechanism for ',
           em('how'),
           ', which keeps the paradox productive fifty years on.',
@@ -334,7 +334,7 @@ const blackHoles: Module = {
         {
           moduleId: 'escape-velocity',
           reason:
-            'Setting escape velocity to the speed of light predicts this radius exactly; that module’s going-deeper explains why the agreement is a famous coincidence.',
+            'Setting escape velocity to the speed of light predicts this radius exactly; that module’s going-deeper explains why the agreement is the right answer reached by the wrong physics.',
         },
         {
           moduleId: 'kepler-orbits',

@@ -138,7 +138,8 @@ export function transitShape(ms: number, rs: number, rp: number, a: number): Tra
  * nothing here models the star's actual luminosity.
  *
  * The shoulders are straight lines, which is the model's most visible
- * simplification. A real stellar disc is limb-darkened: dimmer at the edge than
+ * simplification. Even a uniform disc would curve them slightly, because the
+ * overlap area of two circles is not linear in time. A real stellar disc is limb-darkened: dimmer at the edge than
  * the centre, so the planet blocks less light as it first crosses the limb and
  * the corners of this trapezoid are rounded off in every real light curve.
  * Fitting that curvature is how limb-darkening coefficients get measured.

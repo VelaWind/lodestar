@@ -117,9 +117,9 @@ function fillTextClamped(
  *
  * That choice is scale-free, and not by accident. The number of wave cycles in
  * an octave depends only on the product M_c·f, and f_cut ∝ 1/M while M_c ∝ M, so
- * the product — and the cycle count — is the same for every binary the sliders
- * can build: 7.7 cycles, from a pair of neutron stars to a pair of 100 M_☉
- * holes. The window's *duration* varies by two orders of magnitude across that
+ * the product — and the cycle count — is the same for every binary with the same
+ * mass ratio: 7.7 cycles for an equal pair, from two neutron stars to two
+ * 100 M_☉ holes, and more the more lopsided the pair. The window's *duration* varies by two orders of magnitude across that
  * range; the picture does not. A fixed-duration window would show eight legible
  * cycles at one setting and a solid block of ink at another.
  */

@@ -12,8 +12,9 @@
  * The standing assumptions, stated once rather than per function: the orbit is
  * circular (real binaries circularise long before they reach a detector's band,
  * so this is good late in the inspiral and poor early), the bodies are point
- * masses with no spin, and amplitudes are averaged over sky position and
- * orientation.
+ * masses with no spin, and amplitudes are for an optimally oriented source
+ * (face-on, directly overhead); averaged over sky position and orientation the
+ * detected amplitude is 2/5 of that.
  *
  * This module is the single source of truth for the gravitational-waves
  * module's numbers. The canvas, the audio, every readout and the sanity checks
@@ -126,12 +127,12 @@ export function fOfTimeToMerger(mc: number, tau: number): number {
  *
  * Strain amplitude at distance `d`, dimensionless.
  *
- * Sky- and orientation-averaged: a real detector sees an amplitude that depends
- * on where the source sits in its antenna pattern and how the orbital plane is
- * inclined to the line of sight, varying by a factor of a few either way. This
- * is the order-of-magnitude figure, which is the honest thing to put on a
- * readout — and strain is a fractional length change, so the number is the same
- * whatever units the detector arm is measured in.
+ * Optimally oriented (face-on, directly overhead); averaged over sky position
+ * and orientation the detected amplitude is 2/5 of this, and a real source can
+ * only be fainter. What a detector sees depends on where the source sits in its
+ * antenna pattern and how the orbital plane is inclined to the line of sight;
+ * this is the upper figure. Strain is a fractional length change, so the number
+ * is the same whatever units the detector arm is measured in.
  *
  * @param mc chirp mass, kg
  * @param f gravitational-wave frequency, Hz
@@ -170,7 +171,7 @@ export function inspiralPhase(mc: number, tau: number): number {
  * and frequency both climb as `tau` falls — that simultaneous rise in pitch and
  * volume is the chirp.
  *
- * A single polarisation, averaged over orientation. A real detector output is
+ * A single polarisation, optimally oriented. A real detector output is
  * F₊h₊ + F×h×, with the antenna-pattern factors and the inclination setting how
  * much of each gets through.
  *

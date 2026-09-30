@@ -133,7 +133,7 @@ const keplerOrbits: Module = {
           p(
             'The planet is a test particle: it has no mass of its own. A real pair orbits their common ',
             term('barycentre', 'barycentre'),
-            ', and both move. The error is of order m/M: negligible for a planet around a star, not negligible for Jupiter and the Sun (the Sun’s wobble about the barycentre is what most exoplanet detections actually measure), and outright wrong for a binary star.',
+            ', and both move. The error is of order m/M: negligible for a planet around a star, not negligible for Jupiter and the Sun (the Sun’s wobble about the barycentre is what radial-velocity surveys measure), and outright wrong for a binary star.',
           ),
         ),
         prose(
@@ -143,7 +143,7 @@ const keplerOrbits: Module = {
         ),
         prose(
           p(
-            'Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 arcseconds per century for Mercury, the discrepancy that made GR famous. The orbit drawn here never precesses.',
+            'Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 arcseconds per century for Mercury, an anomaly known since 1859 that GR explained in 1915. The orbit drawn here never precesses.',
           ),
         ),
         prose(
@@ -158,7 +158,7 @@ const keplerOrbits: Module = {
         ),
         prose(
           p(
-            'The orbit is scaled to fit the frame and drawn face-on, looking straight down on the orbital plane. Distances within one orbit are therefore comparable to each other but not across slider settings: the ellipse is redrawn to the same size whether it is 0.007 AU or 67 AU across. Real orbits are also inclined to the line of sight, which is why an observed orbit is a projection of the one shown here.',
+            'The orbit is scaled to fit the frame and drawn face-on, looking straight down on the orbital plane. Distances within one orbit are therefore comparable to each other but not across slider settings: the ellipse is redrawn to the same size whether its semi-major axis is 0.007 AU or 67 AU. Real orbits are also inclined to the line of sight, which is why an observed orbit is a projection of the one shown here.',
           ),
         ),
       ],
@@ -259,7 +259,7 @@ const keplerOrbits: Module = {
           height: 962,
           alt: 'Measured positions of the star S2 tracing a long ellipse around the position of Sagittarius A*, with an inset comparing its track in 2005 and in 2021–2022, the two offset by the precession of the orbit.',
           caption:
-            'The star S2, tracked for three decades as it loops around Sagittarius A*, the four-million-solar-mass black hole at the centre of the Galaxy. Its sixteen-year orbit is Kepler’s first law drawn by a real star; at closest approach it moves at nearly three percent of the speed of light, and its ellipse precesses just as general relativity predicts.',
+            'The star S2, tracked for three decades as it loops around Sagittarius A*, the four-million-solar-mass black hole at the centre of the Galaxy. Its sixteen-year orbit is Kepler’s first law drawn by a real star; at closest approach it moves at about two and a half percent of the speed of light, and its ellipse precesses just as general relativity predicts.',
           credit: 'GRAVITY Collaboration, A&A 692, A242 (2024), CC BY 4.0 (Fig. 2, upper panel)',
         }),
       ),
@@ -356,15 +356,17 @@ const keplerOrbits: Module = {
           'real systems are not, and the deviations are the signal; perturbations of Uranus’s ',
           'orbit located Neptune on paper before any telescope found it. Over long spans the ',
           term('N-body problem', 'n-body'),
-          ' turns chaotic: Laskar’s integrations put the inner solar system’s ',
-          'predictability horizon near five million years, after which trajectories — not the ',
-          'planets themselves — dissolve into uncertainty. The bodies are points: real oblateness ',
+          ' turns chaotic: Laskar’s integrations give the inner solar system a Lyapunov time, the ',
+          'time for a small error to grow by a factor of e, near five million years. Errors grow ',
+          'tenfold every ~12 Myr, and positions become unpredictable within about 100 million ',
+          'years, after which trajectories — not the planets themselves — dissolve into ',
+          'uncertainty. The bodies are points: real oblateness ',
           'makes satellite orbits precess, which sun-synchronous spacecraft exploit deliberately. ',
           'And gravity is Newtonian: Mercury’s perihelion creeps forward 43 ',
           term('arcseconds', 'arcsecond'),
           ' per ',
-          'century beyond what Newton can book-keep, the first confirmed prediction of general ',
-          'relativity. In 2020 the GRAVITY collaboration watched the star S2 trace the same ',
+          'century beyond what Newton can book-keep, the first observational success of general ',
+          'relativity, explaining an anomaly known since 1859. In 2020 the GRAVITY collaboration watched the star S2 trace the same ',
           'relativistic ',
           term('precession', 'precession'),
           ' around the galaxy’s central black hole, at four million solar ',

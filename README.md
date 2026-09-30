@@ -94,7 +94,7 @@ The browser suite is separate: `playwright.config.ts` defines five projects (Chr
 
 ## Known limits
 
-Some files are very large and heavily commented: `sanity.ts` is 2366 lines and the largest simulation, supernovae, 927, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
+Some files are very large and heavily commented: `sanity.ts` is 2367 lines and the largest simulation, supernovae, 927, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
 
 The maths layer's Numbers view substitutes each slider's value in SI base units, not in the unit the slider shows, so a speed dragged in km/s appears in the equation in m/s; that is a shell change for another pass.
 
