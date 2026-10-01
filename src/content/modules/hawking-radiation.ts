@@ -87,17 +87,27 @@ const hawkingRadiation: Module = {
       approximations: [
         prose(
           p(
-            'Power and lifetime count light only, and what that leaves out depends on the mass. A cold, heavy hole near a solar mass emits gravitons too, and the exact emission factors make it evaporate about 1.8 times faster; more if the lightest neutrino, whose mass is unknown, is light enough to be emitted. Below about 10²¹ kg a hole starts emitting neutrinos, and once all three kinds are on, below about 2 × 10²⁰ kg, its power is about fourteen times the light-only figure (Page’s 1976 calculation, which knew of only two kinds, gave about ten). Heavier particles raise it further once the hole is hotter still; the mountain-mass example is one of these, and the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
+            'Power and lifetime count light only, so a real hole evaporates faster than shown: nearly twice as fast for one as heavy as the Sun (see Going deeper).',
           ),
         ),
         prose(
           p(
-            'The emission bands switch on sharply at each particle’s rest energy. Real emission turns on gradually, over a few times that temperature.',
+            'Lighter than about 10²¹ kg, a hole gives off neutrinos as well, and from about 2 × 10²⁰ kg down it evaporates about fourteen times as fast, more once heavier particles join in.',
           ),
         ),
         prose(
           p(
-            'The hole does not spin, carries no charge and sits alone. A real hole also absorbs whatever falls in, starting with the microwave background, which is why the heavy ones are growing.',
+            'So the hole finishing its evaporation today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
+          ),
+        ),
+        prose(
+          p(
+            'Each kind of particle switches on sharply here, once the hole is hot enough to make it. Really, each turns on gradually.',
+          ),
+        ),
+        prose(
+          p(
+            'The hole does not spin, carries no charge and sits alone. A real one also swallows whatever falls in, starting with the faint glow left over from the Big Bang, which is why the heavy ones are growing.',
           ),
         ),
       ],
@@ -189,7 +199,7 @@ const hawkingRadiation: Module = {
           height: 640,
           alt: 'An oval map of the whole sky on a black background, mostly deep blue speckled with hundreds of small orange and yellow dots, with a bright band of red, orange and yellow running straight across the middle and brightest at the centre.',
           caption:
-            'The whole sky in gamma rays, as seen by NASA’s Fermi telescope. An evaporating black hole ending its life anywhere nearby would flash in this light. None has been seen.',
+            'The whole sky in gamma rays, the most energetic kind of light, as seen by NASA’s Fermi telescope. An evaporating black hole ending its life anywhere nearby would flash in this light. None has been seen.',
           credit: 'NASA/DOE/Fermi LAT Collaboration',
         }),
       ),
@@ -293,7 +303,8 @@ const hawkingRadiation: Module = {
           'neutrino’s mass is unknown, even that is a floor. Heavier species shorten the lifetime ',
           'further once ',
           m`kT`,
-          ' passes their rest energies.',
+          ' passes their rest energies; each species turns on over a few times that ',
+          'temperature, not at the sharp threshold the sim’s emission bands draw.',
         ),
         p(
           'The thermodynamics is exact in form. The Bekenstein–Hawking entropy, ',

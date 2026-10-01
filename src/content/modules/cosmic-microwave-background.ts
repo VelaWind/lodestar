@@ -92,7 +92,7 @@ const cosmicMicrowaveBackground: Module = {
         },
         {
           id: 'lambda',
-          friendlyLabel: 'Which wavelength are you listening at?',
+          friendlyLabel: 'Which wavelength (crest to crest) are you tuned to?',
           technicalLabel: 'Observing wavelength',
           symbol: '\\lambda_{\\text{obs}}',
           unit: 'm',
@@ -128,7 +128,7 @@ const cosmicMicrowaveBackground: Module = {
         ),
         prose(
           p(
-            'The slider stops at 3000 K, where the universe first became transparent. It was hotter before that, but no light from those times can reach us directly.',
+            'The slider stops at 3000 K (about 2,700 °C), where the universe first became transparent. It was hotter before that, but no light from those times can reach us directly.',
           ),
         ),
         prose(
@@ -224,7 +224,7 @@ const cosmicMicrowaveBackground: Module = {
           height: 640,
           alt: 'An oval map of the whole sky, mottled all over with small irregular patches: dark and pale blue for cooler regions, green in between, and yellow and red flecks for warmer ones, with no large-scale pattern across it.',
           caption:
-            'The whole sky in microwaves, with the average and the dipole removed. Red is warmer than average, blue cooler, by a few hundred-thousandths of a degree. The same primordial ripples, on scales smaller than this map resolves, seeded every galaxy and cluster.',
+            'The whole sky in microwaves, with the average and the dipole (the warm-ahead, cool-behind tilt our own motion adds) removed. Red is warmer than average, blue cooler, by a few hundred-thousandths of a degree. The same primordial ripples, on scales smaller than this map resolves, seeded every galaxy and cluster.',
           credit: 'NASA / WMAP Science Team',
         }),
       ),

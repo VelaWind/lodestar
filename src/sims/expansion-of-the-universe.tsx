@@ -36,6 +36,7 @@ import {
   redshiftFromVelocity,
 } from '@/physics/cosmology';
 import { formatLightTravelTime } from '@/physics/scale';
+import { trueMinus } from '@/lib/format';
 import { eased } from '@/motion/ease';
 import { DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
@@ -49,17 +50,20 @@ import { firstClearPlacement, labelBox, type LabelBox } from './labels';
 const SIG3 = new Intl.NumberFormat('en', { maximumSignificantDigits: 3 });
 const GROUPED = new Intl.NumberFormat('en', { maximumFractionDigits: 0 });
 
-/** m/s → "6,740 km/s", three significant figures. */
+/** m/s → "6,740 km/s", three significant figures; a true minus when approaching. */
 function formatKmS(mps: number): string {
   if (!Number.isFinite(mps)) return '—';
-  return `${SIG3.format(mps / 1e3)} km/s`;
+  return `${trueMinus(SIG3.format(mps / 1e3))} km/s`;
 }
 
-/** z to four decimals, without the "-0.0000" a tiny blueshift would round to. */
+/**
+ * z to four decimals, with a true minus (U+2212) for a blueshift, through the
+ * shared formatter's `trueMinus` — a hyphen reads as a dash and is spoken as
+ * one — and without the "−0.0000" a tiny blueshift would round to.
+ */
 function formatRedshift(z: number): string {
   if (!Number.isFinite(z)) return '—';
-  const text = z.toFixed(4);
-  return Number(text) === 0 ? (0).toFixed(4) : text;
+  return trueMinus(z.toFixed(4));
 }
 
 /** m → "671.0 nm". */
@@ -655,4 +659,4 @@ function Readout({
  * deliberately ugly name the other sims use, so the module's real surface stays
  * a default export taking SimProps.
  */
-export const __internals = { drawScene, eased, formatRedshift };
+export const __internals = { drawScene, eased, formatRedshift, formatKmS };

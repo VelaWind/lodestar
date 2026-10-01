@@ -76,7 +76,7 @@ const habitableZone: Module = {
       params: [
         {
           id: 'L',
-          friendlyLabel: 'How bright is the star?',
+          friendlyLabel: 'How bright is the star? (in Suns)',
           technicalLabel: 'Stellar luminosity',
           symbol: 'L',
           unit: 'W',
@@ -91,7 +91,7 @@ const habitableZone: Module = {
         },
         {
           id: 'd',
-          friendlyLabel: 'How far out is the planet?',
+          friendlyLabel: 'How far out is the planet? (in Earth–Sun distances)',
           technicalLabel: 'Orbital distance',
           symbol: 'd',
           unit: 'm',
@@ -237,7 +237,7 @@ const habitableZone: Module = {
           height: 1042,
           alt: 'The whole Earth, fully lit, on black. Africa runs from the tan Sahara at the top down to the continent’s southern tip, with Arabia at the upper right and Madagascar off the east coast; swirls of white cloud cover the blue ocean around it, and the Antarctic ice cap fills the bottom of the disc.',
           caption:
-            'Earth, the one habitable-zone planet known to be inhabited. From 1 AU it receives 1 361 watts per square metre, reflects 30 percent, and would sit at −18 °C without its atmosphere.',
+            'Earth, the one habitable-zone planet known to be inhabited. At its distance from the Sun (1 AU, the yardstick astronomers use within the Solar System) it receives 1 361 watts on every square metre facing the Sun, as much as about fourteen 100-watt bulbs, reflects 30 percent, and would sit at −18 °C without its atmosphere.',
           credit: 'NASA',
         }),
       ),

@@ -126,12 +126,19 @@ export interface Flight {
    * returns. Callers that want the physical question must ask `vEsc`.
    */
   leftFrame: boolean;
+  /**
+   * Integration ran out of steps before the flight landed or reached the
+   * ceiling. A computational limit, never a physical outcome: it says nothing
+   * about where the projectile went, and callers must not read it as "left the
+   * frame". `timestepForFlight` sizes dt so this does not happen in practice.
+   */
+  stepCapped: boolean;
   /** Flight time covered, s. */
   duration: number;
 }
 
 /** Bounded so a near-threshold flight cannot spin forever. */
-const MAX_STEPS = 2_000_000;
+export const MAX_STEPS = 2_000_000;
 
 /**
  * Integrates a full flight and returns the sampled trajectory. Used to drive
@@ -190,16 +197,57 @@ export function integrateFlight(
     }
   }
 
-  // Exhausting the step cap without landing means the projectile is still up
-  // there. Report that as "left the frame" rather than letting a caller read
-  // the absence of a landing as a landing.
-  if (!state.landed && !leftFrame) leftFrame = true;
+  // Exhausting the step cap without landing or reaching the ceiling means the
+  // projectile is still up there, mid-flight. That is the integration's limit,
+  // reported as such: it is neither a landing nor leaving the frame.
+  const stepCapped = !state.landed && !leftFrame;
 
   // The final state rarely lands on a stride boundary; keep it regardless so
   // the path reaches the ground (or the frame edge) exactly.
   if (samples[samples.length - 1] !== state) samples.push(state);
 
-  return { samples, peakAltitude, leftFrame, duration: state.t };
+  return { samples, peakAltitude, leftFrame, stepCapped, duration: state.t };
+}
+
+/**
+ *     a = 1 / (2/R − v₀²/GM),   r = a(1 − cos η),   t = √(a³/GM) (η − sin η)
+ *
+ * Time from launch to landing for a suborbital radial flight, s: up to the apex
+ * at r = 2a (η = π) and back down, the degenerate (radial) Kepler orbit. A
+ * closed form, so a caller can size the integration before running it.
+ * Infinity at or above the escape speed.
+ *
+ * @param M gravitating mass, kg
+ * @param R surface radius, m
+ * @param v0 launch speed, m/s
+ */
+export function flightDuration(M: number, R: number, v0: number): number {
+  if (!(M > 0) || !(R > 0) || !(v0 > 0)) return 0;
+  const inverseA = 2 / R - v0 ** 2 / (G * M);
+  if (!(inverseA > 0)) return Infinity;
+  const a = 1 / inverseA;
+  const eta0 = Math.acos(1 - R / a);
+  const upTime = Math.sqrt(a ** 3 / (G * M)) * (Math.PI - (eta0 - Math.sin(eta0)));
+  return 2 * upTime;
+}
+
+/**
+ * `timestepFor`, stretched only when the whole flight would not fit in the
+ * step budget. A launch just under the escape speed takes days to come down,
+ * and at the body's natural timestep that runs past `MAX_STEPS`; here dt grows
+ * just enough for the closed-form flight (up to `maxAltitude`, past which the
+ * integration stops anyway) to fit in three-quarters of the budget. On Earth
+ * that is still under a second per step, against a flight of days.
+ *
+ * @param maxAltitude the altitude at which integration will stop, m
+ */
+export function timestepForFlight(M: number, R: number, v0: number, maxAltitude: number): number {
+  const base = timestepFor(M, R);
+  // A flight that will leave the frame is integrated only up to the frame top.
+  const climbing = apexAltitude(M, R, v0) > maxAltitude;
+  const duration = climbing ? 0 : flightDuration(M, R, v0);
+  if (!(duration > 0) || !Number.isFinite(duration)) return base;
+  return Math.max(base, duration / (0.75 * MAX_STEPS));
 }
 
 /**

@@ -115,12 +115,12 @@ const timeDilation: Module = {
       approximations: [
         prose(
           p(
-            'The trip is flown at one steady speed, with the turnaround at Proxima taken as instant. A real ship would spend part of the trip speeding up and slowing down, and the gap between the clocks would be a little smaller.',
+            'The trip is flown at one steady speed, with the turnaround at Proxima Centauri, the nearest star after the Sun, taken as instant. A real ship would spend part of the trip speeding up and slowing down, and the gap between the clocks would be a little smaller.',
           ),
         ),
         prose(
           p(
-            'The black hole is a single non-spinning one of ten solar masses, and the clock hovers in place. A spinning black hole, or a clock falling or orbiting, runs at a different rate.',
+            'The black hole is a single non-spinning one of ten times the Sun’s mass, and the clock hovers in place. A spinning black hole, or a clock falling or orbiting, runs at a different rate.',
           ),
         ),
         prose(

@@ -43,7 +43,7 @@ export const glossary: Record<string, GlossaryEntry> = {
     body: 'The radius of the event horizon: pack a mass inside it and nothing, light included, gets back out.',
   },
   isco: {
-    title: 'ISCO',
+    title: 'Innermost stable orbit (ISCO)',
     body: 'The closest distance at which anything can steadily orbit a black hole; closer than this, it spirals in.',
   },
   'accretion-disc': {
@@ -177,7 +177,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   sputtering: {
     title: 'Sputtering',
-    body: 'Atmosphere loss by impact: solar-wind particles strike molecules at the top of the air and knock them into space.',
+    body: 'Atmosphere loss by impact: fast particles streaming from the Sun, the solar wind, strike molecules at the top of the air and knock them into space.',
   },
 
   /* Exoplanets ----------------------------------------------------- */
@@ -266,7 +266,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   inspiral: {
     title: 'Inspiral',
-    body: 'The final stage of a binary’s life: the orbit shrinking as gravitational waves carry energy away.',
+    body: 'The long last stage of two dead stars or black holes circling each other: the orbit shrinks as ripples in space carry its energy away, until the two collide.',
   },
   ringdown: {
     title: 'Ringdown',
@@ -278,7 +278,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   strain: {
     title: 'Strain',
-    body: 'The fractional stretch a passing wave gives any length; dimensionless, and around 10⁻²¹ at Earth.',
+    body: 'How much a passing gravitational wave stretches a length, as a share of it: about 10⁻²¹ at Earth, so a 4 km detector arm changes by a few thousandths of a proton’s width.',
   },
   'luminosity-distance': {
     title: 'Luminosity distance',
@@ -301,7 +301,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   barycentre: {
     title: 'Barycentre',
-    body: 'The shared centre of mass two bodies actually orbit; usually inside the star, though for the Sun and Jupiter just outside its surface.',
+    body: 'The balance point two orbiting bodies both circle, like the pivot of a see-saw; usually inside the star, though for the Sun and Jupiter just outside its surface.',
   },
   'angular-momentum': {
     title: 'Angular momentum',
@@ -328,7 +328,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   'escape-parameter': {
     title: 'Escape parameter',
-    body: 'λ: the squared ratio of escape speed to thermal speed; escape rates depend on it exponentially.',
+    body: 'λ, the square of a world’s escape speed divided by a gas molecule’s typical speed. Each step of 1 in λ cuts the rate the gas escapes by a factor of about 2.7.',
   },
   photochemistry: {
     title: 'Photochemistry',

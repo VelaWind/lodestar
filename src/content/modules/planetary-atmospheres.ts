@@ -90,7 +90,7 @@ const planetaryAtmospheres: Module = {
       params: [
         {
           id: 'M',
-          friendlyLabel: 'How heavy is the world?',
+          friendlyLabel: 'How heavy is the world? (in Earths)',
           technicalLabel: 'Planet mass',
           symbol: 'M',
           unit: 'kg',
@@ -109,7 +109,7 @@ const planetaryAtmospheres: Module = {
         },
         {
           id: 'R',
-          friendlyLabel: 'How big is the world?',
+          friendlyLabel: 'How big is the world? (in Earth widths)',
           technicalLabel: 'Planet radius',
           symbol: 'R',
           unit: 'm',
@@ -155,33 +155,33 @@ const planetaryAtmospheres: Module = {
       approximations: [
         prose(
           p(
-            'The verdict is a rule of thumb, not a flux. Real Jeans escape is a rate computed at the exobase (the altitude where a molecule stops colliding on its way out) and it depends *exponentially* on the ',
+            'The verdict is a rule of thumb. Really, a gas leaks away gradually, at a rate set steeply by the ',
             term('escape parameter', 'escape-parameter'),
-            ', so a planet does not flip from keeping a gas to losing it at a threshold: each unit of λ cuts the loss rate by a factor of about e (≈2.7), and ten units cut it by more than ten thousand. The factor-of-six criterion here is the standard pedagogical stand-in for that exponential, and the band between the two thresholds is exactly where it stops answering.',
+            '; the middle band is where the rule stops answering.',
           ),
         ),
         prose(
           p(
-            'One temperature stands for the whole exosphere. A real one varies with latitude, with local time, and by more than a factor of two over the solar cycle: Earth’s thermosphere runs roughly 600–700 K at solar minimum and up to 1500 K at maximum, so the same planet sits at different places on this chart depending on the decade.',
+            'One temperature stands for the whole top of the atmosphere. A real one changes with place, with time of day, and over the Sun’s eleven-year cycle.',
           ),
         ),
         prose(
           p(
-            'Only thermal escape is modelled. The mechanisms that actually stripped Mars are missing: hydrodynamic outflow, in which an escaping light gas drags heavier ones with it; solar-wind stripping of an unmagnetised upper atmosphere; ',
+            'Only escape by heat is modelled. Mars lost most of its air by routes left out here, such as the solar wind and ',
             term('sputtering', 'sputtering'),
-            '; and impact erosion. That is why a body can pass this criterion and still be airless, and why Mars lost an atmosphere this model says it should have kept (see Going deeper).',
+            ', so a world can pass this test and still be airless (see Going deeper).',
           ),
         ),
         prose(
           p(
-            'Each gas is judged on its own. In a real atmosphere the species interact: hydrogen escaping from a hydrogen-rich upper atmosphere carries heavier molecules along with it, and ',
+            'Each gas is judged on its own. Really they interact: sunlight breaks molecules apart through ',
             term('photochemistry', 'photochemistry'),
-            ' converts one species into another; water is not lost as water, it is split, and the hydrogen leaves.',
+            ', and water is lost by being split, its hydrogen escaping.',
           ),
         ),
         prose(
           p(
-            'The planet’s radius is treated as the escape radius. The exobase sits above the surface (several hundred kilometres up on Earth) where gravity is slightly weaker, so a real escape velocity at the escape altitude is a few percent lower than the surface figure used here.',
+            'Escape speed is taken at the ground. Escape really happens higher up (several hundred kilometres on Earth), where it is a few percent lower.',
           ),
         ),
       ],
@@ -266,7 +266,7 @@ const planetaryAtmospheres: Module = {
           height: 657,
           alt: 'The curved edge of Titan, an orange atmosphere fading upward into a thin detached blue haze layer.',
           caption:
-            'Titan’s edge, photographed by Cassini: an atmosphere with half again Earth’s surface pressure, held by a moon with a seventh of Earth’s gravity. It survives because Titan is cold: at the roughly 150 K of its upper atmosphere, nitrogen’s thermal tail barely reaches escape speed. The detached blue layer is photochemical haze.',
+            'Titan’s edge, photographed by Cassini: an atmosphere with half again Earth’s surface pressure, held by a moon with a seventh of Earth’s gravity. It survives because Titan is cold: at the roughly 150 K of its upper atmosphere, even the rare fastest nitrogen molecules barely reach escape speed. The detached blue layer is photochemical haze.',
           credit: 'NASA/JPL-Caltech/Space Science Institute',
         }),
       ),
@@ -378,6 +378,24 @@ const planetaryAtmospheres: Module = {
           ', ',
           'whose flaring youth batters young atmospheres — actually fall on; the early JWST ',
           'verdicts on the TRAPPIST-1 planets lean airless, and the census has just begun.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. Real Jeans escape is a flux computed at the ',
+          'exobase, the altitude where a molecule stops colliding on its way out, and it depends ',
+          'exponentially on the escape parameter: each unit of λ cuts the loss rate by a factor ',
+          'of about e (≈2.7), and ten units cut it by more than ten thousand. The factor-of-six ',
+          'criterion is the standard pedagogical stand-in for that exponential, and the band ',
+          'between the two thresholds is exactly where it stops answering. One temperature ',
+          'stands for the whole exosphere, though a real one varies with latitude and local time ',
+          'and by more than a factor of two over the solar cycle: Earth’s thermosphere runs ',
+          'roughly 600–700 K at solar minimum and up to 1500 K at maximum. Only thermal escape ',
+          'is modelled; hydrodynamic outflow, in which an escaping light gas drags heavier ones ',
+          'with it, solar-wind stripping of an unmagnetised upper atmosphere, sputtering and ',
+          'impact erosion are absent, which is why Mars lost an atmosphere this model says it ',
+          'should have kept. Each species is judged alone, though escaping hydrogen carries ',
+          'heavier molecules with it and photochemistry converts one species into another. And ',
+          'the surface radius stands in for the exobase, several hundred kilometres up on Earth, ',
+          'where the escape velocity is a few percent lower.',
         ),
       ),
     },

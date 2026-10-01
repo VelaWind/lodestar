@@ -72,16 +72,18 @@ const gravitationalWaves: Module = {
         p(
           'Choose two masses and how far away they collide, then watch the final moments of the ',
           'spiral. The trace rises in frequency and strength together — the chirp — and shows only ',
-          'the final octave, slowed down. The button plays the chirp at true speed and its true ',
-          'frequencies from 30 Hz, where a detector’s band opens (the last six seconds of it, for ',
-          'a pair as light as two neutron stars); for black holes those frequencies sit, by ',
-          'coincidence, in the range of human hearing.',
+          'the final octave, the last doubling of pitch, slowed down. The button plays the chirp ',
+          'at true speed and at its true frequencies. It starts from 30 Hz (thirty vibrations a ',
+          'second), where a detector’s band opens, or from the start of the final octave if that ',
+          'is lower. For a pair as light as two neutron stars, the city-sized collapsed cores of ',
+          'dead stars, it plays only the last six seconds. For black holes, those frequencies ',
+          'happen to sit in the range of human hearing.',
         ),
       ),
       params: [
         {
           id: 'm1',
-          friendlyLabel: 'How heavy is the first one?',
+          friendlyLabel: 'How heavy is the first one? (in Suns)',
           technicalLabel: 'Primary mass',
           symbol: 'm_1',
           unit: 'kg',
@@ -101,7 +103,7 @@ const gravitationalWaves: Module = {
         },
         {
           id: 'm2',
-          friendlyLabel: 'How heavy is the other one?',
+          friendlyLabel: 'How heavy is the other one? (in Suns)',
           technicalLabel: 'Secondary mass',
           symbol: 'm_2',
           unit: 'kg',
@@ -118,7 +120,7 @@ const gravitationalWaves: Module = {
         },
         {
           id: 'd',
-          friendlyLabel: 'How far away did it happen?',
+          friendlyLabel: 'How far away did it happen? (1 Mpc ≈ 3.26 million light-years)',
           technicalLabel: 'Distance',
           symbol: 'd',
           unit: 'm',
@@ -142,43 +144,43 @@ const gravitationalWaves: Module = {
       approximations: [
         prose(
           p(
-            'Newtonian quadrupole only: the leading-order waveform, with no post-Newtonian corrections. The error grows as the bodies speed up, which is exactly where the signal is loudest: by the last few cycles the orbital velocity is a third of the speed of light and the leading-order phase has drifted measurably from the real one. Real searches match against waveforms carrying corrections to 3.5 post-Newtonian order and beyond, precisely because the phase has to stay right for hundreds of cycles.',
+            'Only the leading term of the physics is used. It drifts from the real wave in the last few orbits, when the bodies move at a third of the speed of light.',
           ),
         ),
         prose(
           p(
-            'The waveform stops at the innermost stable circular orbit and there is no merger or ringdown. Everything after that cutoff is numerical relativity rather than algebra: the two bodies plunge together, merge, and the remnant rings down, radiating past the cutoff frequency at amplitudes larger than anything the ',
+            'The ',
             term('inspiral', 'inspiral'),
-            ' formula predicts. GW150914 crosses this model’s cutoff around 68 Hz; the real signal ran on to about 250 Hz, and most of its energy came out after this trace ends. The cutoff itself uses the Schwarzschild ISCO of the combined mass, which is a conventional marker rather than a derived boundary for a two-body system.',
+            ' stops once the two bodies are close enough to plunge together. The collision and the ringing that follows are not drawn, though for the default pair most of the energy comes out there.',
           ),
         ),
         prose(
           p(
-            'The orbit is circular, and the bodies are point masses with no spin. Circularity is the mildest assumption here: gravitational radiation itself circularises an eccentric orbit long before it reaches a detector’s band, so it is good late in the inspiral and poor early. Spin is not so mild: it shifts both the cutoff and the phase, and measuring it is one of the things a real detection is for.',
+            'The orbit is a circle and the bodies do not spin. Real pairs have had their orbits rounded off long before we hear them; their spin matters more.',
           ),
         ),
         prose(
           p(
-            'The amplitude is for an optimally oriented source (face-on, directly overhead); averaged over sky position and orientation, the root-mean-square detected amplitude is 2/5 of this (a typical source gives about a third), and a real source can only be fainter. A real detector measures F₊h₊ + F×h×: how much ',
+            'The ',
             term('strain', 'strain'),
-            ' gets through depends on where the source sits in the antenna pattern and how the orbital plane is tilted to the line of sight. The readout is an upper figure, not a prediction of what a particular instrument would record.',
+            ' shown is for the best possible angle, the pair face-on and directly overhead. A typical pair elsewhere on the sky gives about a third of it.',
           ),
         ),
         prose(
           p(
-            'Nothing here is redshifted. The masses are source-frame and the distance is treated as a simple ',
+            'Nothing is redshifted: the masses are the pair’s own, and the distance is a simple ',
             term('luminosity distance', 'luminosity-distance'),
-            '; a real signal from 410 Mpc arrives with every frequency lowered by (1+z) ≈ 1.09, which is why the mass a detector measures directly — the redshifted, detector-frame chirp mass — is about 30.5 M_☉ for GW150914 while the source-frame value is 28.1.',
+            ', the one its brightness implies.',
           ),
         ),
         prose(
           p(
-            'The trace covers the final octave of frequency, and it is played slowly. Choosing an octave rather than a fixed duration keeps the picture honest across the slider’s range (a near-equal pair like the default sweeps about 7.7 cycles; the more lopsided the pair, the more cycles the octave holds, nearly 200 at a hundred to one) but the durations differ enormously: 175 ms for the default pair, 7 ms for two neutron stars. Playback is slowed by the factor shown beside it, because at true speed the whole trace would flick past in under a fifth of a second.',
+            'The trace shows only the final octave, slowed by the factor shown beside it. At true speed the default pair’s octave lasts under a fifth of a second, and a hundred-to-one pair’s about seven.',
           ),
         ),
         prose(
           p(
-            'The sound is a sonification, not a recording. A gravitational wave is a stretching of space, not a pressure wave, and there is nothing to hear where it comes from; the tone is an oscillator driven at the wave’s own frequency and amplitude. The frequencies are true and unshifted (which is possible only because a stellar-mass inspiral happens to sweep through the range human hearing covers) and where the true band falls below about 20 Hz the pitch is held there rather than transposed.',
+            'The sound is a stand-in, not a recording: a tone at the wave’s own frequency and strength. Below about 20 Hz, under human hearing, the pitch is held at 20 Hz.',
           ),
         ),
       ],
@@ -269,7 +271,7 @@ const gravitationalWaves: Module = {
           height: 1280,
           alt: 'Three stacked panels of gravitational-wave strain against time; in the lowest, the traces from the two detectors overlaid, oscillating faster and larger over two tenths of a second before settling to a flat line.',
           caption:
-            'The first gravitational wave detected: strain against time at the two LIGO sites on 14 September 2015, the same waveform arriving 6.9 milliseconds apart across the continent. From first tremor to silence the signal lasts a fifth of a second; the sim’s chirp is this curve made audible.',
+            'The first gravitational wave detected: strain (how far space was stretched) against time at the two sites of LIGO, the Laser Interferometer Gravitational-Wave Observatory, on 14 September 2015, the same waveform arriving 6.9 milliseconds apart across the continent. From first tremor to silence the signal lasts a fifth of a second; the sim’s chirp is this curve made audible.',
           credit: 'Caltech/MIT/LIGO Lab',
         }),
       ),
@@ -382,6 +384,28 @@ const gravitationalWaves: Module = {
           term('ringdown', 'ringdown'),
           ' ',
           'beyond the cutoff are actually computed.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. The waveform is the Newtonian quadrupole; real ',
+          'searches match templates carrying corrections to 3.5 post-Newtonian order and beyond, ',
+          'because the phase has to stay right for hundreds of cycles. The cutoff is the ',
+          'Schwarzschild ISCO of the combined mass, a conventional marker rather than a derived ',
+          'boundary for a two-body system: GW150914 crosses it near 68 Hz, while the real signal ',
+          'ran on to about 250 Hz. Gravitational radiation circularises an eccentric orbit long ',
+          'before it reaches a detector’s band, but spin shifts both the cutoff and the phase, ',
+          'and measuring it is part of what a detection is for. The amplitude is for an optimally ',
+          'oriented source; averaged over sky position and orientation, the root-mean-square ',
+          'detected amplitude is 2/5 of it (the plain mean, 0.35). A detector records ',
+          m`F_+h_+ + F_\times h_\times`,
+          ', its antenna pattern and the orbit’s inclination setting how much of each ',
+          'polarisation gets through. Nothing is redshifted: a signal from 410 Mpc arrives with ',
+          'every frequency lowered by ',
+          m`(1+z) \approx 1.09`,
+          ', so GW150914’s detector-frame chirp mass is about 30.5 ',
+          m`M_\odot`,
+          ' against a source-frame 28.1. The final octave holds about 7.7 cycles for a near-equal ',
+          'pair and nearly 200 at a hundred to one, and lasts from 7 ms for two neutron stars to ',
+          'about seven seconds at a hundred to one.',
         ),
         p(
           'The waves were believed in long before they were caught. The Hulse–Taylor binary ',

@@ -273,17 +273,22 @@ function drawGeometry(
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  /* Labels, each above its own ring. Adjacent captions are separated by half the
-     horizon radius in pixels, so below a certain diagram size they would sit on
-     top of one another; there, a single line naming the three line styles says
-     the same thing without the collision. */
-  if (rsPx >= 24) {
+  /* Labels. The two outer ones sit above their own rings. The horizon's sits
+     inside the dark disc: above it, the gap to the photon-sphere ring is only
+     half a horizon radius, and the label's own width carried its ends across the
+     dashed ring. Where the disc is too small to hold it, a single line naming the
+     three line styles says the same thing without the collision. */
+  const horizonLabel = 'horizon · r_s';
+  const labelsAbove = rsPx >= 24 && ctx.measureText(horizonLabel).width <= 1.6 * rsPx;
+  if (labelsAbove) {
     ctx.fillStyle = 'rgba(157,180,255,0.85)';
     fillTextClamped(ctx, 'ISCO · 3 r_s', cx, cy - rIscoPx - 6, left, right);
     ctx.fillStyle = 'rgba(232,189,125,0.9)';
     fillTextClamped(ctx, 'photon sphere · 1.5 r_s', cx, cy - rPhotonPx - 6, left, right);
     ctx.fillStyle = COLORS.ink;
-    fillTextClamped(ctx, 'horizon · r_s', cx, cy - rsPx - 6, left, right);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(horizonLabel, cx, cy);
+    ctx.textBaseline = 'alphabetic';
   } else {
     ctx.fillStyle = COLORS.inkDim;
     fillTextClamped(
@@ -296,12 +301,15 @@ function drawGeometry(
     );
   }
 
+  // The scale, so the anatomy visibly rescales: the shapes keep their 1 : 1.5 : 3
+  // ratios at every mass, and this number is what changes. Same formatter as the
+  // horizon readout below the canvas, so the two always agree.
   ctx.fillStyle = COLORS.inkFaint;
   fillTextClamped(
     ctx,
-    'geometry — the three radii to one scale',
+    `to scale · 3 r_s = ${formatLength(view.rIsco)}`,
     cx,
-    cy + rIscoPx + (rsPx >= 24 ? 16 : 30),
+    cy + rIscoPx + (labelsAbove ? 16 : 30),
     left,
     right,
   );
