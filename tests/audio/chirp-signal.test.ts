@@ -37,6 +37,7 @@ import {
   type ChirpCurves,
 } from '@/sims/gw-audio';
 import { __internals as gw } from '@/sims/gravitational-waves';
+import gravitationalWaves from '@/content/modules/gravitational-waves';
 
 const SAMPLE_RATE = 44_100;
 const OUT_DIR = 'qa-audio';
@@ -590,5 +591,44 @@ describe('chirp signal: the two binaries against each other', () => {
         AUDIBLE_FLOOR_HZ,
       );
     }
+  });
+});
+
+/**
+ * The 30 Hz claims hold for heavy and lopsided pairs too.
+ *
+ * A pair heavy enough cuts off below 30 Hz (100 + 100 M☉ at 22 Hz): the model
+ * never radiates at 30 Hz, so the readout must say so rather than quote a time.
+ * A lopsided pair's sound starts at its final octave, below 30 Hz (21.8 Hz at a
+ * hundred to one), so the caption must allow for that.
+ */
+describe('chirp signal: the 30 Hz readout and caption', () => {
+  it('says a heavy pair’s inspiral ends below 30 Hz, and gives a time otherwise', () => {
+    const heavy = { m1: 100 * M_SUN, m2: 100 * M_SUN };
+    const heavyCutoff = fCutoff(heavy.m1, heavy.m2);
+    expect(heavyCutoff).toBeLessThan(BAND_ENTRY_HZ);
+    expect(gw.bandEntryReadout(chirpMass(heavy.m1, heavy.m2), heavyCutoff)).toBe(
+      'inspiral ends below 30 Hz',
+    );
+
+    const def = { m1: 36 * M_SUN, m2: 29 * M_SUN };
+    const readout = gw.bandEntryReadout(chirpMass(def.m1, def.m2), fCutoff(def.m1, def.m2));
+    expect(readout).not.toContain('below');
+    expect(readout).toMatch(/\d/);
+  });
+
+  it('starts a lopsided pair’s sound at its final octave, below 30 Hz, and the caption says so', () => {
+    const m1 = 100 * M_SUN;
+    const m2 = 1 * M_SUN;
+    const mc = chirpMass(m1, m2);
+    const cutoff = fCutoff(m1, m2);
+    const win = gw.windowFor(mc, DISTANCE, cutoff);
+    expect(win).not.toBeNull();
+    const plan = audioPlanFor(mc, win!);
+    expect(plan.fStart, 'starts below 30 Hz').toBeLessThan(BAND_ENTRY_HZ);
+    expect(plan.fStart / (cutoff / 2), 'starts at the final octave').toBeCloseTo(1, 6);
+
+    const caption = JSON.stringify(gravitationalWaves.layers.play.caption);
+    expect(caption).toContain('or from the start of the final octave if that ');
   });
 });

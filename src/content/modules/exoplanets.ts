@@ -47,10 +47,10 @@ const exoplanets: Module = {
           'Watch a streetlight from across a valley at night. A moth is circling it, far too ',
           'small and too far away for you to see. But every time the moth crosses in front of the ',
           'bulb, the light dims. Not much: a flicker at the edge of what you can measure. You ',
-          'could never point to the moth. Yet if the flicker comes back again and again on a ',
-          'perfect schedule — same dimming, same duration, like clockwork — you know something is ',
-          'circling that light, you know how big it is compared to the bulb, and you know how ',
-          'long its laps take. You have discovered the moth without ever seeing it.',
+          'could never point to the moth. Yet suppose the flicker comes back again and again on a ',
+          'perfect schedule: same dimming, same duration, like clockwork. Then you know something ',
+          'is circling that light. You know how big it is compared to the bulb, and how long its ',
+          'laps take. You have discovered the moth without ever seeing it.',
         ),
         p(
           'That is the transit method. The streetlight is a star, the moth is a planet, and the ',
@@ -80,7 +80,7 @@ const exoplanets: Module = {
       params: [
         {
           id: 'Mstar',
-          friendlyLabel: 'How heavy is the star?',
+          friendlyLabel: 'How heavy is the star? (in Suns)',
           technicalLabel: 'Stellar mass',
           symbol: 'M_\\star',
           unit: 'kg',
@@ -102,7 +102,7 @@ const exoplanets: Module = {
         },
         {
           id: 'Rstar',
-          friendlyLabel: 'How big is the star?',
+          friendlyLabel: 'How big is the star? (in Sun widths)',
           technicalLabel: 'Stellar radius',
           symbol: 'R_\\star',
           unit: 'm',
@@ -122,7 +122,7 @@ const exoplanets: Module = {
         },
         {
           id: 'Rp',
-          friendlyLabel: 'How big is the planet?',
+          friendlyLabel: 'How big is the planet? (in Earth widths)',
           technicalLabel: 'Planet radius',
           symbol: 'R_p',
           unit: 'm',
@@ -145,7 +145,7 @@ const exoplanets: Module = {
         },
         {
           id: 'a',
-          friendlyLabel: 'How far out does it orbit?',
+          friendlyLabel: 'How far out does it orbit? (in Earth–Sun distances)',
           technicalLabel: 'Orbital distance',
           symbol: 'a',
           unit: 'm',
@@ -168,41 +168,41 @@ const exoplanets: Module = {
       approximations: [
         prose(
           p(
-            'The stellar disc is uniformly bright. It is not: a star is limb-darkened, dimmer at the edge than at the centre, because looking at the limb you see higher and cooler layers. So a real ',
+            'The star is drawn evenly bright. Real stars are dimmer at the edge, so a real ',
             term('light curve', 'light-curve'),
-            ' has no corners: the planet blocks less light as it first crosses the dim limb, and the shoulders of this trapezoid are rounded off. The straight shoulders are a simplification even for a uniform disc: the overlap of two circles does not grow in proportion to time, so a true ingress is curved at its ends. Fitting that curvature is how limb-darkening coefficients are measured, and getting it wrong biases the planet radius by a few percent.',
+            ' has rounded corners rather than this trapezoid’s sharp ones.',
           ),
         ),
         prose(
           p(
-            'The transit is central: the planet crosses the middle of the disc, ',
+            'The planet crosses the middle of the star, an ',
             term('impact parameter', 'impact-parameter'),
-            ' zero. Almost none are. A real transit is a chord, and a shorter one: a planet crossing near the limb takes less time and gives a V-shaped curve with barely any flat bottom. Duration and impact parameter are degenerate in a single light curve, which is why a measured planet radius always comes with a fitted impact parameter beside it.',
+            ' of zero. Most cross off-centre, which gives a shorter, more V-shaped dip.',
           ),
         ),
         prose(
           p(
-            'The orbit is circular and edge-on. Eccentricity changes the transit duration through the planet’s speed at conjunction (a planet transiting near periapsis crosses faster) and the "chance of alignment" readout is the geometric probability for a circular orbit only.',
+            'The orbit is a circle, seen exactly edge-on. The chance-of-alignment readout holds for circular orbits only.',
           ),
         ),
         prose(
           p(
-            'The planet is opaque, spherical and contributes no light of its own. Real hot Jupiters emit and reflect enough to be detected in secondary eclipse when they pass behind the star, and a few are tidally stretched enough to matter.',
+            'The planet is a dark ball that gives off no light of its own.',
           ),
         ),
         prose(
           p(
-            'One planet, one star. Multi-planet systems perturb each other, and those perturbations shift transit times by minutes: transit timing variations, which is how several planets have been found without ever seeing their own transit.',
+            'One planet, one star. Real neighbouring planets tug on each other and shift transit times by minutes.',
           ),
         ),
         prose(
           p(
-            'The frame shows the transit and its own length again either side, not the whole orbit. At the default settings the transit is 3% of the period, and for an Earth around a Sun it is 0.15%: an axis spanning one orbit would draw the dip a pixel wide. What is inside the frame is to scale (the planet against the star, and its speed across the disc); the axis simply stops at the edges of the event.',
+            'The frame shows only the transit and its own length again either side, not the whole orbit. Inside the frame, sizes and speed are to scale.',
           ),
         ),
         prose(
           p(
-            'Depth is capped at total. The sliders reach a planet larger than its star, which is a real configuration for a 2 R_J planet around a 0.1 R_☉ dwarf; there the "transit" is a total eclipse and the flux goes to zero rather than the formula’s negative.',
+            'The dip stops at total: a planet bigger than its star blocks all of its light, and no more.',
           ),
         ),
       ],
@@ -288,7 +288,7 @@ const exoplanets: Module = {
           height: 622,
           alt: 'A graph of Kepler’s measured brightness of the star HAT-P-7 over ten days, dipping sharply at each transit of the planet.',
           caption:
-            'A real transit, plotted from the archive: the Kepler space telescope watching the hot Jupiter HAT-P-7b cross its star every 2.2 days, in the mission’s earliest photometry. The dip is under one percent, and where the sim draws a trapezoid, nature rounds the corners.',
+            'A real transit, plotted from the archive: the Kepler space telescope watching HAT-P-7b, a hot Jupiter (a giant planet in a scorching close orbit), cross its star every 2.2 days, in the mission’s earliest brightness measurements. The dip is under one percent, and where the sim draws a trapezoid, nature rounds the corners.',
           credit: 'NASA Kepler mission data via MAST (KIC 10666592); plotted for this page',
         }),
       ),
@@ -398,6 +398,28 @@ const exoplanets: Module = {
           'feasibility, their measurements to date compatible with thin atmospheres or none, and ',
           'the answer bears directly on whether transiting rocky planets are airless by rule or ',
           'by exception.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. The disc is uniformly bright, but the limb shows ',
+          'higher, cooler layers, so the planet blocks less light as it first crosses it; even a ',
+          'uniform disc would curve the shoulders, because the overlap of two circles does not ',
+          'grow in proportion to time. Fitting that curvature is how limb-darkening coefficients ',
+          'are measured, and getting it wrong biases the radius by a few percent. The transit is ',
+          'central, but duration and impact parameter are degenerate in a single light curve, ',
+          'which is why a measured radius always comes with a fitted impact parameter beside it. ',
+          'Eccentricity changes the duration through the planet’s speed at conjunction (a planet ',
+          'transiting near periapsis crosses faster), and the alignment probability is the ',
+          'geometric one for a circular orbit. Real hot Jupiters emit and reflect enough to be ',
+          'detected in secondary eclipse, and a few are tidally stretched enough to matter. ',
+          'Planets perturb one another into transit timing variations of minutes, which is how ',
+          'several have been found without ever transiting. The default transit is 3% of its ',
+          'period, an Earth’s around a Sun 0.15%, so a whole-orbit axis would draw the dip a ',
+          'pixel wide. And the sliders reach a planet larger than its star (2 ',
+          m`R_J`,
+          ' around a 0.1 ',
+          m`R_\odot`,
+          ' dwarf), where the transit is a total eclipse and the flux goes to zero rather than ',
+          'the formula’s negative.',
         ),
       ),
     },

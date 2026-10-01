@@ -26,7 +26,8 @@ const stellarFusion: Module = {
       body: prose(
         p(
           'By the physics of everyday objects, the Sun is not hot enough to shine: its protons ',
-          'should never get close enough to fuse. They do anyway, because the very small plays by ',
+          'should never get close enough to fuse, joining into a heavier nucleus and giving off ',
+          'energy. They do anyway, because the very small plays by ',
           'different rules.',
         ),
       ),
@@ -89,7 +90,7 @@ const stellarFusion: Module = {
         },
         {
           id: 'rho',
-          friendlyLabel: 'How dense is the core?',
+          friendlyLabel: 'How dense is the core? (grams per cubic centimetre: water is 1, lead 11, the Sun’s centre 150)',
           technicalLabel: 'Core density',
           symbol: '\\rho',
           unit: 'kg/m^3',
@@ -106,22 +107,27 @@ const stellarFusion: Module = {
       approximations: [
         prose(
           p(
-            'Only the first step of the proton–proton chain is computed, with the hydrogen fraction fixed at the Sun’s central value of 0.34. The temperature and density sliders scale that one rate. The upper panel scales each curve to its own maximum, so heights compare shapes, not amounts.',
+            'Only the first step of the Sun’s fusion chain is computed, with the share of hydrogen fixed at the Sun’s central value.',
           ),
         ),
         prose(
           p(
-            'The barrier is bare electrical repulsion down to 1.4 fm and a sharp well inside. Screening by the surrounding electrons, which raises the real rate by a few percent, is left out.',
+            'The top panel scales each curve to its own peak, so it compares shapes, not amounts.',
           ),
         ),
         prose(
           p(
-            'The rate formula is the standard fit around solar conditions. Below about 3 million K it overstates the true rate, and above about 17 million K a different chain, the CNO cycle, takes over and is not shown.',
+            'The push between protons is simplified: the slight shielding by nearby electrons, worth a few percent, is left out.',
           ),
         ),
         prose(
           p(
-            'The chain’s later branches, which roughly double the central rate, are left out; the worked example comes out about half the standard solar model’s value.',
+            'The rate is a fit to Sun-like conditions. It runs too high below about 3 million K, and above about 17 million K another route to fusion takes over and is not shown.',
+          ),
+        ),
+        prose(
+          p(
+            'Later steps of the chain, which roughly double the rate at the centre, are left out, so the worked example comes out about half the real value.',
           ),
         ),
       ],
@@ -221,7 +227,7 @@ const stellarFusion: Module = {
           height: 1280,
           alt: 'The whole Sun as a golden disc on black, its face mottled with darker and brighter patches. Bright active regions near the left and right edges and at lower right trail looping arcs of glowing gas, and fine luminous strands reach out from the rim into the darkness around it.',
           caption:
-            'The Sun in extreme ultraviolet light, from the Solar Dynamics Observatory. Everything visible here is powered by protons tunnelling into each other in a core the surface hides.',
+            'The Sun in extreme ultraviolet light, from the Solar Dynamics Observatory. Everything visible here is powered by protons tunnelling into each other, slipping through a barrier they could not climb, in a core the surface hides.',
           credit: 'NASA/GSFC/Solar Dynamics Observatory',
         }),
       ),
@@ -414,6 +420,17 @@ const stellarFusion: Module = {
           m`10^{-19}`,
           ' seconds that matter. The cat is not in two states. The proton is, and the Sun shines ',
           'because of it.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. Only the first step of the proton–proton chain ',
+          'is computed, with the hydrogen mass fraction fixed at the Sun’s central 0.34, and the ',
+          'two sliders scale that one rate. The barrier is bare Coulomb repulsion down to 1.4 fm ',
+          'with a sharp nuclear well inside; electron screening, which raises the real rate by a ',
+          'few percent, is omitted. The rate formula is the standard fit around solar ',
+          'conditions: below about 3 million K it overstates the true rate, and above about 17 ',
+          'million K the CNO cycle dominates and is not shown. The chain’s later branches roughly ',
+          'double the central rate, so the worked example comes out about half the standard ',
+          'solar model’s value.',
         ),
       ),
     },

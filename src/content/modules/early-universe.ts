@@ -95,7 +95,7 @@ const earlyUniverse: Module = {
         },
         {
           id: 'E',
-          friendlyLabel: 'How heavy a particle?',
+          friendlyLabel: 'How heavy a particle? (as the energy locked in its mass, in MeV; an electron is 0.511)',
           technicalLabel: 'Particle rest energy',
           symbol: 'mc^2',
           unit: 'J',
@@ -113,7 +113,17 @@ const earlyUniverse: Module = {
       approximations: [
         prose(
           p(
-            'For the first two minutes the sim uses the simple rule for a universe whose energy is almost all light, in which the temperature falls as one over the square root of time. The rule depends on how many kinds of particle are in the mix, and the sim changes that count in sudden steps as each kind stops being made, at particle energies of 170, 100 and 0.5 MeV (millions of electronvolts, the energy unit of particle physics) and, for the heavier particles on the second slider, at their masses. Real transitions are gradual and the epoch boundaries are drawn sharp. Where the particle count changes in a step, the clock stalls briefly: near 11–20 µs, 58–74 µs and 3–5 s the temperature shown is held flat, and times there are uncertain by up to a factor of two.',
+            'For the first two minutes the sim uses the simple rule for a universe filled almost entirely with light: the temperature falls as one over the square root of time.',
+          ),
+        ),
+        prose(
+          p(
+            'That rule depends on how many kinds of particle are in the mix, and the sim changes the count in sudden steps as each kind stops being made. Real changes are gradual, and the epoch boundaries are drawn sharp.',
+          ),
+        ),
+        prose(
+          p(
+            'At each step the clock stalls briefly and the temperature is held flat, so times there are uncertain by up to a factor of two.',
           ),
         ),
         prose(
@@ -123,7 +133,7 @@ const earlyUniverse: Module = {
         ),
         prose(
           p(
-            '‘Being made’ means the light’s typical energy, kT, is above the particle’s rest energy, mc², the energy locked in its mass. In reality a particle stops being made in a race between how fast particles collide and how fast the universe expands, and that happens somewhat later than the line.',
+            '‘Being made’ means the light is hot enough to create the particle: its typical energy is above the energy locked in the particle’s mass. Really, production ends in a race against the expansion, a little later than the line.',
           ),
         ),
       ],
@@ -222,7 +232,7 @@ const earlyUniverse: Module = {
           height: 921,
           alt: 'An illustration of the universe as a bell shape on its side, drawn as a wire-frame grid that widens from a bright white glow at the left to a broad open mouth at the right. Near the narrow end a green mottled disc is labelled as the afterglow light at 375,000 years, followed by a dark band labelled the dark ages, the first stars, and then a widening region scattered with galaxies. A small spacecraft sits beyond the open end, and a bracket beneath spans 13.77 billion years.',
           caption:
-            'An artist’s timeline, not a measurement: the hot beginning at the left, the release of the microwave background as the mottled disc, the dark ages, the first stars as the bright band, and today’s galaxies at the right. Expansion stretches the shape outward. The illustration’s own dates come from an earlier analysis and differ slightly from the text.',
+            'An artist’s timeline, not a measurement: the hot beginning at the left, the release of the microwave background as the mottled disc, the dark ages (the long stretch before any star shone), the first stars as the bright band, and today’s galaxies at the right. Expansion stretches the shape outward. The illustration’s own dates come from an earlier analysis and differ slightly from the text.',
           credit: 'NASA / WMAP Science Team',
         }),
       ),
@@ -345,7 +355,15 @@ const earlyUniverse: Module = {
           ' in steps: at 175, 125 and 90 GeV and 4.5 and 1.5 GeV as the heavy particles drop out, ',
           'then at 170, 100 and 0.5 MeV, the QCD step placed at the top of the 150–170 MeV range ',
           'lattice calculations give for the crossover; the real function is smooth, and the ',
-          'lattice-QCD tabulation of Borsányi et al. (2016) is the standard reference.',
+          'lattice-QCD tabulation of Borsányi et al. (2016) is the standard reference. The ',
+          'heavier particles on the second slider step out at their own masses. Where ',
+          m`g_*`,
+          ' steps, the stitched clock stalls: near 11–20 µs, 58–74 µs and 3–5 s the temperature ',
+          'shown is held flat, and times there are uncertain by up to a factor of two. And ',
+          'freeze-out is drawn at ',
+          m`kT = mc^2`,
+          ', while a real species decouples when its interaction rate falls below the expansion ',
+          'rate, somewhat later.',
         ),
         p(
           'Scale factor and temperature are tied by entropy conservation, ',

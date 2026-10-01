@@ -67,9 +67,11 @@ const wormholes: Module = {
       simKey: 'wormholes',
       caption: prose(
         p(
-          'Widen and narrow the throat of the tunnel, and see how much negative mass it would take to ',
-          'hold it open, and how impossibly close two plates would have to sit to make negative energy ',
-          'that dense.',
+          'Widen and narrow the throat of the tunnel. See how much negative mass, a kind of matter ',
+          'whose gravity would push instead of pull, it would take to hold it open. Then see how ',
+          'impossibly close two parallel metal plates would have to sit to make negative energy that ',
+          'dense: pushed close together, they leave the gap between them with slightly less energy ',
+          'than empty space.',
         ),
       ),
       params: [
@@ -199,7 +201,7 @@ const wormholes: Module = {
           height: 576,
           alt: 'A black hole seen from the side against black space: a thin, glowing orange-red disc crosses the image, the far side of the disc appears bent up and over a dark central circle in a bright arch, and a smaller glowing arc of its underside is bent into view below.',
           caption:
-            'An illustration, not an observation: a black hole seen close up, its own light bent around it. The Einstein–Rosen bridge lies hidden in the mathematics of the simplest black hole, closed to anything trying to cross.',
+            'An illustration, not an observation: a black hole seen close up, its own light bent around it. The Einstein–Rosen bridge, a tunnel joining two regions of space, lies hidden in the mathematics of the simplest black hole, closed to anything trying to cross.',
           credit: 'NASA’s Goddard Space Flight Center/Jeremy Schnittman',
         }),
       ),

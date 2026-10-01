@@ -138,6 +138,18 @@ interface TraceWindow {
   fEnd: number;
 }
 
+/**
+ * The "from 30 Hz to merger" readout. A pair heavy enough that its cutoff falls
+ * below the detector band's 30 Hz entry (equal masses from about 74 + 74 M☉;
+ * 100 + 100 M☉ cuts off at 22 Hz) never radiates at 30 Hz before the inspiral
+ * this model draws has ended, so there is no time to give, and the readout says
+ * so rather than quoting τ(30 Hz) for a frequency the model never reaches.
+ */
+function bandEntryReadout(mc: number, cutoff: number): string {
+  if (!(cutoff >= BAND_ENTRY_HZ)) return `inspiral ends below ${BAND_ENTRY_HZ} Hz`;
+  return formatDuration(timeToMerger(mc, BAND_ENTRY_HZ));
+}
+
 function windowFor(mc: number, d: number, cutoff: number): TraceWindow | null {
   if (!(mc > 0) || !(d > 0) || !(cutoff > 0)) return null;
   const tauEnd = timeToMerger(mc, cutoff);
@@ -411,7 +423,7 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
   const cutoff = useMemo(() => fCutoff(m1, m2), [m1, m2]);
   const win = useMemo(() => windowFor(mc, d, cutoff), [mc, d, cutoff]);
   const plan = useMemo(() => (win ? audioPlanFor(mc, win) : null), [mc, win]);
-  const tauFrom30 = useMemo(() => timeToMerger(mc, BAND_ENTRY_HZ), [mc]);
+  const bandEntry = useMemo(() => bandEntryReadout(mc, cutoff), [mc, cutoff]);
   const slowFactor = win ? slowFactorFor(win.duration) : 1;
 
   /** Paints the current scene at the canvas's current size. */
@@ -619,7 +631,7 @@ export default function GravitationalWavesSim({ params, values }: SimProps) {
         <Readout label="chirp mass" value={`${SIG3.format(mc / M_SUN)} M☉`} />
         <Readout label="frequency at cutoff" value={formatFrequency(cutoff)} />
         <Readout label="peak strain here" value={scientific(win ? win.peak : NaN)} />
-        <Readout label="from 30 Hz to merger" value={formatDuration(tauFrom30)} />
+        <Readout label="from 30 Hz to merger" value={bandEntry} />
       </dl>
 
       {AUDIO_SUPPORTED && plan && (
@@ -666,4 +678,4 @@ function Readout({ label, value }: { label: string; value: string }) {
  * so the module's real surface stays what it has always been - a default export
  * taking SimProps - and so nobody imports them by accident.
  */
-export const __internals = { drawScene, windowFor };
+export const __internals = { drawScene, windowFor, bandEntryReadout };

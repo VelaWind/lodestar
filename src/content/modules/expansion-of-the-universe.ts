@@ -98,7 +98,7 @@ const expansionOfTheUniverse: Module = {
         },
         {
           id: 'H0',
-          friendlyLabel: 'How fast is space stretching?',
+          friendlyLabel: 'How fast is space stretching? (km/s faster for every 3.26 million light-years)',
           technicalLabel: 'Hubble constant',
           symbol: 'H_0',
           // Written `s^{-1}` rather than `s^-1`: the equation layer sets this
@@ -140,7 +140,7 @@ const expansionOfTheUniverse: Module = {
       approximations: [
         prose(
           p(
-            'Redshift here is speed divided by the speed of light. That holds nearby; at the far end of the distance slider it is a few percent below the full result.',
+            'Redshift, how much the light’s waves have been stretched toward red, is taken here as speed divided by the speed of light. That holds nearby; at the far end of the distance slider it is a few percent below the full result.',
           ),
         ),
         prose(
