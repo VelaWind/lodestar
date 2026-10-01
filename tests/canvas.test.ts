@@ -213,11 +213,11 @@ function escapeCases(): Case[] {
         expect(apex, `${v0} m/s apex inside the frame`).toBeLessThan(axis.hTop);
         expect(flight.samples.at(-1)?.landed, `${v0} m/s path reaches the ground`).toBe(true);
         // The drawn path's peak, against the closed form. Near the threshold the
-        // apex is very sensitive to energy, 1/(1 − v₀²/v_esc²), so the
-        // integrator's small launch-step energy offset shows up magnified:
-        // about 1% at 11.0 km/s and 3.5% at 11.1. The status and the readout use
-        // the closed form; only the drawn path carries this.
-        expect(Math.abs(flight.peakAltitude / apex - 1), `${v0} m/s integrated apex`).toBeLessThan(0.05);
+        // apex is very sensitive to energy, 1/(1 − v₀²/v_esc²), and the old
+        // semi-implicit Euler start's launch-step energy offset showed up
+        // magnified, 3.5% at 11.1 km/s. The velocity-Verlet step's half kick
+        // removes it: 0.001% now, held here to a hundredth of a percent.
+        expect(Math.abs(flight.peakAltitude / apex - 1), `${v0} m/s integrated apex`).toBeLessThan(1e-4);
       } else {
         expect(flight.leftFrame, `${v0} m/s leaves through the top`).toBe(true);
       }
@@ -225,6 +225,68 @@ function escapeCases(): Case[] {
     // The case the review found: 409,000 km, drawn and reported as landing.
     expect(apexAltitude(M_EARTH, R_EARTH, 11_100) / 1e3).toBeCloseTo(409_000, -4);
   });
+
+  /** One flight as the sim runs it: its axis, its timestep, its integration. */
+  function simFlight(M: number, R: number, v0: number) {
+    const apex = apexAltitude(M, R, v0);
+    const escaping = v0 >= vEsc(M, R);
+    const axis = ev.makeAxis(R, apex, escaping);
+    const flight = integrateFlight(M, R, v0, timestepForFlight(M, R, v0, axis.hTop), axis.hTop);
+    return { apex, top: axis.hTop, flight };
+  }
+
+  /**
+   * A flight whose closed-form apex is just above the frame top climbs out.
+   *
+   * At 11,131 m/s on Earth the apex is 641,168 km against a 637,100 km frame
+   * top. The old start lost enough energy that the drawn path turned back at
+   * 618,795 km, and the old timestep ran out of steps at 616,731 km; the
+   * half-kick start and a dt sized from the closed-form time to the frame top
+   * fix both.
+   */
+  it('lets 11,131 m/s on Earth leave the frame, with no step cap', () => {
+    const { apex, top, flight } = simFlight(M_EARTH, R_EARTH, 11_131);
+    expect(apex).toBeGreaterThan(top);
+    expect(flight.leftFrame).toBe(true);
+    expect(flight.stepCapped).toBe(false);
+  });
+
+  /**
+   * Near the threshold, across Earth and a coarse grid of the M and R sliders:
+   * the step cap is never hit, and a flight whose closed-form apex is above the
+   * frame top always leaves it, so the drawn path agrees with the status.
+   */
+  it('never runs out of steps near the threshold, and leaves the frame whenever the apex is above it', () => {
+    const ratios: number[] = [];
+    for (let i = 0; i <= 18; i += 1) ratios.push(0.99 + i * 0.0005);
+    const grid: [number, number][] = [[M_EARTH, R_EARTH]];
+    const M = paramOf(params, 'M');
+    const R = paramOf(params, 'R');
+    for (let i = 0; i < 4; i += 1) {
+      for (let j = 0; j < 4; j += 1) {
+        grid.push([
+          10 ** (Math.log10(M.min) + ((Math.log10(M.max) - Math.log10(M.min)) * i) / 3),
+          10 ** (Math.log10(R.min) + ((Math.log10(R.max) - Math.log10(R.min)) * j) / 3),
+        ]);
+      }
+    }
+    const vMax = paramOf(params, 'v0').max;
+    let flights = 0;
+    for (const [m, r] of grid) {
+      const ve = vEsc(m, r);
+      for (const x of ratios) {
+        const v0 = x * ve;
+        if (v0 > vMax) continue;
+        const { apex, top, flight } = simFlight(m, r, v0);
+        const label = `M=${m.toExponential(2)} R=${r.toExponential(2)} v0/v_esc=${x.toFixed(4)}`;
+        expect(flight.stepCapped, `${label} ran out of steps`).toBe(false);
+        if (apex > top) expect(flight.leftFrame, `${label} apex above the frame but path turned back`).toBe(true);
+        flights += 1;
+      }
+    }
+    expect(flights, 'the sweep reached the near-threshold band').toBeGreaterThan(100);
+    // Each near-threshold flight is up to 1.5 million integration steps.
+  }, 60_000);
 
   /**
    * The altitude axis must never label two ticks the same.
