@@ -12,6 +12,10 @@ import {
   positionToValue,
   sliderAriaLabel,
   sliderBounds,
+  ariaNumber,
+  sliderInputAttrs,
+  sliderInputPosition,
+  valueFromSliderPosition,
   valueToPosition,
 } from '@/lib/format';
 import { useTier } from '@/store/useAppStore';
@@ -54,6 +58,9 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
       {params.map((param) => {
         const value = values[param.id] ?? param.default;
         const bounds = sliderBounds(param);
+        // The element's own range, anchored so the default is a stop; it can
+        // overshoot each real end by under a step, and onChange clamps that back.
+        const input = sliderInputAttrs(param);
         const label = paramLabel(param, tier);
         return (
           <div key={param.id}>
@@ -75,11 +82,11 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
               // its middle; the negative margins pull the empty space back out
               // so the visual spacing matches what a 4px input would give.
               className="lodestar-slider -mb-4 -mt-3 w-full"
-              min={bounds.min}
-              max={bounds.max}
-              step={bounds.step}
-              value={valueToPosition(param, value)}
-              onChange={(e) => onChange(param, positionToValue(param, Number(e.target.value)))}
+              min={input.min}
+              max={input.max}
+              step={input.step}
+              value={sliderInputPosition(param, value)}
+              onChange={(e) => onChange(param, valueFromSliderPosition(param, Number(e.target.value)))}
               onKeyDown={(e) => {
                 // Log sliders take their keys from here rather than from the
                 // element's `step`, so that the keyboard contract is the same on
@@ -112,6 +119,14 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
                 );
               }}
               aria-label={sliderAriaLabel(label, param)}
+              // The element's min and max overshoot the real range by under a
+              // step; assistive technology is told the real one. Strings, not
+              // numbers: React would stringify 1.94e-18 with an exponent, which
+              // is not a valid ARIA number, and its types only admit numbers.
+              {...({
+                'aria-valuemin': ariaNumber(input.pMin),
+                'aria-valuemax': ariaNumber(input.pMax),
+              } as Record<string, string>)}
               aria-valuetext={formatWithUnit(param, value)}
             />
             {param.scale === 'log' && (
