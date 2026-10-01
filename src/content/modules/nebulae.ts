@@ -90,7 +90,7 @@ const nebulae: Module = {
         },
         {
           id: 'n',
-          friendlyLabel: 'How crowded is the gas? (atoms per cubic centimetre; the air you breathe has about 3 × 10¹⁹)',
+          friendlyLabel: 'How crowded is the gas? (particles per cubic centimetre; the air you breathe has about 2.5 × 10¹⁹)',
           technicalLabel: 'Hydrogen number density',
           symbol: 'n',
           unit: 'm^{-3}',

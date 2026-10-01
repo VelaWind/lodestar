@@ -146,7 +146,7 @@ interface TraceWindow {
  * so rather than quoting τ(30 Hz) for a frequency the model never reaches.
  */
 function bandEntryReadout(mc: number, cutoff: number): string {
-  if (!(cutoff >= BAND_ENTRY_HZ)) return `never reaches ${BAND_ENTRY_HZ} Hz`;
+  if (!(cutoff >= BAND_ENTRY_HZ)) return `inspiral ends below ${BAND_ENTRY_HZ} Hz`;
   return formatDuration(timeToMerger(mc, BAND_ENTRY_HZ));
 }
 
