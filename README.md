@@ -53,7 +53,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 859 tests in 22 files
+npm test           # vitest, 901 tests in 23 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
@@ -78,7 +78,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 ## Tests
 
-`npm test` is 857 Vitest tests across 22 files, in a Node environment:
+`npm test` is 901 Vitest tests across 23 files, in a Node environment:
 
 - the 138 physics sanity checks as assertions;
 - equation snapshots, so a formatting change cannot quietly rewrite the maths;
@@ -86,7 +86,8 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 - canvas replay of each simulation at phone-to-desktop widths against a recording context, which catches labels drawn outside the frame;
 - the sonification synthesised into a buffer with its frequencies measured back out;
 - content-structure rules, including that every `term` reference resolves in the glossary and every entry is marked somewhere;
-- readout formatting, and tooltip placement at the awkward edges.
+- readout formatting, and tooltip placement at the awkward edges;
+- slider stops on every param: the default is a stop and both ends clamp to the exact bound.
 
 `.github/workflows/ci.yml` runs typecheck, lint, test and build in that order on every push and pull request to `main`, on Node 22.
 
@@ -97,8 +98,6 @@ The browser suite is separate: `playwright.config.ts` defines five projects (Chr
 Some files are very large and heavily commented: `sanity.ts` is 2367 lines and the largest simulation, supernovae, 927, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
 
 The maths layer's Numbers view substitutes each slider's value in SI base units, because the constants in the equations are SI; a "where" line under each equation gives the slider's own reading (v₀ = 8 km/s beside 8000 m/s in the formula) for every substituted value shown in another unit.
-
-Seventeen sliders still have a default a fraction of a step off their grid, and the first drag or arrow press snaps them by up to 1.8%.
 
 <!-- site:case-study:end -->
 
