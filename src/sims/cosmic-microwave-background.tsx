@@ -88,6 +88,17 @@ function plainOrScientific(value: number): string {
 }
 
 /** m → "1.06 mm", "966 nm", "10.6 µm": the named unit the value warrants. */
+/**
+ * The dipole's size: millikelvin, as quoted for the real 3.36 mK, until it
+ * reaches a whole kelvin, then kelvin. At the slider's top speed it is several
+ * kelvin, and "3700.76 mK" is a number nobody reads.
+ */
+function formatDipole(kelvin: number): string {
+  if (!Number.isFinite(kelvin)) return '—';
+  if (kelvin * 1e3 < 1000) return `${(kelvin * 1e3).toFixed(2)} mK`;
+  return `${kelvin.toPrecision(3)} K`;
+}
+
 function formatWavelength(metres: number): string {
   if (!Number.isFinite(metres) || metres <= 0) return '—';
   if (metres >= 1) return `${SIG3.format(metres)} m`;
@@ -519,11 +530,11 @@ function drawSky(
   }
 
   /* The dipole's size, below. */
-  const deltaMk = (dipoleAmplitude(view.T, view.v) * 1e3).toFixed(2);
+  const delta = formatDipole(dipoleAmplitude(view.T, view.v));
   ctx.fillStyle = COLORS.ember;
   centredWithin(
     ctx,
-    view.units === 'technical' ? `ΔT = ${deltaMk} mK` : `ahead is ${deltaMk} mK above average`,
+    view.units === 'technical' ? `ΔT = ${delta}` : `ahead is ${delta} above average`,
     cx,
     h - 8,
     left,
@@ -691,7 +702,7 @@ export default function CmbSim({ params, values }: SimProps) {
         />
         <Readout
           label={deep ? 'Dipole amplitude ΔT' : 'How much hotter the sky is ahead of us'}
-          value={`${(dipole * 1e3).toFixed(2)} mK`}
+          value={formatDipole(dipole)}
         />
       </dl>
     </div>
@@ -715,4 +726,4 @@ function Readout({ label, value }: { label: string; value: string }) {
  * Internals exposed for `tests/canvas.test.ts`, and for nothing else — the same
  * deliberately ugly name the other sims use.
  */
-export const __internals = { drawScene, formatWavelength, B_MIN, B_MAX };
+export const __internals = { drawScene, formatWavelength, formatDipole, B_MIN, B_MAX };

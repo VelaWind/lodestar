@@ -54,12 +54,13 @@ import { __internals as ko } from '@/sims/kepler-orbits';
 import { __internals as pa } from '@/sims/planetary-atmospheres';
 import { __internals as su } from '@/sims/scale-of-the-universe';
 
-import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
+import { apexAltitude, integrateFlight, timestepForFlight, vEsc } from '@/physics/escape';
 import { chirpMass, fCutoff } from '@/physics/gw';
 import { orbitGeometry, period, stateAt } from '@/physics/kepler';
 import { transitShape } from '@/physics/transit';
 import { GASES, retentionVerdict } from '@/physics/atmosphere';
 import {
+  dipoleAmplitude,
   lineOfSightVelocity,
   observedWavelength,
   redshiftFromVelocity,
@@ -75,6 +76,7 @@ import {
   LIGHT_YEAR,
   L_SUN,
   MEGAPARSEC,
+  M_EARTH,
   M_MOON,
   M_SUN,
   PARSEC,
@@ -142,7 +144,7 @@ function escapeCases(): Case[] {
           m.value,
           r.value,
           v.value,
-          timestepFor(m.value, r.value),
+          timestepForFlight(m.value, r.value, v.value, axis.hTop),
           axis.hTop,
         );
         const end = flight.samples[flight.samples.length - 1];
@@ -172,13 +174,57 @@ function escapeCases(): Case[] {
               flight,
               cursor: flight.samples.length - 1,
               altitude: end?.altitude ?? 0,
-              phase: escaping ? 'escaped' : flight.leftFrame ? 'offframe' : 'landed',
+              phase: ev.endPhaseFor(escaping, apex, axis.hTop),
               staticPath: true,
             }),
         });
       }
     }
   }
+
+  /**
+   * Near the threshold the outcome comes from the closed forms, not the step cap.
+   *
+   * At 11.1 km/s on Earth the apex is about 409,000 km and the frame holds it,
+   * but the flight takes about eleven days, more than the integrator's step
+   * budget at Earth's natural timestep. The cap used to be reported as "left the
+   * frame", so the status said "apex is above the frame" over a drawn apex.
+   */
+  it('lands at 11.0 and 11.1 km/s and escapes at 11.2 on Earth, with no step cap', () => {
+    const cases: [number, string][] = [
+      [11_000, 'landed'],
+      [11_100, 'landed'],
+      [11_200, 'escaped'],
+    ];
+    for (const [v0, expected] of cases) {
+      const apex = apexAltitude(M_EARTH, R_EARTH, v0);
+      const escaping = v0 >= vEsc(M_EARTH, R_EARTH);
+      const axis = ev.makeAxis(R_EARTH, apex, escaping);
+      const flight = integrateFlight(
+        M_EARTH,
+        R_EARTH,
+        v0,
+        timestepForFlight(M_EARTH, R_EARTH, v0, axis.hTop),
+        axis.hTop,
+      );
+      expect(ev.endPhaseFor(escaping, apex, axis.hTop), `${v0} m/s`).toBe(expected);
+      expect(flight.stepCapped, `${v0} m/s ran out of steps`).toBe(false);
+      if (expected === 'landed') {
+        expect(apex, `${v0} m/s apex inside the frame`).toBeLessThan(axis.hTop);
+        expect(flight.samples.at(-1)?.landed, `${v0} m/s path reaches the ground`).toBe(true);
+        // The drawn path's peak, against the closed form. Near the threshold the
+        // apex is very sensitive to energy, 1/(1 − v₀²/v_esc²), so the
+        // integrator's small launch-step energy offset shows up magnified:
+        // about 1% at 11.0 km/s and 3.5% at 11.1. The status and the readout use
+        // the closed form; only the drawn path carries this.
+        expect(Math.abs(flight.peakAltitude / apex - 1), `${v0} m/s integrated apex`).toBeLessThan(0.05);
+      } else {
+        expect(flight.leftFrame, `${v0} m/s leaves through the top`).toBe(true);
+      }
+    }
+    // The case the review found: 409,000 km, drawn and reported as landing.
+    expect(apexAltitude(M_EARTH, R_EARTH, 11_100) / 1e3).toBeCloseTo(409_000, -4);
+  });
 
   /**
    * The altitude axis must never label two ticks the same.
@@ -636,6 +682,16 @@ function expansionCases(): Case[] {
     }
   });
 
+  it('prints a blueshift and an approach speed with a true minus, never a hyphen', () => {
+    expect(eu.formatRedshift(-0.0033)).toBe('−0.0033');
+    expect(eu.formatRedshift(0.0230)).toBe('0.0230');
+    expect(eu.formatRedshift(-0.00001)).toBe('0.0000');
+    expect(eu.formatKmS(-110_000)).toBe('−110 km/s');
+    for (const text of [eu.formatRedshift(-0.0033), eu.formatKmS(-110_000)]) {
+      expect(text).not.toContain('-');
+    }
+  });
+
   it('names the shift by its sign, and draws no motion tick when there is none', () => {
     const text = (d: number, vPec: number) => {
       const { ctx, records } = recordingContext();
@@ -747,6 +803,21 @@ function cmbCases(): Case[] {
     expect(still).toContain('the same in every direction');
     expect(still).not.toContain('hotter, ahead');
     expect(still.some((t) => t.includes('0.00 mK'))).toBe(true);
+  });
+
+  it('quotes the dipole in mK, and in K once it reaches a whole kelvin', () => {
+    expect(cmb.formatDipole(0)).toBe('0.00 mK');
+    expect(cmb.formatDipole(3.3621e-3)).toBe('3.36 mK');
+    expect(cmb.formatDipole(0.99999)).toBe('999.99 mK');
+    expect(cmb.formatDipole(3.70076)).toBe('3.70 K');
+    // At every speed and temperature the slider reaches, never a four-digit mK.
+    const vParam = paramOf(params, 'v');
+    const tParam = paramOf(params, 'T');
+    for (const T of [tParam.min, tParam.default, tParam.max]) {
+      for (const v of [vParam.min, vParam.default, vParam.max]) {
+        expect(cmb.formatDipole(dipoleAmplitude(T, v))).not.toMatch(/\d{4,}\.\d+ mK/);
+      }
+    }
   });
 
   it('formats the peak wavelength in the unit the value warrants', () => {
@@ -1412,6 +1483,11 @@ function ladderCases(): Case[] {
     expect(cdl.formatOwnMotion(90)).toBe('more than the expansion itself');
     expect(cdl.formatMagnitude(13.268)).toBe('+13.3');
     expect(cdl.formatMagnitude(-0.823)).toBe('−0.8');
+    // The calibration slider's error as a brightness a reader can picture.
+    expect(cdl.formatBrightnessError(0)).toBe('spot on');
+    expect(cdl.formatBrightnessError(0.1)).toBe('assumed 9% too faint');
+    expect(cdl.formatBrightnessError(-0.1)).toBe('assumed 10% too bright');
+    expect(cdl.formatBrightnessError(0.17)).toBe('assumed 14% too faint');
     expect(cdl.formatH0(73.07 * KM_S_PER_MPC)).toBe('73.1 km/s/Mpc');
   });
 
@@ -1668,6 +1744,14 @@ function hawkingRadiationCases(): Case[] {
     expect(hr.formatNet('shrinking')).toBe('hotter than the background: shrinking');
     expect(hr.formatNet('growing')).toBe('colder than the background: growing');
     expect(hr.formatNet('balanced')).toBe('as warm as the background: in balance');
+  });
+
+  it('names the nearest landmark for the mass, as a readable multiple', () => {
+    expect(hr.formatLandmark(1e12)).toBe('1 × a mountain');
+    expect(hr.formatLandmark(hr.M_CROSSOVER)).toBe('0.613 × the Moon');
+    expect(hr.formatLandmark(M_EARTH)).toBe('1 × the Earth');
+    expect(hr.formatLandmark(1e31)).toBe('5.03 × the Sun');
+    expect(hr.formatLandmark(1e5)).toBe('about 10⁻⁷ × a mountain');
   });
 
   it('the crossover button sets a mass whose temperature reads as the CMB, and no slider stop does', () => {

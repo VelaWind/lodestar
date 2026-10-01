@@ -22,7 +22,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
-import { apexAltitude, integrateFlight, timestepFor, vEsc } from '@/physics/escape';
+import { apexAltitude, integrateFlight, timestepForFlight, vEsc } from '@/physics/escape';
 import { schwarzschildRadius } from '@/physics/blackhole';
 import { firstClearPlacement, labelBox, type LabelBox } from './labels';
 import type { Flight } from '@/physics/escape';
@@ -214,6 +214,18 @@ function axisTicks(axis: Axis): Tick[] {
  * back, which is what happens just below the threshold.
  */
 type Phase = 'ready' | 'flying' | 'landed' | 'escaped' | 'offframe';
+
+/**
+ * How a flight ends, from closed forms only: escape from v₀ against v_esc, and
+ * "above the frame" from the closed-form apex against the frame top. Never from
+ * where the integration stopped — its step cap is a computational limit, and at
+ * 11.1 km/s on Earth it used to report an apex of 409,000 km, drawn inside the
+ * frame, as "above the frame".
+ */
+function endPhaseFor(escaping: boolean, apex: number, hTop: number): Phase {
+  if (escaping) return 'escaped';
+  return apex > hTop ? 'offframe' : 'landed';
+}
 
 interface Scene {
   apex: number;
@@ -540,12 +552,14 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
     const scene = sceneRef.current;
     if (!scene) return;
 
-    const dt = timestepFor(M, R);
+    const dt = timestepForFlight(M, R, v0, scene.axis.hTop);
     const flight = integrateFlight(M, R, v0, dt, scene.axis.hTop);
 
-    // Escape is decided by v₀ against v_esc — the closed form — not by whether
-    // the integration happened to run off the top of the frame.
-    const endPhase: Phase = escaping ? 'escaped' : flight.leftFrame ? 'offframe' : 'landed';
+    // Every outcome is decided by closed forms, not by where the integration
+    // happened to stop: escape by v₀ against v_esc, and "above the frame" by
+    // the closed-form apex against the frame top. The integrator's step cap is
+    // a computational limit (`flight.stepCapped`) and never stands in for one.
+    const endPhase = endPhaseFor(escaping, apex, scene.axis.hTop);
 
     if (reduced) {
       // No animation: the complete path, drawn once, apex already marked.
@@ -614,7 +628,7 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
     };
 
     rafRef.current = requestAnimationFrame(tick);
-  }, [M, R, v0, escaping, reduced, paint]);
+  }, [M, R, v0, apex, escaping, reduced, paint]);
 
   const reset = useCallback(() => {
     const scene = sceneRef.current;
@@ -755,4 +769,11 @@ function Readout({
  * so the module's real surface stays what it has always been — a default export
  * taking SimProps — and so nobody imports them by accident.
  */
-export const __internals = { drawScene, makeAxis, axisTicks, uniqueTickLabels, collapseNote };
+export const __internals = {
+  drawScene,
+  makeAxis,
+  axisTicks,
+  uniqueTickLabels,
+  collapseNote,
+  endPhaseFor,
+};

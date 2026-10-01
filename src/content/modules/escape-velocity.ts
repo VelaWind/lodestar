@@ -108,44 +108,44 @@ const escapeVelocity: Module = {
       approximations: [
         prose(
           p(
-            'No atmosphere: no drag, no heating. This is the largest omission near the surface: a real projectile leaving the ground at 11 km/s does not reach space, it burns up like a meteor in reverse. The vacuum result is only honest above roughly 100 km, which is why real launches are powered rather than ',
+            'There is no air. A real ',
             term('ballistic', 'ballistic'),
-            '.',
+            ' throw at 11 km/s from the ground would burn up like a meteor in reverse.',
           ),
         ),
         prose(
           p(
-            'The body is perfectly spherical and does not rotate. Sphericity costs almost nothing (a uniform sphere pulls exactly as a point mass would, so the formula is exact for one) but rotation does: launching eastward from Earth’s equator is worth about 0.47 km/s of free speed, and rotation and the bulge together lower equatorial gravity by about 0.5%.',
+            'The planet is a perfect ball that does not spin. Spin would help: launching east from Earth’s equator gets about 0.47 km/s for free.',
           ),
         ),
         prose(
           p(
-            'The launch is purely radial: straight up, along the line to the centre. Escape speed itself is direction-independent for an unpowered object, so the threshold shown is correct for any angle that misses the surface; what changes is the path. An angled launch traces a conic section, not the vertical line drawn here.',
+            'The throw is straight up. Escape speed is the same in any direction that clears the ground; only the path changes.',
           ),
         ),
         prose(
           p(
-            'Newtonian gravity only. Curiously, general relativity gives the same formula for the speed, launched straight up, that an observer hovering at radius r would measure (near a black hole the escape speed depends on direction), but what r and speed mean changes, and inside r_s no speed is enough (see Going deeper).',
+            'Gravity here is Newton’s, not Einstein’s. The difference only matters near a black hole (see Going deeper).',
           ),
         ),
         prose(
           p(
-            'Two bodies, one of them negligible. The projectile does not recoil the planet, and nothing else pulls on it. Escaping Earth is not escaping the Sun: that needs a further 12.3 km/s from Earth’s orbital position.',
+            'Nothing else pulls on the projectile. Escaping Earth is not escaping the Sun, which takes another 12.3 km/s.',
           ),
         ),
         prose(
           p(
-            'Playback is time-accelerated. The flight above is compressed to a few seconds of wall time; the 8 km/s default trajectory really takes about 36 minutes up and the same back down. Relative timing within a flight is faithful: the projectile genuinely spends most of it near the apex, where it is slowest.',
+            'The flight is sped up. The 8 km/s default really takes about 36 minutes up and the same back down.',
           ),
         ),
         prose(
           p(
-            'The altitude axis is linear near the surface and logarithmic above, with the switchover marked on the axis. Without it, a 100 km hop and a 10⁶ km escape cannot share a frame. Vertical distances are therefore not comparable across the boundary: the trajectory’s shape is distorted, though every altitude it reads off is exact.',
+            'The height scale is stretched above the marked switchover, so a 100 km hop and a million-kilometre climb fit in one frame. Every height read off it is still exact.',
           ),
         ),
         prose(
           p(
-            'Trajectories are integrated with semi-implicit Euler at a fixed timestep, not solved in closed form. The scheme is symplectic, so energy error stays bounded rather than drifting, and the apex it produces agrees with the exact energy-conservation result to well under 1%. The apex altitude reported in the readout is the closed-form value, not the integrated one.',
+            'The path is worked out in small time steps. Very close to escape speed its drawn peak falls a few percent short of the true highest point, which the readout gives.',
           ),
         ),
       ],
@@ -217,7 +217,7 @@ const escapeVelocity: Module = {
           height: 1280,
           alt: 'The Earth, half in shadow, rising above the grey cratered horizon of the Moon.',
           caption:
-            'Earthrise, photographed by Bill Anders from Apollo 8 lunar orbit on 24 December 1968. Getting there took nearly the whole escape budget: the translunar burn left Earth at about 10.8 kilometres per second, within four percent of the escape speed this module computes.',
+            'Earthrise, photographed by Bill Anders from Apollo 8 lunar orbit on 24 December 1968. Getting there took nearly the whole escape budget: the engine burn that sent the crew toward the Moon left Earth at about 10.8 kilometres per second, within four percent of the escape speed this module computes.',
           credit: 'NASA / Bill Anders, Apollo 8 (AS8-14-2383)',
         }),
       ),
@@ -352,6 +352,26 @@ const escapeVelocity: Module = {
           'science’s open questions: whether rocky planets around M-dwarfs sit above or below the ',
           'line. The first JWST measurements of the inner TRAPPIST-1 planets lean toward bare ',
           'rock, and the question is unsettled.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. Drag and heating are the largest omission near ',
+          'the surface, and the vacuum result is honest only above roughly 100 km, which is why ',
+          'real launches are powered rather than thrown. Sphericity costs nothing (a uniform ',
+          'sphere pulls exactly as a point mass would) but rotation does: rotation and the ',
+          'equatorial bulge together lower Earth’s equatorial gravity by about 0.5%. Escape ',
+          'speed is direction-independent for an unpowered object, but an angled launch traces a ',
+          'conic section rather than the vertical line drawn. The projectile does not recoil ',
+          'the planet, and the further 12.3 km/s to leave the Sun is counted from Earth’s orbital ',
+          'position. Playback compresses the flight to seconds while keeping its relative timing, ',
+          'so the projectile still spends most of it near the apex, where it is slowest. The ',
+          'altitude axis is linear near the surface and logarithmic above, which distorts the ',
+          'path’s shape across the switchover but not any altitude read from it. And the path is ',
+          'integrated with semi-implicit Euler at a fixed timestep: symplectic, so energy error ',
+          'stays bounded, and its apex agrees with the closed form to well under 1% for most ',
+          'launches. Just below escape speed the apex goes as ',
+          m`1/(1 - v_0^2/v_{\text{esc}}^2)`,
+          ', which magnifies the launch step’s small energy offset into a shortfall of a few ',
+          'percent (3.5% at 11.1 km/s on Earth); the readout and the status use the closed form.',
         ),
       ),
     },

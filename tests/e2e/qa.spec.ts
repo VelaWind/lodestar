@@ -3226,7 +3226,9 @@ test('glossary: a term opens, reads, and closes @cross-engine', async ({ page })
   await expect(
     page.locator('#glossary-live-region'),
     'the open definition should be announced',
-  ).toHaveText('ISCO: The closest distance at which anything can steadily orbit a black hole; closer than this, it spirals in.');
+  ).toHaveText(
+    'Innermost stable orbit (ISCO): The closest distance at which anything can steadily orbit a black hole; closer than this, it spirals in.',
+  );
 
   // Inside the viewport, on all four sides. A panel clipped by the accordion or
   // hanging off a 390px screen is the failure the portal exists to prevent.
@@ -3475,7 +3477,7 @@ test('glossary: selecting the definition keeps it open @cross-engine', async ({ 
   ).toContain(selected);
 
   // The announcement is still standing, because the panel is.
-  await expect(page.locator('#glossary-live-region')).toContainText('ISCO:');
+  await expect(page.locator('#glossary-live-region')).toContainText('Innermost stable orbit (ISCO):');
 
   /* --- and everything that should still dismiss, still does --------- */
 

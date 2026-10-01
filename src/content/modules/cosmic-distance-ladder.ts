@@ -68,7 +68,7 @@ const cosmicDistanceLadder: Module = {
       simKey: 'cosmic-distance-ladder',
       caption: prose(
         p(
-          'Slide out from the nearest stars to a billion parsecs and watch which methods can still ',
+          'Slide out from the nearest stars to about 3.3 billion light-years and watch which methods can still ',
           'reach. Then introduce a small error in how bright the standard stars are assumed to be, ',
           'and see what it does to the expansion rate at the top.',
         ),
@@ -91,7 +91,7 @@ const cosmicDistanceLadder: Module = {
         },
         {
           id: 'delta',
-          friendlyLabel: 'How wrong is the candles’ assumed brightness?',
+          friendlyLabel: 'How wrong is the bulbs’ assumed brightness? (in magnitudes; 0.1 is about 9%)',
           technicalLabel: 'Calibration offset',
           symbol: '\\delta',
           unit: '',
@@ -118,7 +118,7 @@ const cosmicDistanceLadder: Module = {
         ),
         prose(
           p(
-            'Parallax precision uses one figure for Gaia, 20 millionths of an arcsecond; faint stars are measured several times less precisely.',
+            'Parallax precision uses one figure for the Gaia space telescope, 20 millionths of an arcsecond (about the width of a large coin on the Moon, seen from Earth); faint stars are measured several times less precisely.',
           ),
         ),
       ],
@@ -226,7 +226,7 @@ const cosmicDistanceLadder: Module = {
           height: 1195,
           alt: 'A brilliant white star at the centre with long thin diffraction spikes crossing the frame, wrapped in a wreath of wispy dust lit in pale blue and grey near the star and brown and rust further out, on a black field scattered with smaller blue-white and orange stars.',
           caption:
-            'RS Puppis, a Cepheid about 6 500 light-years away that brightens and fades every 41.4 days. The dust around it reflects each pulse, and timing those light echoes gave its distance to about one and a half percent.',
+            'RS Puppis, a Cepheid (a star that pulses in brightness on a strict schedule) about 6 500 light-years away that brightens and fades every 41.4 days. The dust around it reflects each pulse, and timing those light echoes gave its distance to about one and a half percent.',
           credit:
             'NASA, ESA, and the Hubble Heritage Team (STScI/AURA)-Hubble/Europe Collaboration; Acknowledgment: H. Bond (STScI and Pennsylvania State University)',
         }),

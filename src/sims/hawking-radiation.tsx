@@ -21,7 +21,17 @@
  */
 import { useCallback, useEffect, useRef } from 'react';
 import type { Param, ParamValues, SimProps } from '@/content/types';
-import { AGE_UNIVERSE, DAY_S, EV, JULIAN_YEAR, K_B, M_MOON, M_SUN, T_CMB } from '@/physics/constants';
+import {
+  AGE_UNIVERSE,
+  DAY_S,
+  EV,
+  JULIAN_YEAR,
+  K_B,
+  M_EARTH,
+  M_MOON,
+  M_SUN,
+  T_CMB,
+} from '@/physics/constants';
 import { evaporationTime, hawkingTemperature, schwarzschildRadius } from '@/physics/blackhole';
 import { emissionBand, hawkingPower, massForHawkingTemperature, netWithCMB } from '@/physics/hawking';
 import { eased } from '@/motion/ease';
@@ -201,6 +211,35 @@ const REFERENCES: [number, string][] = [
   [M_MOON, 'the Moon'],
   [M_SUN, 'the Sun'],
 ];
+
+/**
+ * Landmarks for the "compared with" readout: a mountain (10¹² kg, the round
+ * figure the module uses), the Moon, the Earth and the Sun. The slider's bare
+ * kilograms span twenty-six decades, and a beginner needs a thing to hold.
+ */
+const LANDMARKS: [number, string][] = [
+  [1e12, 'a mountain'],
+  [M_MOON, 'the Moon'],
+  [M_EARTH, 'the Earth'],
+  [M_SUN, 'the Sun'],
+];
+
+/**
+ * The mass as a multiple of the nearest landmark, nearest in log space:
+ * "0.613 × the Moon" at the crossover. Far from every landmark (the slider's
+ * hundred-tonne end is 10⁻⁷ of a mountain) the ratio is given as a power of
+ * ten, since three significant figures of 10⁻⁷ say nothing a reader can use.
+ */
+function formatLandmark(M_kg: number): string {
+  if (!(M_kg > 0)) return '—';
+  let best = LANDMARKS[0]!;
+  for (const landmark of LANDMARKS) {
+    if (Math.abs(Math.log10(M_kg / landmark[0])) < Math.abs(Math.log10(M_kg / best[0]))) best = landmark;
+  }
+  const ratio = M_kg / best[0];
+  if (ratio >= 0.01 && ratio < 1e4) return `${formatSig3(ratio)} × ${best[1]}`;
+  return `about ${powerOfTen(Math.round(Math.log10(ratio)))} × ${best[1]}`;
+}
 
 const MASS_TICKS = [1e10, 1e15, 1e20, 1e25, 1e30];
 const T_TICKS = [1e-6, 1, 1e6, 1e12, 1e18];
@@ -768,6 +807,7 @@ export default function HawkingRadiationSim({ params, values, setValue }: SimPro
           label={deep ? 'Evaporation time, photons' : 'Time to evaporate, left alone'}
           value={formatLifetime(lifetime)}
         />
+        <Readout label={deep ? 'Mass, nearest landmark' : 'As heavy as'} value={formatLandmark(M)} />
       </dl>
 
       {/* The crossover mass falls between two slider stops (0.34 of a step
@@ -810,5 +850,6 @@ export const __internals = {
   formatPower,
   formatLifetime,
   formatNet,
+  formatLandmark,
   M_CROSSOVER,
 };

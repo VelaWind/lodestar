@@ -134,6 +134,20 @@ function formatOwnMotion(fraction: number): string {
 }
 
 /** A magnitude to one decimal, signed, with a true minus: "−0.8", "+13.3". */
+/**
+ * The slider's magnitude error as a brightness percentage, which a reader can
+ * picture. δ > 0 means the bulbs were assumed fainter than they are: assumed
+ * brightness is 10^(−0.4δ) of the true one, the definition of the magnitude
+ * scale. 0.1 mag reads "assumed 9% too faint"; −0.1 "assumed 10% too bright".
+ */
+function formatBrightnessError(delta: number): string {
+  if (!Number.isFinite(delta)) return '—';
+  const ratio = 10 ** (-0.4 * delta);
+  const percent = Math.round(Math.abs(ratio - 1) * 100);
+  if (percent === 0) return 'spot on';
+  return `assumed ${percent}% too ${ratio < 1 ? 'faint' : 'bright'}`;
+}
+
 function formatMagnitude(m: number): string {
   if (!Number.isFinite(m)) return '—';
   const r = Math.round(m * 10) / 10;
@@ -795,6 +809,10 @@ export default function CosmicDistanceLadderSim({ params, values }: SimProps) {
           value={formatOwnMotion(share)}
         />
         <Readout label={deep ? 'Inferred H₀' : 'Expansion rate the ladder would report'} value={formatH0(H0)} />
+        <Readout
+          label={deep ? 'Calibration error δ, as brightness' : 'How far off the bulbs’ assumed brightness is'}
+          value={formatBrightnessError(delta)}
+        />
       </dl>
     </div>
   );
@@ -825,5 +843,6 @@ export const __internals = {
   formatPercent,
   formatOwnMotion,
   formatMagnitude,
+  formatBrightnessError,
   formatH0,
 };

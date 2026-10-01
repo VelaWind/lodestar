@@ -29,7 +29,7 @@ const blackHoles: Module = {
     hook: {
       body: prose(
         p(
-          'Pack enough mass into a small enough space, and the speed needed to leave exceeds ',
+          'Pack enough matter into a small enough space, and the speed needed to leave exceeds ',
           'the speed of light. Past that line, falling inward is the only direction there is.',
         ),
       ),
@@ -96,37 +96,37 @@ const blackHoles: Module = {
       approximations: [
         prose(
           p(
-            'The hole does not rotate. Real ones do, often near the maximum allowed, and spin is not a small correction: for a maximally rotating Kerr hole the prograde innermost stable orbit falls from 3 r_s to 0.5 r_s and the prograde photon orbit with it, the horizon itself becomes oblate, and the energy released by matter falling in rises from 5.7% of its rest mass to 42%. Everything drawn here is the non-rotating limit.',
+            'The hole does not spin. Real ones usually do, and spin pulls the innermost orbits much closer in.',
           ),
         ),
         prose(
           p(
-            'The hole carries no charge. This one costs almost nothing: any net charge attracts the opposite sign out of the surrounding plasma and neutralises quickly, so astrophysical holes are uncharged to excellent accuracy.',
+            'The hole carries no electric charge. Real ones lose any charge quickly, so this costs almost nothing.',
           ),
         ),
         prose(
           p(
-            'There is no accretion disc, no jet, and nothing else nearby. A real hole of any of these masses is drawn as an isolated vacuum solution here, and everything that makes one visible — the disc, the ring of lensed light, the outflow — is absent.',
+            'Nothing is near the hole: no glowing disc of gas, no jet. Those are what make real ones visible.',
           ),
         ),
         prose(
           p(
-            'The picture is a plan view of coordinate radii, not a photograph. r_s, 1.5 r_s and 3 r_s are Schwarzschild radial coordinates plotted as if space were flat; the geometry they describe is curved, so the drawn separations are labels rather than distances a ruler would measure. Nor is this what a camera would see: the hole’s own lensing would wrap the far side of the disc into view and swell the dark patch from the horizon’s r_s to a shadow of radius √27 GM/c² ≈ 2.6 r_s, about 5.2 r_s across.',
+            'The drawing is a map, not a photograph. Space near the hole is curved, and a camera would see a dark shadow about 2.6 times the horizon’s width.',
           ),
         ),
         prose(
           p(
-            'The tidal number is a static, radial estimate. It is the head-to-foot stretch on a rigid 1.7 m person falling feet-first, evaluated exactly at the horizon, with the person short compared with r_s. The coefficient is exact for Schwarzschild (the relativistic answer for radial separations is the Newtonian one) but the body is not rigid, does not stay radial, and the figure says nothing about what happens on the way down.',
+            'The stretching figure is for a 1.7 m person falling feet first, measured right at the horizon.',
           ),
         ),
         prose(
           p(
-            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: for holes this heavy, too cold to emit any neutrino unless the lightest, whose mass is unknown, is light enough, adding gravitons and the exact emission factors shortens it about 1.8 times. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.7 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
+            'The evaporation time counts light only, so it is nearly twice too long. And no hole this heavy is shrinking yet: each is colder than the 2.7 K glow left over from the Big Bang, so it takes in more than it gives off.',
           ),
         ),
         prose(
           p(
-            'The two panels carry two different scales, each labelled on the canvas. The three radii are drawn to one scale within the geometry panel; the horizon and the comparison object share a separate scale in the size panel. A single scale across both would collapse one panel or the other into a dot.',
+            'The two panels use two different scales, each labelled on the canvas.',
           ),
         ),
       ],
@@ -199,7 +199,7 @@ const blackHoles: Module = {
           height: 746,
           alt: 'A bright orange ring, brighter along its lower edge, surrounding a dark central circle.',
           caption:
-            'The first image of a black hole: M87*, six and a half billion solar masses, photographed by the Event Horizon Telescope. The glow is hot gas orbiting just outside the horizon; the dark centre is a shadow wide enough to swallow the Solar System.',
+            'The first image of a black hole: M87*, six and a half billion times as heavy as the Sun, photographed by the Event Horizon Telescope. The glow is hot gas orbiting just outside the horizon; the dark centre is a shadow wide enough to swallow the Solar System.',
           credit: 'EHT Collaboration',
         }),
       ),
@@ -325,6 +325,27 @@ const blackHoles: Module = {
           'was two ~30-solar-mass holes merging, radiating three Suns of mass in a fifth of a ',
           'second, a peak power briefly exceeding the light of every star in the observable ',
           'universe combined.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. Real holes rotate, often near the maximum ',
+          'allowed, and spin is not a small correction: for a maximally rotating Kerr hole the ',
+          'prograde innermost stable orbit falls from 3 r_s to 0.5 r_s and the prograde photon ',
+          'orbit with it, the horizon becomes oblate, and the energy released by infalling ',
+          'matter rises from 5.7% of its rest mass to 42%. Net charge attracts the opposite sign ',
+          'out of the surrounding plasma and neutralises quickly, so astrophysical holes are ',
+          'uncharged to excellent accuracy. Each hole is drawn as an isolated vacuum solution, ',
+          'with no disc, lensed ring or outflow. The radii r_s, 1.5 r_s and 3 r_s are ',
+          'Schwarzschild radial coordinates plotted as if space were flat, so their drawn ',
+          'separations are labels rather than distances a ruler would measure; the hole’s own ',
+          'lensing swells the dark patch to a shadow of radius ',
+          m`\sqrt{27}\,GM/c^2 \approx 2.6\,r_s`,
+          '. The tidal figure is static and radial: the head-to-foot stretch on a rigid body ',
+          'short compared with r_s, evaluated at the horizon, with a coefficient that is exact ',
+          'for Schwarzschild. The evaporation time counts photons only; for holes this heavy, ',
+          'too cold for any neutrino unless the lightest (mass unknown) is light enough, ',
+          'gravitons and the exact emission factors shorten it about 1.8 times, and its clock ',
+          'cannot start until the universe has cooled below the hole’s temperature. A single ',
+          'scale across both panels would collapse one or the other into a dot.',
         ),
       ),
     },

@@ -65,11 +65,14 @@ export function ParamControls({ params, values, onChange, onReset }: Props) {
         return (
           <div key={param.id}>
             <label htmlFor={`p-${param.id}`} className="flex items-baseline justify-between gap-3">
-              <span className="flex items-baseline gap-2 truncate">
+              {/* Wraps rather than truncating: the plain-language labels name the
+                  slider's unit in words ("in Earth–Sun distances"), and an
+                  ellipsis would cut off exactly that part. */}
+              <span className="flex min-w-0 items-baseline gap-2">
                 {/* The symbol is the Deep reader's handle on the quantity. At the
                     other tiers it is noise in front of a plain-language phrase. */}
                 {tier === 'deep' && <Tex tex={param.symbol} className="text-ink" />}
-                <span className="truncate font-ui text-xs text-ink-faint">{label}</span>
+                <span className="min-w-0 font-ui text-xs leading-snug text-ink-faint">{label}</span>
               </span>
               <span className="shrink-0 font-mono text-xs tabular-nums text-ember">
                 {formatWithUnit(param, value)}

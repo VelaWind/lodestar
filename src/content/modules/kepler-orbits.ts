@@ -51,6 +51,12 @@ const keplerOrbits: Module = {
           'the time it takes (the orbit’s period) comes out the same every single lap.',
         ),
         p(
+          'The same pull sets the pace from one planet to the next. A planet close to its star ',
+          'has to move fast to stay in orbit, and has a short way round, so its year is short; a ',
+          'distant one crawls a much longer path. How the year grows with distance is the ',
+          'one-line rule, and the sim lets you test it.',
+        ),
+        p(
           'The analogy breaks in one place: a swing needs pushing, because its bearings and the ',
           'air steal a little energy every pass. An orbit has nothing to rub against. The trade ',
           'repeats exactly, for millions of years, with nothing driving it.',
@@ -86,7 +92,7 @@ const keplerOrbits: Module = {
         },
         {
           id: 'a',
-          friendlyLabel: 'How wide is the orbit?',
+          friendlyLabel: 'How far is the planet from its star, on average? (midway between nearest and farthest)',
           technicalLabel: 'Semi-major axis',
           symbol: 'a',
           unit: 'm',
@@ -126,39 +132,34 @@ const keplerOrbits: Module = {
       approximations: [
         prose(
           p(
-            'Two bodies and nothing else. No other planet pulls on this one, so the orbit closes exactly and repeats forever. Real multi-planet systems perturb each other continuously: it is those perturbations that turned up Neptune, and that make the Solar System’s long-term evolution a numerical question rather than a formula.',
+            'Only two bodies: no other planet pulls on this one, so the orbit repeats exactly, forever.',
           ),
         ),
         prose(
           p(
-            'The planet is a test particle: it has no mass of its own. A real pair orbits their common ',
+            'The planet weighs nothing here. Really, both bodies circle their shared ',
             term('barycentre', 'barycentre'),
-            ', and both move. The error is of order m/M: negligible for a planet around a star, not negligible for Jupiter and the Sun (the Sun’s wobble about the barycentre is what radial-velocity surveys measure), and outright wrong for a binary star.',
+            ', so the star wobbles too.',
           ),
         ),
         prose(
           p(
-            'Both bodies are point masses. Nothing here has a radius, so the smallest orbits the sliders allow would lie inside a real star, and no tidal distortion or oblateness is modelled.',
+            'Both bodies are points, so the smallest orbits the sliders allow would really lie inside the star.',
           ),
         ),
         prose(
           p(
-            'Newtonian gravity only. General relativity adds a slow rotation of the ellipse itself: 43 arcseconds per century for Mercury, an anomaly known since 1859 that GR explained in 1915. The orbit drawn here never precesses.',
+            'Gravity here is Newton’s, not Einstein’s, so the oval never slowly turns the way Mercury’s does; it stays fixed in space, lap after lap.',
           ),
         ),
         prose(
           p(
-            'The ellipse is fixed in space and traced repeatedly. With no perturbations and no relativity, periapsis stays put; the animation loops the same closed path indefinitely.',
+            'The motion is sped up, by a factor the readout shows. Within each lap the timing is true: the planet really does dawdle at the far end.',
           ),
         ),
         prose(
           p(
-            'Playback is time-accelerated, and by a different factor for every orbit: one full period is compressed to a fixed number of seconds of wall time, so the acceleration factor is shown on the readout and changes as you drag. Relative timing within an orbit is exact: the planet genuinely dawdles near apoapsis, which is the second law and not a rendering artifact.',
-          ),
-        ),
-        prose(
-          p(
-            'The orbit is scaled to fit the frame and drawn face-on, looking straight down on the orbital plane. Distances within one orbit are therefore comparable to each other but not across slider settings: the ellipse is redrawn to the same size whether its semi-major axis is 0.007 AU or 67 AU. Real orbits are also inclined to the line of sight, which is why an observed orbit is a projection of the one shown here.',
+            'The orbit is scaled to fit the frame and seen from straight above, so its drawn size stays the same as you drag.',
           ),
         ),
       ],
@@ -259,7 +260,7 @@ const keplerOrbits: Module = {
           height: 962,
           alt: 'Measured positions of the star S2 tracing a long ellipse around the position of Sagittarius A*, with an inset comparing its track in 2005 and in 2021–2022, the two offset by the precession of the orbit.',
           caption:
-            'The star S2, tracked for three decades as it loops around Sagittarius A*, the four-million-solar-mass black hole at the centre of the Galaxy. Its sixteen-year orbit is Kepler’s first law drawn by a real star; at closest approach it moves at about two and a half percent of the speed of light, and its ellipse precesses just as general relativity predicts.',
+            'The star S2, tracked for three decades as it loops around Sagittarius A*, the black hole at the centre of the Galaxy, four million times as heavy as the Sun. Its sixteen-year orbit is an ellipse with the black hole at one focus, Kepler’s first law drawn by a real star; at closest approach it moves at about two and a half percent of the speed of light, and its ellipse slowly turns, lap by lap, just as general relativity predicts.',
           credit: 'GRAVITY Collaboration, A&A 692, A242 (2024), CC BY 4.0 (Fig. 2, upper panel)',
         }),
       ),
@@ -377,6 +378,24 @@ const keplerOrbits: Module = {
           'wobble plus the law yields planet masses; in packed systems like TRAPPIST-1, planets ',
           'tug each other’s transit times off schedule, and those deviations weigh worlds too ',
           'small and dim for any other scale.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. Real multi-planet systems perturb each other ',
+          'continuously; those perturbations turned up Neptune, and they make the Solar System’s ',
+          'long-term evolution a numerical question rather than a formula. The planet is a test ',
+          'particle, an error of order ',
+          m`m/M`,
+          ': negligible for most planets, not for Jupiter and the Sun (the Sun’s wobble about ',
+          'the barycentre is what radial-velocity surveys measure), and outright wrong for a ',
+          'binary star. Point masses carry no tides or oblateness. With no perturbations and no ',
+          'relativity, periapsis never moves; general relativity alone would turn Mercury’s ',
+          'ellipse 43 arcseconds a century. Playback compresses one full period to a fixed number ',
+          'of seconds, so the acceleration factor changes as you drag, while the timing within an ',
+          'orbit stays exact: the dawdle near apoapsis is the second law, not a rendering ',
+          'artifact. The ellipse is drawn face-on and redrawn to one size whether its semi-major ',
+          'axis is 0.007 AU or 67 AU, so distances compare within an orbit but not across slider ',
+          'settings; real orbits are inclined to the line of sight, and an observed one is a ',
+          'projection of the one drawn here.',
         ),
       ),
     },
