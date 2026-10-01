@@ -106,7 +106,7 @@ const SUPERSCRIPT_DIGITS: Record<string, string> = {
 };
 
 /** Swap a leading hyphen-minus for U+2212, and drop the sign from a displayed zero. */
-function trueMinus(text: string): string {
+export function trueMinus(text: string): string {
   if (!text.startsWith('-')) return text;
   return /[1-9]/.test(text) ? `${MINUS}${text.slice(1)}` : text.slice(1);
 }

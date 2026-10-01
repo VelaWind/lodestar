@@ -25,9 +25,9 @@ const supernovae: Module = {
     hook: {
       body: prose(
         p(
-          'A star fifteen times the Sun’s mass ends its life in less than a second, and for a few ',
-          'weeks the explosion shines as bright as hundreds of millions of Suns. Some of the iron ',
-          'in your blood was made that way.',
+          'When a star fifteen times heavier than the Sun dies, its core collapses in under a ',
+          'second, and for a few weeks the explosion shines as bright as hundreds of millions of ',
+          'Suns. Some of the iron in your blood was made that way.',
         ),
       ),
     },
@@ -47,10 +47,10 @@ const supernovae: Module = {
           'layers drift away as a glowing shell, and what is left is a hot, dense ember the size ',
           'of the Earth that cools for the rest of time. But a star many times heavier burns ',
           'through its fuel in a few million years and then, in its last day, forges iron at its ',
-          'centre. Iron gives no heat when it fuses. The burner goes out at the centre of a star ',
-          'that weighs more than eight Suns, and the core falls in on itself, at a quarter of the ',
-          'speed of light, until it is as dense as an atomic nucleus, the tiny, heavy heart of an ',
-          'atom, and can fall no further. The ',
+          'centre. Iron gives no heat when it fuses. In a star that weighs more than eight Suns, ',
+          'the burner goes out at the centre. The core falls in on itself at a quarter of the ',
+          'speed of light. It stops only when it is as dense as an atomic nucleus, the tiny, heavy ',
+          'heart of an atom, and can fall no further. The ',
           'infalling layers slam into it, and the rebound, driven by a flood of particles from the ',
           'new core, blows the rest of the star into space.',
         ),
@@ -70,14 +70,15 @@ const supernovae: Module = {
       caption: prose(
         p(
           'Slide the star’s birth mass across the line at eight Suns and see its fate change from ',
-          'a quiet ember to a collapse. Then move a supernova of the standard kind nearer and ',
-          'farther and see how far away it would still be visible to the naked eye.',
+          'a quiet ember to a collapse. Then take a supernova of the kind that always flares to ',
+          'about the same peak brightness, move it nearer and farther, and see how far away it ',
+          'would still be visible to the naked eye.',
         ),
       ),
       params: [
         {
           id: 'M',
-          friendlyLabel: 'How heavy is the star at birth?',
+          friendlyLabel: 'How heavy is the star at birth? (in Suns)',
           technicalLabel: 'Initial mass',
           symbol: 'M',
           unit: 'kg',
@@ -120,22 +121,22 @@ const supernovae: Module = {
       approximations: [
         prose(
           p(
-            'Fates are drawn as sharp cuts at 8 and 20 solar masses, for a star of the Sun’s composition. The real boundaries are uncertain by a couple of solar masses, shift with composition and rotation, and some stars above 20 collapse to black holes with no explosion at all.',
+            'Fates are drawn as sharp cuts at 8 and 20 times the Sun’s mass. The real boundaries are fuzzy by a couple of Suns either way.',
           ),
         ),
         prose(
           p(
-            'Lifetime and brightness use the main-sequence power laws t ∝ M⁻²·⁵ and L ∝ M³·⁵, good to about a factor of two between 0.5 and 20 solar masses. Above 20 they overstate how quickly a star burns out, by about a factor of three at the top of the slider, because the brightest stars level off near the limit at which their own light would blow them apart.',
+            'Lifetime and brightness use simple rules of thumb, good to about a factor of two up to 20 Suns; above that they make stars burn out too fast.',
           ),
         ),
         prose(
           p(
-            'The brightness panel is a Type Ia at its average peak, −19.3, with no dimming by dust. A core-collapse supernova is typically two magnitudes fainter, and no single explosion is exactly average.',
+            'The brightness panel uses one kind of supernova at its average peak brightness, with no dust in the way. The kind made by a collapsing core is usually about six times fainter.',
           ),
         ),
         prose(
           p(
-            'Stars below about 0.9 solar masses have not yet had time to die; their fate shown here is the prediction.',
+            'Stars lighter than about 0.9 Suns have not had time to die yet; the fate shown for them is a prediction.',
           ),
         ),
       ],
@@ -227,7 +228,7 @@ const supernovae: Module = {
           height: 1280,
           alt: 'A ragged, roughly oval cloud on a black starfield: a web of orange and red filaments, green-tinged toward the lower left, wrapped around a pale blue glow that fills the interior.',
           caption:
-            'The Crab Nebula, the remains of a core-collapse supernova seen from Earth in 1054. At its centre is a neutron star spinning thirty times a second; the filaments are the star’s outer layers, still expanding at 1 500 km/s.',
+            'The Crab Nebula, the remains of a core-collapse supernova seen from Earth in 1054. At its centre is a neutron star, the star’s collapsed core packed into a ball the size of a city, spinning thirty times a second; the filaments are the star’s outer layers, still expanding at 1 500 km/s.',
           credit: 'NASA, ESA, J. Hester and A. Loll (Arizona State University)',
         }),
       ),
@@ -378,6 +379,25 @@ const supernovae: Module = {
           m`18\,M_\odot`,
           ' has been identified in pre-explosion images, which may mean that heavier stars ',
           'collapse quietly, or that their late-stage dust hides them.',
+        ),
+        p(
+          'The simulation’s shortcuts, in full. The fate boundaries at 8 and 20 ',
+          m`M_\odot`,
+          ' are for a star of the Sun’s composition; they are uncertain by a couple of solar ',
+          'masses, shift with composition and rotation, and some stars above 20 collapse to black ',
+          'holes with no explosion at all. Lifetime and luminosity use the main-sequence power ',
+          'laws ',
+          m`t \propto M^{-2.5}`,
+          ' and ',
+          m`L \propto M^{3.5}`,
+          ', good to about a factor of two between 0.5 and 20 ',
+          m`M_\odot`,
+          '; above that they overstate how quickly a star burns out, by about a factor of three at ',
+          'the top of the slider, because the most luminous stars level off near the Eddington ',
+          'limit. The brightness panel is a Type Ia at its average peak, ',
+          m`M = -19.3`,
+          ', with no extinction; a core-collapse supernova is typically two magnitudes fainter, ',
+          'and no single explosion is exactly average.',
         ),
       ),
     },
