@@ -424,7 +424,7 @@ const stellarFusion: Module = {
         {
           moduleId: 'early-universe',
           reason:
-            'Fusion ran once before, everywhere at once, for twenty-five minutes; that module shows why it stopped at helium.',
+            'Fusion ran once before, everywhere at once, for about twenty minutes; that module shows why it stopped at helium.',
         },
         {
           moduleId: 'supernovae',

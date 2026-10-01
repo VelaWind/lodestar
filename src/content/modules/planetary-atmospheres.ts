@@ -357,8 +357,9 @@ const planetaryAtmospheres: Module = {
           'atmosphere observably boiling off. Worlds without a magnetic field face ',
           em('solar-wind stripping'),
           ', the mechanism MAVEN measured at Mars, though whether a field protects an ',
-          'atmosphere on net is disputed (it also channels ions out over the poles), and Venus ',
-          'keeps 92 bar without one. And large impacts can blast off atmosphere ',
+          'atmosphere on net is disputed (it also channels ions out over the poles); Venus has no ',
+          'field yet keeps 92 bar of heavy carbon dioxide, though it lost almost all its water. ',
+          'And large impacts can blast off atmosphere ',
           'wholesale. Mars is the compound case: too small to hold interior heat, it lost its ',
           term('magnetic dynamo', 'magnetic-dynamo'),
           ', and the wind plus its weak gravity did the rest. The evidence is ',
@@ -420,6 +421,12 @@ const planetaryAtmospheres: Module = {
         'Vidal-Madjar et al. 2003, “An extended upper atmosphere around the extrasolar planet HD209458b”, Nature 422, 143',
       url: 'https://doi.org/10.1038/nature01448',
       note: 'The evaporating hot Jupiter in layer 6',
+    },
+    {
+      label:
+        'Gunell et al. 2018, “Why an intrinsic magnetic field does not protect a planet against atmospheric escape”, A&A 614, L3',
+      url: 'https://doi.org/10.1051/0004-6361/201832934',
+      note: 'The magnetic-shield dispute in layer 6',
     },
   ],
 };

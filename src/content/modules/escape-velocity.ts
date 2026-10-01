@@ -125,7 +125,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'Newtonian gravity only. Curiously, general relativity gives the same formula for the speed an observer hovering at radius r would measure, but what r and speed mean changes, and inside r_s no speed is enough (see Going deeper).',
+            'Newtonian gravity only. Curiously, general relativity gives the same formula for the speed, launched straight up, that an observer hovering at radius r would measure (near a black hole the escape speed depends on direction), but what r and speed mean changes, and inside r_s no speed is enough (see Going deeper).',
           ),
         ),
         prose(
