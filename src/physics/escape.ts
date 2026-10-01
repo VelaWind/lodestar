@@ -83,15 +83,20 @@ export function initialState(R: number, v0: number): FlightState {
 }
 
 /**
- * One semi-implicit (symplectic) Euler step on
+ * One velocity-Verlet (kick–drift–kick leapfrog) step on
  *
  *     dv/dt = −GM/r²,    dr/dt = v
  *
- * Velocity is updated first and the *new* velocity advances position, which is
- * what makes this symplectic: energy error stays bounded over long flights
- * instead of drifting monotonically the way explicit Euler's does. That matters
- * here because the whole point of the sim is whether the projectile turns
- * around, and an integrator that leaks energy would move the threshold.
+ *     v½ = v − g(r)·dt/2,   r′ = r + v½·dt,   v′ = v½ − g(r′)·dt/2
+ *
+ * Each step opens with a half kick, so position and velocity stay in step: the
+ * velocity a state carries is the velocity *at* its position. That removes the
+ * first-step energy offset the earlier semi-implicit Euler start carried (it
+ * advanced the launch with a full kick, costing about v₀·g·dt of energy at the
+ * outset), which near the escape threshold, where the apex goes as
+ * 1/(1 − v₀²/v_esc²), turned into a drawn peak short by up to a tenth. The
+ * scheme is symplectic and time-reversible, so energy error stays bounded over
+ * long flights instead of drifting, and it is second-order in dt.
  *
  * `dt` is a fixed physics timestep in seconds — never the frame delta. Playback
  * speed is handled by taking more steps per frame, not by enlarging `dt`.
@@ -101,13 +106,14 @@ export function initialState(R: number, v0: number): FlightState {
 export function step(state: FlightState, M: number, R: number, dt: number): FlightState {
   if (state.landed) return state;
 
-  const v = state.v - gravity(M, state.r) * dt;
-  const r = state.r + v * dt;
+  const vHalf = state.v - gravity(M, state.r) * (dt / 2);
+  const r = state.r + vHalf * dt;
 
   if (r <= R) {
     // Came back down. Clamp to the surface rather than tunnelling through it.
-    return { t: state.t + dt, r: R, v, altitude: 0, landed: true };
+    return { t: state.t + dt, r: R, v: vHalf, altitude: 0, landed: true };
   }
+  const v = vHalf - gravity(M, r) * (dt / 2);
   return { t: state.t + dt, r, v, altitude: r - R, landed: false };
 }
 
@@ -232,20 +238,62 @@ export function flightDuration(M: number, R: number, v0: number): number {
 }
 
 /**
- * `timestepFor`, stretched only when the whole flight would not fit in the
- * step budget. A launch just under the escape speed takes days to come down,
- * and at the body's natural timestep that runs past `MAX_STEPS`; here dt grows
- * just enough for the closed-form flight (up to `maxAltitude`, past which the
- * integration stops anyway) to fit in three-quarters of the budget. On Earth
- * that is still under a second per step, against a flight of days.
+ * Time for a radial launch to climb from the surface to radius `r`, s, in
+ * closed form, on whichever conic the launch speed puts it:
+ *
+ *     bound (v₀ < v_esc):   a = 1/(2/R − v₀²/GM),  r = a(1 − cos η),   t = √(a³/GM)(η − sin η)
+ *     parabolic (v₀ = v_esc):                      t = (2/3)(r^{3/2} − R^{3/2}) / √(2GM)
+ *     hyperbolic (v₀ > v_esc): a = 1/(v₀²/GM − 2/R), r = a(cosh H − 1), t = √(a³/GM)(sinh H − H)
+ *
+ * Infinity if a bound launch never reaches `r`. Checked against the integrator
+ * from 10 to 20 km/s on Earth before use. Within a part in 10⁹ of the threshold
+ * the conic forms lose precision to cancellation, and the parabolic form, which
+ * they both approach, is used instead.
+ *
+ * @param M gravitating mass, kg
+ * @param R surface radius, m
+ * @param v0 launch speed, m/s
+ * @param r target radius from the body's centre, m
+ */
+export function timeToRadius(M: number, R: number, v0: number, r: number): number {
+  if (!(M > 0) || !(R > 0) || !(v0 >= 0) || !(r >= R)) return NaN;
+  const GM = G * M;
+  const inverseA = 2 / R - v0 ** 2 / GM;
+  if (Math.abs(inverseA) <= 1e-9 * (2 / R)) {
+    return ((2 / 3) * (r ** 1.5 - R ** 1.5)) / Math.sqrt(2 * GM);
+  }
+  if (inverseA > 0) {
+    const a = 1 / inverseA;
+    if (r > 2 * a) return Infinity;
+    const at = (x: number) => {
+      const eta = Math.acos(1 - x / a);
+      return Math.sqrt(a ** 3 / GM) * (eta - Math.sin(eta));
+    };
+    return at(r) - at(R);
+  }
+  const a = -1 / inverseA;
+  const at = (x: number) => {
+    const H = Math.acosh(1 + x / a);
+    return Math.sqrt(a ** 3 / GM) * (Math.sinh(H) - H);
+  };
+  return at(r) - at(R);
+}
+
+/**
+ * `timestepFor`, stretched only when the flight would not fit in the step
+ * budget. A launch just under the escape speed takes days to come down, and at
+ * the body's natural timestep that runs past `MAX_STEPS`; here dt grows just
+ * enough for the closed-form time the integration will cover to fit in
+ * three-quarters of the budget. That time is the whole flight for one that
+ * lands in the frame, and the climb to the frame top, `maxAltitude`, for one
+ * that leaves it, escaping or not. On Earth dt stays under a second per step.
  *
  * @param maxAltitude the altitude at which integration will stop, m
  */
 export function timestepForFlight(M: number, R: number, v0: number, maxAltitude: number): number {
   const base = timestepFor(M, R);
-  // A flight that will leave the frame is integrated only up to the frame top.
   const climbing = apexAltitude(M, R, v0) > maxAltitude;
-  const duration = climbing ? 0 : flightDuration(M, R, v0);
+  const duration = climbing ? timeToRadius(M, R, v0, R + maxAltitude) : flightDuration(M, R, v0);
   if (!(duration > 0) || !Number.isFinite(duration)) return base;
   return Math.max(base, duration / (0.75 * MAX_STEPS));
 }
