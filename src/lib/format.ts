@@ -343,6 +343,126 @@ export function sliderBounds(param: Param): { min: number; max: number; step: nu
   return { min: param.min, max: param.max, step: param.step };
 }
 
+/**
+ * The range input's own min, max and step, anchored on the default.
+ *
+ * A range input stops only at `min + k·step`, counted from the element's min.
+ * Handing it the param's real min puts the stops on a grid that the default
+ * need not sit on, and the first drag then snaps the default away. So the
+ * element's min is pushed *down* by less than one step, to the stop at or below
+ * the real min on a grid running through the default, and its max *up* by less
+ * than one step the same way:
+ *
+ *     inputMin = pDef − kLo·s,  kLo = ⌈(pDef − pMin)/s − 10⁻⁹⌉   →  inputMin ≤ pMin < inputMin + s
+ *     inputMax = pDef + kHi·s,  kHi = ⌈(pMax − pDef)/s − 10⁻⁹⌉   →  pMax ≤ inputMax < pMax + s
+ *
+ * Every stop is then pDef + k·s. The overshoot past each end is never a value
+ * the reader can hold: `valueFromSliderPosition` clamps it back to the real
+ * min and max. The 10⁻⁹ tolerance keeps an end that already sits on the grid
+ * (the eight mins `grid.ts` nudged) from gaining a spurious extra step.
+ *
+ * All in position space: decades for a log param, SI for a linear one.
+ */
+export function sliderInputAttrs(param: Param): {
+  min: number;
+  max: number;
+  step: number;
+  /** The real ends, in position space: what aria-valuemin/max report. */
+  pMin: number;
+  pMax: number;
+} {
+  const { min: pMin, max: pMax, step: s } = sliderBounds(param);
+  const pDef = valueToPosition(param, param.default);
+  if (!(s > 0) || !Number.isFinite(pDef)) return { min: pMin, max: pMax, step: s, pMin, pMax };
+  const kLo = Math.max(0, Math.ceil((pDef - pMin) / s - 1e-9));
+  const kHi = Math.max(0, Math.ceil((pMax - pDef) / s - 1e-9));
+  // An end already on the grid can come back from the float arithmetic a hair
+  // inside the real end; the element's range must never be narrower than it.
+  const min = Math.min(pDef - kLo * s, pMin);
+  const max = Math.max(pDef + kHi * s, pMax);
+  // The browser counts stops in exact decimal on the attribute strings, and on
+  // some sliders min + (kLo + kHi)·s lands a hair above max there, so the top
+  // stop is unreachable and End falls a step short. Only then, the step shrinks
+  // by one part in 10¹²: the top stop comes back, and the default moves off its
+  // stop by a part in 10¹¹ of a step, which `valueFromSliderPosition` snaps.
+  const step = reachesTop(min, max, s, kLo + kHi) ? s : s * (1 - 1e-12);
+  return { min, max, step, pMin, pMax };
+}
+
+/** A number's shortest decimal string as an exact mantissa × 10^exponent. */
+function exactDecimal(x: number): { mantissa: bigint; exponent: number } {
+  const [coefficient = '0', power] = String(x).split('e');
+  const negative = coefficient.startsWith('-');
+  const [whole = '0', fraction = ''] = (negative ? coefficient.slice(1) : coefficient).split('.');
+  const mantissa = BigInt(`${whole}${fraction}`);
+  return {
+    mantissa: negative ? -mantissa : mantissa,
+    exponent: (power ? Number(power) : 0) - fraction.length,
+  };
+}
+
+/**
+ * Whether a range input with these attributes can reach stop number `stops`:
+ * min + stops·step ≤ max, exactly, on the strings the browser is handed. All
+ * three engines agree with this on every slider on the site; a float check
+ * does not (it gets seven of forty-one wrong).
+ */
+export function reachesTop(min: number, max: number, step: number, stops: number): boolean {
+  if (![min, max, step].every(Number.isFinite)) return true;
+  const [a, b, c] = [min, max, step].map(exactDecimal) as [
+    ReturnType<typeof exactDecimal>,
+    ReturnType<typeof exactDecimal>,
+    ReturnType<typeof exactDecimal>,
+  ];
+  const floor = Math.min(a.exponent, b.exponent, c.exponent);
+  const scaled = (d: ReturnType<typeof exactDecimal>) =>
+    d.mantissa * 10n ** BigInt(d.exponent - floor);
+  return scaled(a) + BigInt(stops) * scaled(c) <= scaled(b);
+}
+
+/**
+ * The SI value for a position the range input reports, clamped to the param's
+ * real range. At or past either end it returns `param.min` or `param.max`
+ * themselves, not a log round trip of them, so dragging to an end, Home and End
+ * all give the authored bound exactly; on the default's own stop it returns
+ * `param.default` exactly, for the same reason.
+ */
+export function valueFromSliderPosition(param: Param, pos: number): number {
+  const { pMin, pMax } = sliderInputAttrs(param);
+  const s = sliderBounds(param).step;
+  if (!(pos > pMin)) return param.scale === 'log' ? logDomain(param).lo : param.min;
+  if (!(pos < pMax)) return param.scale === 'log' ? logDomain(param).hi : param.max;
+  const pDef = valueToPosition(param, param.default);
+  if (s > 0 && Math.abs(pos - pDef) < 1e-6 * s) return param.default;
+  return positionToValue(param, pos);
+}
+
+/**
+ * The position to hand the range input for a stored value.
+ *
+ * At or beyond an end it is the element's own end stop, not the real bound: the
+ * real bound is generally not a stop, the browser would silently round it to
+ * the nearest one inside the range, and the `change` event that follows Home,
+ * End or a drag's release would then report that rounded stop back as a new
+ * value. Anywhere else it is the plain position.
+ */
+export function sliderInputPosition(param: Param, si: number): number {
+  const { min, max, pMin, pMax } = sliderInputAttrs(param);
+  const pos = valueToPosition(param, si);
+  if (!(pos > pMin)) return min;
+  if (!(pos < pMax)) return max;
+  return pos;
+}
+
+/**
+ * A number as an ARIA attribute value: plain decimal, never exponent notation,
+ * which axe rejects as an invalid aria-valuemin/max. Up to 17 significant
+ * figures, so nothing is lost.
+ */
+export function ariaNumber(n: number): string {
+  return n.toLocaleString('en-US', { useGrouping: false, maximumSignificantDigits: 17 });
+}
+
 export function clampToParam(param: Param, si: number): number {
   return Math.min(param.max, Math.max(param.min, si));
 }

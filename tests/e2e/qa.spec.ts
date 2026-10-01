@@ -1350,6 +1350,49 @@ test('keyboard: the whole sim is operable without a pointer @cross-engine', asyn
   assertClean(w, 'keyboard');
 });
 
+/**
+ * Every slider's default is a stop, and its ends are exact.
+ *
+ * The input's own min and max are pushed outward by under a step so its stops
+ * run through the default; the page clamps the overshoot back. Kepler's
+ * eccentricity was the worst off-grid default (0.0167 on a 0.001 grid, 1.8% of
+ * the value): one step there and back used to land on 0.017. Dragging past each
+ * end must show exactly the authored bound, on a log slider and a linear one.
+ */
+test('sliders: the default is a stop, and dragging to either end gives the exact bound @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/kepler-orbits', { waitUntil: 'domcontentloaded' });
+  await settle(page);
+
+  const e = page.locator('#p-e');
+  const atDefault = await e.getAttribute('aria-valuetext');
+  expect(atDefault, 'kepler e at its default').toBe('0.0167');
+  await e.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(e, 'one step up from the default').toHaveAttribute('aria-valuetext', '0.0177');
+  await page.keyboard.press('ArrowLeft');
+  await expect(e, 'and back: exactly the default').toHaveAttribute('aria-valuetext', atDefault!);
+
+  // Linear: eccentricity, 0 to 0.97.
+  await dragSliderToEnd(page, e, 'min');
+  await expect(e, 'kepler e dragged to its minimum').toHaveAttribute('aria-valuetext', '0');
+  await dragSliderToEnd(page, e, 'max');
+  await expect(e, 'kepler e dragged to its maximum').toHaveAttribute('aria-valuetext', '0.97');
+
+  // Log: escape-velocity's mass, 10¹⁸ to 10³² kg, which used to stop a step short of the top.
+  await page.goto('/m/escape-velocity', { waitUntil: 'domcontentloaded' });
+  await settle(page);
+  const M = page.locator('#p-M');
+  await dragSliderToEnd(page, M, 'min');
+  await expect(M, 'escape M dragged to its minimum').toHaveAttribute('aria-valuetext', '1.00 × 10¹⁸ kg');
+  await dragSliderToEnd(page, M, 'max');
+  await expect(M, 'escape M dragged to its maximum').toHaveAttribute('aria-valuetext', '1.00 × 10³² kg');
+
+  assertClean(w, 'slider stops');
+});
+
 test('screen reader: canvases are labelled and described', async ({ page }) => {
   const w = watch(page);
 
