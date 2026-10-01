@@ -137,13 +137,20 @@ export function hawkingTemperature(M: number): number {
  *
  * This is the Page-type estimate for a hole emitting photons only, integrated
  * from the Stefan–Boltzmann power of a horizon at T_H. It is order-of-magnitude,
- * not a prediction, and how far off it is depends on the mass. For holes this
- * heavy, far too cold to emit neutrinos (which have mass), adding gravitons and
- * the exact emission factors shortens it roughly twofold: Page 1976's photon
- * and graviton shares, 19% of 2.011 × 10⁻⁴ ħc⁶/(G²M²), against the naive
- * photon blackbody's 1/(15360π), a factor of 1.84. A hole hot enough to emit
- * neutrinos, lighter than about 10²¹ kg, evaporates about ten times faster than
- * this figure, and faster still once electrons, then hadrons, switch on.
+ * not a prediction, and how far off it is depends on the mass. Page's
+ * coefficients, as Bambeck & Hiscock 2005 (eq. 6) write them, give the power in
+ * Planck units as a = 4.091 × 10⁻⁵ n + 3.755 × 10⁻⁵, with n the spin-½ states
+ * the hole is hot enough to emit and the constant its photons and gravitons.
+ * Against the naive photon blackbody's 1/(15360π):
+ *   - n = 0, a hole too cold for any neutrino: about 1.8 times faster (1.81).
+ *     A floor, since the lightest neutrino's mass is unknown and it may be
+ *     emitted after all;
+ *   - n = 4, Page 1976's two massless flavours: about ten times (9.71);
+ *   - n = 6, all three flavours, below about 2 × 10²⁰ kg: about fourteen
+ *     (13.7); about twenty-five (25.5) if neutrinos are Dirac particles.
+ * Neutrinos switch on where kT passes their mass: the second-lightest, at
+ * least 0.0087 eV, from about 1.2 × 10²¹ kg down. Electrons, then hadrons,
+ * raise it further.
  * The final, non-semiclassical phase is not modelled at all.
  *
  * It also ignores everything the hole is sitting in. For any hole this module

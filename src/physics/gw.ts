@@ -13,8 +13,9 @@
  * circular (real binaries circularise long before they reach a detector's band,
  * so this is good late in the inspiral and poor early), the bodies are point
  * masses with no spin, and amplitudes are for an optimally oriented source
- * (face-on, directly overhead); averaged over sky position and orientation the
- * detected amplitude is 2/5 of that.
+ * (face-on, directly overhead); averaged over sky position and orientation, the
+ * root-mean-square detected amplitude is 2/5 of that (a typical source gives
+ * about a third: the plain mean is 0.35).
  *
  * This module is the single source of truth for the gravitational-waves
  * module's numbers. The canvas, the audio, every readout and the sanity checks
@@ -128,8 +129,8 @@ export function fOfTimeToMerger(mc: number, tau: number): number {
  * Strain amplitude at distance `d`, dimensionless.
  *
  * Optimally oriented (face-on, directly overhead); averaged over sky position
- * and orientation the detected amplitude is 2/5 of this, and a real source can
- * only be fainter. What a detector sees depends on where the source sits in its
+ * and orientation, the root-mean-square detected amplitude is 2/5 of this (a
+ * typical source gives about a third), and a real source can only be fainter. What a detector sees depends on where the source sits in its
  * antenna pattern and how the orbital plane is inclined to the line of sight;
  * this is the upper figure. Strain is a fractional length change, so the number
  * is the same whatever units the detector arm is measured in.

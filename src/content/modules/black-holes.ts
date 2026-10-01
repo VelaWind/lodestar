@@ -121,7 +121,7 @@ const blackHoles: Module = {
         ),
         prose(
           p(
-            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: for holes this heavy, far too cold to emit neutrinos (which have mass), adding gravitons and the exact emission factors shortens it roughly twofold. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.725 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
+            'The evaporation time counts photons only, and assumes the hole is left completely alone. It is an order-of-magnitude estimate: for holes this heavy, too cold to emit any neutrino unless the lightest, whose mass is unknown, is light enough, adding gravitons and the exact emission factors shortens it about 1.8 times. More importantly, no hole this size is evaporating at all. Every mass on this slider is colder than the 2.7 K microwave background, so it absorbs more than it radiates and grows: the clock quoted does not start until the universe has cooled below its temperature.',
           ),
         ),
         prose(
@@ -305,7 +305,8 @@ const blackHoles: Module = {
           'Only after the cosmos cools below a hole’s temperature does the ',
           m`10^{67}`,
           '-year countdown genuinely begin, and the crossover mass (a hole as warm as today’s ',
-          'CMB) is about the mass of the Moon, far below anything astrophysics knows how to make.',
+          'CMB) is about three-fifths of the Moon’s mass, far below anything astrophysics knows how ',
+          'to make.',
         ),
         p(
           'Evaporation sharpened the field’s central open problem. Thermal radiation carries no ',

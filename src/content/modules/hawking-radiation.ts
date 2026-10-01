@@ -87,7 +87,7 @@ const hawkingRadiation: Module = {
       approximations: [
         prose(
           p(
-            'Power and lifetime count light only, and what that leaves out depends on the mass. A cold, heavy hole, near a solar mass, also emits gravitons but no neutrinos, which have mass, and the exact emission factors make it evaporate about twice as fast. A hot hole, lighter than about 10²¹ kg, emits neutrinos too, which multiplies its power about tenfold, and heavier particles once it is hotter still, which raises it further; the mountain-mass example is one of these, and the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
+            'Power and lifetime count light only, and what that leaves out depends on the mass. A cold, heavy hole near a solar mass emits gravitons too, and the exact emission factors make it evaporate about 1.8 times faster; more if the lightest neutrino, whose mass is unknown, is light enough to be emitted. Below about 10²¹ kg a hole starts emitting neutrinos, and once all three kinds are on, below about 2 × 10²⁰ kg, its power is about fourteen times the light-only figure (Page’s 1976 calculation, which knew of only two kinds, gave about ten). Heavier particles raise it further once the hole is hotter still; the mountain-mass example is one of these, and the hole that finishes evaporating today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
           ),
         ),
         prose(
@@ -281,11 +281,17 @@ const hawkingRadiation: Module = {
           'factors, the transmission through the potential barrier around the hole, which suppress ',
           'low-frequency emission and differ by spin, so that a non-rotating hole emits, per unit ',
           'energy, most in neutrinos, then photons, then gravitons (Page 1976). The photons-only ',
-          'coefficients used in the sim are an order-of-magnitude account; Page’s full calculation for ',
-          'a hole emitting only massless particles gives a lifetime about a tenth as long. That ',
-          'holds for a hole hot enough to treat neutrinos as massless; a hole too cold to emit them, ',
-          'near a solar mass, gains only about a factor of two from gravitons and the exact ',
-          'emission factors. Heavier species shorten it further once ',
+          'coefficients used in the sim are an order-of-magnitude account. Page’s full calculation, ',
+          'with the two massless neutrino flavours then known, gives a power about ten times ',
+          'larger; counting the three flavours now known, as Bambeck and Hiscock (2005) do, it is ',
+          'about fourteen, and about twenty-five if neutrinos are Dirac particles, with twice as ',
+          'many states. Neutrinos have mass, so they switch on only where ',
+          m`kT`,
+          ' exceeds it: the second-lightest from about 1.2 × 10²¹ kg down, the heaviest below ',
+          'about 2 × 10²⁰ kg. A hole too cold for any of them, near a solar mass, gains a factor of ',
+          'only about 1.8 from gravitons and the exact emission factors, and since the lightest ',
+          'neutrino’s mass is unknown, even that is a floor. Heavier species shorten the lifetime ',
+          'further once ',
           m`kT`,
           ' passes their rest energies.',
         ),
@@ -382,9 +388,9 @@ const hawkingRadiation: Module = {
     },
     {
       label:
-        'Steinhauer 2016, “Observation of quantum Hawking radiation and its entanglement in an analogue black hole”, Nature Physics 12, 959',
-      url: 'https://doi.org/10.1038/nphys3863',
-      note: 'The analogue measurement',
+        'Bambeck & Hiscock 2005, “Effects of nonzero neutrino masses on black hole evaporation”, Class. Quantum Grav. 22, 4247',
+      url: 'https://doi.org/10.1088/0264-9381/22/20/006',
+      note: 'Page’s coefficients recounted for three neutrino flavours, and the neutrino-mass thresholds',
     },
     {
       label:

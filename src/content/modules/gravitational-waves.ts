@@ -122,7 +122,8 @@ const gravitationalWaves: Module = {
           technicalLabel: 'Distance',
           symbol: 'd',
           unit: 'm',
-          // About 1e22 m ≈ 0.3 Mpc, just past the Andromeda galaxy; 1e26 m ≈ 3 Gpc, out
+          // About 1e22 m ≈ 0.3 Mpc, inside the Local Group, short of Andromeda
+          // (0.77 Mpc); 1e26 m ≈ 3 Gpc, out
           // to where many detected mergers lie (GW190521, among the most distant,
           // was about 5.3 Gpc away). The minimum is nudged
           // 0.4% above 1e22 so the default is step 310 of 400.
@@ -158,7 +159,7 @@ const gravitationalWaves: Module = {
         ),
         prose(
           p(
-            'The amplitude is for an optimally oriented source (face-on, directly overhead); averaged over sky position and orientation the detected amplitude is 2/5 of this, and a real source can only be fainter. A real detector measures F₊h₊ + F×h×: how much ',
+            'The amplitude is for an optimally oriented source (face-on, directly overhead); averaged over sky position and orientation, the root-mean-square detected amplitude is 2/5 of this (a typical source gives about a third), and a real source can only be fainter. A real detector measures F₊h₊ + F×h×: how much ',
             term('strain', 'strain'),
             ' gets through depends on where the source sits in the antenna pattern and how the orbital plane is tilted to the line of sight. The readout is an upper figure, not a prediction of what a particular instrument would record.',
           ),

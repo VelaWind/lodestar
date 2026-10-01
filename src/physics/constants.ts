@@ -104,8 +104,9 @@ export const T_MS_SUN = 1e10 * JULIAN_YEAR;
 // Stellar endpoints
 /**
  * Chandrasekhar limit, kg, rounded to 1.4 M☉: the most mass electron
- * degeneracy pressure can support. 1.44 M☉ for a carbon–oxygen white dwarf
- * (Y_e = 0.5). Source: Chandrasekhar 1931, ApJ 74, 81.
+ * degeneracy pressure can support. 1.46 M☉ for a carbon–oxygen white dwarf
+ * (5.836/μ_e² M☉ with μ_e = 2, i.e. Y_e = 0.5). Source: Chandrasekhar 1931,
+ * ApJ 74, 81.
  */
 export const M_CHANDRASEKHAR = 1.4 * M_SUN;
 /** A typical neutron-star mass, kg: about 1.4 M☉, the peak of the measured distribution. */
@@ -248,6 +249,13 @@ export const MUON_LIFETIME = 2.1969811e-6;
 export const AGE_UNIVERSE = 13.8e9 * JULIAN_YEAR;
 /** One megaton of TNT, J: 4.184 × 10¹⁵, by definition (a thousand tonnes at 4.184 GJ each). */
 export const MEGATON_TNT = 4.184e15;
+/**
+ * The least the second-lightest neutrino's rest energy can be, J: √Δm²₂₁, with
+ * the lightest at zero, 0.0087 eV. Only mass differences are measured, so this
+ * is a floor, and the lightest neutrino's own mass is unknown. Source: PDG 2024,
+ * Δm²₂₁ = (7.53 ± 0.18) × 10⁻⁵ eV².
+ */
+export const E_NEUTRINO_2_MIN = Math.sqrt(7.53e-5) * EV;
 /** Electron rest energy, J. Source: CODATA 2018, m_e c² = 0.510 998 950 00(15) MeV. */
 export const E_ELECTRON_REST = 0.51099895e6 * EV;
 /** Muon rest energy, J. Source: CODATA 2018, m_μ c² = 105.658 3755(23) MeV. */
