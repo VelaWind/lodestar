@@ -130,7 +130,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'Nothing else pulls on the projectile. Escaping Earth is not escaping the Sun, which takes another 12.3 km/s.',
+            'Nothing else pulls on the projectile. Escaping Earth is not escaping the Sun: thrown from the ground in the right direction, that takes about 16.6 km/s in all.',
           ),
         ),
         prose(
@@ -145,7 +145,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'The path is worked out in small time steps. Very close to escape speed its drawn peak falls a few percent short of the true highest point, which the readout gives.',
+            'The path is worked out in small time steps. Very close to escape speed its drawn peak can fall up to about a tenth short of the true highest point, which the readout gives.',
           ),
         ),
       ],
@@ -370,8 +370,9 @@ const escapeVelocity: Module = {
           'stays bounded, and its apex agrees with the closed form to well under 1% for most ',
           'launches. Just below escape speed the apex goes as ',
           m`1/(1 - v_0^2/v_{\text{esc}}^2)`,
-          ', which magnifies the launch step’s small energy offset into a shortfall of a few ',
-          'percent (3.5% at 11.1 km/s on Earth); the readout and the status use the closed form.',
+          ', which magnifies the launch step’s small energy offset into a drawn-peak shortfall of ',
+          'up to about a tenth for the highest flights that still land in the frame (3.5% at ',
+          '11.1 km/s on Earth); the readout and the status use the closed form.',
         ),
       ),
     },

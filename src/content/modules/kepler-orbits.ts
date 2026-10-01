@@ -92,7 +92,7 @@ const keplerOrbits: Module = {
         },
         {
           id: 'a',
-          friendlyLabel: 'How far is the planet from its star, on average? (midway between nearest and farthest)',
+          friendlyLabel: 'How far is the planet from its star? (midway between nearest and farthest)',
           technicalLabel: 'Semi-major axis',
           symbol: 'a',
           unit: 'm',
@@ -149,7 +149,7 @@ const keplerOrbits: Module = {
         ),
         prose(
           p(
-            'Gravity here is Newton’s, not Einstein’s, so the oval never slowly turns the way Mercury’s does; it stays fixed in space, lap after lap.',
+            'No other planet tugs on it and gravity here is Newton’s, not Einstein’s, so the oval never slowly turns the way Mercury’s does; it stays fixed in space, lap after lap.',
           ),
         ),
         prose(

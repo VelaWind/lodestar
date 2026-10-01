@@ -603,17 +603,17 @@ describe('chirp signal: the two binaries against each other', () => {
  * hundred to one), so the caption must allow for that.
  */
 describe('chirp signal: the 30 Hz readout and caption', () => {
-  it('says a heavy pair never reaches 30 Hz, and gives a time otherwise', () => {
+  it('says a heavy pair’s inspiral ends below 30 Hz, and gives a time otherwise', () => {
     const heavy = { m1: 100 * M_SUN, m2: 100 * M_SUN };
     const heavyCutoff = fCutoff(heavy.m1, heavy.m2);
     expect(heavyCutoff).toBeLessThan(BAND_ENTRY_HZ);
     expect(gw.bandEntryReadout(chirpMass(heavy.m1, heavy.m2), heavyCutoff)).toBe(
-      'never reaches 30 Hz',
+      'inspiral ends below 30 Hz',
     );
 
     const def = { m1: 36 * M_SUN, m2: 29 * M_SUN };
     const readout = gw.bandEntryReadout(chirpMass(def.m1, def.m2), fCutoff(def.m1, def.m2));
-    expect(readout).not.toContain('never');
+    expect(readout).not.toContain('below');
     expect(readout).toMatch(/\d/);
   });
 
