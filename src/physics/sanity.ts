@@ -394,7 +394,7 @@ export function verifyEscapeIntegrator(): CheckBlock {
   // summary header — and carries a second body line naming the conditions.
   const line =
     `${passed ? 'PASS' : 'FAIL'}  ${name}\n` +
-    `      r_max = 1 / (1/R − v₀²/2GM),  against semi-implicit Euler on dv/dt = −GM/r²\n` +
+    `      r_max = 1 / (1/R − v₀²/2GM),  against velocity Verlet on dv/dt = −GM/r²\n` +
     `      Earth M/R, v₀ = ${v0 / 1000} km/s, dt = ${significant(dt)} s\n` +
     `      ${detail}` +
     `  ·  Δ ${(error * 100).toFixed(4)}%  ·  tolerance ±1.0%`;
