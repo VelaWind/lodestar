@@ -231,7 +231,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'cosmological-redshift': {
     title: 'Cosmological redshift',
-    body: 'Redshift caused by space stretching while the light travels: the wave grows by the same factor the universe grew. Distinct from a Doppler shift.',
+    body: 'The redshift of light crossing an expanding universe: the wave grows by the same factor the universe grew. Usually pictured as stretching, though a sum of tiny Doppler shifts describes it too.',
   },
   'type-ia-supernova': {
     title: 'Type Ia supernova',
@@ -363,7 +363,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'standard-deviation': {
     title: 'Standard deviation',
-    body: 'The statistician’s yardstick for surprise; five of them makes chance a one-in-a-million explanation.',
+    body: 'The statistician’s yardstick for surprise; five of them makes chance a less than one-in-a-million explanation.',
   },
 
   /* Stellar fusion ------------------------------------------------- */
@@ -502,7 +502,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'leavitt-law': {
     title: 'Leavitt law',
-    body: 'The rule, found by Henrietta Swan Leavitt in 1912, that brighter Cepheid variables pulse more slowly. Timing one gives its true brightness.',
+    body: 'The rule, noticed by Henrietta Swan Leavitt in 1908 and published in 1912, that brighter Cepheid variables pulse more slowly. Timing one gives its true brightness.',
   },
   'absolute-magnitude': {
     title: 'Absolute magnitude',
@@ -571,7 +571,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'einstein-rosen-bridge': {
     title: 'Einstein–Rosen bridge',
-    body: 'The wormhole hidden in the mathematics of a simple black hole, found in 1935. It pinches shut faster than light can cross it, so nothing can travel through.',
+    body: 'The wormhole hidden in the mathematics of a simple black hole, first glimpsed by Ludwig Flamm in 1916 and made explicit by Einstein and Rosen in 1935. It pinches shut faster than light can cross it.',
   },
   'exotic-matter': {
     title: 'Exotic matter',

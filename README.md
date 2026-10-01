@@ -59,7 +59,7 @@ npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
 ```
 
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 857 of 857, and `npm run build` emits 20 route HTML files (39 total) plus `sitemap.xml`.
+On a clean install with Node 22: lint reports zero issues, `npm test` passes 901 of 901, and `npm run build` emits 20 route HTML files (39 total) plus `sitemap.xml`.
 
 <!-- site:case-study:start -->
 

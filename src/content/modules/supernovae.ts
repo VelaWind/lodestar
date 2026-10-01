@@ -25,7 +25,7 @@ const supernovae: Module = {
     hook: {
       body: prose(
         p(
-          'A star twenty times the Sun’s mass ends its life in less than a second, and for a few ',
+          'A star fifteen times the Sun’s mass ends its life in less than a second, and for a few ',
           'weeks the explosion shines as bright as hundreds of millions of Suns. Some of the iron ',
           'in your blood was made that way.',
         ),
