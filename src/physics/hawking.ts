@@ -15,14 +15,26 @@
  * Photons only, as `evaporationTime` is: the power below is the one whose
  * integral gives that lifetime, so the two are consistent by construction.
  * A real hole also emits gravitons; neutrinos, which have mass, only once it is
- * hotter than their rest energy (lighter than about 10²¹ kg); and heavier
- * particles once hotter still. The module discloses the cost by mass: about
- * twofold for a cold hole near a solar mass, tenfold or more for a hot one.
+ * hotter than their rest energy (lighter than about 10²¹ kg, all three below
+ * about 2 × 10²⁰ kg); and heavier particles once hotter still. The module
+ * discloses the cost by mass: about 1.8 times for a cold hole near a solar mass
+ * (more if the lightest neutrino, of unknown mass, is emitted), about fourteen
+ * once all three neutrino flavours are on. See `evaporationTime`.
  *
  * The sim, its readouts and the sanity block all read these functions.
  */
 import { hawkingTemperature } from './blackhole';
-import { C, E_ELECTRON_REST, E_MUON_REST, E_QCD, G, H_BAR, K_B, T_CMB } from './constants';
+import {
+  C,
+  E_ELECTRON_REST,
+  E_MUON_REST,
+  E_NEUTRINO_2_MIN,
+  E_QCD,
+  G,
+  H_BAR,
+  K_B,
+  T_CMB,
+} from './constants';
 
 /**
  * The mass whose Hawking temperature is T, kg: the inverse of
@@ -82,7 +94,10 @@ export function finalSecondEnergy(): number {
  * module discloses; real emission turns on over a few times that temperature.
  */
 export const EMISSION_BANDS: readonly { threshold_J: number; label: string }[] = [
-  { threshold_J: 0, label: 'light, neutrinos and gravitons' },
+  // Neutrinos have mass, so a cold hole emits none, unless the lightest (mass
+  // unknown) is light enough; the band switches on at the second-lightest.
+  { threshold_J: 0, label: 'light and gravitons' },
+  { threshold_J: E_NEUTRINO_2_MIN, label: 'plus neutrinos' },
   { threshold_J: E_ELECTRON_REST, label: 'plus electrons and positrons' },
   { threshold_J: E_MUON_REST, label: 'plus muons' },
   { threshold_J: E_QCD, label: 'plus quarks and gluons, which become pions and protons' },

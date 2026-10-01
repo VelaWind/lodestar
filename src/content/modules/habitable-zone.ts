@@ -204,8 +204,8 @@ const habitableZone: Module = {
           'could see it.',
         ),
         p(
-          'The edges are model results and carry about a ten percent uncertainty; different ',
-          'assumptions about clouds move the inner edge between 0.95 and 0.99 AU for the Sun. The ',
+          'The edges are model results and carry about a ten percent uncertainty: the choice of ',
+          'limit and of climate model moves the inner edge between 0.95 and 0.99 AU for the Sun. The ',
           'Sun was about 30 percent dimmer when it formed, so the zone has been moving outward ',
           'the whole time. The conservative inner edge already sits just inside Earth’s orbit; ',
           'the runaway-greenhouse limit reaches 1 AU in roughly a billion years.',
@@ -442,10 +442,9 @@ const habitableZone: Module = {
       note: 'The modern definition and the moist and maximum greenhouse limits',
     },
     {
-      label:
-        'Prša et al. 2016, “Nominal Values for Selected Solar and Planetary Quantities: IAU 2015 Resolution B3”, AJ 152, 41',
-      url: 'https://doi.org/10.3847/0004-6256/152/2/41',
-      note: 'S☉ = 1361 W/m² and L☉',
+      label: 'Gough 1981, “Solar interior structure and luminosity variations”, Solar Physics 74, 21',
+      url: 'https://doi.org/10.1007/BF00151270',
+      note: 'The Sun’s brightening: about 30 percent dimmer at formation, and the zone’s outward drift',
     },
     {
       label:
