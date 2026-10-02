@@ -42,7 +42,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { DISTANCE, DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import { lookup } from '@/content/glossary';
@@ -480,7 +480,7 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
         createPortal(
           <AnimatePresence>
             {open && (
-              <motion.div
+              <m.div
                 key={panelId}
                 id={panelId}
                 ref={panelEl}
@@ -528,7 +528,7 @@ export function GlossaryTerm({ text, termRef }: { text: string; termRef: string 
                 <p className="mt-1.5 font-prose text-[0.9375rem] leading-[1.55] text-ink-dim">
                   {entry.body}
                 </p>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>,
           document.body,

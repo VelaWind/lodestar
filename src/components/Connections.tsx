@@ -9,7 +9,8 @@
  * link stays live, badged, so the draft can be worked on.
  */
 import { Link } from 'react-router-dom';
-import { getModule } from '@/content/registry';
+import { getModuleSummary } from '@/content/catalog';
+import { prefetchOnIntent } from '@/lib/prefetch';
 import type { ConnectionsLayer } from '@/content/types';
 import { titleFromSlug } from '@/lib/titles';
 import { isReaderVisible } from '@/lib/visibility';
@@ -22,7 +23,7 @@ export function Connections({ layer }: { layer: ConnectionsLayer }) {
   return (
     <ul className="grid gap-3 sm:grid-cols-2">
       {layer.links.map(({ moduleId, reason }) => {
-        const target = getModule(moduleId);
+        const target = getModuleSummary(moduleId);
         // Read before the visibility narrowing below: `isReaderVisible` is a
         // type predicate, so its false branch types as `undefined` and forgets
         // that a draft module is both invisible and titled.
@@ -58,6 +59,7 @@ export function Connections({ layer }: { layer: ConnectionsLayer }) {
           <li key={moduleId}>
             <Link
               to={`/m/${target.id}`}
+              {...prefetchOnIntent(target.id)}
               className="group block h-full rounded-lg border border-edge-soft bg-void-800/40 px-4 py-3.5 transition-colors hover:border-star-dim/60 hover:bg-void-700/60"
             >
               <span className="flex items-baseline justify-between gap-2">

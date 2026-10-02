@@ -7,7 +7,8 @@
  *      sims should always open at the canonical defaults.
  */
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { dedupedStorage } from './dedupedStorage';
 import type { Param, ParamUpdate, ParamValues } from '@/content/types';
 import { clampToParam } from '@/lib/format';
 import type { DepthTier } from '@/lib/layers';
@@ -72,6 +73,10 @@ export const useAppStore = create<AppState>()(
       version: 1,
       // Only the reading preference survives a reload.
       partialize: (s) => ({ tier: s.tier }),
+      // `persist` writes after every state change, slider ticks included, even
+      // though only `tier` is kept. The wrapper skips any write identical to the
+      // last one, so localStorage is touched only when the tier itself changes.
+      storage: createJSONStorage(() => dedupedStorage(localStorage)),
     },
   ),
 );

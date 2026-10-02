@@ -3,7 +3,7 @@
  * no parsing, no side effects. If a node kind is added to `types.ts`, tsc will
  * fail here until it's handled, which is the point of the AST.
  */
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, memo, type ReactNode } from 'react';
 import type { Block, Inline, RichText as RichTextAst } from '@/content/types';
 import { GlossaryTerm } from './GlossaryTerm';
 import { Tex } from './Tex';
@@ -134,6 +134,7 @@ function block(node: Block, key: number): ReactNode {
         <figure key={key} className="my-2 space-y-2.5">
           <img
             src={node.src}
+            {...responsiveSources(node.src, node.width)}
             // The file's own pixel dimensions, so the browser reserves the box
             // before the bytes land. Without them the caption and everything
             // under it jumps when the image decodes.
@@ -161,6 +162,32 @@ function block(node: Block, key: number): ReactNode {
   }
 }
 
-export function RichText({ content }: { content: RichTextAst }) {
-  return <div className="max-w-measure space-y-4 font-prose">{content.map(block)}</div>;
+/** Widths of the narrower copies `scripts/figure-variants.mjs` writes beside each figure. */
+const FIGURE_VARIANT_WIDTHS = [640, 1080];
+
+/**
+ * `srcset` and `sizes` for a figure. A figure fills the reading column: the
+ * viewport less its 16 px gutters on a phone, and at most 544 CSS px. The
+ * 640 w and 1080 w copies exist only where the original is wider, which is the
+ * same rule the generator uses; the original stays in the set at its own width.
+ */
+function responsiveSources(src: string, width: number): { srcSet?: string; sizes?: string } {
+  if (!/^\/figures\/[^/]+\.webp$/.test(src)) return {};
+  const variants = FIGURE_VARIANT_WIDTHS.filter((w) => w < width).map(
+    (w) => `${src.replace(/\.webp$/, `-${w}.webp`)} ${w}w`,
+  );
+  if (variants.length === 0) return {};
+  return {
+    srcSet: [...variants, `${src} ${width}w`].join(', '),
+    sizes: '(max-width: 576px) calc(100vw - 32px), 544px',
+  };
 }
+
+/**
+ * Memoised on `content`, which is module data: the same object for the life of
+ * the page, so a paragraph renders once and is skipped on every re-render of
+ * whatever contains it.
+ */
+export const RichText = memo(function RichText({ content }: { content: RichTextAst }) {
+  return <div className="max-w-measure space-y-4 font-prose">{content.map(block)}</div>;
+});

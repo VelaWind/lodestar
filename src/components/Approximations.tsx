@@ -11,7 +11,7 @@
  * cover both.
  */
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import type { RichText as RichTextAst } from '@/content/types';
@@ -33,7 +33,7 @@ export function Approximations({ items }: { items: RichTextAst[] }) {
         aria-expanded={open}
         className="flex w-full items-center gap-2 px-4 py-3 text-left font-ui text-xs font-medium uppercase tracking-[0.12em] text-ink-faint transition-colors hover:text-ink-dim"
       >
-        <motion.svg
+        <m.svg
           viewBox="0 0 12 12"
           className="h-2.5 w-2.5 shrink-0 fill-current"
           animate={{ rotate: open ? 90 : 0 }}
@@ -42,7 +42,7 @@ export function Approximations({ items }: { items: RichTextAst[] }) {
           }
         >
           <path d="M3 1l6 5-6 5z" />
-        </motion.svg>
+        </m.svg>
         <span className="flex-1">Approximations</span>
         <span className="font-mono text-[0.7rem] text-ink-faint">{items.length}</span>
       </button>
