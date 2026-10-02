@@ -24,6 +24,8 @@
  *     marked.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
+import { textWidth } from './labels';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { AU, JULIAN_YEAR } from '@/physics/constants';
@@ -245,7 +247,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
       'equal areas, equal times',
     ];
     const caption =
-      captions.find((text) => ctx.measureText(text).width <= plotW) ??
+      captions.find((text) => textWidth(ctx, text) <= plotW) ??
       captions[captions.length - 1]!;
 
     ctx.textAlign = 'left';
@@ -285,7 +287,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, scene: S
     // wide frame. The ellipse is auto-scaled to fill 90% of the plot, so on a
     // phone both markers sit within a few pixels of the frame edge and the
     // outboard label runs off it — flip inboard when it will not fit.
-    const width = ctx.measureText(apsis.label).width;
+    const width = textWidth(ctx, apsis.label);
     const fitsOutboard =
       apsis.align === 'left'
         ? px + apsis.dx + width <= plotLeft + plotW
@@ -387,7 +389,7 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
     const scene = sceneRef.current;
     if (!canvas || !scene) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -487,9 +489,7 @@ export default function KeplerOrbitsSim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   /* Never leave a loop running past unmount. */

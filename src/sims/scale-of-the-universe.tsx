@@ -21,6 +21,7 @@
  *     cuts straight to the new scene.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { scaleAnchors, type ScaleAnchor } from '@/content/modules/scale-of-the-universe';
@@ -524,7 +525,7 @@ export default function ScaleOfTheUniverseSim({ params, values, setValue }: SimP
       const scene = sceneRef.current;
       if (!canvas || !scene || !param) return false;
 
-      const rect = canvas.getBoundingClientRect();
+      const rect = canvasSize(canvas);
       if (rect.width === 0 || rect.height === 0) return false;
 
       // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -606,9 +607,7 @@ export default function ScaleOfTheUniverseSim({ params, values, setValue }: SimP
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint(performance.now()));
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint(performance.now()));
   }, [paint]);
 
   /* Never leave a loop running past unmount. */

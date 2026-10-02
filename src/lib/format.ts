@@ -130,6 +130,17 @@ const NUMBER_WORDS: [number, number, string][] = [
   [1e6, 1e6, 'million'],
 ];
 
+/** One grouping formatter per significant-digit count, built on first use. */
+const GROUPED_BY_DIGITS = new Map<number, Intl.NumberFormat>();
+function groupedFormatter(digits: number): Intl.NumberFormat {
+  let formatter = GROUPED_BY_DIGITS.get(digits);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat('en', { maximumSignificantDigits: digits });
+    GROUPED_BY_DIGITS.set(digits, formatter);
+  }
+  return formatter;
+}
+
 /**
  * A slider's value as a reader sees and hears it. Never JavaScript e-notation,
  * never a hyphen for a minus.
@@ -167,7 +178,7 @@ function formatForReader(value: number, fmt: ParamFormat | undefined): string {
   const abs = Math.abs(rounded);
   if (abs >= 0.01 && abs < 1e4) return trueMinus(rounded.toString());
   if (abs >= 1e4 && abs < 1e6) {
-    return trueMinus(new Intl.NumberFormat('en', { maximumSignificantDigits: digits }).format(rounded));
+    return trueMinus(groupedFormatter(digits).format(rounded));
   }
   if (abs >= 1e6 && abs < 1e15) {
     const [, divisor, word] = NUMBER_WORDS.find(([threshold]) => abs >= threshold)!;
@@ -460,8 +471,18 @@ export function sliderInputPosition(param: Param, si: number): number {
  * figures, so nothing is lost.
  */
 export function ariaNumber(n: number): string {
-  return n.toLocaleString('en-US', { useGrouping: false, maximumSignificantDigits: 17 });
+  return ARIA_NUMBER.format(n);
 }
+
+/**
+ * Built once: `toLocaleString` with options constructs a fresh formatter on
+ * every call, and this runs twice per slider per render. The same options give
+ * the same strings.
+ */
+const ARIA_NUMBER = new Intl.NumberFormat('en-US', {
+  useGrouping: false,
+  maximumSignificantDigits: 17,
+});
 
 export function clampToParam(param: Param, si: number): number {
   return Math.min(param.max, Math.max(param.min, si));

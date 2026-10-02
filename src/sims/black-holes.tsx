@@ -19,6 +19,7 @@
  * formatting only.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { A_NEPTUNE, AU, JULIAN_YEAR, R_EARTH, R_SUN } from '@/physics/constants';
 import {
@@ -540,7 +541,7 @@ export default function BlackHolesSim({ params, values }: SimProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -568,9 +569,7 @@ export default function BlackHolesSim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   const tidalG = tidal / G0;

@@ -6,7 +6,7 @@
  * hiding the real content will never trust the app.
  */
 import { useEffect, useRef, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { TIERS } from '@/lib/layers';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -91,7 +91,7 @@ export function DepthControl() {
               }`}
             >
               {active && (
-                <motion.span
+                <m.span
                   layoutId="depth-pill"
                   className="absolute inset-0 rounded-full bg-star"
                   transition={

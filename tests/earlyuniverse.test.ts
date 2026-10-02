@@ -10,12 +10,44 @@
 import { describe, expect, it } from 'vitest';
 import {
   EPOCHS,
+  T_TABLE_PANELS,
   epochAt,
   lcdmScaleFactorAtTime,
+  lcdmScaleFactorAtTimeReference,
   lcdmTimeAtScaleFactor,
   radiationTemperatureAtTime,
   radiationTimeAtTemperature,
 } from '@/physics/earlyuniverse';
+import earlyUniverse from '@/content/modules/early-universe';
+
+/**
+ * The tabulated inverse against the bisection it replaced.
+ *
+ * The old `lcdmScaleFactorAtTime` ran sixty bisection steps, each a 4000-panel
+ * Simpson integral, on every render of the early-universe sim. The table is
+ * built once; this holds it to the old answer at 200 log-spaced times across
+ * the whole time slider, from a microsecond to today. The brief's bar is 10⁻⁶;
+ * the site's rule for unchanged physics is 10⁻⁹, and that is the one asserted.
+ */
+describe('tabulated scale factor against the bisection reference', () => {
+  it('agrees to 1e-9 relative at 200 times across the slider, with a table under 20k entries', () => {
+    expect(T_TABLE_PANELS + 1).toBeLessThan(20_000);
+    const param = earlyUniverse.layers.play.params.find((p) => p.id === 't')!;
+    const lo = Math.log10(param.min);
+    const hi = Math.log10(param.max);
+    let worst = 0;
+    for (let i = 0; i < 200; i += 1) {
+      const t = 10 ** (lo + ((hi - lo) * i) / 199);
+      const table = lcdmScaleFactorAtTime(t);
+      const reference = lcdmScaleFactorAtTimeReference(t);
+      const rel = Math.abs(table / reference - 1);
+      worst = Math.max(worst, rel);
+      expect(rel, `t = ${t.toExponential(3)} s`).toBeLessThan(1e-9);
+    }
+    // Recorded for the report: the largest disagreement found.
+    expect(worst).toBeLessThan(1e-9);
+  }, 120_000);
+});
 
 describe('early universe', () => {
   it('inverts the radiation-era time–temperature relation', () => {

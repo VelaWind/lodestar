@@ -218,12 +218,16 @@ const A_SEARCH_MIN = 1e-12;
 const A_SEARCH_MAX = 1.01;
 
 /**
- * The inverse of `lcdmTimeAtScaleFactor`, dimensionless, by bisection in log a
- * over [10⁻¹², 1.01].
+ * The inverse of `lcdmTimeAtScaleFactor` by bisection in log a over
+ * [10⁻¹², 1.01]: sixty halvings, each a full 4000-panel Simpson integral, so
+ * about 240 000 evaluations of H(a) per call.
+ *
+ * Kept as the reference the tabulated `lcdmScaleFactorAtTime` is tested
+ * against (tests/earlyuniverse.test.ts). Nothing on the page calls it.
  *
  * @param t_s time since the Big Bang, s
  */
-export function lcdmScaleFactorAtTime(t_s: number): number {
+export function lcdmScaleFactorAtTimeReference(t_s: number): number {
   let lo = Math.log10(A_SEARCH_MIN);
   let hi = Math.log10(A_SEARCH_MAX);
   for (let i = 0; i < 60; i += 1) {
@@ -232,6 +236,101 @@ export function lcdmScaleFactorAtTime(t_s: number): number {
     else hi = mid;
   }
   return 10 ** ((lo + hi) / 2);
+}
+
+/** Panels in the cumulative t(ln a) table, from a = 10⁻⁹ to 1.01. */
+export const T_TABLE_PANELS = 4096;
+
+interface TimeTable {
+  x0: number;
+  h: number;
+  /** t at each node, s. */
+  t: Float64Array;
+  /** dt/d ln a = 1/H(a) at each node, s. */
+  slope: Float64Array;
+}
+
+let timeTable: TimeTable | null = null;
+
+/**
+ * The cumulative table, built once on first use from a single Simpson pass:
+ * each panel adds (h/6)(f₀ + 4f½ + f₁) with f = 1/H(a), starting from the
+ * analytic radiation-era value at a = 10⁻⁹. The slope at each node is kept
+ * too, so the inversion can interpolate with a cubic Hermite rather than a
+ * straight line.
+ */
+function getTimeTable(): TimeTable {
+  if (timeTable) return timeTable;
+  const x0 = Math.log(A_ANALYTIC);
+  const h = (Math.log(A_SEARCH_MAX) - x0) / T_TABLE_PANELS;
+  const f = (x: number) => 1 / hubbleAt(Math.exp(x));
+  const t = new Float64Array(T_TABLE_PANELS + 1);
+  const slope = new Float64Array(T_TABLE_PANELS + 1);
+  t[0] = A_ANALYTIC ** 2 / (2 * H0_PLANCK_2018 * Math.sqrt(OMEGA_R));
+  let fPrev = f(x0);
+  slope[0] = fPrev;
+  for (let i = 0; i < T_TABLE_PANELS; i += 1) {
+    const fMid = f(x0 + (i + 0.5) * h);
+    const fNext = f(x0 + (i + 1) * h);
+    t[i + 1] = t[i]! + (h / 6) * (fPrev + 4 * fMid + fNext);
+    slope[i + 1] = fNext;
+    fPrev = fNext;
+  }
+  timeTable = { x0, h, t, slope };
+  return timeTable;
+}
+
+/**
+ * The inverse of `lcdmTimeAtScaleFactor`, dimensionless: scale factor at a
+ * time since the Big Bang, a = 1 today.
+ *
+ * Looked up rather than searched. Below a = 10⁻⁹ the radiation-era relation
+ * inverts exactly, a = √(2H₀√Ω_r · t); above it a binary search finds the
+ * table panel, and Newton's method solves the cubic Hermite through the
+ * panel's two times and two slopes. Agrees with the bisection reference to
+ * about 10⁻¹¹ relative (tested at 10⁻⁹), and clamps to the same domain,
+ * [10⁻¹², 1.01].
+ *
+ * @param t_s time since the Big Bang, s
+ */
+export function lcdmScaleFactorAtTime(t_s: number): number {
+  const table = getTimeTable();
+  const { t, slope, x0, h } = table;
+  const n = T_TABLE_PANELS;
+  if (!(t_s > t[0]!)) {
+    const a = Math.sqrt(Math.max(t_s, 0) * 2 * H0_PLANCK_2018 * Math.sqrt(OMEGA_R));
+    return Math.min(Math.max(a, A_SEARCH_MIN), A_ANALYTIC);
+  }
+  if (t_s >= t[n]!) return A_SEARCH_MAX;
+
+  // The panel [i, i + 1] with t[i] ≤ t_s < t[i + 1].
+  let lo = 0;
+  let hi = n;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (t[mid]! <= t_s) lo = mid;
+    else hi = mid;
+  }
+  const t0 = t[lo]!;
+  const t1 = t[lo + 1]!;
+  const d0 = slope[lo]! * h;
+  const d1 = slope[lo + 1]! * h;
+  // Cubic Hermite in s ∈ [0, 1], and its derivative, solved by Newton from the
+  // straight-line guess. Monotonic on the panel, so four steps converge.
+  const p = (s: number) => {
+    const s2 = s * s;
+    const s3 = s2 * s;
+    return (
+      (2 * s3 - 3 * s2 + 1) * t0 + (s3 - 2 * s2 + s) * d0 + (-2 * s3 + 3 * s2) * t1 + (s3 - s2) * d1
+    );
+  };
+  const dp = (s: number) => {
+    const s2 = s * s;
+    return (6 * s2 - 6 * s) * t0 + (3 * s2 - 4 * s + 1) * d0 + (-6 * s2 + 6 * s) * t1 + (3 * s2 - 2 * s) * d1;
+  };
+  let s = (t_s - t0) / (t1 - t0);
+  for (let k = 0; k < 4; k += 1) s -= (p(s) - t_s) / dp(s);
+  return Math.exp(x0 + (lo + Math.min(1, Math.max(0, s))) * h);
 }
 
 /* ------------------------------------------------------------------ */
