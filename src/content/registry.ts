@@ -1,24 +1,21 @@
 /**
- * The registry — the only reason "add a module" is a one-file job.
+ * The registry — every module's full data, eagerly.
  *
- * Both maps are built by `import.meta.glob` at build time rather than by a
- * hand-maintained list, so dropping `src/content/modules/foo.ts` and
- * `src/sims/foo.tsx` into the tree wires them up with zero edits anywhere in
- * the shell. Vite statically analyses these globs, so tree-shaking and code
- * splitting still work exactly as if the imports were written out.
+ * Built by `import.meta.glob` at build time rather than by a hand-maintained
+ * list, so dropping `src/content/modules/foo.ts` into the tree wires it up with
+ * zero edits anywhere. Vite statically analyses the glob.
  *
- * Module *data* is eager: it's small, and the index page needs every title and
- * tagline immediately. Sim *components* are lazy: they're the heavy part
- * (canvas, integrators, occasionally WebGL) and only one is ever on screen.
+ * The app's pages do not import this file. Eagerly, all eighteen modules' prose
+ * is about 91 kB gzipped, and it used to sit in the entry chunk of every route.
+ * The pages read `catalog.ts` instead: a small manifest generated from this
+ * registry at build time, plus a lazy loader per module. The registry is what
+ * the build reads to write per-route heads and the manifest, and what the tests
+ * read to check every module.
  */
-import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
-import type { Module, SimProps } from './types';
+import type { Module } from './types';
+import { basename } from './sims';
 
-/** `src/content/modules/escape-velocity.ts` → key `escape-velocity` */
-function basename(path: string): string {
-  const file = path.split('/').pop() ?? path;
-  return file.replace(/\.(ts|tsx)$/, '');
-}
+export { sims, getSim, simKeys } from './sims';
 
 /* ---------------------------------- modules --------------------------------- */
 
@@ -51,21 +48,3 @@ export const moduleList: Module[] = Object.values(modules).sort((a, b) => {
 export function getModule(id: string | undefined): Module | undefined {
   return id ? modules[id] : undefined;
 }
-
-/* ----------------------------------- sims ----------------------------------- */
-
-const simFiles = import.meta.glob<{ default: ComponentType<SimProps> }>('../sims/*.tsx');
-
-export const sims: Record<string, LazyExoticComponent<ComponentType<SimProps>>> =
-  Object.fromEntries(
-    Object.entries(simFiles).map(([path, loader]) => [basename(path), lazy(loader)]),
-  );
-
-export function getSim(
-  simKey: string,
-): LazyExoticComponent<ComponentType<SimProps>> | undefined {
-  return sims[simKey];
-}
-
-/** Names of every registered sim — used by the "missing sim" error state. */
-export const simKeys = Object.keys(sims);

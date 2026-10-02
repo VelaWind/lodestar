@@ -3727,10 +3727,17 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
       )
       .toBe(true);
 
-    const shown = await image.evaluate((el) => {
+    const shown = await image.evaluate(async (el) => {
       const img = el as HTMLImageElement;
       const figureEl = img.closest('figure')!;
       const caption = figureEl.querySelector('figcaption');
+      // The original file's own pixel size. With a `srcset` the element's
+      // `naturalWidth` is the density-corrected size of whichever copy the
+      // browser chose, not the file the width and height attributes describe,
+      // so the original is decoded on its own to read its dimensions.
+      const original = new Image();
+      original.src = img.getAttribute('src') ?? '';
+      await original.decode();
       return {
         src: img.getAttribute('src'),
         widthAttr: img.getAttribute('width'),
@@ -3738,8 +3745,8 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
         loading: img.getAttribute('loading'),
         decoding: img.getAttribute('decoding'),
         alt: img.getAttribute('alt') ?? '',
-        naturalWidth: img.naturalWidth,
-        naturalHeight: img.naturalHeight,
+        naturalWidth: original.naturalWidth,
+        naturalHeight: original.naturalHeight,
         renderedWidth: Math.round(img.getBoundingClientRect().width),
         captionText: (caption?.textContent ?? '').trim(),
         // The figure belongs to the reading column, not to the breakout the sim

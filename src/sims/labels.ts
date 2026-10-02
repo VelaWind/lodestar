@@ -30,10 +30,60 @@ const ASCENT = 0.8;
 /** Descent below it. */
 const DESCENT = 0.2;
 
-/** The font size in px, read back off the context. */
-export function fontSizeOf(ctx: CanvasRenderingContext2D): number {
-  const match = /(\d+(?:\.\d+)?)px/.exec(ctx.font);
-  return match?.[1] ? Number(match[1]) : 10;
+/** Parsed font sizes by font string; a sim uses a handful of fonts, so this stays tiny. */
+const FONT_SIZES = new Map<string, number>();
+
+/**
+ * The font size in px, read back off the context. The font string is parsed
+ * once per distinct font rather than on every label of every frame.
+ */
+export function fontSizeOf(ctx: CanvasRenderingContext2D, font: string = ctx.font): number {
+  let size = FONT_SIZES.get(font);
+  if (size === undefined) {
+    const match = /(\d+(?:\.\d+)?)px/.exec(font);
+    size = match?.[1] ? Number(match[1]) : 10;
+    FONT_SIZES.set(font, size);
+  }
+  return size;
+}
+
+/**
+ * Text widths per context, per font, per string. A label's width depends only
+ * on its text and font, and the same few dozen labels are measured every frame
+ * of an animation; `measureText` is the costly part of placing them. Kept per
+ * context so two canvases, or a test's recording context, never share answers.
+ */
+const WIDTHS = new WeakMap<CanvasRenderingContext2D, Map<string, Map<string, number>>>();
+
+/**
+ * `ctx.measureText(text).width` for the context's current font, cached.
+ *
+ * `font` defaults to `ctx.font`, but a caller placing several labels in one
+ * font should read it once and pass it: the `font` getter re-serialises the
+ * font string on every read, and in a drag profile it was most of the cost of
+ * placing labels.
+ */
+export function textWidth(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  font: string = ctx.font,
+): number {
+  let byFont = WIDTHS.get(ctx);
+  if (!byFont) {
+    byFont = new Map();
+    WIDTHS.set(ctx, byFont);
+  }
+  let byText = byFont.get(font);
+  if (!byText) {
+    byText = new Map();
+    byFont.set(font, byText);
+  }
+  let width = byText.get(text);
+  if (width === undefined) {
+    width = ctx.measureText(text).width;
+    byText.set(text, width);
+  }
+  return width;
 }
 
 /**
@@ -49,9 +99,10 @@ export function labelBox(
   x: number,
   y: number,
   align: CanvasTextAlign = ctx.textAlign,
+  font: string = ctx.font,
 ): LabelBox {
-  const width = ctx.measureText(text).width;
-  const size = fontSizeOf(ctx);
+  const width = textWidth(ctx, text, font);
+  const size = fontSizeOf(ctx, font);
   const x0 = align === 'center' ? x - width / 2 : align === 'right' || align === 'end' ? x - width : x;
   return { x0, x1: x0 + width, y0: y - size * ASCENT, y1: y + size * DESCENT };
 }
@@ -85,8 +136,9 @@ export function firstClearPlacement(
   obstacles: LabelBox[],
   pad = 2,
 ): { x: number; y: number; align: CanvasTextAlign } {
+  const font = ctx.font;
   for (const candidate of candidates) {
-    const box = labelBox(ctx, text, candidate.x, candidate.y, candidate.align);
+    const box = labelBox(ctx, text, candidate.x, candidate.y, candidate.align, font);
     if (!obstacles.some((obstacle) => overlaps(box, obstacle, pad))) return candidate;
   }
   return candidates[candidates.length - 1] ?? { x: 0, y: 0, align: 'left' };
@@ -128,7 +180,8 @@ export function layOutRow(
   gap = 10,
 ): PlacedLabel[] {
   const [first, second] = labels;
-  const widthOf = (label: RowLabel) => ctx.measureText(label.text).width;
+  const font = ctx.font;
+  const widthOf = (label: RowLabel) => textWidth(ctx, label.text, font);
   const wa = widthOf(first);
   const wb = widthOf(second);
   const available = right - left;

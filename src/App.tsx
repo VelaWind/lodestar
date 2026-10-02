@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, LazyMotion, m } from 'framer-motion';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import type { Location } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
@@ -93,7 +93,7 @@ function RouteFrame({ at }: { at: Location }) {
     : {};
 
   return (
-    <motion.div
+    <m.div
       className={leaving ? 'pointer-events-none absolute inset-x-0 top-0' : undefined}
       {...leavingAttrs}
       initial={{ opacity: 0, y: DISTANCE.nudge }}
@@ -103,7 +103,7 @@ function RouteFrame({ at }: { at: Location }) {
       exit={{ opacity: 0, transition: { duration: EXIT_SECONDS, ease: EASE_OUT } }}
     >
       <AppRoutes location={at} />
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -174,12 +174,21 @@ function RoutedOutlet() {
  * it, and `popLayout` above is part of preserving it: keeping the outgoing route
  * in flow would hold the document tall enough that no clamp happened at all.
  */
+/**
+ * Framer Motion's features load in their own chunk (see `motion/features`), so
+ * the entry carries only the `m` renderer. `strict` makes a stray `motion`
+ * component throw rather than quietly pull the full bundle back in.
+ */
+const loadMotionFeatures = () => import('@/motion/features').then((mod) => mod.default);
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <AppShell>
-        <RoutedOutlet />
-      </AppShell>
-    </BrowserRouter>
+    <LazyMotion features={loadMotionFeatures} strict>
+      <BrowserRouter>
+        <AppShell>
+          <RoutedOutlet />
+        </AppShell>
+      </BrowserRouter>
+    </LazyMotion>
   );
 }

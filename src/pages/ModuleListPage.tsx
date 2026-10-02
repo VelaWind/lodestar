@@ -5,12 +5,10 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import type { Module } from '@/content/types';
+import { moduleCatalog, prefetchModule, type ModuleSummary } from '@/content/catalog';
 import { requestDepthFocus } from '@/components/DepthControl';
 import { Reveal } from '@/motion/Reveal';
-import { moduleList } from '@/content/registry';
 import { TIERS } from '@/lib/layers';
-import { plainText } from '@/lib/plainText';
 import { isReaderVisible } from '@/lib/visibility';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -66,7 +64,7 @@ export function ModuleListPage() {
      so the index and the cross-links cannot disagree about what a reader may
      reach. */
   const listed = useMemo(
-    () => moduleList.filter(isReaderVisible).sort((a, b) => orderFor(a.id) - orderFor(b.id)),
+    () => moduleCatalog.filter(isReaderVisible).sort((a, b) => orderFor(a.id) - orderFor(b.id)),
     [],
   );
 
@@ -132,9 +130,9 @@ export function ModuleListPage() {
 /** Width and height of the highlight, in px. Set here because JS centres it. */
 const GLOW_PX = 320;
 
-function ModuleCard({ module }: { module: Module }) {
-  const teaser = plainText(module.layers.hook.body);
-  const params = module.layers.play.params.length;
+function ModuleCard({ module }: { module: ModuleSummary }) {
+  const teaser = module.teaser;
+  const params = module.paramCount;
 
   const glowRef = useRef<HTMLSpanElement>(null);
   /* The card's box, read once when the pointer arrives rather than on every
@@ -173,12 +171,20 @@ function ModuleCard({ module }: { module: Module }) {
   return (
     <Link
       to={`/m/${module.id}`}
-      onPointerEnter={trackPointer}
+      onPointerEnter={(event) => {
+        // Intent to follow the link: start fetching the module's data now.
+        prefetchModule(module.id);
+        trackPointer(event);
+      }}
       onPointerMove={trackPointer}
       onPointerLeave={() => {
         boxRef.current = null;
       }}
-      onFocus={centreGlow}
+      onFocus={(event) => {
+        prefetchModule(module.id);
+        centreGlow(event);
+      }}
+      onTouchStart={() => prefetchModule(module.id)}
       /*
        * `isolate` is load-bearing. It makes the card a stacking context, which
        * is what lets the highlight sit at `-z-10`: negative-z children paint

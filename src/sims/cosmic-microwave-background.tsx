@@ -24,6 +24,7 @@
  * Under reduced motion it jumps, and the canvas is still between drags.
  */
 import { useCallback, useEffect, useRef } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { C, T_CMB } from '@/physics/constants';
 import {
@@ -613,7 +614,7 @@ export default function CmbSim({ params, values }: SimProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -665,9 +666,7 @@ export default function CmbSim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   return (

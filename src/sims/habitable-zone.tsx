@@ -23,6 +23,7 @@
  * slide in log d. Under reduced motion they jump.
  */
 import { useCallback, useEffect, useRef } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import {
   AU,
@@ -137,8 +138,18 @@ function formatKelvinCelsius(kelvin: number): string {
   const hundredths = Math.round(shown * 100) - 27_315;
   const unit = 10 ** (2 - places);
   const rounded = (Math.sign(hundredths) * Math.round(Math.abs(hundredths) / unit) * unit) / 100;
-  const celsius = new Intl.NumberFormat('en', { minimumFractionDigits: places, maximumFractionDigits: places });
-  return `${plainOrScientific(kelvin)} K (${minus(celsius.format(rounded))} °C)`;
+  return `${plainOrScientific(kelvin)} K (${minus(celsiusFormatter(places).format(rounded))} °C)`;
+}
+
+/** One fixed-places formatter per decimal count, built on first use rather than per readout. */
+const CELSIUS_BY_PLACES = new Map<number, Intl.NumberFormat>();
+function celsiusFormatter(places: number): Intl.NumberFormat {
+  let formatter = CELSIUS_BY_PLACES.get(places);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat('en', { minimumFractionDigits: places, maximumFractionDigits: places });
+    CELSIUS_BY_PLACES.set(places, formatter);
+  }
+  return formatter;
 }
 
 /** An orbital period in s as years, or days below one year: three significant figures. */
@@ -723,7 +734,7 @@ export default function HabitableZoneSim({ params, values }: SimProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -750,9 +761,7 @@ export default function HabitableZoneSim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   return (

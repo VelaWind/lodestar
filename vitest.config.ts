@@ -18,6 +18,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // The build generates this module (scripts/manifestPlugin.ts); the tests
+      // compute the same manifest from the registry.
+      'virtual:lodestar-manifest': fileURLToPath(
+        new URL('./tests/helpers/manifest.ts', import.meta.url),
+      ),
     },
   },
   test: {

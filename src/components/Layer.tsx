@@ -3,8 +3,8 @@
  * or why it's open — the page owns expansion state so tier changes can reset it
  * atomically.
  */
-import type { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { memo, type ReactNode } from 'react';
+import { m } from 'framer-motion';
 import { DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import type { LayerMeta } from '@/lib/layers';
@@ -18,7 +18,11 @@ interface Props {
   children: ReactNode;
 }
 
-export function Layer({ meta, open, onToggle, children }: Props) {
+/**
+ * Memoised: `ModulePage` passes stable `meta`, `onToggle` and `children`, so a
+ * layer re-renders only when its own `open` changes.
+ */
+export const Layer = memo(function Layer({ meta, open, onToggle, children }: Props) {
   const reduced = useReducedMotion();
   const panelId = `layer-panel-${meta.id}`;
   const headerId = `layer-header-${meta.id}`;
@@ -58,7 +62,7 @@ export function Layer({ meta, open, onToggle, children }: Props) {
             <span className="mt-0.5 block font-ui text-xs text-ink-faint">{meta.hint}</span>
           </span>
 
-          <motion.svg
+          <m.svg
             viewBox="0 0 14 14"
             aria-hidden
             className={`h-3 w-3 shrink-0 self-center stroke-current transition-colors ${
@@ -72,7 +76,7 @@ export function Layer({ meta, open, onToggle, children }: Props) {
             }
           >
             <path d="M2 5l5 5 5-5" fill="none" strokeWidth="1.5" strokeLinecap="round" />
-          </motion.svg>
+          </m.svg>
         </button>
       </h2>
 
@@ -117,4 +121,4 @@ export function Layer({ meta, open, onToggle, children }: Props) {
       )}
     </section>
   );
-}
+});

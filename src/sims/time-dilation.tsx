@@ -24,6 +24,7 @@
  * or slides.
  */
 import { useCallback, useEffect, useRef } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { DAY_S, D_PROXIMA, JULIAN_YEAR, M_DEMO_BH } from '@/physics/constants';
 import { schwarzschildRadius } from '@/physics/blackhole';
@@ -33,7 +34,7 @@ import { DURATION, EASE } from '@/motion/tokens';
 import { useRafLoop } from '@/motion/useRafLoop';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import { useTier } from '@/store/useAppStore';
-import { firstClearPlacement, labelBox, overlaps, type LabelBox } from './labels';
+import { firstClearPlacement, labelBox, overlaps, textWidth, type LabelBox } from './labels';
 
 /* ------------------------------------------------------------------ */
 /* Display helpers — formatting only, never used to compute            */
@@ -179,7 +180,7 @@ function centredWithin(
   right: number,
   obstacles: LabelBox[],
 ): void {
-  const half = ctx.measureText(text).width / 2;
+  const half = textWidth(ctx, text) / 2;
   const x = right - left >= 2 * half ? Math.min(right - half, Math.max(left + half, cx)) : (left + right) / 2;
   placeText(ctx, text, x, y, 'center', obstacles);
 }
@@ -223,7 +224,7 @@ function labelNear(
   obstacles: LabelBox[],
   extra: LabelBox[] = [],
 ): void {
-  const half = ctx.measureText(text).width / 2;
+  const half = textWidth(ctx, text) / 2;
   const slid = Math.min(bounds.x1 - half - 1, Math.max(bounds.x0 + half + 1, x));
   const candidates: { x: number; y: number; align: CanvasTextAlign }[] = [];
   for (const dy of [-9, 15, -21, 27, -33, 39, -45, 51, -57, 63, -69, 75, -81, 87]) {
@@ -317,7 +318,7 @@ function drawClocks(
 
   /* The two faces, side by side. */
   const barLabelLines =
-    ctx.measureText('for every hour at home, the ship’s clock ticks').width <= right - left
+    textWidth(ctx, 'for every hour at home, the ship’s clock ticks') <= right - left
       ? ['for every hour at home, the ship’s clock ticks']
       : ['for every hour at home,', 'the ship’s clock ticks'];
   const barBlock = 12 * barLabelLines.length + 22;
@@ -574,7 +575,7 @@ export default function TimeDilationSim({ params, values }: SimProps) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -612,9 +613,7 @@ export default function TimeDilationSim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   return (
