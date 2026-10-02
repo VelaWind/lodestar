@@ -114,6 +114,11 @@ export const M_NS_TYPICAL = 1.4 * M_SUN;
 /**
  * Neutron-star radius, m: about 12 km. Source: NICER pulsar measurements
  * (Riley et al. 2021, Miller et al. 2021, PSR J0740+6620), R ≈ 12–13 km.
+ * Miller et al. 2021 (ApJL 918, L28), combining NICER, XMM-Newton, GW170817
+ * and nuclear theory, give 12.45 ± 0.65 km for a 1.4 M☉ star and
+ * 12.35 ± 0.75 km at 2.08 M☉, so the neutron-stars module uses this one
+ * radius for every mass: the radius depends on the unknown equation of state,
+ * and no mass–radius formula is used. The module discloses it.
  */
 export const R_NS = 1.2e4;
 /**
@@ -411,6 +416,59 @@ export const OMEGA_LAMBDA = 0.685;
  * decoupling", JCAP 08, 012 — N_eff = 3.044.
  */
 export const N_EFF = 3.044;
+
+// Neutron stars
+/** Standard gravity, m/s²: exact by definition (3rd CGPM, 1901). The "g" readouts are in this. */
+export const G_STANDARD = 9.806_65;
+/**
+ * Nuclear saturation density, kg/m³: the density of matter inside a heavy
+ * nucleus, n_s ≃ 0.16 fm⁻³. Source: Lattimer & Prakash 2016, "The equation of
+ * state of hot, dense matter and neutron stars", Phys. Rep. 621, 127 —
+ * ρ_s ≃ 2.7 × 10¹⁴ g cm⁻³. (`NUCLEAR_DENSITY` above is the rounded lower figure
+ * the wormholes module compares against; this is the cited central value.)
+ */
+export const NUCLEAR_SATURATION_DENSITY = 2.7e17;
+/**
+ * Coefficient of the Keplerian (mass-shedding) spin frequency, Hz:
+ * f_K = C (M/M☉)^½ (R/10 km)^(−3/2), with M and R the non-rotating star's mass
+ * and circumferential radius, good to a few percent for 0.5 M☉ < M < 0.9 M_max.
+ * Source: Haensel, Zdunik, Bejger & Lattimer 2009, "Keplerian frequency of
+ * uniformly rotating neutron stars and strange stars", A&A 502, 605 — C = 1.08 kHz.
+ */
+export const KEPLER_FREQUENCY_COEFFICIENT = 1080;
+/**
+ * The heaviest neutron star measured, kg: PSR J0740+6620, 2.08 ± 0.07 M☉, from
+ * the Shapiro delay. Source: Fonseca et al. 2021, "Refined Mass and Geometric
+ * Measurements of the High-mass PSR J0740+6620", ApJL 915, L12.
+ */
+export const NS_MASS_HEAVIEST = 2.08 * M_SUN;
+/**
+ * Above this mass, kg, the module's star collapses to a black hole: 2.3 M☉. The
+ * true maximum (M_TOV) is unknown. It is at least the 2.08 M☉ measured above,
+ * and GW170817's remnant bounds it at 2.16 (+0.17, −0.15) M☉ (Rezzolla, Most &
+ * Weih 2018, ApJL 852, L25); 2.3 M☉ is the top of that range, so a star the
+ * slider calls stable could still be too heavy, and the module says so.
+ */
+export const NS_MASS_COLLAPSE = 2.3 * M_SUN;
+/** The fastest known pulsar's spin, Hz: PSR J1748−2446ad, 716 Hz (Hessels et al. 2006, Science 311, 1901). */
+export const FASTEST_PULSAR_FREQUENCY = 716;
+/**
+ * The Crab pulsar's spin, Hz, and its rate of change, Hz/s, at epoch MJD 48442.5
+ * (mid-1991). Source: the ATNF Pulsar Catalogue (Manchester et al. 2005, AJ
+ * 129, 1993), PSR J0534+2200: F0 = 29.9469230 Hz, F1 = −3.77535 × 10⁻¹⁰ Hz/s;
+ * that is P = 33.39 ms and Ṗ = 4.21 × 10⁻¹³ s/s. It slows by about 13 µs of
+ * period a year, so the period today is near 33.9 ms.
+ */
+export const CRAB_F0 = 29.946_923;
+export const CRAB_F1 = -3.775_35e-10;
+/**
+ * A neutron star's moment of inertia, kg m²: the conventional 10⁴⁵ g cm² the
+ * ATNF catalogue uses for its derived spin-down luminosities and fields. A real
+ * star's depends on its unknown internal structure, within about a factor of two.
+ */
+export const NS_MOMENT_OF_INERTIA = 1e38;
+/** A metric teaspoon, m³: 5 mL. */
+export const TEASPOON = 5e-6;
 
 // Mathematics
 /**

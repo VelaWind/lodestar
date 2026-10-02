@@ -29,6 +29,7 @@ if (import.meta.env.DEV) {
       verifyRelativityModel,
       verifyHawkingModel,
       verifyWormholeModel,
+      verifyNeutronStarModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -49,6 +50,7 @@ if (import.meta.env.DEV) {
       verifyRelativityModel();
       verifyHawkingModel();
       verifyWormholeModel();
+      verifyNeutronStarModel();
     },
   );
 }
