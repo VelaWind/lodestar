@@ -411,6 +411,29 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Core-collapse supernova',
     body: 'The explosion of a star above about eight solar masses when its iron core gives way. Leaves a neutron star or a black hole.',
   },
+
+  /* Neutron stars -------------------------------------------------- */
+
+  pulsar: {
+    title: 'Pulsar',
+    body: 'A spinning neutron star whose beams of radio waves sweep across Earth, so we see a pulse once or twice each turn.',
+  },
+  'millisecond-pulsar': {
+    title: 'Millisecond pulsar',
+    body: 'A pulsar spinning hundreds of times a second, spun up by matter falling onto it from a companion star.',
+  },
+  'equation-of-state': {
+    title: 'Equation of state',
+    body: 'How hard matter pushes back when squeezed: its pressure at each density. Inside a neutron star’s core it is not yet known.',
+  },
+  'light-cylinder': {
+    title: 'Light cylinder',
+    body: 'The distance from a pulsar’s spin axis at which anything turning with the star would have to move at the speed of light.',
+  },
+  magnetar: {
+    title: 'Magnetar',
+    body: 'A neutron star with the strongest magnetic field known, a hundred to a thousand times a typical pulsar’s, powering bursts of X-rays and gamma rays.',
+  },
   'chandrasekhar-limit': {
     title: 'Chandrasekhar limit',
     body: 'About 1.4 solar masses: the most a white dwarf, or a star’s inert core, can weigh before it must collapse.',
