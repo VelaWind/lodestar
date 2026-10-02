@@ -14,8 +14,9 @@
  * animation causes a React render — a `useState` per frame would re-render the
  * entire app shell sixty times a second to move some dots.
  */
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { DISTANCE, DURATION } from '@/motion/tokens';
+import { simOnScreen, subscribeSimOnScreen } from './simVisibility';
 import { useRafLoop } from '@/motion/useRafLoop';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import { drawStars, generateStars, type Star } from './stars';
@@ -55,6 +56,10 @@ interface Vec {
 
 export function Starfield() {
   const reduced = useReducedMotion();
+  /* Paused while a sim canvas is on screen: the sim and the sky would otherwise
+     share one frame budget on a slow phone. The last frame stays drawn, and the
+     loop resumes from it (its first delta is zero) when no sim is visible. */
+  const simVisible = useSyncExternalStore(subscribeSimOnScreen, simOnScreen, () => false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const starsRef = useRef<Star[]>([]);
@@ -204,7 +209,7 @@ export function Starfield() {
 
     elapsedRef.current += deltaMs;
     paint(elapsedRef.current, true);
-  }, !reduced);
+  }, !reduced && !simVisible);
 
   return (
     <canvas

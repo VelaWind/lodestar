@@ -22,6 +22,7 @@
  * out of; a reader with it set sees exactly what everyone else sees.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import {
   GASES,
@@ -276,7 +277,7 @@ export default function PlanetaryAtmospheresSim({ params, values }: SimProps) {
     const scene = sceneRef.current;
     if (!canvas || !scene) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -304,9 +305,7 @@ export default function PlanetaryAtmospheresSim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   return (

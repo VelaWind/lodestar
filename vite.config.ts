@@ -1,10 +1,11 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { manifestPlugin } from './scripts/manifestPlugin';
 import { routeHeadsPlugin } from './scripts/routeHeadsPlugin';
 
 export default defineConfig({
-  plugins: [react(), routeHeadsPlugin()],
+  plugins: [react(), manifestPlugin(), routeHeadsPlugin()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

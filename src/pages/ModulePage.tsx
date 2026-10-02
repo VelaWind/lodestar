@@ -5,10 +5,18 @@
  * specific module, sim, or param, which is what makes "add a module" a
  * data-file-plus-sim job with no shell edits.
  */
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { Link, useParams } from 'react-router-dom';
-import type { LayerId, Module, Param, ParamUpdate } from '@/content/types';
-import { getModule } from '@/content/registry';
+import type { LayerId, Module, Param, ParamUpdate, ParamValues } from '@/content/types';
+import { getModuleSummary, readModule } from '@/content/catalog';
 import { DISTANCE } from '@/motion/tokens';
 import { Reveal } from '@/motion/Reveal';
 import { useNoindex } from '@/lib/useNoindex';
@@ -22,30 +30,83 @@ import { ensureKatex, katexLoaded } from '@/components/Tex';
 import { Connections } from '@/components/Connections';
 import { References } from '@/components/References';
 
-/** Upper bound on how long the KaTeX prefetch waits for an idle moment. */
-const KATEX_PREFETCH_MS = 2000;
+/** How far below the viewport a math layer's header starts the KaTeX fetch. */
+const KATEX_LOOKAHEAD = '0px 0px 50% 0px';
 
 export function ModulePage() {
   const { id } = useParams<{ id: string }>();
-  const module = getModule(id);
-
-  if (!module) return <NotFound id={id} />;
+  // The manifest says whether the module exists without loading it, so an
+  // unknown address shows the not-found page at once.
+  if (!id || !getModuleSummary(id)) return <NotFound id={id} />;
   // Keyed so that navigating between modules resets all per-module state
   // (open layers, equation mode) instead of leaking it across topics.
-  return <ModuleView key={module.id} module={module} />;
+  return <LoadedModule key={id} id={id} />;
+}
+
+/** Suspends until the module's data has arrived; see `readModule`. */
+function LoadedModule({ id }: { id: string }) {
+  const module = readModule(id);
+  return <ModuleView module={module} />;
+}
+
+/**
+ * The live slider values for a module: the stored ones, or the defaults until
+ * the store has been seeded.
+ *
+ * Read only by the two layers that use them, never by the page. A slider tick
+ * updates the store dozens of times a second; subscribed here at the top, every
+ * tick re-rendered the whole article, every layer and every paragraph, to
+ * change one number in the sim and its readouts.
+ */
+function useModuleValues(module: Module): ParamValues {
+  const params = module.layers.play.params;
+  const stored = useAppStore((s) => s.params[module.id]);
+  const fallback = useMemo(() => defaultsOf(params), [params]);
+  return stored ?? fallback;
+}
+
+/** Layer 3: the sim and its sliders, the one subscriber to slider ticks besides layer 5. */
+function PlayLayer({ module }: { module: Module }) {
+  const values = useModuleValues(module);
+  const setParam = useAppStore((s) => s.setParam);
+  const resetParams = useAppStore((s) => s.resetModuleParams);
+  const onChange = useCallback(
+    (param: Param, value: ParamUpdate) => setParam(module.id, param, value),
+    [setParam, module.id],
+  );
+  const onReset = useCallback(
+    () => resetParams(module.id, module.layers.play.params),
+    [resetParams, module.id, module.layers.play.params],
+  );
+  return (
+    <SimStage
+      moduleId={module.id}
+      layer={module.layers.play}
+      values={values}
+      onChange={onChange}
+      onReset={onReset}
+    />
+  );
+}
+
+/** Layer 5: the equations, bound to the same values as layer 3. */
+function MathLayer({ module }: { module: Module }) {
+  const values = useModuleValues(module);
+  return (
+    <EquationBlock
+      layer={module.layers.math}
+      params={module.layers.play.params}
+      values={values}
+    />
+  );
 }
 
 function ModuleView({ module }: { module: Module }) {
   const tier = useAppStore((s) => s.tier);
   const ensure = useAppStore((s) => s.ensureModuleParams);
-  const setParam = useAppStore((s) => s.setParam);
-  const resetParams = useAppStore((s) => s.resetModuleParams);
-  const stored = useAppStore((s) => s.params[module.id]);
 
   // Layer 3 owns the params; layer 5 binds the very same objects.
   const params: Param[] = module.layers.play.params;
-  const fallback = useMemo(() => defaultsOf(params), [params]);
-  const values = stored ?? fallback;
 
   useEffect(() => {
     ensure(module.id, params);
@@ -67,21 +128,40 @@ function ModuleView({ module }: { module: Module }) {
   }
 
   /*
-   * KaTeX is fetched here, once, after the page has had its first paint — never
-   * as part of it. `requestIdleCallback` puts it behind whatever the browser
-   * still has to do, and the timeout is the floor for a machine that never goes
-   * idle. By the time a reader has read the hook and reached for a layer with
-   * equations in it, the library is already in memory and opening is instant.
+   * KaTeX is fetched only where math is coming, never at idle on every page.
+   *
+   * If an open layer has math in it (the Student and Deep tiers open some), the
+   * fetch starts now; `Tex` would suspend on it anyway. Otherwise the headers of
+   * the closed layers that have math are watched, and the fetch starts when one
+   * comes within half a viewport of the screen: early enough that the library
+   * is normally in memory before the reader can open it, and never for a reader
+   * at the Curious tier who does not scroll that far. Opening a math layer
+   * still waits for the library (`openLayers` below), so the first open
+   * renders equations in the same commit as the panel, with no flash and no
+   * shift.
    */
   useEffect(() => {
-    const idle = window.requestIdleCallback;
-    if (typeof idle !== 'function') {
-      const timer = setTimeout(() => void ensureKatex(), KATEX_PREFETCH_MS);
-      return () => clearTimeout(timer);
+    if (katexLoaded()) return;
+    if (LAYER_ORDER.some((id) => open.has(id) && layerHasMath(module, id, tier))) {
+      void ensureKatex();
+      return;
     }
-    const handle = idle(() => void ensureKatex(), { timeout: KATEX_PREFETCH_MS });
-    return () => window.cancelIdleCallback?.(handle);
-  }, []);
+    if (typeof IntersectionObserver === 'undefined') return;
+    const headers = LAYER_ORDER.filter((id) => layerHasMath(module, id, tier))
+      .map((id) => document.getElementById(`layer-header-${id}`))
+      .filter((element): element is HTMLElement => element !== null);
+    if (headers.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        void ensureKatex();
+      },
+      { rootMargin: KATEX_LOOKAHEAD },
+    );
+    headers.forEach((header) => observer.observe(header));
+    return () => observer.disconnect();
+  }, [module, tier, open]);
 
   /*
    * Opening a layer waits for KaTeX if that layer has math in it and the
@@ -112,6 +192,34 @@ function ModuleView({ module }: { module: Module }) {
     else next.add(layerId);
     openLayers(next);
   };
+
+  /*
+   * Stable per-layer handlers and stable layer bodies, so the memoised `Layer`s
+   * and the `RichText` inside them skip re-rendering when only one layer's
+   * state changes. The handlers call the latest `toggle` through a ref: its
+   * closure has to see the current open set and tier, but its identity must
+   * not change with them.
+   */
+  const toggleRef = useRef(toggle);
+  useLayoutEffect(() => {
+    toggleRef.current = toggle;
+  });
+  const toggles = useMemo(
+    () =>
+      Object.fromEntries(LAYER_ORDER.map((id) => [id, () => toggleRef.current(id)])) as Record<
+        LayerId,
+        () => void
+      >,
+    [],
+  );
+  const bodies = useMemo(
+    () =>
+      Object.fromEntries(LAYER_ORDER.map((id) => [id, renderLayer(id, module)])) as Record<
+        LayerId,
+        ReactNode
+      >,
+    [module],
+  );
 
   const allOpen = open.size === LAYER_ORDER.length;
   const toggleAll = () => openLayers(allOpen ? new Set() : new Set(LAYER_ORDER));
@@ -195,12 +303,8 @@ function ModuleView({ module }: { module: Module }) {
             distance={DISTANCE.rise}
             className="border-t border-edge-soft first:border-t-0"
           >
-            <Layer
-              meta={LAYER_META[layerId]}
-              open={open.has(layerId)}
-              onToggle={() => toggle(layerId)}
-            >
-              {renderLayer(layerId, module, values, setParam, resetParams)}
+            <Layer meta={LAYER_META[layerId]} open={open.has(layerId)} onToggle={toggles[layerId]}>
+              {bodies[layerId]}
             </Layer>
           </Reveal>
         ))}
@@ -215,13 +319,7 @@ function ModuleView({ module }: { module: Module }) {
  * The one place layer ids become components. The switch is exhaustive over
  * `LayerId`, so adding an eighth layer is a compile error here — intentional.
  */
-function renderLayer(
-  layerId: LayerId,
-  module: Module,
-  values: Record<string, number>,
-  setParam: (moduleId: string, param: Param, value: ParamUpdate) => void,
-  resetParams: (moduleId: string, params: Param[]) => void,
-): ReactNode {
+function renderLayer(layerId: LayerId, module: Module): ReactNode {
   const { layers } = module;
 
   switch (layerId) {
@@ -230,21 +328,11 @@ function renderLayer(
     case 'intuition':
       return <RichText content={layers.intuition.body} />;
     case 'play':
-      return (
-        <SimStage
-          moduleId={module.id}
-          layer={layers.play}
-          values={values}
-          onChange={(param, value) => setParam(module.id, param, value)}
-          onReset={() => resetParams(module.id, layers.play.params)}
-        />
-      );
+      return <PlayLayer module={module} />;
     case 'real':
       return <RichText content={layers.real.body} />;
     case 'math':
-      return (
-        <EquationBlock layer={layers.math} params={layers.play.params} values={values} />
-      );
+      return <MathLayer module={module} />;
     case 'deeper':
       return <RichText content={layers.deeper.body} />;
     case 'connections':

@@ -28,6 +28,8 @@
  *     transit to model. That is a legible message on the canvas, not a crash.
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
+import { textWidth } from './labels';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { createGlowCache, drawGlow, glowRadius } from '@/visual/glow';
@@ -86,13 +88,13 @@ function wrapLines(
   maxWidth: number,
   maxLines: number,
 ): string[] {
-  if (maxWidth <= 0 || ctx.measureText(text).width <= maxWidth) return [text];
+  if (maxWidth <= 0 || textWidth(ctx, text) <= maxWidth) return [text];
 
   const lines: string[] = [];
   let current = '';
   for (const word of text.split(' ')) {
     const candidate = current ? `${current} ${word}` : word;
-    if (current && ctx.measureText(candidate).width > maxWidth && lines.length < maxLines - 1) {
+    if (current && textWidth(ctx, candidate) > maxWidth && lines.length < maxLines - 1) {
       lines.push(current);
       current = word;
     } else {
@@ -112,7 +114,7 @@ function fillTextClamped(
   left: number,
   right: number,
 ): void {
-  const half = ctx.measureText(text).width / 2;
+  const half = textWidth(ctx, text) / 2;
   const lo = left + half;
   const hi = right - half;
   ctx.fillText(text, hi >= lo ? Math.min(hi, Math.max(lo, cx)) : (left + right) / 2, y);
@@ -386,7 +388,7 @@ export default function ExoplanetsSim({ params, values }: SimProps) {
     const scene = sceneRef.current;
     if (!canvas || !scene) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -442,9 +444,7 @@ export default function ExoplanetsSim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   /* Never leave a loop running past unmount. */

@@ -107,10 +107,95 @@ export function headFor(shell: string, route: RouteHead): string {
   return html;
 }
 
+/** The slice of Rollup's output bundle this plugin reads. */
+interface OutputChunkLike {
+  type: 'chunk';
+  fileName: string;
+  name: string;
+  facadeModuleId: string | null;
+  moduleIds: string[];
+  imports: string[];
+  isEntry: boolean;
+  viteMetadata?: { importedCss: Set<string> };
+}
+
+/** Root-relative source path with forward slashes, for matching chunks to files. */
+function sourcePath(id: string | null): string {
+  if (!id) return '';
+  const normal = id.replace(/\\/g, '/');
+  const at = normal.lastIndexOf('/src/');
+  return at === -1 ? normal : normal.slice(at + 1);
+}
+
+/**
+ * `<link rel="modulepreload">` tags for one module page: the ModulePage and
+ * RichText chunks, the module's own content chunk and its sim chunk, and
+ * every chunk those import statically that the shell does not already load.
+ *
+ * Without them a direct visit to /m/<id> discovers its chunks one round trip
+ * at a time: the entry, then ModulePage, then the module's data, then its sim.
+ * With them the browser fetches all of them in parallel with the entry. The
+ * module's stylesheets are preloaded too (`as="style"`, which does not block
+ * rendering); Vite's loader attaches them as before.
+ */
+export function preloadTags(
+  chunks: OutputChunkLike[],
+  shell: string,
+  moduleId: string,
+  simKey: string,
+): string {
+  const byFile = new Map(chunks.map((chunk) => [chunk.fileName, chunk]));
+  const wanted = (chunk: OutputChunkLike) => {
+    const facade = sourcePath(chunk.facadeModuleId);
+    return (
+      facade === 'src/pages/ModulePage.tsx' ||
+      facade === `src/content/modules/${moduleId}.ts` ||
+      facade === `src/sims/${simKey}.tsx` ||
+      chunk.moduleIds.some((id) => sourcePath(id) === 'src/components/RichText.tsx')
+    );
+  };
+
+  const files = new Set<string>();
+  const visit = (chunk: OutputChunkLike) => {
+    if (chunk.isEntry || files.has(chunk.fileName)) return;
+    files.add(chunk.fileName);
+    for (const imported of chunk.imports) {
+      const next = byFile.get(imported);
+      if (next) visit(next);
+    }
+  };
+  chunks.filter(wanted).forEach(visit);
+
+  const css = new Set<string>();
+  for (const file of files) {
+    for (const sheet of byFile.get(file)?.viteMetadata?.importedCss ?? []) css.add(sheet);
+  }
+
+  // Anything the shell already links needs no second hint.
+  const inShell = (file: string) => shell.includes(`/${file}"`);
+  const scripts = [...files]
+    .filter((file) => !inShell(file))
+    .sort()
+    .map((file) => `    <link rel="modulepreload" crossorigin href="/${file}">`);
+  const sheets = [...css]
+    .filter((file) => !inShell(file))
+    .sort()
+    .map((file) => `    <link rel="preload" as="style" crossorigin href="/${file}">`);
+  return [...scripts, ...sheets].join('\n');
+}
+
 export function routeHeadsPlugin(): Plugin {
+  let chunks: OutputChunkLike[] = [];
+
   return {
     name: 'lodestar:route-heads',
     apply: 'build',
+    // Before closeBundle: the bundle's chunk graph, for the preload hints.
+    writeBundle(_options, bundle) {
+      chunks = Object.values(bundle).filter(
+        (item): item is OutputChunkLike & (typeof bundle)[string] => item.type === 'chunk',
+      ) as unknown as OutputChunkLike[];
+    },
     // After the client bundle is on disk, so the shell being copied already
     // carries the hashed asset tags.
     async closeBundle() {
@@ -139,9 +224,19 @@ export function routeHeadsPlugin(): Plugin {
       const outDir = 'dist';
       const shell = readFileSync(join(outDir, 'index.html'), 'utf8');
 
+      const simKeyOf = new Map(moduleList.map((m) => [m.id, m.layers.play.simKey]));
+
       let written = 0;
+      let preloaded = 0;
       for (const route of routes) {
-        const html = headFor(shell, route);
+        let html = headFor(shell, route);
+        const moduleId = route.path.startsWith('/m/') ? route.path.slice(3) : null;
+        if (moduleId) {
+          const tags = preloadTags(chunks, shell, moduleId, simKeyOf.get(moduleId) ?? moduleId);
+          if (!tags) throw new Error(`routeHeads: no preload hints for ${route.path}`);
+          html = html.replace(/\n([ \t]*)<\/head>/, `\n${tags}\n$1</head>`);
+          preloaded += 1;
+        }
         for (const file of route.files) {
           const target = join(outDir, file);
           mkdirSync(dirname(target), { recursive: true });
@@ -154,7 +249,7 @@ export function routeHeadsPlugin(): Plugin {
 
       console.log(
         `\nroute heads: ${routes.length} routes, ${written} files + sitemap.xml ` +
-          `(${routes.map((r) => r.path || '/').join(', ')})`,
+          `(${routes.map((r) => r.path || '/').join(', ')}); preload hints on ${preloaded} module pages`,
       );
     },
   };

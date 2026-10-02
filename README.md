@@ -53,13 +53,13 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 909 tests in 23 files
+npm test           # vitest, 914 tests in 24 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
 ```
 
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 909 of 909, and `npm run build` emits 20 route HTML files (39 total) plus `sitemap.xml`.
+On a clean install with Node 22: lint reports zero issues, `npm test` passes 914 of 914, and `npm run build` emits 20 route HTML files (39 total) plus `sitemap.xml`.
 
 <!-- site:case-study:start -->
 
@@ -78,7 +78,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 ## Tests
 
-`npm test` is 909 Vitest tests across 23 files, in a Node environment:
+`npm test` is 914 Vitest tests across 24 files, in a Node environment:
 
 - the 138 physics sanity checks as assertions;
 - equation snapshots, so a formatting change cannot quietly rewrite the maths;
@@ -93,9 +93,27 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 The browser suite is separate: `playwright.config.ts` defines five projects (Chromium at two viewports, WebKit, Firefox, mobile WebKit) covering tooltip journeys, figures, axe accessibility passes, keyboard operability and the not-found route. It starts no dev server, so `baseURL` defaults to the live site and `E2E_BASE_URL` retargets it at a local `npm run preview`.
 
+## Performance
+
+Measured in the lab against `npm run preview`: Lighthouse 13 in mobile mode (simulated slow 4G, 4× CPU), median of three runs per route, and a Playwright frame-rate test at 4× CPU slowdown on a 390 px phone viewport (5 s idle with the sim on screen, then a 3 s slider drag at 60 input events per second).
+
+| | Before | After |
+|---|---|---|
+| Largest contentful paint, home | 2.14 s | 1.87 s |
+| Largest contentful paint, module pages | 2.59–3.20 s | 2.26–2.48 s |
+| Largest contentful paint, About | 2.59 s | 2.17 s |
+| Total blocking time, worst route (early universe) | 133 ms | 98 ms |
+| Cumulative layout shift, every route | 0 | 0 |
+| Idle frame rate, lowest module | 56.8 fps | 59.2 fps |
+| Slider drag, median across modules | 50.9 fps | 55.5 fps |
+| Slider drag, slowest module (early universe before) | 24.4 fps | 44.8 fps (hawking radiation; 50.8 median of four runs) |
+| Entry JavaScript, gzipped | 145.1 kB | 23.8 kB |
+
+Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic; most of a drag's time in the profile is software canvas drawing. What changed: slider ticks re-render only the sim and its readouts, not the page; sims read their size from a `ResizeObserver` instead of forcing a layout per paint; label widths are cached; the early-universe scale factor comes from a table built once (agreeing with the old bisection to about 10⁻¹¹) instead of 240 000 integrand evaluations per frame; the starfield pauses while a sim is on screen; each module's content loads on its own page, with a build-time manifest for the index; framer-motion's features and KaTeX load only when needed; module pages preload their chunks; and figures ship 640 w and 1080 w copies.
+
 ## Known limits
 
-Some files are very large and heavily commented: `sanity.ts` is 2367 lines and the largest simulation, supernovae, 927, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
+Some files are very large and heavily commented: `sanity.ts` is 2367 lines and the largest simulation, supernovae, 926, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
 
 The maths layer's Numbers view substitutes each slider's value in SI base units, because the constants in the equations are SI; a "where" line under each equation gives the slider's own reading (v₀ = 8 km/s beside 8000 m/s in the formula) for every substituted value shown in another unit.
 

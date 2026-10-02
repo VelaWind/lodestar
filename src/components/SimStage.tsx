@@ -5,7 +5,7 @@
  */
 import { Suspense } from 'react';
 import type { Param, ParamUpdate, ParamValues, SimLayer } from '@/content/types';
-import { getSim, simKeys } from '@/content/registry';
+import { getSim, simKeys } from '@/content/sims';
 import { ParamControls } from './ParamControls';
 import { Approximations } from './Approximations';
 import { RichText } from './RichText';

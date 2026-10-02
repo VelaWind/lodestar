@@ -20,6 +20,7 @@
  *     the complete trajectory in one pass with the apex marked.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { canvasSize, observeCanvasSize } from './canvasSize';
 import { useReducedMotion } from 'framer-motion';
 import type { Param, ParamValues, SimProps } from '@/content/types';
 import { apexAltitude, integrateFlight, timestepForFlight, vEsc } from '@/physics/escape';
@@ -490,7 +491,7 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
     const scene = sceneRef.current;
     if (!canvas || !scene) return;
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasSize(canvas);
     if (rect.width === 0 || rect.height === 0) return;
 
     // DPR-aware: back the canvas with device pixels, draw in CSS pixels.
@@ -535,9 +536,7 @@ export default function EscapeVelocitySim({ params, values }: SimProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const observer = new ResizeObserver(() => paint());
-    observer.observe(canvas);
-    return () => observer.disconnect();
+    return observeCanvasSize(canvas, () => paint());
   }, [paint]);
 
   /* Never leave a loop running past unmount. */
