@@ -46,23 +46,23 @@ const neutronStars: Module = {
     intuition: {
       body: prose(
         p(
-          'Picture a lighthouse on a dark coast, its lamp turning. From a ship you never see the lamp ',
-          'itself, only a flash each time the beam sweeps across you, as regular as a clock. Count ',
-          'the flashes and you know how fast the lamp turns without ever seeing it.',
+          'Picture a lighthouse, its lamp turning. From a ship you never see the lamp ',
+          'itself, only a flash each time the beam sweeps across you; count the flashes and you know ',
+          'how fast it turns.',
         ),
         p(
           'When a big star runs out of fuel, its core can collapse into a ball about the size of a ',
           'city but heavier than the Sun: a neutron star. It spins, often many times a second, and ',
-          'it is a magnet far stronger than any on Earth. Two narrow beams of radio waves stream out ',
+          'is a magnet stronger than any on Earth. Two narrow beams of radio waves stream out ',
           'from its magnetic poles, and as the star turns they sweep around the sky like a ',
-          'lighthouse’s. If a beam crosses Earth, we catch a pulse every turn, and we call the star ',
-          'a pulsar.',
+          'lighthouse’s. If a beam crosses Earth, we catch a pulse every turn: the star is a pulsar.',
         ),
         p(
           'Where the analogy breaks: a lighthouse’s beam turns flat around its tower, so every ship ',
           'sees it. A neutron star’s magnetic poles are tilted away from the axis it spins on, so each ',
-          'beam sweeps out a cone, and only from inside that cone do you see pulses. Most beams miss ',
-          'us entirely.',
+          'beam sweeps around a cone, like the light from a tilted torch you turn in your hand. You see ',
+          'pulses only if you sit near the rim of that cone, where the beam passes; inside it or outside ',
+          'it, the beam never reaches you.',
         ),
       ),
     },
@@ -84,9 +84,10 @@ const neutronStars: Module = {
           technicalLabel: 'Mass',
           symbol: 'M',
           unit: 'kg',
-          // 1.1 to 2.5 M☉. Measured neutron-star masses run from about 1.2 to
-          // 2.08 M☉ (PSR J0740+6620); past 2.3 M☉ the sim collapses the star to
-          // a black hole, so the top of the slider shows that. Default: 1.4 M☉.
+          // 1.1 to 2.5 M☉. Precisely measured neutron-star masses run from about
+          // 1.2 to 2.08 M☉ (PSR J0740+6620; PSR J0952−0607's less certain
+          // 2.35 ± 0.17 M☉ is higher); past 2.3 M☉ the sim collapses the star
+          // to a black hole, so the top of the slider shows that. Default: 1.4 M☉.
           min: M_MIN,
           max: M_MAX,
           default: 1.4 * M_SUN,
@@ -144,12 +145,12 @@ const neutronStars: Module = {
       approximations: [
         prose(
           p(
-            'The star is a ball 12 km in radius at every mass. Its real size depends on how its matter resists squeezing, which is not known; measurements put it between about 12 and 13 km.',
+            'The star is a ball 12 kilometres in radius at every mass. Its real size depends on how its matter resists squeezing, which is not known; measurements put it between about 11 and 13 kilometres.',
           ),
         ),
         prose(
           p(
-            'The heaviest neutron star yet weighed is 2.08 times the Sun. Above 2.3 the sim collapses it to a black hole; the true limit is unknown and may be lower.',
+            'The heaviest neutron star measured precisely, PSR J0740+6620, is 2.08 times the Sun’s mass (a less certain measurement puts PSR J0952−0607 at about 2.35). Above 2.3 times the Sun’s mass the sim collapses the star; the true limit is unknown and could be a little lower or higher, and is for a star that does not spin: fast spin can hold up somewhat more.',
           ),
         ),
         prose(
@@ -159,17 +160,17 @@ const neutronStars: Module = {
         ),
         prose(
           p(
-            'Each beam is a cone 10° wide at every spin. Real beams are wider for fast pulsars and narrower for slow ones, and each pulsar’s pulse has its own shape.',
+            'Each beam is a cone 20 degrees across (10 degrees either side of its centre) at every spin. Real beams are wider for fast pulsars and narrower for slow ones, and each pulsar’s pulse has its own shape.',
           ),
         ),
         prose(
           p(
-            'The spin is drawn slowed down so you can follow it; the readouts and the trace’s time axis use the real speed.',
+            'The spin is drawn slowed down so you can follow it, except for stars that take longer than about three and a half seconds to turn, which are drawn at the real speed; the readouts and the trace’s time axis always use the real speed.',
           ),
         ),
         prose(
           p(
-            'The breakup spin uses a fit to detailed models, good to a few percent for stars well below the heaviest possible.',
+            'The fastest spin before it flies apart uses a fit to detailed models, good to a few percent for stars well below the heaviest possible.',
           ),
         ),
       ],
@@ -184,7 +185,8 @@ const neutronStars: Module = {
           ' is what is left when the core of a star born with more than about eight times the ',
           'Sun’s mass collapses in a supernova; above about 20, the core usually collapses further, ',
           'to a black hole. Most measured masses are close to 1.4 times the ',
-          'Sun’s; the heaviest yet weighed, PSR J0740+6620, is 2.08. The radius is about 12 km: NICER, ',
+          'Sun’s; the heaviest measured precisely, PSR J0740+6620, is 2.08 (a less certain ',
+          'measurement puts PSR J0952−0607 at about 2.35). The radius is about 12 km: NICER, ',
           'an X-ray telescope on the International Space Station, and the gravitational waves of the ',
           'neutron-star merger GW170817 together put a star of 1.4 solar masses at 12.45 ± 0.65 km. ',
           'So more than the Sun’s mass fits inside a city. The mean density, about 4 × 10¹⁷ kg/m³, is ',
@@ -245,6 +247,15 @@ const neutronStars: Module = {
 
     /* 5 ------------------------------------------------------------------ */
     math: {
+      intro: prose(
+        p(
+          'The first two equations take your mass slider and describe a neutron star up to the ',
+          '2.3-solar-mass threshold where the sim collapses it. Past that, the sim’s star is no ',
+          'longer a neutron star but a black hole, and the numbers they show describe nothing real. ',
+          'The third is the Crab’s worked case: it takes your period slider, but the rate the period ',
+          'lengthens has no slider, so the values beneath it are the Crab’s, not the sim’s.',
+        ),
+      ),
       equations: [
         {
           id: 'density',
@@ -310,12 +321,13 @@ const neutronStars: Module = {
           binds: ['P'],
           note: prose(
             p(
+              'The Crab’s worked case. ',
               m`\dot E`,
               ' — the power the star loses as it slows; ',
               m`P`,
               ' — its spin period (your slider); ',
               m`\dot P`,
-              ' — how fast the period lengthens, seconds per second; ',
+              ' — how fast the period lengthens, seconds per second, with no slider here; ',
               m`I`,
               ' — the moment of inertia, conventionally ',
               m`10^{38}\,\text{kg m}^2`,
@@ -361,13 +373,16 @@ const neutronStars: Module = {
           'the inner core holds, whether hyperons, deconfined quarks or only denser nucleons, is ',
           'open. Each candidate gives a different mass–radius relation, and observation is closing ',
           'in from two sides. Masses come from binary orbits: the Shapiro delay of PSR J0740+6620’s ',
-          'signal passing its companion gives 2.08 ± 0.07 solar masses, so any viable equation of ',
-          'state must hold at least that much up. GW170817’s remnant, which collapsed to a black ',
-          'hole, bounds the maximum from above at about 2.16 (+0.17, −0.15) solar masses. Radii come ',
-          'from NICER’s modelling of how hot spots on a spinning star bend in and out of view, and ',
-          'from the tidal deformation GW170817 imprinted on its waveform; combined, they give ',
-          '12.45 ± 0.65 km at 1.4 solar masses and 12.35 ± 0.75 km at 2.08, nearly the same, which ',
-          'is why the sim can hold the radius fixed.',
+          'signal passing its companion gives 2.08 ± 0.07 solar masses, the heaviest measured ',
+          'precisely, so any viable equation of state must hold at least that much up (a less ',
+          'certain measurement puts PSR J0952−0607 at about 2.35). GW170817’s remnant, which is ',
+          'thought to have collapsed to a black hole within a second or so, bounds the maximum from ',
+          'above at about 2.16 (+0.17, −0.15) solar masses. Radii come from NICER’s modelling of how ',
+          'hot spots on a spinning star bend in and out of view, and from the tidal deformation ',
+          'GW170817 imprinted on its waveform; combined, they give 12.45 ± 0.65 km at 1.4 solar ',
+          'masses and 12.35 ± 0.75 km at 2.08, nearly the same, which is why the sim can hold the ',
+          'radius fixed. NICER’s 2024 analysis of the nearest millisecond pulsar, PSR J0437−4715, ',
+          'came out smaller, 11.36 (+0.95, −0.63) km at 1.42 solar masses.',
         ),
         p(
           'The spin limit is relativistic too. Spun faster than its ',
@@ -375,7 +390,8 @@ const neutronStars: Module = {
           'radius the limit is about ',
           m`f_K \approx 1.08\,\text{kHz}\,(M/M_\odot)^{1/2}(R/10\,\text{km})^{-3/2}`,
           ' (Haensel et al. 2009), 972 Hz at 1.4 solar masses and 12 km, which is only 0.59 of the ',
-          'naive Newtonian orbital frequency because the spinning star bulges. The fastest known ',
+          'naive Newtonian orbital frequency, mainly because the spinning star bulges at its ',
+          'equator. The fastest known ',
           'pulsar, at 716 Hz, sits safely inside it. Pulsars that fast are ',
           term('millisecond pulsars', 'millisecond-pulsar'),
           ', first found in 1982: old neutron stars spun up again by matter falling onto them from a ',
@@ -391,8 +407,10 @@ const neutronStars: Module = {
           'that lights a nebula like the Crab’s. Modelling the star as a rotating magnetic dipole ',
           'gives the braking law, and integrating it from a much faster birth spin gives the ',
           'characteristic age. The Crab’s, about 1 260 years, overstates its true age because it ',
-          'was born spinning not much faster than it does now, and because its braking is not ',
-          'exactly dipolar. At the other extreme are ',
+          'was born spinning only about twice as fast as now, with a period near 19 ms, rather ',
+          'than much faster, as the formula assumes. Its braking, which is not exactly dipolar ',
+          '(braking index about 2.5), pushes the estimate the other way; with both, it comes to ',
+          'about 950 years. At the other extreme are ',
           term('magnetars', 'magnetar'),
           ', neutron stars with the strongest magnetic fields known, whose bursts of X-rays and ',
           'gamma rays are powered by the decay of the field itself rather than by the spin.',
@@ -400,8 +418,8 @@ const neutronStars: Module = {
         p(
           'Pulsars are also instruments. The first binary pulsar, found by Russell Hulse and Joseph ',
           'Taylor in 1974, has an orbit shrinking within 0.2 percent of the rate general relativity ',
-          'predicts for energy carried off by gravitational waves, the indirect proof recognised by ',
-          'the 1993 Nobel Prize. A clock on a neutron star’s surface runs slow by the same factor ',
+          'predicts for energy carried off by gravitational waves: the indirect proof of the waves. ',
+          'The 1993 Nobel Prize went to the pulsar’s discovery, which opened that test. A clock on a neutron star’s surface runs slow by the same factor ',
           'that redshifts its light, the gravitational time dilation of the time-dilation module: ',
           'at 1.4 solar masses, 1.235 seconds pass far away for each second on the surface. And ',
           'millisecond pulsars spread across the sky form ',

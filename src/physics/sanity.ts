@@ -61,6 +61,8 @@ import {
   A_VENUS,
   SEFF_MAXGH,
   SEFF_MOIST,
+  CRAB_BIRTH_PERIOD,
+  CRAB_BRAKING_INDEX,
   CRAB_F0,
   CRAB_F1,
   FASTEST_PULSAR_FREQUENCY,
@@ -187,6 +189,7 @@ import {
   escapeSpeedFraction,
   keplerFrequency,
   meanDensity,
+  spinDownAge,
   spinDownPower,
   surfaceGravity,
   surfaceRedshift,
@@ -2394,9 +2397,11 @@ export function verifyWormholeModel(): CheckBlock {
  * redshift. The equator's speed for the Crab and for the 716 Hz pulsar, and the
  * Keplerian limit (Haensel et al. 2009). The Crab's spin-down power and
  * characteristic age against the ATNF catalogue's own derived values (EDOT
- * 4.5 × 10³⁸ erg/s, AGE 1.26 × 10³ yr), computed here from its F0 and F1. And
- * two orderings: the fastest known pulsar spins below the limit, and the
- * collapse threshold sits above the heaviest measured star.
+ * 4.5 × 10³⁸ erg/s, AGE 1.26 × 10³ yr), computed here from its F0 and F1, and
+ * its spin-down age with the measured braking index and estimated birth period
+ * (Faucher-Giguère & Kaspi 2006) against its true age. And two orderings: the
+ * fastest known pulsar spins below the limit, and the collapse threshold sits
+ * above the heaviest precisely measured star.
  */
 export function verifyNeutronStarModel(): CheckBlock {
   const results: CheckResult[] = [];
@@ -2462,7 +2467,22 @@ export function verifyNeutronStarModel(): CheckBlock {
     0.005,
   );
 
-  /* 13 and 14 — orderings the module's prose depends on. */
+  /*
+   * 13 — the layer-6 explanation of that overestimate. With the measured
+   * braking index and the estimated birth period the spin-down age comes to
+   * 954 years, against a true age of 937 at the catalogue epoch (SN 1054 to
+   * mid-1991): within 2%, where the characteristic age is 34% high.
+   */
+  check(
+    'Crab spin-down age with n = 2.51 and P₀ = 19 ms, against its true age',
+    't = P/((n−1)Ṗ) · [1 − (P₀/P)^(n−1)]',
+    spinDownAge(crabP, crabPdot, CRAB_BRAKING_INDEX, CRAB_BIRTH_PERIOD) / JULIAN_YEAR,
+    1991.5 - 1054.5,
+    'yr',
+    0.02,
+  );
+
+  /* 14 and 15 — orderings the module's prose depends on. */
   const fastest = FASTEST_PULSAR_FREQUENCY;
   const limit = keplerFrequency(M);
   results.push(
@@ -2475,7 +2495,7 @@ export function verifyNeutronStarModel(): CheckBlock {
   );
   results.push(
     asserted(
-      'The collapse threshold sits above the heaviest measured neutron star',
+      'The collapse threshold sits above the heaviest precisely measured neutron star',
       '2.08 M☉ is stable; 2.4 M☉ collapses',
       `collapses(2.08 M☉) = ${collapses(NS_MASS_HEAVIEST)}  ·  collapses(2.4 M☉) = ${collapses(2.4 * M_SUN)}`,
       !collapses(NS_MASS_HEAVIEST) && collapses(2.4 * M_SUN),

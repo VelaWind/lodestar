@@ -197,6 +197,20 @@ export function characteristicAge(P: number, Pdot: number): number {
   return P / (2 * Pdot);
 }
 
+/**
+ *     t = P / ((n − 1) Ṗ) × [1 − (P₀/P)^(n−1)]
+ *
+ * Spin-down age, s, for a braking index n (Ω̇ ∝ Ωⁿ, constant) and a birth
+ * period P₀. With n = 3 and P₀ → 0 it is the characteristic age.
+ *
+ * @param n braking index, dimensionless, > 1
+ * @param P0 birth spin period, s
+ */
+export function spinDownAge(P: number, Pdot: number, n: number, P0: number): number {
+  if (!(P > 0) || !(Pdot > 0) || !(n > 1) || !(P0 >= 0)) return NaN;
+  return (P / ((n - 1) * Pdot)) * (1 - (P0 / P) ** (n - 1));
+}
+
 /* ------------------------------------------------------------------ */
 /* Beams                                                                */
 /* ------------------------------------------------------------------ */
@@ -221,34 +235,63 @@ export function beamAngle(alpha: number, zeta: number, phase: number): number {
 }
 
 /**
- * Which beams sweep across the line of sight during a rotation. The first
- * pole's axis traces a cone of half-angle α around the spin axis, so its
- * closest approach to a line of sight at ζ is |ζ − α|; the second pole's is
- * |ζ − (π − α)|. A beam gives pulses if that is within its half-width and its
- * farthest point, ζ + α (or 2π − ζ − α), is not: a line of sight that never
- * leaves the beam sees a steady glow, not a pulse. For ζ and α up to 90° only
- * the first beam can be steady.
+ * Tolerance on the beam edge, rad. A setting placed exactly on the edge (45°
+ * tilt seen from 35°) lands a part in 10¹⁶ either side of it in floating
+ * point; this puts it inside, the same way in the verdict, the trace and the
+ * drawing.
+ */
+const EDGE_TOLERANCE = 1e-9;
+
+/**
+ * Whether an angle from a beam's axis is inside that beam, the one test every
+ * beam decision in the module uses.
+ */
+export function insideBeam(angle: number, halfWidth = BEAM_HALF_WIDTH): boolean {
+  return angle <= halfWidth + EDGE_TOLERANCE;
+}
+
+/**
+ * What a distant observer at ζ receives from a star tilted α, from the same
+ * `beamAngle` the drawing uses. The first pole's angle from the line of sight
+ * is smallest at φ = 0, |ζ − α|, and largest at φ = π, ζ + α; the second pole's
+ * angle, π − θ, is smallest at φ = π, |π − ζ − α|, and largest at φ = 0,
+ * π − |ζ − α|.
+ *
+ *   - `first`, `second`: the beam reaches the line of sight at some phase.
+ *   - `alwaysOn`: the line of sight never leaves a beam, so the received signal
+ *     never drops to zero. For ζ and α up to 90° only the first beam can do
+ *     this, when ζ + α is within the half-width.
+ *   - `modulated`: the received signal changes over a turn at all, which needs
+ *     the pole to move relative to the line of sight, sin α sin ζ > 0.
+ *
+ * A pulse, the pulsar's on–off flash, is a beam that is reached but left again.
+ */
+export function beamVisibility(
+  alpha: number,
+  zeta: number,
+  halfWidth = BEAM_HALF_WIDTH,
+): { first: boolean; second: boolean; alwaysOn: boolean; modulated: boolean } {
+  const atZero = beamAngle(alpha, zeta, 0);
+  const atPi = beamAngle(alpha, zeta, Math.PI);
+  const first = insideBeam(atZero, halfWidth);
+  const second = insideBeam(Math.PI - atPi, halfWidth);
+  const alwaysOn = insideBeam(atPi, halfWidth) || insideBeam(Math.PI - atZero, halfWidth);
+  return { first, second, alwaysOn, modulated: Math.sin(alpha) * Math.sin(zeta) > EDGE_TOLERANCE };
+}
+
+/**
+ * Which beams give pulses: reached during a turn and left again. A line of
+ * sight that never leaves a beam sees a signal that is always on, not a pulse.
  */
 export function beamsSeen(alpha: number, zeta: number, halfWidth = BEAM_HALF_WIDTH): {
   first: boolean;
   second: boolean;
 } {
-  return {
-    first: Math.abs(zeta - alpha) <= halfWidth && !steadyBeam(alpha, zeta, halfWidth),
-    second: Math.abs(zeta - (Math.PI - alpha)) <= halfWidth && 2 * Math.PI - zeta - alpha > halfWidth,
-  };
+  const v = beamVisibility(alpha, zeta, halfWidth);
+  return { first: v.first && !v.alwaysOn, second: v.second && !v.alwaysOn };
 }
 
-/**
- * Whether the line of sight stays inside the first beam all the way round,
- * ζ + α ≤ half-width: a beam lying close along the spin axis, seen from close
- * to that axis, glows steadily and does not pulse.
- */
-export function steadyBeam(alpha: number, zeta: number, halfWidth = BEAM_HALF_WIDTH): boolean {
-  return zeta + alpha <= halfWidth;
-}
-
-/** Pulses per second a distant observer receives: one per visible beam per turn. */
+/** Pulses per second a distant observer receives: one per pulsing beam per turn. */
 export function pulsesPerSecond(P: number, alpha: number, zeta: number): number {
   if (!(P > 0)) return NaN;
   const seen = beamsSeen(alpha, zeta);
@@ -257,12 +300,13 @@ export function pulsesPerSecond(P: number, alpha: number, zeta: number): number 
 
 /**
  * The received radio intensity at rotation phase φ, 0 to 1, for the pulse
- * trace: each beam a Gaussian in its angle from the line of sight, cut off at
- * the beam edge. Shape only; real pulse profiles vary from pulsar to pulsar.
+ * trace: each beam a Gaussian in its angle from the line of sight, σ half the
+ * half-width, cut off at the beam edge by `insideBeam`. Shape only; real pulse
+ * profiles vary from pulsar to pulsar.
  */
 export function beamIntensity(alpha: number, zeta: number, phase: number, halfWidth = BEAM_HALF_WIDTH): number {
   const theta = beamAngle(alpha, zeta, phase);
   const sigma = halfWidth / 2;
-  const lobe = (angle: number) => (angle <= halfWidth ? Math.exp(-(angle ** 2) / (2 * sigma ** 2)) : 0);
+  const lobe = (angle: number) => (insideBeam(angle, halfWidth) ? Math.exp(-(angle ** 2) / (2 * sigma ** 2)) : 0);
   return Math.min(1, lobe(theta) + lobe(Math.PI - theta));
 }

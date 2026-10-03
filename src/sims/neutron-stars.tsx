@@ -24,7 +24,8 @@
  * sanity block also reads. This file owns pixels and formatting only.
  *
  * Motion: the star turns slowed down, one turn every half second at the fastest
- * spin to about five seconds at the slowest, so faster stars still look faster.
+ * spin, so faster stars still look faster; from a 3.55 s period up it turns at
+ * the real speed, never faster.
  * Under reduced motion there is no loop: the star is drawn at the moment its
  * first beam swings closest to Earth, and the cursor marks that moment.
  */
@@ -36,15 +37,15 @@ import {
   BEAM_HALF_WIDTH,
   beamAngle,
   beamIntensity,
-  beamsSeen,
+  beamVisibility,
   breakupPeriod,
   collapses,
   densityOverNuclear,
   equatorialSpeedFraction,
   escapeSpeedFraction,
+  insideBeam,
   keplerFrequency,
   pulsesPerSecond,
-  steadyBeam,
   surfaceGravity,
 } from '@/physics/neutronstar';
 import { useReducedMotion } from '@/motion/useReducedMotion';
@@ -110,22 +111,27 @@ function formatSpin(frequency: number): string {
   return `${formatSig3(frequency)} turns a second (${formatTime(1 / frequency)})`;
 }
 
-type Verdict = 'collapsed' | 'both' | 'one' | 'steady' | 'none';
+type Verdict = 'collapsed' | 'both' | 'one' | 'brightening' | 'steady' | 'none';
 
-/** What a distant observer sees, from the physics module's beam geometry. */
+/**
+ * What a distant observer sees, from `beamVisibility`, the rule the trace's
+ * intensity and the drawing's lit line of sight also use. "Always on" is
+ * exactly "the drawn intensity never reaches zero".
+ */
 function verdictFor(M: number, alpha: number, zeta: number): Verdict {
   if (collapses(M)) return 'collapsed';
-  if (steadyBeam(alpha, zeta)) return 'steady';
-  const seen = beamsSeen(alpha, zeta);
-  if (seen.first && seen.second) return 'both';
-  return seen.first || seen.second ? 'one' : 'none';
+  const v = beamVisibility(alpha, zeta);
+  if (v.alwaysOn) return v.modulated ? 'brightening' : 'steady';
+  if (v.first && v.second) return 'both';
+  return v.first || v.second ? 'one' : 'none';
 }
 
 const VERDICT_TEXT: Record<Verdict, string> = {
   collapsed: 'No: too heavy, it has collapsed to a black hole',
   both: 'Yes: both beams sweep past Earth, two pulses a turn',
   one: 'Yes: one beam sweeps past Earth, one pulse a turn',
-  steady: 'Not as a pulsar: Earth sits in a beam that never moves away',
+  brightening: 'Always on, brightening once a turn: not a pulsar’s on–off flash',
+  steady: 'Always on and steady: the beam never sweeps away from Earth',
   none: 'No: both beams miss Earth',
 };
 
@@ -284,6 +290,8 @@ function drawStar(ctx: CanvasRenderingContext2D, w: number, bottom: number, view
   const cy = Math.round(24 + (bottom - 24) / 2);
   const reach = Math.max(20, Math.min((bottom - 24) / 2 - 8, (w - PAD.left - PAD.right) * 0.36));
   const r = Math.max(6, Math.min(14, reach * 0.14));
+  /** Half a beam's width at its tip, px. */
+  const beamHalf = reach * Math.tan(BEAM_HALF_WIDTH);
   const phi = view.turn - Math.PI / 2;
   const { alpha, zeta } = view;
 
@@ -296,7 +304,7 @@ function drawStar(ctx: CanvasRenderingContext2D, w: number, bottom: number, view
   );
   const sightLen = Math.max(r + 4, tEdge);
   const theta = beamAngle(alpha, zeta, phi);
-  const lit = !collapsed && (theta <= BEAM_HALF_WIDTH || Math.PI - theta <= BEAM_HALF_WIDTH);
+  const lit = !collapsed && (insideBeam(theta) || insideBeam(Math.PI - theta));
   ctx.strokeStyle = lit ? COLORS.ember : COLORS.warm;
   ctx.lineWidth = lit ? 2 : 1;
   ctx.setLineDash(lit ? [] : [5, 4]);
@@ -353,19 +361,26 @@ function drawStar(ctx: CanvasRenderingContext2D, w: number, bottom: number, view
     const my = -Math.cos(alpha);
     const mz = Math.sin(alpha) * Math.sin(phi);
     const beams = [
-      { sign: 1, front: mz >= 0, on: theta <= BEAM_HALF_WIDTH },
-      { sign: -1, front: mz < 0, on: Math.PI - theta <= BEAM_HALF_WIDTH },
+      { sign: 1, front: mz >= 0, on: insideBeam(theta) },
+      { sign: -1, front: mz < 0, on: insideBeam(Math.PI - theta) },
     ];
+    const half = beamHalf;
     const drawBeam = (sign: number, front: boolean, on: boolean) => {
       const dx = sign * mx;
       const dy = sign * my;
       const len = Math.hypot(dx, dy);
-      const half = reach * Math.tan(BEAM_HALF_WIDTH);
       // Perpendicular to the projected axis; a beam seen end-on is a dot of light.
       const px = len > 1e-6 ? -dy / len : 1;
       const py = len > 1e-6 ? dx / len : 0;
       const tx = cx + dx * reach;
       const ty = cy + dy * reach;
+      /* The beam as obstacles for the labels: boxes along its axis, as wide as the beam there. */
+      for (let t = 0.2; t <= 1.001; t += 0.1) {
+        const bx = cx + dx * reach * t;
+        const by = cy + dy * reach * t;
+        const pad = half * t + 1;
+        marks.push({ x0: bx - pad, x1: bx + pad, y0: by - pad, y1: by + pad });
+      }
       ctx.globalAlpha = on ? 0.85 : front ? 0.5 : 0.22;
       ctx.fillStyle = on ? COLORS.ember : COLORS.beam;
       ctx.beginPath();
@@ -403,6 +418,11 @@ function drawStar(ctx: CanvasRenderingContext2D, w: number, bottom: number, view
         { x: cx + 6, y: cy - reach + 4, align: 'left' },
         { x: cx - 6, y: cy + reach, align: 'right' },
         { x: cx + 6, y: cy + reach, align: 'left' },
+        // Clear of a beam lying close along the axis, at small tilt.
+        { x: cx - half - 6, y: cy - reach + 4, align: 'right' },
+        { x: cx + half + 6, y: cy - reach + 4, align: 'left' },
+        { x: cx - half - 6, y: cy + reach, align: 'right' },
+        { x: cx + half + 6, y: cy + reach, align: 'left' },
       ],
       bounds,
       obstacles,
@@ -423,7 +443,12 @@ function drawStar(ctx: CanvasRenderingContext2D, w: number, bottom: number, view
   }
 
   ctx.fillStyle = lit ? COLORS.ember : COLORS.warm;
-  placeFirstOf(ctx, ['to Earth', 'Earth'], spotsAround(earth.x, earth.y), bounds, obstacles, marks);
+  // Beside the line first; then, for a line of sight lying inside a beam, out past the beam's edge.
+  const besideBeam: Spot[] = [-8, 14, -18, 24].flatMap((dy) => [
+    { x: earth.x + beamHalf + 6, y: earth.y + dy, align: 'left' as const },
+    { x: earth.x - beamHalf - 6, y: earth.y + dy, align: 'right' as const },
+  ]);
+  placeFirstOf(ctx, ['to Earth', 'Earth'], [...spotsAround(earth.x, earth.y), ...besideBeam], bounds, obstacles, marks);
 }
 
 /* -------------------------- the period strip ------------------------- */
@@ -495,18 +520,32 @@ function drawStrip(ctx: CanvasRenderingContext2D, w: number, top: number, view: 
     { x: x + 2, y: lineY - 13, align: 'right' },
     { x, y: lineY - 13, align: 'center' },
   ];
+  /* At the default the dot sits on the Crab, so the one label names both. */
+  const atCrab = Math.abs(view.P * CRAB_F0 - 1) < 1e-6;
   ctx.fillStyle = COLORS.ember;
-  placeFirstOf(ctx, [formatTime(view.P)], [...above(xP), { x: xP + 7, y: lineY + 30, align: 'left' }], bounds, obstacles, marks);
+  placeFirstOf(
+    ctx,
+    atCrab ? [`${formatTime(view.P)} (the Crab)`, formatTime(view.P)] : [formatTime(view.P)],
+    [...above(xP), { x: xP + 7, y: lineY + 30, align: 'left' }],
+    bounds,
+    obstacles,
+    marks,
+  );
   ctx.fillStyle = COLORS.star;
   placeFirstOf(
     ctx,
-    [`fastest known, ${FASTEST_PULSAR_FREQUENCY} a second`, `fastest, ${FASTEST_PULSAR_FREQUENCY} Hz`, 'fastest'],
+    [
+      `fastest known, ${FASTEST_PULSAR_FREQUENCY} a second`,
+      `fastest, ${FASTEST_PULSAR_FREQUENCY} a second`,
+      `${FASTEST_PULSAR_FREQUENCY} a second`,
+      'fastest',
+    ],
     above(xFast),
     bounds,
     obstacles,
     marks,
   );
-  placeFirstOf(ctx, ['the Crab'], above(xCrab), bounds, obstacles, marks);
+  if (!atCrab) placeFirstOf(ctx, ['the Crab'], above(xCrab), bounds, obstacles, marks);
   if (!collapses(view.M)) {
     ctx.fillStyle = COLORS.dangerInk;
     placeFirstOf(
@@ -524,6 +563,23 @@ function drawStrip(ctx: CanvasRenderingContext2D, w: number, top: number, view: 
 }
 
 /* ----------------------------- the trace ----------------------------- */
+
+/** Samples across the trace's two turns. φ = 0 falls on sample 45. */
+const TRACE_STEPS = 360;
+
+/**
+ * The received intensity across the trace's two turns, 0 to 1, from
+ * `beamIntensity`: the curve drawn, and what the tests check the verdict against.
+ */
+function traceSamples(view: Pick<View, 'M' | 'alpha' | 'zeta'>): number[] {
+  const collapsed = collapses(view.M);
+  const samples: number[] = [];
+  for (let i = 0; i <= TRACE_STEPS; i += 1) {
+    const turn = (i / TRACE_STEPS) * 2 * TAU;
+    samples.push(collapsed ? 0 : beamIntensity(view.alpha, view.zeta, turn - Math.PI / 2));
+  }
+  return samples;
+}
 
 function drawTrace(
   ctx: CanvasRenderingContext2D,
@@ -578,16 +634,14 @@ function drawTrace(
   }
 
   /* The signal. */
-  const collapsed = verdict === 'collapsed';
-  const steps = 360;
+  const samples = traceSamples(view);
+  const steps = samples.length - 1;
   ctx.strokeStyle = COLORS.ember;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   for (let i = 0; i <= steps; i += 1) {
-    const turn = (i / steps) * 2 * TAU;
-    const I = collapsed ? 0 : beamIntensity(view.alpha, view.zeta, turn - Math.PI / 2);
     const x = left + (i / steps) * (right - left);
-    const y = plotBottom - I * (plotBottom - plotTop - 4);
+    const y = plotBottom - samples[i]! * (plotBottom - plotTop - 4);
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   }
@@ -607,7 +661,8 @@ function drawTrace(
   if (verdict === 'both' || verdict === 'one') return;
   const note: Record<Exclude<Verdict, 'both' | 'one'>, string[]> = {
     collapsed: ['no signal: a black hole has no beams', 'no signal'],
-    steady: ['a steady signal, no pulses', 'steady, no pulses'],
+    brightening: ['always on, never dropping to zero: no pulses', 'always on, no pulses'],
+    steady: ['always on and steady: no pulses', 'always on, no pulses'],
     none: ['no pulses: both beams miss Earth', 'no pulses'],
   };
   ctx.fillStyle = COLORS.inkDim;
@@ -668,11 +723,13 @@ function readParam(params: Param[], values: ParamValues, id: string): number {
 
 /**
  * Seconds per turn on screen: half a second at the fastest known pulsar,
- * growing as the fourth root of the period, so about 1.1 s at the Crab and
- * 4.6 s at ten seconds. Display only.
+ * growing as the fourth root of the period, so about 1.1 s at the Crab. Never
+ * faster than the real spin: from 3.55 s up, where the fourth-root rule would
+ * turn the drawing faster than the star, it turns at the real period. Display
+ * only.
  */
 function shownTurnSeconds(P: number): number {
-  return 0.5 * (P * FASTEST_PULSAR_FREQUENCY) ** 0.25;
+  return Math.max(P, 0.5 * (P * FASTEST_PULSAR_FREQUENCY) ** 0.25);
 }
 
 /** The phase the static drawing holds: the first beam swung closest to Earth. */
@@ -695,7 +752,7 @@ export default function NeutronStarsSim({ params, values }: SimProps) {
   const collapsed = collapses(M);
   const verdict = verdictFor(M, alpha, zeta);
   const pulses = collapsed ? NaN : pulsesPerSecond(P, alpha, zeta);
-  const speed = equatorialSpeedFraction(P);
+  const speed = collapsed ? NaN : equatorialSpeedFraction(P);
   const gravity = collapsed ? NaN : surfaceGravity(M);
   const escape = collapsed ? NaN : escapeSpeedFraction(M);
   const density = collapsed ? NaN : densityOverNuclear(M);
@@ -790,21 +847,32 @@ export default function NeutronStarsSim({ params, values }: SimProps) {
       </dl>
 
       <p className="font-ui text-[0.7rem] text-ink-faint">
-        {reduced ? (
+        {/* Collapse first: under reduced motion too, there are no beams or signal to describe. */}
+        {collapsed ? (
+          <>The star is past the collapse threshold: it is drawn as a black hole, with no beams and no signal.</>
+        ) : reduced ? (
           <>
             Animation disabled by your reduced-motion setting; the star is drawn at the moment its first beam swings
             closest to Earth, marked on the signal below.
           </>
-        ) : collapsed ? (
-          <>The star is past the collapse threshold, so nothing turns here.</>
-        ) : (
+        ) : shownTurn > P ? (
           <>
             Drawn slowed down: one turn takes{' '}
             <span className="font-mono text-ember">{SIG3.format(shownTurn)} s</span> here and{' '}
             <span className="font-mono text-ember">{formatTime(P)}</span> in reality. The signal’s time axis is real.
           </>
+        ) : (
+          <>
+            Drawn at the real speed: one turn takes <span className="font-mono text-ember">{formatTime(P)}</span>.
+          </>
         )}
       </p>
+      {!collapsed && (
+        <p className="font-ui text-[0.7rem] text-ink-faint">
+          Seen from the side, a beam can look as if it lies along the line to Earth without lighting it: it is
+          pointing out of the screen or into it, past Earth.
+        </p>
+      )}
     </div>
   );
 }
@@ -836,6 +904,8 @@ export const __internals = {
   formatSpin,
   verdictFor,
   VERDICT_TEXT,
+  traceSamples,
+  TRACE_STEPS,
   STATIC_TURN,
   shownTurnSeconds,
 };

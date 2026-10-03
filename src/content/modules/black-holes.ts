@@ -78,8 +78,9 @@ const blackHoles: Module = {
           technicalLabel: 'Mass',
           symbol: 'M',
           unit: 'kg',
-          // About 1e30 kg ≈ 0.5 M_☉, below the ~2.2 M_☉ Tolman–Oppenheimer–Volkoff
-          // limit but a legitimate horizon for the geometry; 1.3e41 kg ≈ 65
+          // About 1e30 kg ≈ 0.5 M_☉, below the Tolman–Oppenheimer–Volkoff limit
+          // of about 2.2–2.3 M_☉ (Rezzolla et al. 2018: 2.16 +0.17/−0.15) but a
+          // legitimate horizon for the geometry; 1.3e41 kg ≈ 65
           // billion M_☉, covering TON 618 at the top of the quasar mass range.
           // The minimum is nudged 0.5% below 1e30 so the default is step 130 of
           // 1111 exactly (src/content/grid.ts), and the maximum is reachable.
