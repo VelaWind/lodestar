@@ -14,7 +14,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 
 ## Features
 
-- 19 modules, each a seven-layer page: hook, intuition, interactive simulation, real picture, the maths, going deeper, connections. The depth tier persists across sessions via Zustand's `persist`.
+- 20 modules, each a seven-layer page: hook, intuition, interactive simulation, real picture, the maths, going deeper, connections. The depth tier persists across sessions via Zustand's `persist`.
 - Simulations run on real SI quantities. Every control is a typed `Param` with a unit and a symbol, and the maths layer renders KaTeX from the same `Param` values the animation uses, so the number in the equation is the number in the physics.
 - Readouts are recomputed, not tabulated: the gravitational-waves page derives chirp mass, frequency at cutoff, peak strain and time from 30 Hz to merger from `src/physics/gw.ts`.
 - Each simulation lists its approximations in a counted expander beside it, not in the prose.
@@ -31,6 +31,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 | Black Holes | One number, how heavy, decides everything else about it. |
 | The Cosmic Distance Ladder | Almost every distance to a galaxy rests on a shorter one, all the way down to the width of Earth’s orbit. |
 | The Cosmic Microwave Background | The oldest light there is still fills the sky, cooled by the stretching of space to three degrees above absolute zero. |
+| Dark Matter | Stars at a galaxy’s edge orbit too fast for the matter we can see. Something unseen is pulling on them. |
 | The Early Universe | From a trillion-degree soup of quarks to the first atoms: what the universe was made of at every moment, and why it changed. |
 | Escape Velocity | How fast you have to throw something so gravity never gets it back. |
 | Exoplanets | A star dims by a hundredth, on schedule, and there is a world in the way. |
@@ -54,13 +55,13 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 971 tests in 24 files
+npm test           # vitest, 1045 tests in 24 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
 ```
 
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 971 of 971, and `npm run build` emits 21 route HTML files (41 total) plus `sitemap.xml`.
+On a clean install with Node 22: lint reports zero issues, `npm test` passes 1045 of 1045, and `npm run build` emits 22 route HTML files (43 total) plus `sitemap.xml`.
 
 <!-- site:case-study:start -->
 
@@ -70,8 +71,8 @@ On a clean install with Node 22: lint reports zero issues, `npm test` passes 971
 - **One source of truth per quantity.** Formulae and constants live in `src/physics/`, shared by the animation loop, the readouts and the equation renderer. The simulations hold no physics of their own: every simulation imports from `@/physics`.
 - **Canvas first.** Simulations draw in `requestAnimationFrame` loops reading refs, so dragging a slider does not re-render React per frame. Sims are lazy-loaded per route.
 - **Terms are marked, not re-explained.** A `term` node in the AST is a leaf: visible words plus a glossary id, so a definition cannot come to contain a link or an equation. Its panel is portalled to `document.body` and positioned `fixed`, because every layer body sits inside the accordion's `overflow-hidden`.
-- **A sanity suite guards the physics.** `src/physics/sanity.ts` recomputes known quantities (Earth's orbital period, the Schwarzschild radius of the Sun, light travel times: 153 checks in 20 blocks) through the code paths the simulations use, logging on dev boot and asserted in tests.
-- **Every route serves its own head.** `scripts/routeHeadsPlugin.ts` emits one HTML file per route at build time from the registry (21 routes, 41 files) plus `sitemap.xml`, so a shared module link unfurls as the module rather than the front page.
+- **A sanity suite guards the physics.** `src/physics/sanity.ts` recomputes known quantities (Earth's orbital period, the Schwarzschild radius of the Sun, light travel times: 170 checks in 21 blocks) through the code paths the simulations use, logging on dev boot and asserted in tests.
+- **Every route serves its own head.** `scripts/routeHeadsPlugin.ts` emits one HTML file per route at build time from the registry (22 routes, 43 files) plus `sitemap.xml`, so a shared module link unfurls as the module rather than the front page.
 
 ## Stack
 
@@ -79,9 +80,9 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 ## Tests
 
-`npm test` is 971 Vitest tests across 24 files, in a Node environment:
+`npm test` is 1045 Vitest tests across 24 files, in a Node environment:
 
-- the 153 physics sanity checks as assertions;
+- the 170 physics sanity checks as assertions;
 - equation snapshots, so a formatting change cannot quietly rewrite the maths;
 - a copy snapshot pinning every word a reader can see (layers, glossary, About page, captions, credits, alt text), so a copy edit fails until the snapshot is updated deliberately;
 - canvas replay of each simulation at phone-to-desktop widths against a recording context, which catches labels drawn outside the frame;

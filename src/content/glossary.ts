@@ -612,6 +612,37 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Energy condition',
     body: 'A rule that ordinary matter obeys, such as never having negative energy density. Wormholes need these rules broken.',
   },
+
+  /* Dark matter ---------------------------------------------------- */
+
+  'dark-matter': {
+    title: 'Dark matter',
+    body: 'Matter that gives off, absorbs and reflects no light we can detect, known only by its gravity. About five times as much as ordinary matter; what it is made of is unknown.',
+  },
+  'rotation-curve': {
+    title: 'Rotation curve',
+    body: 'How fast stars and gas orbit a galaxy’s centre at each distance from it. Far out, most are nearly flat.',
+  },
+  'dark-matter-halo': {
+    title: 'Dark matter halo',
+    body: 'The roughly round cloud of dark matter a galaxy is inferred to sit in, reaching far beyond its stars and holding most of its mass.',
+  },
+  'gravitational-lensing': {
+    title: 'Gravitational lensing',
+    body: 'The bending of light from distant objects by the gravity of mass in front of them. Measuring the distortion weighs that mass, seen or not.',
+  },
+  mond: {
+    title: 'MOND',
+    body: 'Modified Newtonian dynamics: Milgrom’s 1983 proposal that gravity is stronger than Newton’s law at very low accelerations, offered in place of dark matter.',
+  },
+  wimp: {
+    title: 'WIMP',
+    body: 'Weakly interacting massive particle: a hypothetical dark matter particle a few to thousands of times a proton’s mass, interacting about as weakly as neutrinos. None has been found.',
+  },
+  axion: {
+    title: 'Axion',
+    body: 'A hypothetical, extremely light particle proposed in 1977–78 to fix a puzzle in the strong nuclear force, and a candidate for dark matter. None has been found.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */

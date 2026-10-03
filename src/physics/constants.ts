@@ -483,6 +483,83 @@ export const NS_MOMENT_OF_INERTIA = 1e38;
 /** A metric teaspoon, m³: 5 mL. */
 export const TEASPOON = 5e-6;
 
+// Dark matter
+/** A kiloparsec, m. */
+export const KILOPARSEC = 1e3 * PARSEC;
+/**
+ * The Sun's distance from the Galactic Centre, m. Source: GRAVITY Collaboration
+ * 2021, "Improved GRAVITY astrometric accuracy from modelling optical
+ * aberrations", A&A 647, A59 — R₀ = 8275 ± 9 (stat) ± 33 (sys) pc, from the
+ * orbit of the star S2 around Sgr A*. (GRAVITY 2019, A&A 625, L10, had
+ * 8178 ± 13 ± 22 pc.)
+ */
+export const R0_GALACTIC = 8.275 * KILOPARSEC;
+/**
+ * The Milky Way's circular speed at the Sun, m/s: 229.0 km/s (Eilers et al.
+ * 2019, derived for R₀ = 8.122 kpc; with GRAVITY 2021's 8.275 kpc the same data
+ * give a few km/s more — about 233, since the Sun's measured angular speed
+ * about Sgr A* fixes v/R₀). Source: Eilers, Hogg, Rix & Ness 2019, "The
+ * Circular Velocity Curve of the Milky Way from 5 to 25 kpc", ApJ 871, 120 —
+ * v_c(R⊙) = 229.0 ± 0.2 km/s, with systematic uncertainties of 2–5%, declining
+ * by 1.7 ± 0.1 km/s per kpc. Later Gaia DR3 analyses span about
+ * 229.6 (red giants) to 236.8 ± 0.8 km/s (classical Cepheids, MNRAS 546,
+ * stag011, 2026), consistent within those systematics.
+ */
+export const V_CIRC_SUN = 229.0e3;
+/**
+ * The Milky Way's stars plus cold gas, kg: M_bary ≈ (6.3 ± 0.5) × 10¹⁰ M☉, of
+ * which stars are (5 ± 1) × 10¹⁰ M☉. Source: Bland-Hawthorn & Gerhard 2016,
+ * "The Galaxy in Context", ARA&A 54, 529, §6.2 and §6.4.4. The hot corona,
+ * about 2.5 × 10¹⁰ M☉ spread to 250 kpc, is not included: it adds almost
+ * nothing to the rotation curve inside the disc.
+ */
+export const MW_BARYONIC_MASS = 6.3e10 * M_SUN;
+/**
+ * The Milky Way's thin-disc scale length, m: R_d = 2.6 ± 0.5 kpc, from a
+ * statistical analysis of fifteen studies. Source: Bland-Hawthorn & Gerhard
+ * 2016, ARA&A 54, 529, §5.1.
+ */
+export const MW_DISC_SCALE_LENGTH = 2.6 * KILOPARSEC;
+/**
+ * The dark-matter-halo model's core radius, m: 5 kpc, fixed. Not a measurement.
+ * Chosen with `HALO_V_INF_DEFAULT` so the Milky Way-like defaults give a
+ * circular speed within 1% of `V_CIRC_SUN` at `R0_GALACTIC` and a gently
+ * falling curve out to 30 kpc, as Eilers et al. 2019 measure.
+ */
+export const HALO_CORE_RADIUS = 5 * KILOPARSEC;
+/**
+ * The halo's default asymptotic speed, m/s: 200 km/s. Tuned with
+ * `HALO_CORE_RADIUS`, not measured; the module says so.
+ */
+export const HALO_V_INF_DEFAULT = 200e3;
+/**
+ * Physical cold-dark-matter and baryon densities, Ω h² (dimensionless). Source:
+ * Planck Collaboration 2020, "Planck 2018 results VI: Cosmological parameters",
+ * A&A 641, A6, TT,TE,EE+lowE+lensing — Ω_c h² = 0.1200 ± 0.0012 and
+ * Ω_b h² = 0.02237 ± 0.00015. With h from `H0_PLANCK_2018` they give
+ * Ω_c ≈ 0.264 and Ω_b ≈ 0.049; with massive neutrinos (Ω_ν ≈ 0.0014) they sum to
+ * `OMEGA_M`.
+ */
+export const OMEGA_C_H2 = 0.12;
+export const OMEGA_B_H2 = 0.022_37;
+/**
+ * MOND's acceleration scale, m/s²: a₀ ≈ 1.2 × 10⁻¹⁰. Source: McGaugh, Lelli &
+ * Schombert 2016, "Radial Acceleration Relation in Rotationally Supported
+ * Galaxies", PRL 117, 201101 — g† = 1.20 ± 0.02 (random) ± 0.24 (systematic)
+ * × 10⁻¹⁰ m/s², the scale in the fitted relation that MOND's a₀ plays.
+ */
+export const MOND_A0 = 1.2e-10;
+/**
+ * Zwicky's 1933 Coma Cluster result: the mean density would have to be at least
+ * 400 times that derived from the luminous matter, for a Hubble constant of
+ * 558 km/s/Mpc. Source: Zwicky 1933, Helv. Phys. Acta 6, 110 (English
+ * translation, Gen. Relativ. Gravit. 41, 207, 2009). A mass-to-light ratio
+ * scales as 1/distance, so as H₀; with a modern H₀ his factor drops to about
+ * 50 (van den Bergh 1999, "The Early History of Dark Matter", PASP 111, 657).
+ */
+export const ZWICKY_1933_FACTOR = 400;
+export const ZWICKY_1933_H0 = 558 * KM_S_PER_MPC;
+
 // Mathematics
 /**
  * Apéry's constant, ζ(3), dimensionless. It sets the photon number density of
