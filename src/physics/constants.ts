@@ -118,7 +118,9 @@ export const M_NS_TYPICAL = 1.4 * M_SUN;
  * and nuclear theory, give 12.45 ± 0.65 km for a 1.4 M☉ star and
  * 12.35 ± 0.75 km at 2.08 M☉, so the neutron-stars module uses this one
  * radius for every mass: the radius depends on the unknown equation of state,
- * and no mass–radius formula is used. The module discloses it.
+ * and no mass–radius formula is used. The module discloses it. NICER's PSR
+ * J0437−4715 (Choudhury et al. 2024, ApJL 971, L20) is smaller, 11.36 (+0.95,
+ * −0.63) km at 1.418 M☉, so the disclosed range is about 11 to 13 km.
  */
 export const R_NS = 1.2e4;
 /**
@@ -437,14 +439,17 @@ export const NUCLEAR_SATURATION_DENSITY = 2.7e17;
  */
 export const KEPLER_FREQUENCY_COEFFICIENT = 1080;
 /**
- * The heaviest neutron star measured, kg: PSR J0740+6620, 2.08 ± 0.07 M☉, from
- * the Shapiro delay. Source: Fonseca et al. 2021, "Refined Mass and Geometric
- * Measurements of the High-mass PSR J0740+6620", ApJL 915, L12.
+ * The heaviest neutron star measured precisely, kg: PSR J0740+6620,
+ * 2.08 ± 0.07 M☉, from the Shapiro delay. Source: Fonseca et al. 2021, "Refined
+ * Mass and Geometric Measurements of the High-mass PSR J0740+6620", ApJL 915,
+ * L12. A less certain measurement, from modelling the light of a black-widow
+ * companion, puts PSR J0952−0607 at 2.35 ± 0.17 M☉ (Romani et al. 2022, ApJL
+ * 934, L17).
  */
 export const NS_MASS_HEAVIEST = 2.08 * M_SUN;
 /**
  * Above this mass, kg, the module's star collapses to a black hole: 2.3 M☉. The
- * true maximum (M_TOV) is unknown. It is at least the 2.08 M☉ measured above,
+ * true maximum (M_TOV) is unknown. It is at least the 2.08 M☉ measured precisely above,
  * and GW170817's remnant bounds it at 2.16 (+0.17, −0.15) M☉ (Rezzolla, Most &
  * Weih 2018, ApJL 852, L25); 2.3 M☉ is the top of that range, so a star the
  * slider calls stable could still be too heavy, and the module says so.
@@ -461,6 +466,14 @@ export const FASTEST_PULSAR_FREQUENCY = 716;
  */
 export const CRAB_F0 = 29.946_923;
 export const CRAB_F1 = -3.775_35e-10;
+/**
+ * The Crab pulsar's braking index, dimensionless, and its estimated birth spin
+ * period, s. Source: Faucher-Giguère & Kaspi 2006, "Birth and Evolution of
+ * Isolated Radio Pulsars", ApJ 643, 332 — n = 2.51 ± 0.01 (their Table 4, from
+ * Lyne et al. 1988, 1993) and P₀ ~ 19 ms (citing Manchester & Taylor 1977).
+ */
+export const CRAB_BRAKING_INDEX = 2.51;
+export const CRAB_BIRTH_PERIOD = 0.019;
 /**
  * A neutron star's moment of inertia, kg m²: the conventional 10⁴⁵ g cm² the
  * ATNF catalogue uses for its derived spin-down luminosities and fields. A real

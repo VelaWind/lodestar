@@ -420,7 +420,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'millisecond-pulsar': {
     title: 'Millisecond pulsar',
-    body: 'A pulsar spinning hundreds of times a second, spun up by matter falling onto it from a companion star.',
+    body: 'A pulsar spinning tens to hundreds of times a second, spun up by matter falling onto it from a companion star.',
   },
   'equation-of-state': {
     title: 'Equation of state',

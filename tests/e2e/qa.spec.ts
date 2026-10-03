@@ -2985,16 +2985,24 @@ test('behaviour: neutron-stars readouts follow the sliders, and a term opens by 
   await expect(readout(4), 'surface gravity at 1.4 Suns').toHaveText('163 billion × Earth’s');
   await expect(readout(5), 'escape speed at 1.4 Suns').toHaveText('58.7% of light speed');
 
-  /* Earth on the spin axis: both beams miss. */
+  /* 45° tilt seen from 35°: exactly on the beam edge, and seen, as the trace shows. */
   await page.locator('#p-zeta').focus();
+  for (let i = 0; i < 15; i += 1) await page.keyboard.press('ArrowLeft');
+  await expect(page.locator('#p-zeta'), 'view at 35°').toHaveAttribute('aria-valuetext', /^35 /);
+  await expect(readout(0), 'verdict at 45°/35°').toHaveText(/^Yes: one beam/);
+
+  /* Earth on the spin axis: both beams miss. */
   await page.keyboard.press('Home');
   await expect(readout(0), 'verdict on the spin axis').toHaveText(/^No: both beams miss/);
   await expect(readout(1), 'pulse rate on the spin axis').toHaveText('none');
 
-  /* The heaviest mass: collapsed. */
+  /* The heaviest mass: collapsed, and no star readout survives it. */
   await page.locator('#p-M').focus();
   await page.keyboard.press('End');
   await expect(readout(0), 'verdict at 2.5 Suns').toHaveText(/^No: too heavy/);
+  for (const index of [1, 2, 3, 4, 5, 6]) {
+    await expect(readout(index), `readout ${index} after collapse`).toHaveText(/^—/);
+  }
   await assertNoOverflow(page, 'neutron stars collapsed');
 
   /* A glossary term, reached and opened with the keyboard alone. */
@@ -3029,6 +3037,30 @@ test('behaviour: neutron-stars readouts follow the sliders, and a term opens by 
 
   await shot(page, '25-neutron-stars-behaviour');
   assertClean(w, 'neutron stars behaviour');
+});
+
+/**
+ * Reduced motion and a collapsed star together: the note under the sim says the
+ * star is a black hole, and does not describe the beams and signal that a
+ * collapsed star does not have.
+ */
+test('neutron-stars: under reduced motion a collapsed star is described as collapsed @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/m/neutron-stars', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+
+  const note = page.locator('#layer-panel-play p', { hasText: /reduced-motion|collapse threshold/ });
+  await expect(note, 'reduced-motion note at the defaults').toContainText('first beam');
+
+  await page.locator('#p-M').focus();
+  await page.keyboard.press('End');
+  await expect(note, 'note once collapsed').toContainText('black hole');
+  await expect(note, 'note once collapsed').not.toContainText('beam swings');
+  assertClean(w, 'neutron stars reduced motion collapsed');
 });
 
 /* 8 ---------------------------------------------------------------- */
