@@ -5,7 +5,7 @@
  *
  * Kept apart from `registry.ts`, which imports every module's data eagerly:
  * the app's shell imports this file, and importing the registry instead would
- * pull all eighteen modules' prose into every page's entry chunk.
+ * pull all nineteen modules' prose into every page's entry chunk.
  */
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 import type { SimProps } from './types';

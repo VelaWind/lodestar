@@ -24,8 +24,8 @@ const cases = moduleList.flatMap((module) =>
 );
 
 describe('default-anchored slider stops', () => {
-  it('covers every param of all eighteen modules', () => {
-    expect(moduleList).toHaveLength(18);
+  it('covers every param of all nineteen modules', () => {
+    expect(moduleList).toHaveLength(19);
     expect(cases.length).toBeGreaterThan(40);
   });
 

@@ -38,6 +38,7 @@ import cosmicDistanceLadder from '@/content/modules/cosmic-distance-ladder';
 import timeDilation from '@/content/modules/time-dilation';
 import hawkingRadiation from '@/content/modules/hawking-radiation';
 import wormholes from '@/content/modules/wormholes';
+import neutronStars from '@/content/modules/neutron-stars';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
 import planetaryAtmospheres from '@/content/modules/planetary-atmospheres';
@@ -65,6 +66,7 @@ const MODULES: Module[] = [
   timeDilation,
   hawkingRadiation,
   wormholes,
+  neutronStars,
 ];
 
 /** The tier a reader lands on with nothing persisted — see `useAppStore`. */

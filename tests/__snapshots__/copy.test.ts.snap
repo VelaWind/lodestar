@@ -569,6 +569,55 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "A cloud of gas lit from inside by newborn stars glows the way a neon sign does: its atoms are driven to give off light in colours all their own.",
     "title": "Nebulae",
   },
+  "neutron-stars": {
+    "L1 hook": "The collapsed core of a dead star, a neutron star, is so dense that a teaspoon of it would weigh about two billion tonnes, as much as a mountain. The fastest one known spins 716 times a second.",
+    "L2 intuition": "Picture a lighthouse, its lamp turning. From a ship you never see the lamp itself, only a flash each time the beam sweeps across you; count the flashes and you know how fast it turns. When a big star runs out of fuel, its core can collapse into a ball about the size of a city but heavier than the Sun: a neutron star. It spins, often many times a second, and is a magnet stronger than any on Earth. Two narrow beams of radio waves stream out from its magnetic poles, and as the star turns they sweep around the sky like a lighthouse’s. If a beam crosses Earth, we catch a pulse every turn: the star is a pulsar. Where the analogy breaks: a lighthouse’s beam turns flat around its tower, so every ship sees it. A neutron star’s magnetic poles are tilted away from the axis it spins on, so each beam sweeps around a cone, like the light from a tilted torch you turn in your hand. You see pulses only if you sit near the rim of that cone, where the beam passes; inside it or outside it, the beam never reaches you.",
+    "L3 approximation 0": "The star is a ball 12 kilometres in radius at every mass. Its real size depends on how its matter resists squeezing, which is not known; measurements put it between about 11 and 13 kilometres.",
+    "L3 approximation 1": "The heaviest neutron star measured precisely, PSR J0740+6620, is 2.08 times the Sun’s mass (a less certain measurement puts PSR J0952−0607 at about 2.35). Above 2.3 times the Sun’s mass the sim collapses the star; the true limit is unknown and could be a little lower or higher, and is for a star that does not spin: fast spin can hold up somewhat more.",
+    "L3 approximation 2": "Gravity is worked out for a star that does not spin. Spun near its limit, a real one bulges at the equator, where gravity is then weaker.",
+    "L3 approximation 3": "Each beam is a cone 20 degrees across (10 degrees either side of its centre) at every spin. Real beams are wider for fast pulsars and narrower for slow ones, and each pulsar’s pulse has its own shape.",
+    "L3 approximation 4": "The spin is drawn slowed down so you can follow it, except for stars that take longer than about three and a half seconds to turn, which are drawn at the real speed; the readouts and the trace’s time axis always use the real speed.",
+    "L3 approximation 5": "The fastest spin before it flies apart uses a fit to detailed models, good to a few percent for stars well below the heaviest possible.",
+    "L3 caption": "Spin the star faster and slower, tilt its magnet, and move the Earth around it. A pulse appears on the trace below only when a beam sweeps across our line of sight. Then make the star heavier and watch its gravity climb toward the point where it would collapse.",
+    "L4 figure alt": "A cloud of blue and white light on black, brightest at a small point near its centre that is circled by a bright ring, with a bright jet running from the centre down to the lower left.",
+    "L4 real": "A neutron star is what is left when the core of a star born with more than about eight times the Sun’s mass collapses in a supernova; above about 20, the core usually collapses further, to a black hole. Most measured masses are close to 1.4 times the Sun’s; the heaviest measured precisely, PSR J0740+6620, is 2.08 (a less certain measurement puts PSR J0952−0607 at about 2.35). The radius is about 12 km: NICER, an X-ray telescope on the International Space Station, and the gravitational waves of the neutron-star merger GW170817 together put a star of 1.4 solar masses at 12.45 ± 0.65 km. So more than the Sun’s mass fits inside a city. The mean density, about 4 × 10¹⁷ kg/m³, is roughly one and a half times the density inside an atomic nucleus. Gravity at the surface is about 160 billion times Earth’s, and the escape speed is close to 60 percent of the speed of light. The collapse keeps the core’s spin and squeezes its magnetic field, as the core shrinks from a few thousand kilometres across to about 24, so a newborn neutron star spins fast and is intensely magnetised. A pulsar is one whose radio beams, streaming from its magnetic poles, sweep across Earth, giving a pulse each turn. The Crab pulsar, at the heart of the Crab Nebula, the wreck of the supernova seen in 1054, turns about 30 times a second, and its period lengthens by about 13 millionths of a second each year as it radiates its spin away. Walter Baade and Fritz Zwicky proposed neutron stars in 1934, as the remnants of supernovae, two years after the neutron itself was discovered. One was first found in 1967, when Jocelyn Bell Burnell, a graduate student at Cambridge, noticed a small, odd signal in Antony Hewish’s radio survey that resolved into pulses 1.337 seconds apart. They were so regular that the team briefly labelled the source LGM-1, for “little green men”, while they ruled out an artificial origin. The discovery was published in 1968. The 1974 Nobel Prize in Physics went to Hewish, for his role in the discovery of pulsars, and to Martin Ryle, for his radio observations and the aperture-synthesis technique; Bell Burnell was not included. A common misconception is that a pulsar switches on and off. It does not: the beams shine all the time, and the pulsing is a beam sweeping past us. That is also why most neutron stars are never seen as pulsars at all; their beams never cross Earth. The Crab Nebula in X-rays, seen by NASA’s Chandra telescope. The pulsar is the bright point at the centre. The ring around it and the jet below are matter flung out by the spinning star, still glowing almost a thousand years after the supernova. X-ray: NASA/CXC/SAO",
+    "L5 intro": "The first two equations take your mass slider and describe a neutron star up to the 2.3-solar-mass threshold where the sim collapses it. Past that, the sim’s star is no longer a neutron star but a black hole, and the numbers they show describe nothing real. The third is the Crab’s worked case: it takes your period slider, but the rate the period lengthens has no slider, so the values beneath it are the Crab’s, not the sim’s.",
+    "L5 note (density)": "\\bar\\rho — the mean density; M — the star’s mass (your slider); R — its radius, 12 km here at every mass. Worked example, 1.4 solar masses: \\bar\\rho = 3 \\times 2.78 \\times 10^{30} / (4\\pi \\times (1.2 \\times 10^{4})^{3}) = 3.85 \\times 10^{17}\\,\\text{kg/m}^3, 1.42 times the nuclear saturation density of 2.7 \\times 10^{17}\\,\\text{kg/m}^3. A 5 mL teaspoon of it holds 1.9 \\times 10^{12}\\,\\text{kg}.",
+    "L5 note (escape)": "v_{\\text{esc}} — the escape speed from the surface, as measured there; G — the gravitational constant. Newton’s formula, and also the exact relativistic one, with R the areal radius, the one a tape around the equator would give: the same coincidence the escape-velocity module explains. Under the root is twice the compactness \\beta = GM/(Rc^2), which is exactly 1/2 for a black hole. Worked example, 1.4 solar masses: \\beta = 0.172, 34 percent of the way to a black hole, and v_{\\text{esc}} = \\sqrt{0.345}\\,c = 0.587\\,c. The surface gravity, g = GM/(R^2\\sqrt{1 - 2\\beta}) = 1.59 \\times 10^{12}\\,\\text{m/s}^2, is 1.6 \\times 10^{11} times Earth’s, and light leaving the surface is redshifted by z = 1/\\sqrt{1 - 2\\beta} - 1 = 0.235.",
+    "L5 note (spin-down)": "The Crab’s worked case. \\dot E — the power the star loses as it slows; P — its spin period (your slider); \\dot P — how fast the period lengthens, seconds per second, with no slider here; I — the moment of inertia, conventionally 10^{38}\\,\\text{kg m}^2. The same P sets the light-cylinder radius c/\\Omega = cP/2\\pi, and with \\dot P the characteristic age \\tau = P/(2\\dot P). Worked example, the Crab (ATNF catalogue, 1991): P = 0.03339\\,\\text{s} and \\dot P = 4.21 \\times 10^{-13}, so \\dot E = 4\\pi^2 \\times 10^{38} \\times 4.21 \\times 10^{-13} / 0.03339^3 = 4.5 \\times 10^{31}\\,\\text{W}, about 120 000 times the Sun’s output, which is what lights the nebula. The light cylinder is 1\\,590\\,\\text{km} out, and \\tau = 0.03339 / (2 \\times 4.21 \\times 10^{-13}) = 4.0 \\times 10^{10}\\,\\text{s}, 1 260 years, against a true age of 937 years at that date.",
+    "L6 deeper": "A neutron star’s structure is set by its equation of state, the pressure of matter as a function of density, which is not known above about twice nuclear saturation density, where the inner core sits. Below it, theory and experiment agree: an outer crust of nuclei in a sea of electrons, an inner crust where neutrons drip out of the nuclei, then a core of neutrons with a few percent protons and electrons. What the inner core holds, whether hyperons, deconfined quarks or only denser nucleons, is open. Each candidate gives a different mass–radius relation, and observation is closing in from two sides. Masses come from binary orbits: the Shapiro delay of PSR J0740+6620’s signal passing its companion gives 2.08 ± 0.07 solar masses, the heaviest measured precisely, so any viable equation of state must hold at least that much up (a less certain measurement puts PSR J0952−0607 at about 2.35). GW170817’s remnant, which is thought to have collapsed to a black hole within a second or so, bounds the maximum from above at about 2.16 (+0.17, −0.15) solar masses. Radii come from NICER’s modelling of how hot spots on a spinning star bend in and out of view, and from the tidal deformation GW170817 imprinted on its waveform; combined, they give 12.45 ± 0.65 km at 1.4 solar masses and 12.35 ± 0.75 km at 2.08, nearly the same, which is why the sim can hold the radius fixed. NICER’s 2024 analysis of the nearest millisecond pulsar, PSR J0437−4715, came out smaller, 11.36 (+0.95, −0.63) km at 1.42 solar masses. The spin limit is relativistic too. Spun faster than its Keplerian frequency, a star sheds matter from its equator; for a non-rotating mass and radius the limit is about f_K \\approx 1.08\\,\\text{kHz}\\,(M/M_\\odot)^{1/2}(R/10\\,\\text{km})^{-3/2} (Haensel et al. 2009), 972 Hz at 1.4 solar masses and 12 km, which is only 0.59 of the naive Newtonian orbital frequency, mainly because the spinning star bulges at its equator. The fastest known pulsar, at 716 Hz, sits safely inside it. Pulsars that fast are millisecond pulsars, first found in 1982: old neutron stars spun up again by matter falling onto them from a companion star, with weaker fields, slower spin-down and the steadiest rotation of any natural clock. The spin-down power is only the rotational energy lost, whatever carries it away. What carries it is the magnetic field: field lines that would have to turn faster than light, beyond the light cylinder, cannot co-rotate and are opened, and along them flows the wind of particles and field that lights a nebula like the Crab’s. Modelling the star as a rotating magnetic dipole gives the braking law, and integrating it from a much faster birth spin gives the characteristic age. The Crab’s, about 1 260 years, overstates its true age because it was born spinning only about twice as fast as now, with a period near 19 ms, rather than much faster, as the formula assumes. Its braking, which is not exactly dipolar (braking index about 2.5), pushes the estimate the other way; with both, it comes to about 950 years. At the other extreme are magnetars, neutron stars with the strongest magnetic fields known, whose bursts of X-rays and gamma rays are powered by the decay of the field itself rather than by the spin. Pulsars are also instruments. The first binary pulsar, found by Russell Hulse and Joseph Taylor in 1974, has an orbit shrinking within 0.2 percent of the rate general relativity predicts for energy carried off by gravitational waves: the indirect proof of the waves. The 1993 Nobel Prize went to the pulsar’s discovery, which opened that test. A clock on a neutron star’s surface runs slow by the same factor that redshifts its light, the gravitational time dilation of the time-dilation module: at 1.4 solar masses, 1.235 seconds pass far away for each second on the surface. And millisecond pulsars spread across the sky form pulsar timing arrays, in which a gravitational wave of years-long period shows up as correlated drifts in arrival times; NANOGrav reported evidence for such a background in 2023.",
+    "L7 reason -> black-holes": "Push this module’s mass past its limit and the star collapses; that module starts where this one stops.",
+    "L7 reason -> gravitational-waves": "Two neutron stars spiralling together made GW170817, the merger seen in both gravitational waves and light.",
+    "L7 reason -> supernovae": "Where neutron stars come from: that module’s slider crosses the eight-Sun line where a dying star’s core collapses into one.",
+    "L7 reason -> time-dilation": "A clock on a neutron star’s surface runs about a fifth slower than one far away; that module shows why gravity slows time.",
+    "reference 0": {
+      "label": "Hewish, Bell, Pilkington, Scott & Collins 1968, “Observation of a Rapidly Pulsating Radio Source”, Nature 217, 709",
+      "note": "The discovery of pulsars, pulses 1.337 s apart",
+      "url": "https://doi.org/10.1038/217709a0",
+    },
+    "reference 1": {
+      "label": "Hessels et al. 2006, “A Radio Pulsar Spinning at 716 Hz”, Science 311, 1901",
+      "note": "The fastest known pulsar, PSR J1748−2446ad",
+      "url": "https://doi.org/10.1126/science.1123430",
+    },
+    "reference 2": {
+      "label": "Fonseca et al. 2021, “Refined Mass and Geometric Measurements of the High-mass PSR J0740+6620”, ApJL 915, L12",
+      "note": "The heaviest measured neutron star, 2.08 ± 0.07 M☉",
+      "url": "https://doi.org/10.3847/2041-8213/ac03b8",
+    },
+    "reference 3": {
+      "label": "Miller et al. 2021, “The Radius of PSR J0740+6620 from NICER and XMM-Newton Data”, ApJL 918, L28",
+      "note": "Radii of 12.45 ± 0.65 km at 1.4 M☉ and 12.35 ± 0.75 km at 2.08 M☉",
+      "url": "https://doi.org/10.3847/2041-8213/ac089b",
+    },
+    "reference 4": {
+      "label": "Haensel, Zdunik, Bejger & Lattimer 2009, “Keplerian frequency of uniformly rotating neutron stars and strange stars”, A&A 502, 605",
+      "note": "The breakup spin, f_K = 1.08 kHz (M/M☉)^½ (R/10 km)^−3/2",
+      "url": "https://doi.org/10.1051/0004-6361/200811605",
+    },
+    "tagline": "A star’s collapsed core, heavier than the Sun and a city across, sweeping the sky with its beams.",
+    "title": "Neutron Stars and Pulsars",
+  },
   "planetary-atmospheres": {
     "L1 hook": "Every world is leaking. Earth loses about three kilograms of hydrogen to space each second. It is happening now, quietly, over your head.",
     "L2 intuition": "Put a handful of ping-pong balls in an open box and shake it. The balls bounce at all different heights — most stay low, a few leap surprisingly high — and if the shaking is vigorous enough, every so often one clears the rim and is gone. An atmosphere is that box. The shaking is heat: the warmer the gas, the faster its molecules dart about, and at any moment a few in the swarm are moving far faster than the rest. The rim is gravity: a world’s escape threshold. Molecules that happen to be in the fast few, headed upward, clear it and never return. Lighter balls bounce higher for the same shake, which is the crucial part: light gases ride the shaking faster than heavy ones, so a world can hold its heavy gases for eternity while its lightest ones drain away. The analogy breaks in one place: the box empties in minutes, because every ball takes its turn near the rim. A planet’s air leaks only from its thin uppermost fringe, and only from the fastest sliver of molecules there, so the draining takes millions to billions of years, a leak measured in geologic time.",
@@ -1033,6 +1082,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A rule that ordinary matter obeys, such as never having negative energy density. Wormholes need these rules broken.",
     "title": "Energy condition",
   },
+  "equation-of-state": {
+    "body": "How hard matter pushes back when squeezed: its pressure at each density. Inside a neutron star’s core it is not yet known.",
+    "title": "Equation of state",
+  },
   "equilibrium-temperature": {
     "body": "The temperature a planet settles at when the starlight it absorbs balances the heat it radiates, with no atmosphere. Earth’s is 255 K; its surface is 288 K.",
     "title": "Equilibrium temperature",
@@ -1153,6 +1206,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A graph of a star’s brightness against time.",
     "title": "Light curve",
   },
+  "light-cylinder": {
+    "body": "The distance from a pulsar’s spin axis at which anything turning with the star would have to move at the speed of light.",
+    "title": "Light cylinder",
+  },
   "limb": {
     "body": "The visible edge of a star’s or planet’s disc.",
     "title": "Limb",
@@ -1164,6 +1221,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "luminosity-distance": {
     "body": "Distance inferred from how much a signal has faded on its way here.",
     "title": "Luminosity distance",
+  },
+  "magnetar": {
+    "body": "A neutron star with the strongest magnetic field known, a hundred to a thousand times a typical pulsar’s, powering bursts of X-rays and gamma rays.",
+    "title": "Magnetar",
   },
   "magnetic-dynamo": {
     "body": "The churning of a planet’s molten interior that generates its magnetic field, which deflects the solar wind but may not protect the air on net.",
@@ -1188,6 +1249,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "merger": {
     "body": "The moment the two objects finally touch and become one.",
     "title": "Merger",
+  },
+  "millisecond-pulsar": {
+    "body": "A pulsar spinning tens to hundreds of times a second, spun up by matter falling onto it from a companion star.",
+    "title": "Millisecond pulsar",
   },
   "muonic-hydrogen": {
     "body": "Hydrogen with its electron swapped for a heavier muon, which orbits closer and probes the proton more sharply.",
@@ -1248,6 +1313,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "proton-proton-chain": {
     "body": "The sequence of reactions that turns four protons into one helium nucleus in stars like the Sun, releasing 26.7 MeV and two neutrinos.",
     "title": "Proton–proton chain",
+  },
+  "pulsar": {
+    "body": "A spinning neutron star whose beams of radio waves sweep across Earth, so we see a pulse once or twice each turn.",
+    "title": "Pulsar",
   },
   "pulsar-timing-array": {
     "body": "Millisecond pulsars watched as one galaxy-sized detector: passing waves subtly shift their tick arrivals.",
