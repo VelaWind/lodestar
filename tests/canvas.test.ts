@@ -49,6 +49,9 @@ import { __internals as wh } from '@/sims/wormholes';
 import { __internals as ns } from '@/sims/neutron-stars';
 import neutronStars from '@/content/modules/neutron-stars';
 import { beamVisibility, equatorialSpeedFraction, surfaceGravity } from '@/physics/neutronstar';
+import { __internals as dm } from '@/sims/dark-matter';
+import darkMatter from '@/content/modules/dark-matter';
+import { markerReadout, rotationCurve } from '@/physics/darkmatter';
 import { massEvaporatingIn, massForHawkingTemperature, netWithCMB } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
@@ -2161,6 +2164,130 @@ function neutronStarCases(): Case[] {
   return cases;
 }
 
+/* -------------------------------- dark matter -------------------------------- */
+
+const DM_HEIGHT = 512;
+
+function darkMatterCases(): Case[] {
+  const params = darkMatter.layers.play.params;
+  const cases: Case[] = [];
+  const MYR = 1e6 * JULIAN_YEAR;
+  type DmView = Parameters<typeof dm.drawScene>[3];
+
+  // Every slider's ends and default, against each other, in both label sets,
+  // moving and still.
+  const views: { label: string; view: DmView }[] = [];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const m of extremes(paramOf(params, 'M'))) {
+      for (const rd of extremes(paramOf(params, 'Rd'))) {
+        for (const v of extremes(paramOf(params, 'vInf'))) {
+          for (const r of extremes(paramOf(params, 'R'))) {
+            for (const still of [false, true]) {
+              views.push({
+                label: `M=${m.stop} Rd=${rd.stop} vInf=${v.stop} R=${r.stop} ${still ? 'still' : 't=37 Myr'} ${units}`,
+                view: { M: m.value, Rd: rd.value, vInf: v.value, R: r.value, t: still ? 0 : 37 * MYR, still, units },
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+  // The marker swept across the plot at the defaults, past every curve label.
+  const rParam = paramOf(params, 'R');
+  for (let r = rParam.min; r <= rParam.max + 1; r += (rParam.max - rParam.min) / 29) {
+    for (const vInf of [0, paramOf(params, 'vInf').default, paramOf(params, 'vInf').max]) {
+      views.push({
+        label: `R=${(r / (1e3 * PARSEC)).toFixed(1)} kpc vInf=${vInf / 1e3} km/s`,
+        view: {
+          M: paramOf(params, 'M').default,
+          Rd: paramOf(params, 'Rd').default,
+          vInf,
+          R: r,
+          t: 0,
+          still: false,
+          units: 'friendly',
+        },
+      });
+    }
+  }
+  for (const { label, view } of views) cases.push({ label, draw: (ctx, w, h) => void dm.drawScene(ctx, w, h, view) });
+
+  /*
+   * Labels against the curves and the galaxy, two ways. First by the sim's own
+   * bookkeeping: no placed label overlaps any obstacle it recorded, the curve
+   * segments, the marker and its dots, and the galaxy's disc. Then
+   * independently, from what was drawn: no text box contains a star (a filled
+   * rect) or a vertex of any line, and the curves are drawn with a vertex at
+   * least every 3 px, so a line cannot cross a label between two vertices.
+   */
+  it('keeps every label off the curves, the marker and the galaxy', () => {
+    const problems: string[] = [];
+    for (const width of [...WIDTHS, 390]) {
+      for (const { label, view } of views) {
+        const { ctx, records } = recordingContext();
+        const layout = dm.drawScene(ctx, width, DM_HEIGHT, view);
+        for (const box of layout.labels) {
+          const hit = layout.obstacles.find(
+            (o) => Math.min(box.x1, o.x1) > Math.max(box.x0, o.x0) && Math.min(box.y1, o.y1) > Math.max(box.y0, o.y0),
+          );
+          if (hit) problems.push(`${label} @${width}: label at ${box.x0.toFixed(0)},${box.y0.toFixed(0)} on an obstacle`);
+        }
+        const texts = records.filter((r) => r.kind === 'text');
+        const marks = records.filter((r) => r.kind === 'point' || r.kind === 'rect' || (r.kind === 'arc' && r.x1 - r.x0 <= 12));
+        for (const t of texts) {
+          const inside = marks.find((m) => m.x1 > t.x0 + 0.5 && m.x0 < t.x1 - 0.5 && m.y1 > t.y0 + 0.5 && m.y0 < t.y1 - 0.5);
+          if (inside) problems.push(`${label} @${width}: "${t.text}" is drawn over a ${inside.kind}`);
+        }
+      }
+    }
+    expect(problems.slice(0, 20)).toEqual([]);
+    // About 3 300 full scenes; well over the default 5 s on a busy runner.
+  }, 30_000);
+
+  it('moves every star at the total curve’s speed for its radius', () => {
+    for (const { view } of views.slice(0, 40)) {
+      const model = dm.modelFor(view);
+      for (const star of model.stars) {
+        expect(star.omega * star.R).toBeCloseTo(rotationCurve(star.R, view).total, 6);
+      }
+    }
+  });
+
+  it('names only the curves it draws', () => {
+    const base = views.find((v) => v.view.units === 'friendly')!.view;
+    const { ctx, records } = recordingContext();
+    dm.drawScene(ctx, 900, DM_HEIGHT, { ...base, vInf: 0, R: paramOf(params, 'R').default });
+    const words = records.filter((r) => r.kind === 'text').map((r) => r.text ?? '');
+    expect(words.some((t) => /halo alone|with the dark halo/.test(t))).toBe(false);
+    expect(words).toContain('visible matter only (no halo)');
+  });
+
+  it('formats the readouts at the defaults the way the module states them', () => {
+    const galaxy = {
+      M: paramOf(params, 'M').default,
+      Rd: paramOf(params, 'Rd').default,
+      vInf: paramOf(params, 'vInf').default,
+    };
+    const r = markerReadout(paramOf(params, 'R').default, galaxy);
+    expect(dm.formatSpeed(r.withHalo)).toBe('227 km/s');
+    expect(dm.formatSpeed(r.visibleOnly)).toBe('191 km/s');
+    expect(dm.formatPeriod(r.period)).toBe('224 million years');
+    expect(dm.formatMass(r.visibleMass)).toBe('52.1 billion Suns');
+    expect(dm.formatMass(r.totalMass)).toBe('81.3 billion Suns');
+    expect(dm.formatRatio(r.darkToVisible)).toBe('0.561 to 1');
+    expect(dm.formatDistance(paramOf(params, 'R').default, false)).toBe('about 27,000 light-years');
+    expect(dm.formatDistance(paramOf(params, 'Rd').default, false)).toBe('about 8,480 light-years');
+    expect(dm.formatDistance(paramOf(params, 'R').default, true)).toBe('8.28 kpc');
+  });
+
+  it('speeds time up by one factor at every setting', () => {
+    expect(dm.REAL_SECONDS_PER_SCREEN_SECOND).toBe(25 * MYR);
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -2183,6 +2310,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'hawking-radiation', height: HR_HEIGHT, cases: hawkingRadiationCases },
   { name: 'wormholes', height: WH_HEIGHT, cases: wormholeCases },
   { name: 'neutron-stars', height: NS_HEIGHT, cases: neutronStarCases },
+  { name: 'dark-matter', height: DM_HEIGHT, cases: darkMatterCases },
 ];
 
 /**
@@ -2220,6 +2348,7 @@ const MEASURED_PLACEMENT = new Set([
   'hawking-radiation',
   'wormholes',
   'neutron-stars',
+  'dark-matter',
 ]);
 
 for (const sim of SIMS) {
