@@ -155,6 +155,59 @@ export function discSpeed(R: number, M: number, Rd: number): number {
 }
 
 /**
+ *     F(y) = 2y² [I₀(y)K₀(y) − I₁(y)K₁(y)],   so   v_disc² = (GM / R_d) · F(R / 2R_d)
+ *
+ * The disc's rotation curve in dimensionless form: one curve for every mass
+ * and scale length, which is what makes it worth tabulating.
+ */
+export function discShape(y: number): number {
+  if (!(y > 0)) return 0;
+  return Math.max(0, 2 * y * y * (besselI0(y) * besselK0(y) - besselI1(y) * besselK1(y)));
+}
+
+/**
+ * The table's range and step in y = R/2R_d. Outside it, `discShape` itself is
+ * used: below 0.2, where F ~ y² ln y has too much curvature for the cubic (the
+ * error reached 6 × 10⁻⁶ at y = 0.05) and the series converge in a few terms.
+ */
+const SHAPE_Y_MIN = 0.2;
+const SHAPE_Y_MAX = 20;
+const SHAPE_STEP = 0.005;
+let shapeTable: Float64Array | null = null;
+
+function tabulatedShape(y: number): number {
+  if (!(y >= SHAPE_Y_MIN) || y >= SHAPE_Y_MAX) return discShape(y);
+  if (!shapeTable) {
+    const n = Math.ceil((SHAPE_Y_MAX - SHAPE_Y_MIN) / SHAPE_STEP) + 3;
+    shapeTable = new Float64Array(n);
+    // One knot either side of the range, for the cubic's end intervals.
+    for (let i = 0; i < n; i += 1) shapeTable[i] = discShape(SHAPE_Y_MIN + (i - 1) * SHAPE_STEP);
+  }
+  // Catmull–Rom cubic through the four knots around y.
+  const u = (y - SHAPE_Y_MIN) / SHAPE_STEP;
+  const i = Math.floor(u) + 1;
+  const t = u - Math.floor(u);
+  const p0 = shapeTable[i - 1]!;
+  const p1 = shapeTable[i]!;
+  const p2 = shapeTable[i + 1]!;
+  const p3 = shapeTable[i + 2]!;
+  return (
+    p1 +
+    0.5 * t * (p2 - p0 + t * (2 * p0 - 5 * p1 + 4 * p2 - p3 + t * (3 * (p1 - p2) + p3 - p0)))
+  );
+}
+
+/**
+ * `discSpeed` from a table of `discShape`, built once, m/s: for drawing, where
+ * a slider drag needs hundreds of speeds a frame. It agrees with `discSpeed`
+ * to better than a part in a million (tested); the readouts use `discSpeed`.
+ */
+export function discSpeedTabulated(R: number, M: number, Rd: number): number {
+  if (!(R > 0) || !(M > 0) || !(Rd > 0)) return 0;
+  return Math.sqrt(((G * M) / Rd) * tabulatedShape(R / (2 * Rd)));
+}
+
+/**
  *     M(<R) = M [1 − (1 + R/R_d) e^(−R/R_d)]
  *
  * The disc's mass inside radius R, kg: inside a cylinder, since the disc is flat.
@@ -230,10 +283,12 @@ export interface CurvePoint {
  *     v_total = √(v_disc² + v_halo²)
  *
  * The rotation curve at radius R, m/s: the one function the drawing, the
- * stars' motion and every readout read.
+ * stars' motion and every readout read. `tabulated` takes the disc's speed from
+ * the table rather than the Bessel functions directly, for drawing: the two
+ * agree to a part in a million, far below a pixel or a printed digit.
  */
-export function rotationCurve(R: number, galaxy: Galaxy): CurvePoint {
-  const visible = discSpeed(R, galaxy.M, galaxy.Rd);
+export function rotationCurve(R: number, galaxy: Galaxy, tabulated = false): CurvePoint {
+  const visible = tabulated ? discSpeedTabulated(R, galaxy.M, galaxy.Rd) : discSpeed(R, galaxy.M, galaxy.Rd);
   const halo = haloSpeed(R, galaxy.vInf);
   return { visible, halo, total: Math.hypot(visible, halo) };
 }
@@ -252,8 +307,10 @@ export function orbitalPeriod(R: number, v: number): number {
  *     M(<r) = v² r / G
  *
  * The mass a circular speed implies inside radius r, kg, if that mass were
- * spherical. For a flattened disc it is only an estimate: a disc pulls a little
- * harder in its own plane than a sphere of the same enclosed mass.
+ * spherical. For a flattened disc it is only an estimate: an exponential disc
+ * pulls up to about 35% harder in its plane than the equivalent sphere beyond
+ * about one scale length, and weaker inside it (v²/(GM(<R)/R) is 0.76 at
+ * 0.5 R_d, 1 at 0.89 R_d, 1.345 at its peak near 2.9 R_d, 1.04 at 12 R_d).
  */
 export function dynamicalMass(r: number, v: number): number {
   return (v * v * r) / G;

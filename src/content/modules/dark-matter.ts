@@ -35,7 +35,12 @@
  *   - Ackermann et al. 2015, PRL 115, 231301 (Fermi-LAT dwarf galaxies: the
  *     thermal-relic rate excluded below about 100 GeV for b b̄ and τ⁺τ⁻).
  *   - Eilers et al. 2019, ApJ 871, 120: local dark matter density
- *     0.30 ± 0.03 GeV/cm³ from their NFW fit.
+ *     0.30 ± 0.03 GeV/cm³ from their NFW fit; the sim's default halo gives
+ *     0.301 at R₀ = 8.275 kpc. Their 229.0 km/s is for R₀ = 8.122 kpc; scaled
+ *     to 8.275 kpc (the Sun's angular speed about Sgr A* fixed) it is 233.3–233.6.
+ *   - Jiao et al. 2023, A&A 678, A208: Gaia DR3 rotation curve declining
+ *     Keplerian-like from about 19 to 26.5 kpc, total mass 2.06 × 10¹¹ M☉;
+ *     disputed, and sensitive to the modelling of the outer disc.
  *   - Small-scale tensions: Klypin et al. 1999, ApJ 522, 82, and Moore et al.
  *     1999, ApJL 524, L19 (missing satellites; 11 known then); Boylan-Kolchin,
  *     Bullock & Kaplinghat 2011, MNRAS 415, L40 (too big to fail); Pontzen &
@@ -84,7 +89,7 @@ const darkMatter: Module = {
         ),
         p(
           'A galaxy is like that. Its stars circle the centre, held by gravity instead of ropes. Most of ',
-          'the stars and gas we can see crowd toward the middle, so stars far out should feel a weaker ',
+          'the stars and gas we can see crowd toward the middle. So stars far out should feel a weaker ',
           'pull and move more slowly, the way Neptune crawls round the Sun while Mercury races. Instead, ',
           'stars far out move about as fast as stars much further in. Something unseen is adding to the ',
           'pull, and astronomers call it dark matter.',
@@ -102,16 +107,16 @@ const darkMatter: Module = {
       simKey: 'dark-matter',
       caption: prose(
         p(
-          'Each star circles at the speed the graph below gives for its distance. Take the dark halo ',
-          'away, with the button or by dragging its strength to zero, and the outer stars slow to what ',
-          'the visible matter alone can hold. Move the marked star outward and watch the two speeds ',
-          'part.',
+          'Each star circles at the speed the graph below gives for its distance. Take away the dark ',
+          'halo, the unseen cloud of matter around the galaxy, with the button or by dragging its ',
+          'strength to zero, and the outer stars slow to what the visible matter alone can hold. Move ',
+          'the marked star outward and watch the two speeds part.',
         ),
       ),
       params: [
         {
           id: 'M',
-          friendlyLabel: 'How much visible matter is in the disc?',
+          friendlyLabel: 'How much visible matter is in the disc? (in billions of Suns)',
           technicalLabel: 'Disc mass (stars and gas)',
           symbol: 'M_{\\text{disc}}',
           unit: 'kg',
@@ -127,7 +132,7 @@ const darkMatter: Module = {
         },
         {
           id: 'Rd',
-          friendlyLabel: 'How spread out is the visible disc?',
+          friendlyLabel: 'How spread out is the visible disc? (in kiloparsecs; one is about 3 260 light-years)',
           technicalLabel: 'Disc scale length',
           symbol: 'R_d',
           unit: 'm',
@@ -142,13 +147,15 @@ const darkMatter: Module = {
         },
         {
           id: 'vInf',
-          friendlyLabel: 'How strong is the dark halo? (its speed far out)',
+          friendlyLabel:
+            'How strong is the dark halo, the unseen cloud of matter around the galaxy? (its speed far out, in kilometres a second)',
           technicalLabel: 'Halo asymptotic speed',
           symbol: 'v_\\infty',
           unit: 'm/s',
           // 0 removes the halo; 600 km/s is three times the default. Default:
           // 200 km/s, tuned (with the fixed 5 kpc core) so the Milky Way-like
-          // defaults give 227 km/s at the Sun, against 229 measured.
+          // defaults give 227 km/s at the Sun, against Eilers et al.'s 229
+          // (derived for R₀ = 8.122 kpc; about 233 rescaled to 8.275 kpc).
           min: 0,
           max: 600e3,
           default: HALO_V_INF_DEFAULT,
@@ -158,7 +165,7 @@ const darkMatter: Module = {
         },
         {
           id: 'R',
-          friendlyLabel: 'How far out is the marked star?',
+          friendlyLabel: 'How far out is the marked star? (in kiloparsecs)',
           technicalLabel: 'Marker radius',
           symbol: 'R',
           unit: 'm',
@@ -175,17 +182,17 @@ const darkMatter: Module = {
       approximations: [
         prose(
           p(
-            'The visible galaxy is one flat disc of stars and gas, thinning out steadily from the centre. The Milky Way’s central bulge and bar, about a third of its stars, are folded into the disc, and so is its gas, which in reality spreads about twice as far as its stars. The curve inside about 3 kiloparsecs (10 000 light-years) is therefore only rough.',
+            'The visible galaxy is one flat disc of stars and gas, thinning out steadily from the centre. The Milky Way’s crowded centre (the bulge and bar), about a third of its stars, is folded into the disc, and so is its gas, which in reality spreads about twice as far as its stars. The curve inside about 10 000 light-years (3 kiloparsecs) is therefore only rough.',
           ),
         ),
         prose(
           p(
-            'The dark halo is a perfect sphere whose density is flat in a core 5 kiloparsecs (about 16 000 light-years) in radius and falls off with the square of distance outside it. Real halos may be flattened, and simulations give them a denser centre; the Milky Way’s true shape is uncertain.',
+            'The dark halo, the unseen cloud of matter around the galaxy, is a perfect sphere. Its density is flat in a core about 16 000 light-years (5 kiloparsecs) in radius and falls off with the square of distance outside it. Real halos may be flattened, and simulations give them a denser centre; the Milky Way’s true shape is uncertain.',
           ),
         ),
         prose(
           p(
-            'The defaults are tuned, not fitted. The disc’s mass and size are the Milky Way’s measured values, and the halo’s strength and core are set by hand so that the speed at the Sun’s distance comes out at 227 km/s, within 1% of the measured 229. The curve is not a fit to the Milky Way’s measured rotation curve.',
+            'The defaults are tuned, not fitted. The disc’s mass and size are the Milky Way’s measured values. The halo’s strength and core are set by hand, so the speed at the Sun’s distance comes out at 227 kilometres a second, within 1% of the measured 229. That measurement assumed the Sun slightly closer to the centre, 26 500 rather than 27 000 light-years; at the distance used here the same data give about 233. The curve is not a fit to the Milky Way’s measured rotation curve.',
           ),
         ),
         prose(
@@ -195,7 +202,7 @@ const darkMatter: Module = {
         ),
         prose(
           p(
-            'The masses inside the marked star’s orbit count the disc inside a cylinder, since it is flat, and the halo inside a sphere.',
+            'The masses inside the marked star’s orbit count the disc inside a cylinder, since it is flat, and the halo inside a sphere. Inside the Sun’s orbit, visible matter still outweighs the dark; the dark halo takes over farther out, and overall it outweighs the visible several times.',
           ),
         ),
         prose(
@@ -205,7 +212,17 @@ const darkMatter: Module = {
         ),
         prose(
           p(
-            'Time is sped up by the same factor at every setting: one second on screen is 25 million years.',
+            'The real disc has few bright stars beyond about 33 000 light-years (10 kiloparsecs), where the two speeds part, so the sim adds a sparse, evenly spread ring of brighter stars from there to the edge of the picture.',
+          ),
+        ),
+        prose(
+          p(
+            'Close to the centre, the marked star’s orbit is drawn at least 32 pixels across, so the star and its ring stay apart; it still takes the true time to go round.',
+          ),
+        ),
+        prose(
+          p(
+            'Time is sped up by the same factor at every setting: one second on screen is 25 million years. Stars that would circle more than twice a second on screen are drawn faint, so they do not flicker.',
           ),
         ),
       ],
@@ -217,17 +234,20 @@ const darkMatter: Module = {
         p(
           'How fast stars orbit at each distance from a galaxy’s centre is its ',
           term('rotation curve'),
-          '. Vera Rubin and Kent Ford measured it for the Andromeda galaxy in 1970, and for dozens of ',
+          '. Vera Rubin and Kent Ford measured it for the Andromeda galaxy in 1970, and for about twenty ',
           'spirals from 1978 to 1980, from how the colour of glowing gas shifts as it moves toward or ',
           'away from us; radio astronomers tracing hydrogen further out found the same. The curves stay ',
           'flat far beyond where the light fades. The Milky Way’s is nearly flat: at the Sun, 8.3 ',
           'kiloparsecs (27 000 light-years) from the centre, it is about 229 km/s, enough to cross the ',
-          'Atlantic in 25 seconds, and out to 25 kiloparsecs it falls only 1.7 km/s per kiloparsec; ',
-          'later Gaia studies give 229 to 237 at the Sun. The 63 billion Suns of visible stars and gas ',
-          'cannot hold stars that fast so far out. The extra pull is attributed to ',
+          'Atlantic in 25 seconds, and out to 25 kiloparsecs it falls only 1.7 km/s per kiloparsec. ',
+          'Later studies with the Gaia star-mapping satellite give 229 to 237 at the Sun. The 63 billion ',
+          'Suns of visible stars and gas cannot hold stars that fast so far out. The extra pull is ',
+          'attributed to ',
           term('dark matter'),
           ': matter that gives off, absorbs and reflects no light we can detect, and shows itself only ',
-          'through its gravity. Around a galaxy it is inferred to form a roughly round ',
+          'through its gravity. What it is made of is unknown: candidates include new particles and ',
+          term('primordial black holes', 'primordial-black-hole'),
+          '. Around a galaxy it is inferred to form a roughly round ',
           term('halo', 'dark-matter-halo'),
           ' reaching far beyond the disc.',
         ),
@@ -242,7 +262,7 @@ const darkMatter: Module = {
           'and agrees. In the Bullet Cluster, pictured below, two clusters ',
           'collided. Their hot gas, most of their ordinary matter, was slowed in the crash, while the ',
           'mass the lensing reveals carried on with the galaxies, an offset measured at eight standard ',
-          'deviations.',
+          'deviations, eight times its typical measurement error: far too large to be chance.',
         ),
         p(
           'The pattern of warm and cool spots in the ',
@@ -331,7 +351,9 @@ const darkMatter: Module = {
               m`191\,\text{km/s}`,
               ', ',
               m`v = \sqrt{191^2 + 123^2} = 227\,\text{km/s}`,
-              ', against 229 measured.',
+              ', against 229.0 km/s (Eilers et al. 2019, derived for ',
+              m`R_0 = 8.122\,\text{kpc}`,
+              '; with GRAVITY 2021’s 8.275 kpc the same data give a few km/s more).',
             ),
           ),
         },
@@ -392,7 +414,9 @@ const darkMatter: Module = {
             p(
               'Worked example, the Sun: ',
               m`v = 229\,\text{km/s}`,
-              ' and ',
+              ' (Eilers et al. 2019, derived for ',
+              m`R_0 = 8.122\,\text{kpc}`,
+              '; with GRAVITY 2021’s 8.275 kpc the same data give a few km/s more) and ',
               m`R = 8.275\,\text{kpc}`,
               ' give ',
               m`M = 1.01 \times 10^{11}\,M_\odot`,
@@ -424,11 +448,14 @@ const darkMatter: Module = {
           m`r^{-3}`,
           ' fall far out, so its curve is flat only over a limited range and then declines. Eilers and ',
           'colleagues’ fit of that profile to the Milky Way gives a local dark matter density of about ',
-          '0.3 GeV per cubic centimetre, the figure direct searches assume.',
+          '0.3 GeV per cubic centimetre, the figure direct searches assume; the sim’s tuned halo gives ',
+          'the same, 0.30, at the Sun’s distance. Some Gaia DR3 analyses find the Milky Way’s curve ',
+          'falling faster beyond about 20 kiloparsecs, implying a lighter halo; the result is disputed ',
+          'and depends on how the outer disc is modelled.',
         ),
         p(
-          'What dark matter is remains open. It must have been slow-moving, or cold, in the early ',
-          'universe, or it would have smoothed away the small lumps that became dwarf galaxies; that ',
+          'What dark matter is remains open. It must have been slow-moving (cold, or at most ‘warm’) ',
+          'in the early universe, or it would have smoothed away the small lumps that became dwarf galaxies; that ',
           'leaves the known neutrinos as at most a small part. ',
           term('WIMPs', 'wimp'),
           ', particles with a few to thousands of times a proton’s mass, interacting about as weakly as ',
@@ -437,8 +464,7 @@ const darkMatter: Module = {
           term('Axions', 'axion'),
           ', far lighter, were proposed in 1977–78 to explain why the strong nuclear force respects CP ',
           'symmetry, which its theory allows it to break. ',
-          term('Primordial black holes', 'primordial-black-hole'),
-          ' could make up all of it only between about ',
+          'Primordial black holes could make up all of it only between about ',
           m`10^{14}`,
           ' and ',
           m`10^{20}`,
@@ -451,7 +477,8 @@ const darkMatter: Module = {
           m`2.2 \times 10^{-48}\,\text{cm}^2`,
           ' at 40 GeV, at 90% confidence. Its December 2025 analysis saw solar neutrinos scattering off ',
           'xenon nuclei at 4.5σ, the background that will ultimately limit such searches. In September ',
-          '2026 LZ reported a single nuclear recoil at 248 keV in a search extended to high energies, in tension with ',
+          '2026 LZ reported one event that looks like a nuclear recoil of about 248 keV, in a search ',
+          'extended to high energies, in tension with ',
           'background alone at 2.6σ once the many models tested are accounted for: worth watching, far ',
           'from a detection. Gamma rays from the Milky Way’s dwarf satellites, seen by Fermi, rule out ',
           'WIMPs lighter than about 100 GeV that annihilate into quarks or tau leptons at the rate the ',

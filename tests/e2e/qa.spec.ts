@@ -3098,7 +3098,8 @@ test('behaviour: dark-matter readouts follow the sliders and the halo button @cr
   await button.focus();
   await page.keyboard.press('Enter');
   await expect(button).toHaveText('Put the dark halo back');
-  await expect(button).toHaveAttribute('aria-pressed', 'true');
+  // One state signal, the label: a button whose label changes carries no aria-pressed.
+  await expect(button).not.toHaveAttribute('aria-pressed');
   await expect(readout(2), 'speed with no halo is the visible-only speed').toHaveText('191 km/s');
   await expect(readout(7), 'no halo, no dark matter').toHaveText('none: no halo');
   await expect(page.locator('#p-vInf')).toHaveAttribute('aria-valuetext', /^0 /);
