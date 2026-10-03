@@ -30,11 +30,14 @@ import {
   verifyHawkingModel,
   verifyWormholeModel,
   verifyNeutronStarModel,
+  verifyDarkMatterModel,
   verifyScaleLadder,
   verifySupernovaModel,
   verifyTransitModel,
   type CheckBlock,
 } from '@/physics/sanity';
+import { besselI0, besselI1, besselK0, besselK1, discSpeed, discSpeedTabulated } from '@/physics/darkmatter';
+import { KILOPARSEC, M_SUN } from '@/physics/constants';
 
 /**
  * The blocks, with the number of checks each is expected to contain.
@@ -65,6 +68,7 @@ const BLOCKS: { run: () => CheckBlock; checks: number }[] = [
   { run: verifyHawkingModel, checks: 10 },
   { run: verifyWormholeModel, checks: 11 },
   { run: verifyNeutronStarModel, checks: 15 },
+  { run: verifyDarkMatterModel, checks: 17 },
 ];
 
 /** Runs a block without its console output, which CI does not need to read. */
@@ -99,10 +103,10 @@ for (const { run, checks } of BLOCKS) {
 }
 
 describe('suite integrity', () => {
-  it('has 153 checks across twenty blocks', () => {
+  it('has 170 checks across twenty-one blocks', () => {
     const total = BLOCKS.reduce((n, b) => n + b.checks, 0);
-    expect(total).toBe(153);
-    expect(BLOCKS).toHaveLength(20);
+    expect(total).toBe(170);
+    expect(BLOCKS).toHaveLength(21);
   });
 
   it('still logs one console message per block', () => {
@@ -124,5 +128,60 @@ describe('suite integrity', () => {
     for (const message of messages) {
       expect(String(message).startsWith('[lodestar] ')).toBe(true);
     }
+  });
+});
+
+/**
+ * The modified Bessel functions under the dark-matter disc, against a table.
+ *
+ * The sanity block checks one value of each; this checks all four across the
+ * range the disc reaches, both sides of K's switch from series to integral at
+ * x = 2, and near zero, where K₀ and K₁ diverge. Reference values are mpmath's
+ * (mp.besseli, mp.besselk, computed at 30 digits, written to 15), which agree
+ * with Abramowitz & Stegun, Table 9.8, wherever that table prints them. The
+ * bound is 10⁻⁹ relative; the functions in fact agree to about 10⁻¹⁵.
+ */
+describe('modified Bessel functions', () => {
+  // x: [I₀, I₁, K₀, K₁]
+  const TABLE: [number, [number, number, number, number]][] = [
+    [0.01, [1.00002500015625, 0.00500006250026042, 4.72124473016109, 99.9738941182962]],
+    [0.1, [1.0025015629341, 0.0500625260470927, 2.42706902470202, 9.85384478087061]],
+    [0.5, [1.06348337074132, 0.257894305390896, 0.924419071227666, 1.6564411200033]],
+    [1, [1.26606587775201, 0.565159103992485, 0.421024438240708, 0.601907230197235]],
+    [1.08, [1.31355908756434, 0.622652725048132, 0.375965672884565, 0.526683482859245]],
+    [2, [2.27958530233607, 1.59063685463733, 0.113893872749533, 0.139865881816522]],
+    [2.5, [3.28983914405012, 2.5167162452887, 0.0623475532003662, 0.0738908163477471]],
+    [5, [27.2398718236044, 24.3356421424505, 0.00369109833404259, 0.00404461344545216]],
+    [10, [2815.71662846625, 2670.98830370125, 1.77800623161677e-5, 1.86487734538256e-5]],
+    [20, [43558282.5595535, 42454973.3851278, 5.74123781533652e-10, 5.88305796955704e-10]],
+  ];
+  const functions = [besselI0, besselI1, besselK0, besselK1];
+  const names = ['I₀', 'I₁', 'K₀', 'K₁'];
+
+  for (const [x, expected] of TABLE) {
+    it(`matches the table at x = ${x}`, () => {
+      functions.forEach((f, i) => {
+        const relative = Math.abs(f(x) / expected[i]! - 1);
+        expect(relative, `${names[i]}(${x}) = ${f(x)}, table ${expected[i]}`).toBeLessThan(1e-9);
+      });
+    });
+  }
+
+  /*
+   * The drawing's disc speeds come from a cached table of the disc's shape,
+   * the readouts' from the functions above. Across every radius the sim can
+   * draw (0.15 to 30 kpc) at every scale length its slider reaches (1 to 8 kpc),
+   * and past both ends of the table, they agree to a part in a million.
+   */
+  it('tabulates the disc speed to a part in a million', () => {
+    let worst = 0;
+    for (let rd = 1; rd <= 8; rd += 0.35) {
+      for (let r = 0.01; r <= 60; r *= 1.013) {
+        const exact = discSpeed(r * KILOPARSEC, 6.3e10 * M_SUN, rd * KILOPARSEC);
+        const table = discSpeedTabulated(r * KILOPARSEC, 6.3e10 * M_SUN, rd * KILOPARSEC);
+        worst = Math.max(worst, Math.abs(table / exact - 1));
+      }
+    }
+    expect(worst).toBeLessThan(1e-6);
   });
 });

@@ -53,6 +53,7 @@ const MODULES = [
   'hawking-radiation',
   'wormholes',
   'neutron-stars',
+  'dark-matter',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -3063,6 +3064,102 @@ test('neutron-stars: under reduced motion a collapsed star is described as colla
   assertClean(w, 'neutron stars reduced motion collapsed');
 });
 
+/**
+ * The dark-matter module, end to end, on every engine.
+ *
+ * At the defaults, the Milky Way-like disc and halo with the marked star at the
+ * Sun's distance: 227 km/s with the halo, 191 from visible matter alone, a
+ * 224-million-year orbit, and 0.561 parts dark to one visible inside it. The
+ * button takes the halo away and puts it back, by keyboard; the marker at the
+ * far end of its slider shows the curves parting. A glossary term opens from
+ * the keyboard, and axe finds nothing serious.
+ */
+test('behaviour: dark-matter readouts follow the sliders and the halo button @cross-engine', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/dark-matter', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'dark matter at rest');
+
+  const readout = (index: number) => page.locator('#dark-matter-readouts dd').nth(index);
+
+  /* Defaults, at the Curious tier: the Sun's orbit. */
+  await expect(readout(0), 'marker distance in light-years').toHaveText('about 27,000 light-years');
+  await expect(readout(1), 'disc scale length in light-years').toHaveText('about 8,480 light-years');
+  await expect(readout(2), 'speed with the halo').toHaveText('227 km/s');
+  await expect(readout(3), 'speed from visible matter alone').toHaveText('191 km/s');
+  await expect(readout(4), 'orbital period').toHaveText('224 million years');
+  await expect(readout(5), 'visible mass inside').toHaveText('52.1 billion Suns');
+  await expect(readout(6), 'total mass inside').toHaveText('81.3 billion Suns');
+  await expect(readout(7), 'dark to visible').toHaveText('0.561 to 1');
+
+  /* The halo off and on again, by keyboard. */
+  const button = page.getByRole('button', { name: /dark halo/ });
+  await button.focus();
+  await page.keyboard.press('Enter');
+  await expect(button).toHaveText('Put the dark halo back');
+  // One state signal, the label: a button whose label changes carries no aria-pressed.
+  await expect(button).not.toHaveAttribute('aria-pressed');
+  await expect(readout(2), 'speed with no halo is the visible-only speed').toHaveText('191 km/s');
+  await expect(readout(7), 'no halo, no dark matter').toHaveText('none: no halo');
+  await expect(page.locator('#p-vInf')).toHaveAttribute('aria-valuetext', /^0 /);
+  await page.keyboard.press('Enter');
+  await expect(button).toHaveText('Remove the dark halo');
+  await expect(readout(2), 'halo restored').toHaveText('227 km/s');
+
+  /* The marked star at 30 kpc: the curves far apart. */
+  await page.locator('#p-R').focus();
+  await page.keyboard.press('End');
+  await expect(readout(2), 'speed with the halo at 30 kpc').toHaveText('200 km/s');
+  await expect(readout(3), 'visible-only speed at 30 kpc').toHaveText('97 km/s');
+  await assertNoOverflow(page, 'dark matter at 30 kpc');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be rotation curve').toBe('rotation-curve');
+  const trigger = page.locator('[data-glossary-term="rotation-curve"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute('aria-expanded', 'true');
+  const panel = page.locator('[data-glossary-panel="rotation-curve"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('How fast stars and gas orbit');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'dark matter: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '26-dark-matter-behaviour');
+  assertClean(w, 'dark matter behaviour');
+});
+
+/**
+ * Reduced motion: the still frame is described as one, and the note does not
+ * claim anything is moving.
+ */
+test('dark-matter: under reduced motion the note describes the still frame @cross-engine', async ({ page }) => {
+  const w = watch(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/m/dark-matter', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+
+  const note = page.locator('#layer-panel-play p', { hasText: /reduced-motion|sped up/ });
+  await expect(note).toContainText('20 million years');
+  await expect(note).not.toContainText('sped up');
+  assertClean(w, 'dark matter reduced motion');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -3102,7 +3199,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes nineteen modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes twenty modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3790,7 +3887,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All nineteen modules now, with no exception branch. `kepler-orbits` carried one
+ * All twenty modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3915,7 +4012,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * until a link is added on purpose.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all twenty-one and checks the rendered DOM rather than the
+ * route — so this walks all twenty-two and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3942,7 +4039,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the repo, and /about says the code is public on GitHub', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all twenty-one routes').toBe(21);
+  expect(routes.length, 'all twenty-two routes').toBe(22);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -4087,7 +4184,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on twenty-one fresh loads. Getting this wrong is what the first run of
+   * asserts on twenty-two fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();
