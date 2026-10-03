@@ -2166,7 +2166,9 @@ function neutronStarCases(): Case[] {
 
 /* -------------------------------- dark matter -------------------------------- */
 
-const DM_HEIGHT = 512;
+/** 512 px below the `sm` breakpoint, 600 above it; the sweep runs at the taller, the label checks at both. */
+const DM_HEIGHT = 600;
+const DM_HEIGHTS = [512, 600];
 
 function darkMatterCases(): Case[] {
   const params = darkMatter.layers.play.params;
@@ -2223,10 +2225,11 @@ function darkMatterCases(): Case[] {
    */
   it('keeps every label off the curves, the marker and the galaxy', () => {
     const problems: string[] = [];
-    for (const width of [...WIDTHS, 390]) {
-      for (const { label, view } of views) {
+    for (const [width, height] of [...WIDTHS, 390].flatMap((w) => DM_HEIGHTS.map((h) => [w, h] as const))) {
+      for (const { label: viewLabel, view } of views) {
+        const label = `${viewLabel} h=${height}`;
         const { ctx, records } = recordingContext();
-        const layout = dm.drawScene(ctx, width, DM_HEIGHT, view);
+        const layout = dm.drawScene(ctx, width, height, view);
         for (const box of layout.labels) {
           const hit = layout.obstacles.find(
             (o) => Math.min(box.x1, o.x1) > Math.max(box.x0, o.x0) && Math.min(box.y1, o.y1) > Math.max(box.y0, o.y0),
@@ -2242,16 +2245,59 @@ function darkMatterCases(): Case[] {
       }
     }
     expect(problems.slice(0, 20)).toEqual([]);
-    // About 3 300 full scenes; well over the default 5 s on a busy runner.
-  }, 30_000);
+    // About 6 600 full scenes at two heights; well over the default 5 s on a busy runner.
+  }, 60_000);
 
+  // The drawing reads the disc's cached table; the readouts read the Bessel
+  // functions. The two must agree far below anything visible or printed.
   it('moves every star at the total curve’s speed for its radius', () => {
-    for (const { view } of views.slice(0, 40)) {
+    for (const { view } of views) {
       const model = dm.modelFor(view);
       for (const star of model.stars) {
-        expect(star.omega * star.R).toBeCloseTo(rotationCurve(star.R, view).total, 6);
+        const exact = rotationCurve(star.R, view).total;
+        expect(Math.abs((star.omega * star.R) / exact - 1), `R = ${star.R}`).toBeLessThan(1e-6);
       }
     }
+  });
+
+  it('puts tracer stars evenly from 10 kpc to the edge, where the curves part', () => {
+    const model = dm.modelFor(views[0]!.view);
+    const tracers = model.stars.filter((s) => s.tracer);
+    expect(tracers).toHaveLength(dm.N_TRACERS);
+    expect(Math.min(...tracers.map((s) => s.R))).toBeGreaterThanOrEqual(dm.TRACER_INNER);
+    expect(Math.max(...tracers.map((s) => s.R))).toBeLessThanOrEqual(dm.R_VIEW);
+    expect(tracers.filter((s) => s.R > 15 * 1e3 * PARSEC).length).toBeGreaterThanOrEqual(18);
+  });
+
+  it('uses more of a wide panel for the galaxy', () => {
+    const { radius } = dm.galaxyGeometry(578, dm.galaxyBottomFor(600));
+    expect(2 * radius).toBeGreaterThan(0.55 * 578);
+  });
+
+  it('never leaves the reduced-motion star more than half a lap ahead of its ring', () => {
+    for (const { view } of views) {
+      const r = markerReadout(view.R, view);
+      const t = dm.stillTime(r.withHalo, r.visibleOnly, view.R);
+      const lead = ((r.withHalo - r.visibleOnly) / view.R) * t;
+      expect(lead, `lead at ${view.R}`).toBeLessThanOrEqual(Math.PI + 1e-9);
+      expect(t).toBeLessThanOrEqual(dm.STATIC_TIME);
+    }
+  });
+
+  it('fades only stars that would circle faster than twice a second on screen', () => {
+    // The innermost star at the heaviest, most compact disc: 8.9 turns a second.
+    const params2 = darkMatter.layers.play.params;
+    const heavy = {
+      M: paramOf(params2, 'M').max,
+      Rd: paramOf(params2, 'Rd').min,
+      vInf: paramOf(params2, 'vInf').default,
+    };
+    const fastest = Math.max(...dm.modelFor(heavy).stars.map((s) => s.omega));
+    expect(1 / dm.screenPeriod(fastest)).toBeGreaterThan(8.5);
+    expect(dm.screenPeriod(fastest)).toBeLessThan(dm.FADE_SCREEN_PERIOD);
+    // At the defaults the Sun's-distance stars are far slower than the fade threshold.
+    const sun = markerReadout(paramOf(params2, 'R').default, { ...heavy, M: paramOf(params2, 'M').default, Rd: paramOf(params2, 'Rd').default });
+    expect(dm.screenPeriod(sun.withHalo / paramOf(params2, 'R').default)).toBeGreaterThan(dm.FADE_SCREEN_PERIOD);
   });
 
   it('names only the curves it draws', () => {

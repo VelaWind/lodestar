@@ -495,10 +495,13 @@ export const KILOPARSEC = 1e3 * PARSEC;
  */
 export const R0_GALACTIC = 8.275 * KILOPARSEC;
 /**
- * The Milky Way's circular speed at the Sun, m/s. Source: Eilers, Hogg, Rix &
- * Ness 2019, "The Circular Velocity Curve of the Milky Way from 5 to 25 kpc",
- * ApJ 871, 120 — v_c(R⊙) = 229.0 ± 0.2 km/s, with systematic uncertainties of
- * 2–5%, declining by 1.7 ± 0.1 km/s per kpc. Later Gaia DR3 analyses span about
+ * The Milky Way's circular speed at the Sun, m/s: 229.0 km/s (Eilers et al.
+ * 2019, derived for R₀ = 8.122 kpc; with GRAVITY 2021's 8.275 kpc the same data
+ * give a few km/s more — about 233, since the Sun's measured angular speed
+ * about Sgr A* fixes v/R₀). Source: Eilers, Hogg, Rix & Ness 2019, "The
+ * Circular Velocity Curve of the Milky Way from 5 to 25 kpc", ApJ 871, 120 —
+ * v_c(R⊙) = 229.0 ± 0.2 km/s, with systematic uncertainties of 2–5%, declining
+ * by 1.7 ± 0.1 km/s per kpc. Later Gaia DR3 analyses span about
  * 229.6 (red giants) to 236.8 ± 0.8 km/s (classical Cepheids, MNRAS 546,
  * stag011, 2026), consistent within those systematics.
  */

@@ -15,12 +15,23 @@
  * No physics lives in this file. Every speed, mass and period comes from
  * `@/physics/darkmatter`, through `rotationCurve` and `markerReadout`, which the
  * sanity block also reads. The picture and the readouts call the same function,
- * so the stars, the curves and the numbers cannot disagree.
+ * so the stars, the curves and the numbers cannot disagree; the drawing takes
+ * the disc's speeds from its cached table (`rotationCurve(…, true)`), which
+ * agrees with the exact Bessel functions the readouts use to a part in a million.
+ *
+ * Besides the disc's own stars, a sparse ring of tracer stars is spread evenly
+ * from 10 kpc to the edge, where the curves part and the real disc has few
+ * bright stars. Stars that would circle in under half a second on screen are
+ * drawn faint, so they do not strobe; near the centre the marked star's orbit is
+ * drawn at least `MIN_MARKER_ORBIT_PX` in radius. The module discloses all three.
  *
  * Motion: time is sped up by one fixed factor, one second on screen for 25
- * million years, at every setting. Under reduced motion there is no loop: each
+ * million years, at every setting and every frame rate; only a gap of more than
+ * a second (a background tab) is skipped. Painting happens once per animation
+ * frame, never per slider event. Under reduced motion there is no loop: each
  * star is drawn with a streak showing how far it travels in 20 million years,
- * and the marked star and its ring are drawn where they are after 100 million.
+ * and the marked star and its ring are drawn where they are after 100 million
+ * years, or sooner if the star would by then be more than half a lap ahead.
  */
 import { useCallback, useEffect, useRef } from 'react';
 import { canvasSize, observeCanvasSize } from './canvasSize';
@@ -88,9 +99,32 @@ const R_VIEW = 30 * KILOPARSEC;
 const N_STARS = 240;
 /** Real time per second on screen, s: 25 million years, at every setting. */
 const REAL_SECONDS_PER_SCREEN_SECOND = 25 * MYR;
-/** The reduced-motion frame: streaks this long, the marked star this far on. */
+/** The reduced-motion frame: streaks this long, the marked star this far on at most. */
 const STREAK_TIME = 20 * MYR;
 const STATIC_TIME = 100 * MYR;
+/** Tracer stars, evenly spread in radius from `TRACER_INNER` to the edge of the view. */
+const N_TRACERS = 28;
+const TRACER_INNER = 10 * KILOPARSEC;
+/** The marked star's drawn orbit is never smaller than this, px, so it stays apart from its ring. */
+const MIN_MARKER_ORBIT_PX = 16;
+/** Stars circling faster than once in this many screen seconds are drawn faint. */
+const FADE_SCREEN_PERIOD = 0.5;
+
+/**
+ * The marked star's lead on its ring at time t is (Ω_total − Ω_visible) t. The
+ * still frame is drawn at 100 million years, or at the moment the lead reaches
+ * half a lap if that is sooner, so the star never sits back on its ring.
+ */
+function stillTime(withHalo: number, visibleOnly: number, R: number): number {
+  const lead = (withHalo - visibleOnly) / R;
+  if (!(lead > 0)) return STATIC_TIME;
+  return Math.min(STATIC_TIME, Math.PI / lead);
+}
+
+/** How long one orbit takes on screen, s, at angular speed ω (rad per real second). */
+function screenPeriod(omega: number): number {
+  return omega > 0 ? (2 * Math.PI) / (omega * REAL_SECONDS_PER_SCREEN_SECOND) : Infinity;
+}
 
 /** A small deterministic generator, so every load draws the same galaxy. */
 function mulberry32(seed: number): () => number {
@@ -141,7 +175,18 @@ interface Star {
   omega: number;
   size: number;
   alpha: number;
+  /** One of the evenly spread outer tracers, drawn brighter. */
+  tracer: boolean;
 }
+
+/** The tracers' fixed draws: an even spread in radius, angles from the same generator. */
+const TRACER_DRAWS = (() => {
+  const rand = mulberry32(20_261_004);
+  return Array.from({ length: N_TRACERS }, (_, i) => ({
+    R: TRACER_INNER + ((i + 0.5) / N_TRACERS) * (R_VIEW - TRACER_INNER),
+    phase: rand() * 2 * Math.PI,
+  }));
+})();
 
 /** One sample of the three curves, m and m/s. */
 interface Sample {
@@ -192,15 +237,19 @@ function modelFor(galaxy: Galaxy): Model {
   const radii = starRadii(galaxy.Rd);
   const stars: Star[] = STAR_DRAWS.map((draw, i) => {
     const R = radii[i]!;
-    const v = rotationCurve(R, galaxy).total;
-    return { R, phase: draw.phase, omega: v / R, size: draw.size, alpha: draw.alpha };
+    const v = rotationCurve(R, galaxy, true).total;
+    return { R, phase: draw.phase, omega: v / R, size: draw.size, alpha: draw.alpha, tracer: false };
   });
+  for (const draw of TRACER_DRAWS) {
+    const v = rotationCurve(draw.R, galaxy, true).total;
+    stars.push({ R: draw.R, phase: draw.phase, omega: v / draw.R, size: 2.4, alpha: 0.95, tracer: true });
+  }
 
   const samples: Sample[] = [];
   let vMax = 0;
   for (let i = 0; i <= CURVE_STEPS; i += 1) {
     const R = (i / CURVE_STEPS) * R_VIEW;
-    const point = rotationCurve(R, galaxy);
+    const point = rotationCurve(R, galaxy, true);
     samples.push({ R, ...point });
     vMax = Math.max(vMax, point.total, point.visible, point.halo);
   }
@@ -221,6 +270,7 @@ const COLORS = {
   edge: '#232b3b',
   grid: 'rgba(35,43,59,0.55)',
   star: '#c9d6ff',
+  tracer: '#f2f5ff',
   visible: '#9db4ff',
   halo: '#c7a0e8',
   total: '#e8bd7d',
@@ -231,7 +281,16 @@ const FONT = '10px Inter, system-ui, -apple-system, sans-serif';
 const TAU = 2 * Math.PI;
 const PAD = { left: 12, right: 12 };
 /** Share of the height for the galaxy; the curve plot takes the rest. */
-const GALAXY_SHARE = 0.5;
+/**
+ * The curve plot's fixed height, px; the galaxy takes everything above it. The
+ * canvas is taller on wider screens, so the extra height all goes to the galaxy.
+ */
+const CURVE_PANEL_HEIGHT = 240;
+
+/** Where the galaxy panel ends and the curve plot begins, px. */
+function galaxyBottomFor(h: number): number {
+  return Math.max(Math.round(h * 0.4), h - CURVE_PANEL_HEIGHT);
+}
 
 type Units = 'friendly' | 'technical';
 
@@ -356,13 +415,27 @@ function galaxyGeometry(w: number, bottom: number): GalaxyGeometry {
   return { cx: w / 2, cy: top + (bottom - top) / 2, radius, scale: radius / R_VIEW };
 }
 
+/**
+ * Everything the glows depend on, rounded to what can be seen: the halo's
+ * opacity to a hundredth of its share of the speed at the edge, the disc
+ * light's radius to half a pixel. A slider drag that changes neither leaves the
+ * cached glow image as it is.
+ */
+function glowInputs(geometry: GalaxyGeometry, view: View): { haloShare: number; discRadius: number } {
+  const edge = rotationCurve(R_VIEW, view, true);
+  const share = edge.total > 0 ? edge.halo / edge.total : 0;
+  return {
+    haloShare: Math.round(share * 100) / 100,
+    discRadius: Math.round(2 * Math.min(geometry.radius, 3 * view.Rd * geometry.scale)) / 2,
+  };
+}
+
 /** The halo's glow and the disc's light, centred on (cx, cy). */
 function drawGlows(ctx: CanvasRenderingContext2D, geometry: GalaxyGeometry, view: View): void {
-  const { cx, cy, radius, scale } = geometry;
+  const { cx, cy, radius } = geometry;
+  const { haloShare, discRadius } = glowInputs(geometry, view);
 
   /* The halo: a glow as strong as its share of the speed at the edge of the view. */
-  const edge = rotationCurve(R_VIEW, view);
-  const haloShare = edge.total > 0 ? edge.halo / edge.total : 0;
   if (haloShare > 0.01) {
     const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
     glow.addColorStop(0, `rgba(199,160,232,${(0.16 * haloShare).toFixed(3)})`);
@@ -374,7 +447,6 @@ function drawGlows(ctx: CanvasRenderingContext2D, geometry: GalaxyGeometry, view
   }
 
   /* The disc's own light: brightest at the centre, fading over a few scale lengths. */
-  const discRadius = Math.min(radius, 3 * view.Rd * scale);
   const discGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, discRadius);
   discGlow.addColorStop(0, 'rgba(232,214,180,0.35)');
   discGlow.addColorStop(1, 'rgba(232,214,180,0)');
@@ -394,7 +466,8 @@ export interface GlowImage {
 }
 
 function glowKey(w: number, bottom: number, dpr: number, view: View): string {
-  return `${w}|${bottom}|${dpr}|${view.M}|${view.Rd}|${view.vInf}`;
+  const { haloShare, discRadius } = glowInputs(galaxyGeometry(w, bottom), view);
+  return `${w}|${bottom}|${dpr}|${haloShare}|${discRadius}`;
 }
 
 function drawGalaxy(
@@ -425,16 +498,15 @@ function drawGalaxy(
   if (glow) ctx.drawImage(glow.image, cx - radius, cy - radius, 2 * radius, 2 * radius);
   else drawGlows(ctx, geometry, view);
 
-  /* The stars, each at its own angular speed. */
-  ctx.fillStyle = COLORS.star;
-  if (view.still) {
-    ctx.strokeStyle = COLORS.star;
-    ctx.lineWidth = 1;
-  }
+  /* The stars, each at its own angular speed; the outer tracers brighter. */
+  if (view.still) ctx.lineWidth = 1;
   for (const star of model.stars) {
     const r = star.R * scale;
     const phi = star.phase + star.omega * view.t;
-    ctx.globalAlpha = star.alpha;
+    // Moving stars that would circle in under half a second on screen are faded, not strobed.
+    const fade = view.still ? 1 : Math.min(1, screenPeriod(star.omega) / FADE_SCREEN_PERIOD);
+    ctx.globalAlpha = star.alpha * fade;
+    ctx.fillStyle = star.tracer ? COLORS.tracer : COLORS.star;
     const x = cx + r * Math.cos(phi);
     const y = cy - r * Math.sin(phi);
     ctx.fillRect(x - star.size / 2, y - star.size / 2, star.size, star.size);
@@ -442,6 +514,7 @@ function drawGalaxy(
       // How far it goes in 20 million years: a streak behind it, counter-clockwise motion.
       const sweep = Math.min(TAU, star.omega * STREAK_TIME);
       ctx.globalAlpha = star.alpha * 0.5;
+      ctx.strokeStyle = star.tracer ? COLORS.tracer : COLORS.star;
       ctx.beginPath();
       ctx.arc(cx, cy, r, -phi, -phi + sweep);
       ctx.stroke();
@@ -450,7 +523,7 @@ function drawGalaxy(
   ctx.globalAlpha = 1;
 
   /* The marked star's orbit, the star, and the ring at the visible-only speed. */
-  const rm = Math.min(view.R, R_VIEW) * scale;
+  const rm = Math.max(MIN_MARKER_ORBIT_PX, Math.min(view.R, R_VIEW) * scale);
   ctx.strokeStyle = COLORS.inkFaint;
   ctx.setLineDash([3, 4]);
   ctx.beginPath();
@@ -459,7 +532,7 @@ function drawGalaxy(
   ctx.setLineDash([]);
 
   const readout = markerReadout(view.R, view);
-  const t = view.still ? STATIC_TIME : view.t;
+  const t = view.still ? stillTime(readout.withHalo, readout.visibleOnly, view.R) : view.t;
   const phiStar = (readout.withHalo / view.R) * t;
   const phiGhost = (readout.visibleOnly / view.R) * t;
   ctx.strokeStyle = COLORS.ghost;
@@ -686,7 +759,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
   if (w <= PAD.left + PAD.right + 60 || h <= 0) return layout;
 
   const model = modelFor(view);
-  const galaxyBottom = Math.round(h * GALAXY_SHARE);
+  const galaxyBottom = galaxyBottomFor(h);
 
   ctx.save();
   drawGalaxyPanel(ctx, w, galaxyBottom, view, model, layout, glow);
@@ -722,7 +795,7 @@ function drawGalaxyPanel(
  */
 function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, view: View, glow?: GlowImage): void {
   if (w <= PAD.left + PAD.right + 60 || h <= 0) return;
-  const galaxyBottom = Math.round(h * GALAXY_SHARE);
+  const galaxyBottom = galaxyBottomFor(h);
   ctx.clearRect(0, 0, w, galaxyBottom + 1);
   ctx.save();
   drawGalaxyPanel(ctx, w, galaxyBottom, view, modelFor(view), newLayout(), glow);
@@ -735,7 +808,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
  * nothing.
  */
 function renderGlow(canvas: HTMLCanvasElement, w: number, h: number, dpr: number, view: View): GlowImage | undefined {
-  const bottom = Math.round(h * GALAXY_SHARE);
+  const bottom = galaxyBottomFor(h);
   const { radius, scale } = galaxyGeometry(w, bottom);
   const side = Math.ceil(2 * radius * dpr);
   if (canvas.width !== side || canvas.height !== side) {
@@ -763,7 +836,14 @@ function readParam(params: Param[], values: ParamValues, id: string): number {
 
 export default function DarkMatterSim({ params, values, setValue }: SimProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number | null>(null);
+  /** The one animation-frame loop: its pending frame, whether the next paint must be full, the last frame's time. */
+  const loopRef = useRef<{ raf: number | null; dirty: boolean; last: number | null }>({
+    raf: null,
+    dirty: true,
+    last: null,
+  });
+  /** Asks for a full repaint at the next animation frame; set up by the loop's effect. */
+  const requestPaintRef = useRef<() => void>(() => {});
   const reduced = useReducedMotion();
   const tier = useTier();
   const deep = tier === 'deep';
@@ -814,7 +894,7 @@ export default function DarkMatterSim({ params, values, setValue }: SimProps) {
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // The glows, redrawn only when the size or the galaxy changes.
-    const key = glowKey(rect.width, Math.round(rect.height * GALAXY_SHARE), dpr, scene);
+    const key = glowKey(rect.width, galaxyBottomFor(rect.height), dpr, scene);
     if (glowRef.current?.key !== key) {
       glowCanvasRef.current ??= document.createElement('canvas');
       glowRef.current = renderGlow(glowCanvasRef.current, rect.width, rect.height, dpr, scene) ?? null;
@@ -824,46 +904,63 @@ export default function DarkMatterSim({ params, values, setValue }: SimProps) {
     else drawFrame(ctx, rect.width, rect.height, scene, glow);
   }, []);
 
-  /* The galaxy turning, restarted from t = 0 on any change, so the marked star
-     and its ring always set off together. Under reduced motion, one still frame. */
+  /* Any change: a new scene from t = 0, so the marked star and its ring always
+     set off together, painted in full at the next animation frame. A drag that
+     fires several events in one frame still paints once. */
   useEffect(() => {
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
     const still = reduced || typeof requestAnimationFrame === 'undefined';
     sceneRef.current = { M, Rd, vInf, R, t: 0, still, units };
-    paint();
-    if (still) return;
+    loopRef.current.last = null;
+    requestPaintRef.current();
+  }, [M, Rd, vInf, R, units, reduced]);
 
-    let last: number | null = null;
-    const tick = (now: number) => {
+  /* The loop. Each frame paints once: in full if anything changed since the
+     last, otherwise the galaxy panel alone. Under reduced motion it paints the
+     still frame and stops until the next change. */
+  useEffect(() => {
+    if (typeof requestAnimationFrame === 'undefined') return;
+    const loop = loopRef.current;
+    const frame = (now: number) => {
+      loop.raf = null;
       const scene = sceneRef.current;
       if (!scene) return;
-      // Clamped so a backgrounded tab does not resume with one enormous step.
-      const dt = last === null ? 0 : Math.min(0.1, (now - last) / 1000);
-      last = now;
-      scene.t += dt * REAL_SECONDS_PER_SCREEN_SECOND;
-      paint(false);
-      rafRef.current = requestAnimationFrame(tick);
+      if (scene.still) {
+        loop.last = null;
+      } else {
+        // Real elapsed time, so one second is 25 million years at any frame
+        // rate; only a gap of over a second, a background tab, is skipped.
+        const dt = loop.last === null ? 0 : (now - loop.last) / 1000;
+        if (dt <= 1) scene.t += dt * REAL_SECONDS_PER_SCREEN_SECOND;
+        loop.last = now;
+      }
+      paint(loop.dirty);
+      loop.dirty = false;
+      if (!scene.still) loop.raf = requestAnimationFrame(frame);
     };
-    rafRef.current = requestAnimationFrame(tick);
+    requestPaintRef.current = () => {
+      loop.dirty = true;
+      if (loop.raf === null) loop.raf = requestAnimationFrame(frame);
+    };
+    requestPaintRef.current();
     return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
+      if (loop.raf !== null) cancelAnimationFrame(loop.raf);
+      loop.raf = null;
+      requestPaintRef.current = () => {};
     };
-  }, [M, Rd, vInf, R, units, reduced, paint]);
+  }, [paint]);
 
   /* Resize-safe: repaint on any container size change, including DPR moves. */
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    return observeCanvasSize(canvas, () => paint());
-  }, [paint]);
+    return observeCanvasSize(canvas, () => requestPaintRef.current());
+  }, []);
 
   const toggleHalo = () => setValue('vInf', haloOn ? 0 : lastHaloRef.current);
 
   return (
     <div className="flex min-h-[32rem] flex-col gap-4">
-      <div className="relative h-[32rem] w-full">
+      <div className="relative h-[32rem] w-full sm:h-[37.5rem]">
         <canvas
           ref={canvasRef}
           className="absolute inset-0 h-full w-full"
@@ -877,7 +974,6 @@ export default function DarkMatterSim({ params, values, setValue }: SimProps) {
         <button
           type="button"
           onClick={toggleHalo}
-          aria-pressed={!haloOn}
           className="rounded border border-edge-soft px-3 py-1.5 font-ui text-sm text-ink hover:border-ember focus-visible:outline focus-visible:outline-2 focus-visible:outline-ember"
         >
           {haloOn ? 'Remove the dark halo' : 'Put the dark halo back'}
@@ -900,13 +996,13 @@ export default function DarkMatterSim({ params, values, setValue }: SimProps) {
           <>
             Animation disabled by your reduced-motion setting. Each star trails a streak as long as the distance it
             travels in 20 million years. The marked star and the hollow ring started together; they are drawn where
-            they are 100 million years later.
+            they are {formatSig3(stillTime(readout.withHalo, readout.visibleOnly, R) / MYR)} million years later.
           </>
         ) : (
           <>
             Time is sped up: one second here is 25 million years, at every setting. The bright star and the hollow
             ring start together each time you move a slider; the ring moves at the speed visible matter alone would
-            give.
+            give. Stars that would circle more than twice a second are drawn faint, so they do not flicker.
           </>
         )}
       </p>
@@ -943,4 +1039,12 @@ export const __internals = {
   R_VIEW,
   REAL_SECONDS_PER_SCREEN_SECOND,
   STATIC_TIME,
+  stillTime,
+  screenPeriod,
+  galaxyBottomFor,
+  galaxyGeometry,
+  MIN_MARKER_ORBIT_PX,
+  FADE_SCREEN_PERIOD,
+  TRACER_INNER,
+  N_TRACERS,
 };

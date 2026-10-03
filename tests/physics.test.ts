@@ -36,7 +36,8 @@ import {
   verifyTransitModel,
   type CheckBlock,
 } from '@/physics/sanity';
-import { besselI0, besselI1, besselK0, besselK1 } from '@/physics/darkmatter';
+import { besselI0, besselI1, besselK0, besselK1, discSpeed, discSpeedTabulated } from '@/physics/darkmatter';
+import { KILOPARSEC, M_SUN } from '@/physics/constants';
 
 /**
  * The blocks, with the number of checks each is expected to contain.
@@ -165,4 +166,22 @@ describe('modified Bessel functions', () => {
       });
     });
   }
+
+  /*
+   * The drawing's disc speeds come from a cached table of the disc's shape,
+   * the readouts' from the functions above. Across every radius the sim can
+   * draw (0.15 to 30 kpc) at every scale length its slider reaches (1 to 8 kpc),
+   * and past both ends of the table, they agree to a part in a million.
+   */
+  it('tabulates the disc speed to a part in a million', () => {
+    let worst = 0;
+    for (let rd = 1; rd <= 8; rd += 0.35) {
+      for (let r = 0.01; r <= 60; r *= 1.013) {
+        const exact = discSpeed(r * KILOPARSEC, 6.3e10 * M_SUN, rd * KILOPARSEC);
+        const table = discSpeedTabulated(r * KILOPARSEC, 6.3e10 * M_SUN, rd * KILOPARSEC);
+        worst = Math.max(worst, Math.abs(table / exact - 1));
+      }
+    }
+    expect(worst).toBeLessThan(1e-6);
+  });
 });
