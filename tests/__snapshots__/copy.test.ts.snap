@@ -142,6 +142,56 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "The oldest light there is still fills the sky, cooled by the stretching of space to three degrees above absolute zero.",
     "title": "The Cosmic Microwave Background",
   },
+  "dark-matter": {
+    "L1 hook": "Most of the matter in the universe has never been seen, by any telescope, in any kind of light. The only sign of it is an extra pull of gravity on everything we can see.",
+    "L2 intuition": "Picture a merry-go-round whose horses are held on only by ropes to the centre. The faster a horse goes, the harder its rope must pull to keep it circling. Now suppose the horses at the rim go round just as fast as the ones near the middle, but the ropes you can see are too thin to hold them at that speed. Something you cannot see must be helping to hold them on. A galaxy is like that. Its stars circle the centre, held by gravity instead of ropes. Most of the stars and gas we can see crowd toward the middle, so stars far out should feel a weaker pull and move more slowly, the way Neptune crawls round the Sun while Mercury races. Instead, stars far out move about as fast as stars much further in. Something unseen is adding to the pull, and astronomers call it dark matter. Where the analogy breaks: the ropes all run to the centre. The unseen matter is not at the centre. It is spread through the galaxy and far beyond it, in a vast cloud, and a star feels the pull of all of that cloud lying inside its orbit.",
+    "L3 approximation 0": "The visible galaxy is one flat disc of stars and gas, thinning out steadily from the centre. The Milky Way’s central bulge and bar, about a third of its stars, are folded into the disc, and so is its gas, which in reality spreads about twice as far as its stars. The curve inside about 3 kiloparsecs (10 000 light-years) is therefore only rough.",
+    "L3 approximation 1": "The dark halo is a perfect sphere whose density is flat in a core 5 kiloparsecs (about 16 000 light-years) in radius and falls off with the square of distance outside it. Real halos may be flattened, and simulations give them a denser centre; the Milky Way’s true shape is uncertain.",
+    "L3 approximation 2": "The defaults are tuned, not fitted. The disc’s mass and size are the Milky Way’s measured values, and the halo’s strength and core are set by hand so that the speed at the Sun’s distance comes out at 227 km/s, within 1% of the measured 229. The curve is not a fit to the Milky Way’s measured rotation curve.",
+    "L3 approximation 3": "Every star moves in a perfect circle in the plane of the disc. Real stars also wander in and out and up and down, by a few tens of kilometres a second.",
+    "L3 approximation 4": "The masses inside the marked star’s orbit count the disc inside a cylinder, since it is flat, and the halo inside a sphere.",
+    "L3 approximation 5": "Stars are scattered evenly around the disc, without spiral arms, and the halo’s violet glow is drawn so you can see where it is: real dark matter gives off no light at all.",
+    "L3 approximation 6": "Time is sped up by the same factor at every setting: one second on screen is 25 million years.",
+    "L3 caption": "Each star circles at the speed the graph below gives for its distance. Take the dark halo away, with the button or by dragging its strength to zero, and the outer stars slow to what the visible matter alone can hold. Move the marked star outward and watch the two speeds part.",
+    "L4 figure alt": "A field of stars and small orange galaxies on black. At the centre, two pink clouds sit side by side, and two larger blue clouds lie outside them, one to the left and one to the right.",
+    "L4 real": "How fast stars orbit at each distance from a galaxy’s centre is its rotation curve. Vera Rubin and Kent Ford measured it for the Andromeda galaxy in 1970, and for dozens of spirals from 1978 to 1980, from how the colour of glowing gas shifts as it moves toward or away from us; radio astronomers tracing hydrogen further out found the same. The curves stay flat far beyond where the light fades. The Milky Way’s is nearly flat: at the Sun, 8.3 kiloparsecs (27 000 light-years) from the centre, it is about 229 km/s, enough to cross the Atlantic in 25 seconds, and out to 25 kiloparsecs it falls only 1.7 km/s per kiloparsec; later Gaia studies give 229 to 237 at the Sun. The 63 billion Suns of visible stars and gas cannot hold stars that fast so far out. The extra pull is attributed to dark matter: matter that gives off, absorbs and reflects no light we can detect, and shows itself only through its gravity. Around a galaxy it is inferred to form a roughly round halo reaching far beyond the disc. The same shortfall appears independently elsewhere. In 1933 Fritz Zwicky found the Coma Cluster’s galaxies moving so fast that, by his estimate, it needed about 400 times more mass than its light suggested. With today’s distance scale that factor is nearer 50, and most of the ordinary matter turned out to be hot gas seen only in X-rays; even so, stars and gas are only about a seventh of a cluster’s mass. Gravitational lensing, the bending of light by mass, weighs clusters without assuming how their galaxies move, and agrees. In the Bullet Cluster, pictured below, two clusters collided. Their hot gas, most of their ordinary matter, was slowed in the crash, while the mass the lensing reveals carried on with the galaxies, an offset measured at eight standard deviations. The pattern of warm and cool spots in the cosmic microwave background, the light left from 380 000 years after the Big Bang, fixes how much ordinary and dark matter the young universe held. The Planck satellite finds dark matter outweighs ordinary matter 5.4 to 1: about 84 percent of all matter, and about 26 percent of the universe’s total energy content, against 5 percent for ordinary matter. Without its pull, the faint lumps in that light could not have grown into galaxies in time. A common misconception is that dark matter is ordinary matter not yet spotted: dim stars, cold gas, the black holes dead stars leave. But the microwave background and the light elements forged in the first minutes each measure all the ordinary matter, and it is only a sixth of what gravity requires. The Bullet Cluster, about 3.8 billion light-years away: two clusters of galaxies that have passed through each other. Pink is hot gas seen in X-rays by NASA’s Chandra telescope, most of the ordinary matter. Blue is where gravitational lensing finds most of the mass, not with the gas but with the galaxies. X-ray: NASA/CXC/CfA/M.Markevitch et al.; Optical: NASA/STScI; Magellan/U.Arizona/D.Clowe et al.; Lensing Map: NASA/STScI; ESO WFI; Magellan/U.Arizona/D.Clowe et al.",
+    "L5 intro": "The first equation adds the two pulls; the second is the disc’s own; the third turns a speed into the mass it needs.",
+    "L5 note (disc)": "\\Sigma_0 — the disc’s central surface density; M_{\\text{disc}} and R_d — its mass and scale length (your sliders); I_n, K_n — modified Bessel functions. This is Freeman’s 1970 result for a razor-thin disc with surface density \\Sigma_0 e^{-R/R_d}. It peaks at R = 2.15\\,R_d and approaches the Keplerian \\sqrt{GM/R} far outside the disc: the fall a flat curve does not show. Worked example, the defaults: \\Sigma_0 = 6.3 \\times 10^{10}\\,M_\\odot / (2\\pi \\times (2.6\\,\\text{kpc})^2) = 1\\,480\\,M_\\odot/\\text{pc}^2. At the Sun, y = 1.59 and v_{\\text{disc}} = 191\\,\\text{km/s}; at the peak, 5.6 kpc out, 201\\,\\text{km/s}; at 30 kpc, 97\\,\\text{km/s}, where the curve with the halo is still at 200.",
+    "L5 note (mass)": "The mass a circular orbit needs inside it, exact for a spherical mass. If v is constant, M \\propto R, so dM/dR = 4\\pi R^2 \\rho = v^2/G and the density falls as \\rho = v^2/(4\\pi G R^2): the isothermal halo. A flat curve means mass growing in step with distance, long after the light has run out. Worked example, the Sun: v = 229\\,\\text{km/s} and R = 8.275\\,\\text{kpc} give M = 1.01 \\times 10^{11}\\,M_\\odot, and one orbit takes 2\\pi R/v = 222 million years. The sim’s own count inside the Sun’s orbit is lower, 5.2 \\times 10^{10} in the disc and 2.9 \\times 10^{10}\\,M_\\odot in the halo, because a flat disc pulls harder in its own plane than a sphere of the same mass: the spherical formula overestimates.",
+    "L5 note (total)": "v(R) — the circular speed at radius R (your marker); v_{\\text{disc}} — the visible disc’s contribution, below; v_\\infty — the halo’s speed far out (your halo slider); r_c = 5\\,\\text{kpc} — its core radius, fixed here. The accelerations of disc and halo add, so their squared speeds do. The halo term is the cored isothermal sphere, \\rho = \\rho_0/(1 + r^2/r_c^2) with v_\\infty^2 = 4\\pi G \\rho_0 r_c^2. Worked example, the defaults at the Sun’s distance, R = 8.275\\,\\text{kpc}: \\arctan(1.655) = 1.027, so the halo gives 200 \\times \\sqrt{1 - 1.027/1.655} = 123\\,\\text{km/s}. With the disc’s 191\\,\\text{km/s}, v = \\sqrt{191^2 + 123^2} = 227\\,\\text{km/s}, against 229 measured.",
+    "L6 deeper": "The halo here is the cored isothermal sphere, the usual form for fitting observed rotation curves. Cosmological simulations of cold dark matter produce instead the Navarro–Frenk–White profile, \\rho \\propto 1/[(r/r_s)(1 + r/r_s)^2], with a central cusp \\rho \\propto r^{-1} and a steeper r^{-3} fall far out, so its curve is flat only over a limited range and then declines. Eilers and colleagues’ fit of that profile to the Milky Way gives a local dark matter density of about 0.3 GeV per cubic centimetre, the figure direct searches assume. What dark matter is remains open. It must have been slow-moving, or cold, in the early universe, or it would have smoothed away the small lumps that became dwarf galaxies; that leaves the known neutrinos as at most a small part. WIMPs, particles with a few to thousands of times a proton’s mass, interacting about as weakly as neutrinos, were long favoured because annihilation at that strength in the hot early universe leaves about the right amount behind. Axions, far lighter, were proposed in 1977–78 to explain why the strong nuclear force respects CP symmetry, which its theory allows it to break. Primordial black holes could make up all of it only between about 10^{14} and 10^{20} kg; the Hawking Radiation module covers the limits on either side. No search has detected dark matter particles. Underground detectors holding tonnes of liquid xenon wait for a nucleus to recoil from a passing particle. LZ’s 4.2 tonne-year result (2025) found no excess and excludes spin-independent WIMP–nucleon cross-sections above 2.2 \\times 10^{-48}\\,\\text{cm}^2 at 40 GeV, at 90% confidence. Its December 2025 analysis saw solar neutrinos scattering off xenon nuclei at 4.5σ, the background that will ultimately limit such searches. In September 2026 LZ reported a single nuclear recoil at 248 keV in a search extended to high energies, in tension with background alone at 2.6σ once the many models tested are accounted for: worth watching, far from a detection. Gamma rays from the Milky Way’s dwarf satellites, seen by Fermi, rule out WIMPs lighter than about 100 GeV that annihilate into quarks or tau leptons at the rate the early universe would need; a gamma-ray excess at the Galactic Centre remains disputed, with unresolved pulsars the main rival explanation. The Large Hadron Collider has seen no missing-energy signal beyond the Standard Model. MOND, proposed by Mordehai Milgrom in 1983, replaces dark matter with a change to gravity: below an acceleration a_0 \\approx 1.2 \\times 10^{-10}\\,\\text{m/s}^2, the pull tends to \\sqrt{g_N a_0} rather than Newton’s g_N. Far out that gives a flat curve with v^4 = G M_b a_0, the baryonic Tully–Fisher relation, which galaxies follow with remarkably little scatter, and it predicts each galaxy’s curve from its visible matter alone. Dark matter models have to reproduce that regularity through the physics of galaxy formation. MOND’s difficulties are elsewhere: clusters still need about twice the mass seen, even with modified gravity; the Bullet Cluster’s lensing follows the galaxies rather than the gas, which modified gravity alone cannot arrange; and the microwave background’s peak heights need a component that does not oscillate with the light. A relativistic version (Skordis and Złośnik, 2021) does fit the microwave background, by adding a field that behaves like dark matter on cosmic scales. Cold dark matter has small-scale tensions of its own. Simulated halos have cusps, while many dwarf galaxies show cores; simulations predict hundreds of satellite halos around a galaxy like ours, where about a dozen satellites were known when the problem was named in 1999; and the largest predicted satellites are denser than any observed. Gas blown out by supernovae can flatten cusps in simulations, and surveys since 2005 have found many faint satellites, with corrections for those too faint to see suggesting the count may match. Whether ordinary-matter physics resolves all three, or the dark matter is warmer or interacts with itself, is not settled.",
+    "L7 reason -> cosmic-microwave-background": "The heights of its acoustic peaks are where the 5.4-to-1 ratio of dark to ordinary matter is measured.",
+    "L7 reason -> early-universe": "The light elements made in the first minutes count the ordinary matter, and come up about five-sixths short of what gravity needs.",
+    "L7 reason -> expansion-of-the-universe": "Dark matter is about a quarter of the universe’s energy content, and its pull slowed the expansion for billions of years.",
+    "L7 reason -> kepler-orbits": "Far out, the curve visible matter alone predicts becomes Kepler’s: speed falling with distance, as it does from Mercury to Neptune.",
+    "reference 0": {
+      "label": "Rubin, Ford & Thonnard 1980, “Rotational properties of 21 Sc galaxies with a large range of luminosities and radii”, ApJ 238, 471",
+      "note": "Flat rotation curves across a sample of spiral galaxies",
+      "url": "https://doi.org/10.1086/158003",
+    },
+    "reference 1": {
+      "label": "Eilers, Hogg, Rix & Ness 2019, “The Circular Velocity Curve of the Milky Way from 5 to 25 kpc”, ApJ 871, 120",
+      "note": "The Milky Way’s rotation curve: 229.0 km/s at the Sun, falling 1.7 km/s per kpc",
+      "url": "https://doi.org/10.3847/1538-4357/aaf648",
+    },
+    "reference 2": {
+      "label": "Clowe et al. 2006, “A Direct Empirical Proof of the Existence of Dark Matter”, ApJ 648, L109",
+      "note": "The Bullet Cluster: lensing mass offset from the X-ray gas at 8σ",
+      "url": "https://doi.org/10.1086/508162",
+    },
+    "reference 3": {
+      "label": "Planck Collaboration 2020, “Planck 2018 results VI: Cosmological parameters”, A&A 641, A6",
+      "note": "Ω_c h² = 0.1200 and Ω_b h² = 0.02237: dark matter 5.4 times ordinary matter",
+      "url": "https://doi.org/10.1051/0004-6361/201833910",
+    },
+    "reference 4": {
+      "label": "LZ Collaboration 2025, “Dark Matter Search Results from 4.2 Tonne-Years of Exposure of the LUX-ZEPLIN (LZ) Experiment”, PRL 135, 011802",
+      "note": "Direct detection: no excess; cross-sections above 2.2 × 10⁻⁴⁸ cm² excluded at 40 GeV (90% confidence)",
+      "url": "https://doi.org/10.1103/4dyc-z8zf",
+    },
+    "tagline": "Stars at a galaxy’s edge orbit too fast for the matter we can see. Something unseen is pulling on them.",
+    "title": "Dark Matter",
+  },
   "early-universe": {
     "L1 hook": "One second after it began, the entire universe was ten billion degrees, hotter than the centre of any star. Every proton and neutron in your body was already there, and had been for most of that second.",
     "L2 intuition": "Think of steam cooling. While it is hot, water is a gas of separate molecules, too energetic to hold on to each other. Cool it and droplets form, because at last the molecules can stick. Cool it further and the droplets freeze into ice, a structure that could not have survived a moment earlier. Each step down in temperature lets something new exist. The universe cooled the same way, in stages. At first it was too hot even for protons: their parts flew about separately. As it cooled, the parts locked into protons and neutrons. Cooler still, protons and neutrons stuck together into the first nuclei. Then, much later, nuclei captured electrons and became atoms. Each of those steps happened everywhere at once, at a temperature the universe passed through on its way down, and each left behind a layer of the world we live in. Where the analogy breaks: steam cools by handing its heat to the room around it. The universe had no room to hand heat to. It cooled only because it was stretching, and every wave of light in it was stretched longer and weaker. And water freezes at one temperature; the universe passed through many, each adding a new kind of thing.",
@@ -962,6 +1012,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "One 3,600th of a degree: about a coin seen from four kilometres away.",
     "title": "Arcsecond",
   },
+  "axion": {
+    "body": "A hypothetical, extremely light particle proposed in 1977–78 to fix a puzzle in the strong nuclear force, and a candidate for dark matter. None has been found.",
+    "title": "Axion",
+  },
   "b-modes": {
     "body": "A swirl pattern in the polarization of the microwave background. The primordial kind, left by gravitational waves from the first instant, is not yet found; a kind made by lensing has been seen since 2013.",
     "title": "B-modes",
@@ -1050,6 +1104,14 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "Whatever is making the expansion speed up rather than slow down. About 70% of the universe’s energy today; its nature is unknown.",
     "title": "Dark energy",
   },
+  "dark-matter": {
+    "body": "Matter that gives off, absorbs and reflects no light we can detect, known only by its gravity. About five times as much as ordinary matter; what it is made of is unknown.",
+    "title": "Dark matter",
+  },
+  "dark-matter-halo": {
+    "body": "The roughly round cloud of dark matter a galaxy is inferred to sit in, reaching far beyond its stars and holding most of its mass.",
+    "title": "Dark matter halo",
+  },
   "dark-nebula": {
     "body": "A cloud dense and dusty enough to block the stars behind it. The Horsehead is one; new stars form inside them.",
     "title": "Dark nebula",
@@ -1117,6 +1179,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "gamow-peak": {
     "body": "The narrow range of collision energies where almost all fusion happens: high enough to tunnel, low enough that some particles actually have it.",
     "title": "Gamow peak",
+  },
+  "gravitational-lensing": {
+    "body": "The bending of light from distant objects by the gravity of mass in front of them. Measuring the distortion weighs that mass, seen or not.",
+    "title": "Gravitational lensing",
   },
   "gravitational-time-dilation": {
     "body": "Clocks deeper in gravity run slower. A clock on the ground loses about 60 microseconds a day against one far out in space.",
@@ -1254,6 +1320,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A pulsar spinning tens to hundreds of times a second, spun up by matter falling onto it from a companion star.",
     "title": "Millisecond pulsar",
   },
+  "mond": {
+    "body": "Modified Newtonian dynamics: Milgrom’s 1983 proposal that gravity is stronger than Newton’s law at very low accelerations, offered in place of dark matter.",
+    "title": "MOND",
+  },
   "muonic-hydrogen": {
     "body": "Hydrogen with its electron swapped for a heavier muon, which orbits closer and probes the proton more sharply.",
     "title": "Muonic hydrogen",
@@ -1362,6 +1432,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The last vibration of the merged hole, ringing like a struck bell as it settles into shape.",
     "title": "Ringdown",
   },
+  "rotation-curve": {
+    "body": "How fast stars and gas orbit a galaxy’s centre at each distance from it. Far out, most are nearly flat.",
+    "title": "Rotation curve",
+  },
   "runaway-greenhouse": {
     "body": "What happens when a planet gets warm enough that its evaporating oceans trap more heat, which evaporates more ocean, until the oceans are gone. Venus, probably.",
     "title": "Runaway greenhouse",
@@ -1445,6 +1519,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "white-hole": {
     "body": "A black hole run backwards in time: a region nothing can enter and from which things can only leave. Allowed by the equations, unstable, and never observed.",
     "title": "White hole",
+  },
+  "wimp": {
+    "body": "Weakly interacting massive particle: a hypothetical dark matter particle a few to thousands of times a proton’s mass, interacting about as weakly as neutrinos. None has been found.",
+    "title": "WIMP",
   },
   "wormhole": {
     "body": "A tunnel through space joining two distant places, allowed by general relativity. None has ever been observed, and holding one open would need matter with negative energy.",
