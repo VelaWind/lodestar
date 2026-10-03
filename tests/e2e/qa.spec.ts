@@ -52,6 +52,7 @@ const MODULES = [
   'time-dilation',
   'hawking-radiation',
   'wormholes',
+  'neutron-stars',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -2956,6 +2957,112 @@ test('behaviour: wormholes readouts follow the throat, and a term opens by keybo
   assertClean(w, 'wormholes behaviour');
 });
 
+/**
+ * The neutron-stars module, end to end, on every engine.
+ *
+ * At the defaults, the Crab's spin, 45° of tilt and Earth 50° from the spin
+ * axis, one beam sweeps past Earth: 29.9 pulses a second, an equator moving at
+ * 0.753% of light speed, 163 billion g and an escape speed of 58.7% of light.
+ * Earth moved onto the spin axis sees no pulses, and the heaviest mass on the
+ * slider has collapsed to a black hole. A glossary term opens from the
+ * keyboard, and axe finds nothing serious.
+ */
+test('behaviour: neutron-stars readouts follow the sliders, and a term opens by keyboard @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.goto('/m/neutron-stars', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'neutron stars at rest');
+
+  const readout = (index: number) => page.locator('#neutron-stars-readouts dd').nth(index);
+
+  /* Defaults: the Crab, seen. */
+  await expect(readout(0), 'verdict at the defaults').toHaveText(/^Yes: one beam/);
+  await expect(readout(1), 'pulse rate at the Crab').toHaveText('29.9 a second');
+  await expect(readout(2), 'equatorial speed at the Crab').toHaveText('0.753% of light speed');
+  await expect(readout(4), 'surface gravity at 1.4 Suns').toHaveText('163 billion × Earth’s');
+  await expect(readout(5), 'escape speed at 1.4 Suns').toHaveText('58.7% of light speed');
+
+  /* 45° tilt seen from 35°: exactly on the beam edge, and seen, as the trace shows. */
+  await page.locator('#p-zeta').focus();
+  for (let i = 0; i < 15; i += 1) await page.keyboard.press('ArrowLeft');
+  await expect(page.locator('#p-zeta'), 'view at 35°').toHaveAttribute('aria-valuetext', /^35 /);
+  await expect(readout(0), 'verdict at 45°/35°').toHaveText(/^Yes: one beam/);
+
+  /* Earth on the spin axis: both beams miss. */
+  await page.keyboard.press('Home');
+  await expect(readout(0), 'verdict on the spin axis').toHaveText(/^No: both beams miss/);
+  await expect(readout(1), 'pulse rate on the spin axis').toHaveText('none');
+
+  /* The heaviest mass: collapsed, and no star readout survives it. */
+  await page.locator('#p-M').focus();
+  await page.keyboard.press('End');
+  await expect(readout(0), 'verdict at 2.5 Suns').toHaveText(/^No: too heavy/);
+  for (const index of [1, 2, 3, 4, 5, 6]) {
+    await expect(readout(index), `readout ${index} after collapse`).toHaveText(/^—/);
+  }
+  await assertNoOverflow(page, 'neutron stars collapsed');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be neutron star').toBe('neutron-star');
+  const trigger = page.locator('[data-glossary-term="neutron-star"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  const panel = page.locator('[data-glossary-panel="neutron-star"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('The collapsed core of a massive star');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  /* Axe, with the real-picture layer open as well as the sim. */
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === 'serious' || v.impact === 'critical',
+  );
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'neutron stars: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '25-neutron-stars-behaviour');
+  assertClean(w, 'neutron stars behaviour');
+});
+
+/**
+ * Reduced motion and a collapsed star together: the note under the sim says the
+ * star is a black hole, and does not describe the beams and signal that a
+ * collapsed star does not have.
+ */
+test('neutron-stars: under reduced motion a collapsed star is described as collapsed @cross-engine', async ({
+  page,
+}) => {
+  const w = watch(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/m/neutron-stars', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+
+  const note = page.locator('#layer-panel-play p', { hasText: /reduced-motion|collapse threshold/ });
+  await expect(note, 'reduced-motion note at the defaults').toContainText('first beam');
+
+  await page.locator('#p-M').focus();
+  await page.keyboard.press('End');
+  await expect(note, 'note once collapsed').toContainText('black hole');
+  await expect(note, 'note once collapsed').not.toContainText('beam swings');
+  assertClean(w, 'neutron stars reduced motion collapsed');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -2995,7 +3102,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes eighteen modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes nineteen modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3683,7 +3790,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All eighteen modules now, with no exception branch. `kepler-orbits` carried one
+ * All nineteen modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -3808,7 +3915,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * until a link is added on purpose.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all twenty and checks the rendered DOM rather than the
+ * route — so this walks all twenty-one and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -3835,7 +3942,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the repo, and /about says the code is public on GitHub', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all twenty routes').toBe(20);
+  expect(routes.length, 'all twenty-one routes').toBe(21);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -3980,7 +4087,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on twenty fresh loads. Getting this wrong is what the first run of
+   * asserts on twenty-one fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();

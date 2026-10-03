@@ -46,6 +46,9 @@ import { __internals as cdl } from '@/sims/cosmic-distance-ladder';
 import { __internals as td } from '@/sims/time-dilation';
 import { __internals as hr } from '@/sims/hawking-radiation';
 import { __internals as wh } from '@/sims/wormholes';
+import { __internals as ns } from '@/sims/neutron-stars';
+import neutronStars from '@/content/modules/neutron-stars';
+import { beamVisibility, equatorialSpeedFraction, surfaceGravity } from '@/physics/neutronstar';
 import { massEvaporatingIn, massForHawkingTemperature, netWithCMB } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
@@ -1963,6 +1966,201 @@ function wormholeCases(): Case[] {
   return cases;
 }
 
+/* ------------------------------- neutron stars ------------------------------- */
+
+const NS_HEIGHT = 512;
+
+function neutronStarCases(): Case[] {
+  const params = neutronStars.layers.play.params;
+  const cases: Case[] = [];
+
+  // Each slider's ends and default, in pairs: mass with period, tilt with view.
+  // Mass's max is past the collapse threshold, so the black-hole drawing is in.
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const m of extremes(paramOf(params, 'M'))) {
+      for (const p of extremes(paramOf(params, 'P'))) {
+        for (const a of extremes(paramOf(params, 'alpha'))) {
+          for (const z of extremes(paramOf(params, 'zeta'))) {
+            for (const turn of [0, ns.STATIC_TURN, Math.PI, 3.3 * Math.PI]) {
+              cases.push({
+                label: `M=${m.stop} P=${p.stop} alpha=${a.stop} zeta=${z.stop} turn=${turn.toFixed(2)} ${units}`,
+                draw: (ctx, w, h) =>
+                  ns.drawScene(ctx, w, h, {
+                    M: m.value,
+                    P: p.value,
+                    alpha: a.value,
+                    zeta: z.value,
+                    turn,
+                    units,
+                  }),
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /*
+   * The beam and its label at every tilt and view a reader can reach, and the
+   * period dot along the whole strip past the fastest-pulsar and Crab marks.
+   */
+  const DEG = Math.PI / 180;
+  for (let a = 0; a <= 90; a += 15) {
+    for (let z = 0; z <= 90; z += 15) {
+      for (const turn of [0.4, ns.STATIC_TURN, 2.9, 4.4, 9]) {
+        cases.push({
+          label: `alpha=${a}° zeta=${z}° turn=${turn}`,
+          draw: (ctx, w, h) =>
+            ns.drawScene(ctx, w, h, {
+              M: paramOf(params, 'M').default,
+              P: paramOf(params, 'P').default,
+              alpha: a * DEG,
+              zeta: z * DEG,
+              turn,
+              units: 'friendly',
+            }),
+        });
+      }
+    }
+  }
+  /* The review's settings: small tilts, where a beam lies close along the spin axis, and the beam edge. */
+  for (const [a, z] of [[0, 0], [3, 5], [5, 5], [3, 0], [10, 0], [45, 35], [45, 55], [45, 20]] as const) {
+    for (const turn of [0, ns.STATIC_TURN, Math.PI, 4.4]) {
+      for (const units of ['friendly', 'technical'] as const) {
+        cases.push({
+          label: `review alpha=${a}° zeta=${z}° turn=${turn.toFixed(2)} ${units}`,
+          draw: (ctx, w, h) =>
+            ns.drawScene(ctx, w, h, {
+              M: paramOf(params, 'M').default,
+              P: paramOf(params, 'P').default,
+              alpha: a * DEG,
+              zeta: z * DEG,
+              turn,
+              units,
+            }),
+        });
+      }
+    }
+  }
+
+  const pParam = paramOf(params, 'P');
+  for (let lp = Math.log10(pParam.min); lp <= Math.log10(pParam.max) + 1e-9; lp += 0.1) {
+    cases.push({
+      label: `P=10^${lp.toFixed(1)}`,
+      draw: (ctx, w, h) =>
+        ns.drawScene(ctx, w, h, {
+          M: paramOf(params, 'M').default,
+          P: 10 ** lp,
+          alpha: 45 * DEG,
+          zeta: 50 * DEG,
+          turn: ns.STATIC_TURN,
+          units: 'technical',
+        }),
+    });
+  }
+
+  it('formats the readouts at the defaults the way the module states them', () => {
+    const M = paramOf(params, 'M').default;
+    const P = paramOf(params, 'P').default;
+    expect(ns.formatTime(P)).toBe('33.4 ms');
+    expect(ns.formatFractionOfC(equatorialSpeedFraction(P))).toBe('0.753% of light speed');
+    expect(ns.formatGravity(surfaceGravity(M))).toBe('163 billion × Earth’s');
+    expect(ns.formatSpin(1 / P)).toBe('29.9 turns a second (33.4 ms)');
+  });
+
+  it('says what Earth sees, from the beam geometry', () => {
+    const M = paramOf(params, 'M').default;
+    const DEG2 = Math.PI / 180;
+    expect(ns.verdictFor(M, 45 * DEG2, 50 * DEG2)).toBe('one');
+    expect(ns.verdictFor(M, 90 * DEG2, 90 * DEG2)).toBe('both');
+    expect(ns.verdictFor(M, 20 * DEG2, 70 * DEG2)).toBe('none');
+    expect(ns.verdictFor(M, 0, 5 * DEG2)).toBe('steady');
+    expect(ns.verdictFor(paramOf(params, 'M').max, 45 * DEG2, 50 * DEG2)).toBe('collapsed');
+  });
+
+  /*
+   * The review's settings, tilt/view. 45°/35° and 45°/55° sit exactly on the
+   * beam edge, a part in 10¹⁶ outside it in floating point; 3°/5° and 5°/5°
+   * never leave the beam, so the signal is always on and brightens once a turn.
+   */
+  it('reads the review’s settings the way their traces look', () => {
+    const M = paramOf(params, 'M').default;
+    const DEG2 = Math.PI / 180;
+    const expected: [number, number, string][] = [
+      [3, 5, 'brightening'],
+      [5, 5, 'brightening'],
+      [45, 35, 'one'],
+      [45, 55, 'one'],
+      [45, 20, 'none'],
+    ];
+    for (const [a, z, verdict] of expected) {
+      const view = { M, alpha: a * DEG2, zeta: z * DEG2 };
+      const samples = ns.traceSamples(view);
+      const label = `${a}°/${z}°`;
+      expect(ns.verdictFor(M, view.alpha, view.zeta), label).toBe(verdict);
+      if (verdict === 'brightening') {
+        expect(Math.min(...samples), `${label} never drops to zero`).toBeGreaterThan(0);
+        expect(Math.max(...samples) - Math.min(...samples), `${label} brightens and dims`).toBeGreaterThan(0.1);
+      }
+      if (verdict === 'one') {
+        expect(Math.max(...samples), `${label} draws a pulse`).toBeGreaterThan(0);
+        expect(Math.min(...samples), `${label} drops to zero between pulses`).toBe(0);
+      }
+      if (verdict === 'none') expect(Math.max(...samples), `${label} draws nothing`).toBe(0);
+    }
+  });
+
+  /*
+   * One rule, everywhere: at every whole degree of tilt and view, the verdict
+   * agrees with the trace that is drawn. Pulses mean the trace reaches zero and
+   * rises from it; always on means it never reaches zero; none means it is flat
+   * at zero. And a beam reached at φ = 0 lights the line of sight in the drawing
+   * at the static frame, which is drawn at that phase.
+   */
+  it('agrees with its drawn trace at every whole-degree tilt and view', () => {
+    const M = paramOf(params, 'M').default;
+    const DEG2 = Math.PI / 180;
+    const mismatches: string[] = [];
+    for (let a = 0; a <= 90; a += 1) {
+      for (let z = 0; z <= 90; z += 1) {
+        const view = { M, alpha: a * DEG2, zeta: z * DEG2 };
+        const verdict = ns.verdictFor(M, view.alpha, view.zeta);
+        const samples = ns.traceSamples(view);
+        const lo = Math.min(...samples);
+        const hi = Math.max(...samples);
+        const ok =
+          verdict === 'none'
+            ? hi === 0
+            : verdict === 'one' || verdict === 'both'
+              ? lo === 0 && hi > 0
+              : verdict === 'brightening'
+                ? lo > 0 && hi > lo
+                : lo > 0 && hi - lo < 1e-12;
+        if (!ok) mismatches.push(`${a}°/${z}°: ${verdict}, trace ${lo.toFixed(3)}–${hi.toFixed(3)}`);
+        // The static frame is drawn at φ = 0, sample 45 of the trace.
+        const first = beamVisibility(view.alpha, view.zeta).first;
+        if (first !== samples[ns.TRACE_STEPS / 8]! > 0 && !beamVisibility(view.alpha, view.zeta).alwaysOn) {
+          mismatches.push(`${a}°/${z}°: beam 1 reached ${first}, trace at φ = 0 is ${samples[ns.TRACE_STEPS / 8]}`);
+        }
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it('never draws the spin faster than the star turns, and says which it is', () => {
+    const pParam = paramOf(params, 'P');
+    for (let lp = Math.log10(pParam.min); lp <= Math.log10(pParam.max) + 1e-9; lp += 0.05) {
+      const P = 10 ** lp;
+      expect(ns.shownTurnSeconds(P), `P = ${P}`).toBeGreaterThanOrEqual(P);
+    }
+    expect(ns.shownTurnSeconds(10)).toBe(10);
+    expect(ns.shownTurnSeconds(pParam.default)).toBeGreaterThan(pParam.default);
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -1984,6 +2182,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'time-dilation', height: TD_HEIGHT, cases: timeDilationCases },
   { name: 'hawking-radiation', height: HR_HEIGHT, cases: hawkingRadiationCases },
   { name: 'wormholes', height: WH_HEIGHT, cases: wormholeCases },
+  { name: 'neutron-stars', height: NS_HEIGHT, cases: neutronStarCases },
 ];
 
 /**
@@ -2020,6 +2219,7 @@ const MEASURED_PLACEMENT = new Set([
   'time-dilation',
   'hawking-radiation',
   'wormholes',
+  'neutron-stars',
 ]);
 
 for (const sim of SIMS) {
