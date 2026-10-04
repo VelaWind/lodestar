@@ -105,7 +105,21 @@ function structuredData(html: string, path: string): Record<string, unknown> {
   const raw = blocks[0]![1]!;
   const data = JSON.parse(raw) as Record<string, unknown>;
   expect(data['@context'], `${path || '/'}: schema.org context`).toBe('https://schema.org');
-  expect(raw, `${path || '/'}: structured data names a person`).not.toMatch(/"(author|creator|publisher|Person)"/);
+  // No person and no contact detail anywhere in it. The one publisher allowed
+  // is the project's own name, as an Organization with nothing else attached.
+  expect(raw, `${path || '/'}: structured data names a person`).not.toMatch(/"(author|creator|Person)"/);
+  expect(raw, `${path || '/'}: structured data carries an email`).not.toMatch(/@[\w-]+\.[a-z]|mailto:|"email"/i);
+  expect(raw, `${path || '/'}: structured data carries contact or address fields`).not.toMatch(
+    /"(telephone|address|contactPoint|logo|sameAs)"/,
+  );
+  const publishers = [...raw.matchAll(/"publisher":(\{[^}]*\})/g)].map((m) => JSON.parse(m[1]!));
+  expect(publishers.length, `${path || '/'}: a publisher on the page`).toBeGreaterThan(0);
+  for (const publisher of publishers) {
+    expect(publisher, `${path || '/'}: publisher is the project's name only`).toEqual({
+      '@type': 'Organization',
+      name: 'VelaWind',
+    });
+  }
   return data;
 }
 

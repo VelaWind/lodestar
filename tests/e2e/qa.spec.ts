@@ -4183,9 +4183,10 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * No route links the repository, and /about says where the code is.
  *
  * The repository was private when this test was written, so a link to it was a
- * 404. It is public now, and /about says so in words; the codebase still holds
- * no link to it, so the site still carries none, and this test keeps it that way
- * until a link is added on purpose.
+ * 404. It is public now, and /about says so in words. One link was then added
+ * on purpose: /about's corrections sentence points at the repository's issues
+ * page. That one link, on that one page, is allowed and required; any other
+ * GitHub link anywhere on the site still fails.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
  * route — so this walks all twenty-four and checks the rendered DOM rather than the
@@ -4212,6 +4213,9 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * Chromium-only by omission of the `@cross-engine` tag — an href is an href on
  * every engine, and this is about content rather than rendering.
  */
+/** Where /about sends scientific corrections: the one GitHub link the site carries. */
+const ISSUES_URL = 'https://github.com/VelaWind/lodestar/issues';
+
 test('no route links the repo, and /about says the code is public on GitHub', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
@@ -4231,8 +4235,13 @@ test('no route links the repo, and /about says the code is public on GitHub', as
     );
     expect(hrefs.length, `${route}: no links at all — did the page render?`).toBeGreaterThan(0);
 
+    // One exception, by the owner's ruling: /about links the repository's
+    // issues page, where scientific corrections go. Any other GitHub link, or
+    // this one anywhere else, is still an offender.
     for (const href of hrefs) {
-      if (href.includes('github.com')) offenders.push(`${route} -> ${href}`);
+      if (!href.includes('github.com')) continue;
+      if (route === '/about' && href === ISSUES_URL) continue;
+      offenders.push(`${route} -> ${href}`);
     }
 
     if (route === '/about') {
@@ -4242,6 +4251,10 @@ test('no route links the repo, and /about says the code is public on GitHub', as
       const main = await page.locator('main').innerText();
       expect(main, '/about must tell a reader where the code is').toContain('public on GitHub');
       expect(main, 'the old private-repository sentence is back').not.toContain('on request');
+      await expect(
+        page.locator('main').getByRole('link', { name: 'the project’s GitHub repository' }),
+        '/about should link the issues page for corrections, once',
+      ).toHaveAttribute('href', ISSUES_URL);
 
       // The seam this shipped alongside. The paragraph said "the division of
       // labour" twice across a sentence boundary; the phrase must not come back.
@@ -4253,7 +4266,7 @@ test('no route links the repo, and /about says the code is public on GitHub', as
     }
   }
 
-  expect(offenders, 'these routes link the private repository').toEqual([]);
+  expect(offenders, 'these routes link GitHub beyond the one corrections link on /about').toEqual([]);
   expect(aboutChecked, '/about was never walked — the route list changed').toBe(true);
 
   console.log(`  private repo: ${routes.length} routes checked, no links out; /about states the terms`);

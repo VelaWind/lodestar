@@ -11,7 +11,7 @@
  * would find it. Its own small shape, kept here beside the text it describes.
  */
 import type { RichText } from './types';
-import { p, prose } from './rich';
+import { link, p, prose } from './rich';
 
 export interface AboutSection {
   /** Rendered as the section's heading. */
@@ -59,8 +59,9 @@ export const aboutSections: AboutSection[] = [
         'figure ships unchecked: claims that ',
         'can be computed are recomputed through the site’s own physics code before publication, ',
         'and claims that can’t are verified against the paper they cite. Scientific corrections ',
-        'are welcome: open an issue on the project’s GitHub repository, quoting the sentence and ',
-        'the source.',
+        'are welcome: open an issue on ',
+        link('https://github.com/VelaWind/lodestar/issues', 'the project’s GitHub repository'),
+        ', quoting the sentence and the source.',
       ),
     ),
   },
@@ -68,7 +69,8 @@ export const aboutSections: AboutSection[] = [
     heading: 'Built solo, with an AI pair',
     body: prose(
       p(
-        'Lodestar is a solo project built in collaboration with Claude Code, and the interesting ',
+        'Lodestar is a VelaWind project. ',
+        'It is a solo project built in collaboration with Claude Code, and the interesting ',
         'part is the division of labour: decisions, not typing. The physics calls, the editorial ',
         'judgements, what is cut, what is corrected, and what counts as true stay with the ',
         'author; the AI drafts to that direction, prose and code both, and nothing ships unread. ',
