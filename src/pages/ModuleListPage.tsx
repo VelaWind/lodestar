@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { moduleCatalog, prefetchModule, type ModuleSummary } from '@/content/catalog';
 import { requestDepthFocus } from '@/components/DepthControl';
+import { StartHere } from '@/components/StartHere';
 import { Reveal } from '@/motion/Reveal';
 import { TIERS } from '@/lib/layers';
 import { isReaderVisible } from '@/lib/visibility';
@@ -100,6 +101,8 @@ export function ModuleListPage() {
           text, and nothing is ever hidden.
         </p>
       </header>
+
+      <StartHere />
 
       {listed.length === 0 ? (
         <p className="font-prose text-ink-faint">

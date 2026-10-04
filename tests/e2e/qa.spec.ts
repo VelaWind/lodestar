@@ -3372,12 +3372,20 @@ test('behaviour: the registry publishes twenty-two modules and leaks no drafts',
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
 
-  const cards = page.locator('a[href^="/m/"]');
-  const hrefs = await cards.evaluateAll((els) => els.map((el) => el.getAttribute('href') ?? ''));
-  expect(
-    [...hrefs].sort(),
-    'the landing page should link every published module, once',
-  ).toEqual(MODULES.map((id) => `/m/${id}`).sort());
+  // Once in the topic grid, and once more on the learning path: never a draft, never twice in either.
+  for (const [where, selector] of [
+    ['topic grid', 'main ul.breakout a[href^="/m/"]'],
+    ['learning path', 'section[aria-labelledby="start-here"] a[href^="/m/"]'],
+  ] as const) {
+    const hrefs = await page
+      .locator(selector)
+      .evaluateAll((els) => els.map((el) => el.getAttribute('href') ?? ''));
+    expect(
+      [...hrefs].sort(),
+      `the landing page's ${where} should link every published module, once`,
+    ).toEqual(MODULES.map((id) => `/m/${id}`).sort());
+  }
+  await expect(page.locator('a[href^="/m/"]')).toHaveCount(2 * MODULES.length);
 
   let planned = 0;
   for (const id of MODULES) {
@@ -3418,7 +3426,7 @@ test('behaviour: the registry publishes twenty-two modules and leaks no drafts',
     ).not.toContainText('draft');
   }
 
-  console.log(`  registry: ${hrefs.length} published cards, ${planned} planned chips`);
+  console.log(`  registry: ${MODULES.length} published cards, ${planned} planned chips`);
   expect(planned, 'planned-chip total across every published page').toBe(0);
 
   assertClean(w, 'registry');
@@ -4320,8 +4328,9 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
 
   await back.click();
   await expect(page).toHaveURL(/\/$/);
+  // The topic grid, not every module link: Start here links each module too.
   await expect(
-    page.locator('main a[href^="/m/"]'),
+    page.locator('main ul.breakout a[href^="/m/"]'),
     'the link should land on the index',
   ).toHaveCount(MODULES.length);
 
@@ -4546,7 +4555,8 @@ test('route transition: reduced motion swaps instantly @cross-engine', async ({ 
         const o = Number(getComputedStyle(el).opacity);
         return o > 0 && o < 1;
       }).length,
-      cards: document.querySelectorAll('a[href^="/m/"]').length,
+      // The topic grid's cards; Start here links each module as well.
+      cards: document.querySelectorAll('main ul.breakout a[href^="/m/"]').length,
       heading: main?.querySelector('h1')?.textContent?.trim() ?? null,
     };
   });
