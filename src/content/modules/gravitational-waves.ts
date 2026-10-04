@@ -59,7 +59,7 @@ const gravitationalWaves: Module = {
           'thing moving ',
           em('through'),
           ' a medium. A gravitational wave has no medium. It is the distances between things that ',
-          'ripple; the “pond” is the geometry you are made of, and when the wave passes, you are ',
+          'ripple. The “pond” is the geometry you are made of, and when the wave passes, you are ',
           'stretched one way and squeezed the other, then the reverse, over and over.',
         ),
       ),
@@ -120,7 +120,7 @@ const gravitationalWaves: Module = {
         },
         {
           id: 'd',
-          friendlyLabel: 'How far away did it happen? (1 Mpc ≈ 3.26 million light-years)',
+          friendlyLabel: 'How far away did it happen? (in megaparsecs; one megaparsec is about 3.26 million light-years)',
           technicalLabel: 'Distance',
           symbol: 'd',
           unit: 'm',
@@ -168,7 +168,7 @@ const gravitationalWaves: Module = {
         ),
         prose(
           p(
-            'Nothing is redshifted: the masses are the pair’s own, and the distance is a simple ',
+            'Nothing is redshifted, that is, stretched to lower frequencies by the universe’s expansion: the masses are the pair’s own, and the distance is a simple ',
             term('luminosity distance', 'luminosity-distance'),
             ', the one its brightness implies.',
           ),
@@ -180,7 +180,7 @@ const gravitationalWaves: Module = {
         ),
         prose(
           p(
-            'The sound is a stand-in, not a recording: a tone at the wave’s own frequency and strength. Below about 20 Hz, under human hearing, the pitch is held at 20 Hz.',
+            'The sound is a stand-in, not a recording: a tone at the wave’s own frequency and strength. Below about 20 vibrations a second (20 Hz), under human hearing, the pitch is held there.',
           ),
         ),
       ],

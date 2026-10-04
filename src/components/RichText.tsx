@@ -6,6 +6,7 @@
 import { Fragment, memo, type ReactNode } from 'react';
 import type { Block, Inline, RichText as RichTextAst } from '@/content/types';
 import { GlossaryTerm } from './GlossaryTerm';
+import { ScrollX } from './ScrollX';
 import { Tex } from './Tex';
 
 function inline(node: Inline, key: number): ReactNode {
@@ -73,9 +74,9 @@ function block(node: Block, key: number): ReactNode {
       );
     case 'ul':
       return (
-        <ul key={key} className="ml-1 space-y-2 text-[1.0625rem] leading-[1.7] text-ink-dim">
+        <ul key={key} className="ms-1 space-y-2 text-[1.0625rem] leading-[1.7] text-ink-dim">
           {node.items.map((item, i) => (
-            <li key={i} className="relative pl-5 before:absolute before:left-0 before:top-[0.7em] before:h-1 before:w-1 before:rounded-full before:bg-star-dim">
+            <li key={i} className="relative ps-5 before:absolute before:start-0 before:top-[0.7em] before:h-1 before:w-1 before:rounded-full before:bg-star-dim">
               {item.map(inline)}
             </li>
           ))}
@@ -83,9 +84,9 @@ function block(node: Block, key: number): ReactNode {
       );
     case 'ol':
       return (
-        <ol key={key} className="ml-5 list-decimal space-y-2 text-[1.0625rem] leading-[1.7] text-ink-dim marker:font-mono marker:text-ink-faint">
+        <ol key={key} className="ms-5 list-decimal space-y-2 text-[1.0625rem] leading-[1.7] text-ink-dim marker:font-mono marker:text-ink-faint">
           {node.items.map((item, i) => (
-            <li key={i} className="pl-1">
+            <li key={i} className="ps-1">
               {item.map(inline)}
             </li>
           ))}
@@ -93,7 +94,7 @@ function block(node: Block, key: number): ReactNode {
       );
     case 'quote':
       return (
-        <blockquote key={key} className="border-l-2 border-star-dim/50 pl-5 text-[1.0625rem] italic leading-[1.7] text-ink-dim">
+        <blockquote key={key} className="border-s-2 border-star-dim/50 ps-5 text-[1.0625rem] italic leading-[1.7] text-ink-dim">
           {node.children.map(inline)}
           {node.cite && (
             <cite className="mt-2 block font-ui text-xs not-italic tracking-wide text-ink-faint">
@@ -115,8 +116,10 @@ function block(node: Block, key: number): ReactNode {
       );
     case 'mathBlock':
       return (
-        <figure key={key} className="my-1 overflow-x-auto py-2">
-          <Tex tex={node.tex} display className="text-ink" />
+        <figure key={key} className="my-1 py-2">
+          <ScrollX label="Equation">
+            <Tex tex={node.tex} display className="text-ink" />
+          </ScrollX>
           {node.caption && (
             <figcaption className="mt-2 text-center font-ui text-xs text-ink-faint">
               {node.caption.map(inline)}

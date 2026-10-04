@@ -110,12 +110,12 @@ const escapeVelocity: Module = {
           p(
             'There is no air. A real ',
             term('ballistic', 'ballistic'),
-            ' throw at 11 km/s from the ground would burn up like a meteor in reverse.',
+            ' throw at 11 kilometres per second from the ground would burn up like a meteor in reverse.',
           ),
         ),
         prose(
           p(
-            'The planet is a perfect ball that does not spin. Spin would help: launching east from Earth’s equator gets about 0.47 km/s for free.',
+            'The planet is a perfect ball that does not spin. Spin would help: launching east from Earth’s equator gets about 0.47 kilometres per second for free.',
           ),
         ),
         prose(
@@ -130,17 +130,17 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'Nothing else pulls on the projectile. Escaping Earth is not escaping the Sun: thrown from the ground in the right direction, that takes about 16.6 km/s in all.',
+            'Nothing else pulls on the projectile. Escaping Earth is not escaping the Sun: thrown from the ground in the right direction, that takes about 16.6 kilometres per second in all.',
           ),
         ),
         prose(
           p(
-            'The flight is sped up. The 8 km/s default really takes about 36 minutes up and the same back down.',
+            'The flight is sped up. The default of 8 kilometres per second really takes about 36 minutes up and the same back down.',
           ),
         ),
         prose(
           p(
-            'The height scale is stretched above the marked switchover, so a 100 km hop and a million-kilometre climb fit in one frame. Every height read off it is still exact.',
+            'The height scale is stretched above the marked switchover, so a 100-kilometre hop and a million-kilometre climb fit in one frame. Every height read off it is still exact.',
           ),
         ),
         prose(
@@ -196,8 +196,8 @@ const escapeVelocity: Module = {
           'Escape velocity also draws the line between worlds that keep an atmosphere and worlds ',
           'that lose one. Gas molecules move at thermal speeds set by temperature; when the ',
           'fastest of them exceed escape velocity, the atmosphere leaks into space, molecule by ',
-          'molecule. Which is why the Moon is bare while Titan (with a similar escape ',
-          'velocity of 2.6 km/s) holds a nitrogen atmosphere denser than Earth’s. Titan is cold, ',
+          'molecule. That is part of why Titan, with an escape velocity of 2.6 km/s, close to the ',
+          'Moon’s 2.4, holds a nitrogen atmosphere denser than Earth’s while the Moon is bare. Titan is cold, ',
           'so its molecules are slow. Temperature and escape velocity set the boundary together; ',
           'gravity alone does not decide.',
         ),

@@ -127,17 +127,17 @@ const habitableZone: Module = {
         ),
         prose(
           p(
-            'The zone edges are the climate-model limits for a Sun-like star, from Kopparapu and colleagues. Around redder or bluer stars they shift, by up to about a quarter in distance for the coolest red dwarfs, most at the outer edge, which the sim does not model, and outside the range from about a tenth to about ten times the Sun’s brightness they are an extrapolation.',
+            'The zone edges are the climate-model limits for a Sun-like star, from Kopparapu and colleagues. Around redder or bluer stars they shift, by up to about a quarter in distance for the coolest, faintest stars, most at the outer edge; the sim does not model this. Outside about a tenth to ten times the Sun’s brightness, the edges are an extrapolation.',
           ),
         ),
         prose(
           p(
-            'The dashed curve adds Earth’s 33 K of greenhouse warming everywhere. A thicker atmosphere adds far more: Venus’s adds 500 K.',
+            'The dashed curve adds Earth’s 33 kelvin of greenhouse warming everywhere. A thicker atmosphere adds far more: Venus’s adds about 510 kelvin.',
           ),
         ),
         prose(
           p(
-            'The length of the year takes the star’s mass from its brightness with the main-sequence rule L ∝ M³·⁵, good to about a factor of two. A real star’s mass is measured, not inferred.',
+            'The length of the year takes the star’s mass from its brightness with a rule of thumb for stars in mid-life, like the Sun: brightness grows as mass to the power 3.5. It is good to about a factor of two. A real star’s mass is measured, not inferred.',
           ),
         ),
       ],

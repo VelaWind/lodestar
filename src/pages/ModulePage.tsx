@@ -29,7 +29,7 @@ import { EquationBlock } from '@/components/EquationBlock';
 import { ensureKatex, katexLoaded } from '@/components/Tex';
 import { Connections } from '@/components/Connections';
 import { References } from '@/components/References';
-import { PathFooter } from '@/components/PathFooter';
+import { PageOrientation, PathFooter } from '@/components/PathFooter';
 
 /** How far below the viewport a math layer's header starts the KaTeX fetch. */
 const KATEX_LOOKAHEAD = '0px 0px 50% 0px';
@@ -257,6 +257,10 @@ function ModuleView({ module }: { module: Module }) {
         <p className="mt-3 max-w-measure font-prose text-lg leading-relaxed text-ink-dim">
           {module.tagline}
         </p>
+        {/* Orientation for a reader who arrived here first, from a search or a
+            shared link: what kind of page this is, how deep it goes, and where
+            it sits on the learning path, all before the first layer. */}
+        <PageOrientation moduleId={module.id} />
       </header>
 
       <div className="mb-2 flex justify-end">

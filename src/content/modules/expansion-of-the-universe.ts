@@ -98,7 +98,7 @@ const expansionOfTheUniverse: Module = {
         },
         {
           id: 'H0',
-          friendlyLabel: 'How fast is space stretching? (km/s faster for every 3.26 million light-years)',
+          friendlyLabel: 'How fast is space stretching? (kilometres a second faster for every 3.26 million light-years)',
           technicalLabel: 'Hubble constant',
           symbol: 'H_0',
           // Written `s^{-1}` rather than `s^-1`: the equation layer sets this
@@ -442,7 +442,7 @@ const expansionOfTheUniverse: Module = {
         {
           moduleId: 'scale-of-the-universe',
           reason:
-            'The distance slider here covers the same range you climbed there; now each step has a speed attached.',
+            'The distance slider here fills the gap between the last two rungs there, the Milky Way and the observable universe; now each distance has a speed attached.',
         },
         {
           moduleId: 'cosmic-microwave-background',

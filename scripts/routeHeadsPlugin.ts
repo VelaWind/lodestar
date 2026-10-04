@@ -87,6 +87,31 @@ export function headFor(shell: string, route: RouteHead): string {
     'og:url',
   );
 
+  // Structured data, at the end of the head. `<` is escaped so no text in it
+  // can close the script element early.
+  const json = JSON.stringify(route.jsonLd).replace(/</g, '\\u003c');
+  html = replaceTag(
+    html,
+    /\n([ \t]*)<\/head>/,
+    `\n$1  <script type="application/ld+json">${json}</script>\n$1</head>`,
+    'head end for the structured data',
+  );
+
+  // The page without JavaScript: after the root, never inside it, so React's
+  // first render has nothing of ours to clear and nothing to flash.
+  const { heading, paragraphs, links } = route.noscript;
+  const list = links?.length
+    ? `\n      <ul>\n${links.map((l) => `        <li><a href="${attr(l.href)}">${attr(l.text)}</a></li>`).join('\n')}\n      </ul>`
+    : '';
+  html = replaceTag(
+    html,
+    /<div id="root"><\/div>/,
+    `<div id="root"></div>\n    <noscript>\n      <h1>${attr(heading)}</h1>\n${paragraphs
+      .map((text) => `      <p>${attr(text)}</p>`)
+      .join('\n')}${list}\n    </noscript>`,
+    'root element for the no-script summary',
+  );
+
   // Canonical is new, so it is inserted rather than replaced — every route,
   // the root included, so a crawler arriving at any of them knows which URL is
   // the address of record.
