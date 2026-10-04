@@ -1066,7 +1066,7 @@ exports[`reader-visible copy > the About page, word for word 1`] = `
 {
   "sections": [
     {
-      "body": "Every topic on this site is a single module that unfolds in seven layers: from a one-sentence hook, through an analogy, a live simulation, and the evidence itself, down to the derivation and the open research questions. Technical terms are dotted-underlined at first meeting, each one tap from a plain-language definition. A depth setting controls which layers open by default, and nothing else: there are no beginner pages and no advanced pages, because parallel versions of the same idea drift apart and quietly start contradicting each other. One text, written once, read at the depth you choose.",
+      "body": "Every topic on this site is a single module that unfolds in seven layers: from a one-sentence hook, through an analogy, a live simulation, and the evidence itself, down to the derivation and the open research questions. Technical terms are dotted-underlined at first meeting, each one tap from a plain-language definition. A depth setting controls which layers open by default, and nothing else: there are no beginner pages and no advanced pages, because parallel versions of the same idea drift apart and quietly start contradicting each other. One text, written once, read at the depth you choose. For a reader new to physics, the front page suggests an order through every topic, though each one stands on its own.",
       "heading": "One module, three readers",
     },
     {
@@ -1688,5 +1688,59 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "A tunnel through space joining two distant places, allowed by general relativity. None has ever been observed, and holding one open would need matter with negative energy.",
     "title": "Wormhole",
   },
+}
+`;
+
+exports[`reader-visible copy > the learning path, word for word 1`] = `
+{
+  "note": "A suggested order for beginners; every topic stands on its own.",
+  "stages": [
+    {
+      "description": "The sizes of things in space, and how gravity throws, holds and stretches them.",
+      "modules": [
+        "scale-of-the-universe",
+        "escape-velocity",
+        "kepler-orbits",
+        "tides",
+      ],
+      "title": "How big, how heavy, how fast",
+    },
+    {
+      "description": "How stars are born, shine and die, and the planets that circle them.",
+      "modules": [
+        "nebulae",
+        "stellar-fusion",
+        "exoplanets",
+        "planetary-atmospheres",
+        "habitable-zone",
+        "supernovae",
+        "neutron-stars",
+      ],
+      "title": "Stars and their worlds",
+    },
+    {
+      "description": "What happens to time and space where gravity is strongest.",
+      "modules": [
+        "black-holes",
+        "time-dilation",
+        "gravitational-waves",
+        "hawking-radiation",
+        "wormholes",
+      ],
+      "title": "Gravity at the extremes",
+    },
+    {
+      "description": "Galaxies, the matter we cannot see, and the history of the universe itself.",
+      "modules": [
+        "galaxies",
+        "dark-matter",
+        "expansion-of-the-universe",
+        "cosmic-distance-ladder",
+        "cosmic-microwave-background",
+        "early-universe",
+      ],
+      "title": "Galaxies and the whole universe",
+    },
+  ],
 }
 `;

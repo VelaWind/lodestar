@@ -29,6 +29,7 @@ import { EquationBlock } from '@/components/EquationBlock';
 import { ensureKatex, katexLoaded } from '@/components/Tex';
 import { Connections } from '@/components/Connections';
 import { References } from '@/components/References';
+import { PathFooter } from '@/components/PathFooter';
 
 /** How far below the viewport a math layer's header starts the KaTeX fetch. */
 const KATEX_LOOKAHEAD = '0px 0px 50% 0px';
@@ -311,6 +312,8 @@ function ModuleView({ module }: { module: Module }) {
       </div>
 
       <References items={module.references} />
+
+      <PathFooter moduleId={module.id} />
     </article>
   );
 }
