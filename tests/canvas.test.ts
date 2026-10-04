@@ -56,6 +56,9 @@ import { __internals as gx } from '@/sims/galaxies';
 import galaxiesModule from '@/content/modules/galaxies';
 import { MAIN_STARS, encounterSteps, endTime, simulateEncounter, type Encounter } from '@/physics/galaxies';
 import { GALAXY_DISC_RADIUS, GALAXY_MAIN_MASS } from '@/physics/constants';
+import { __internals as tid } from '@/sims/tides';
+import tidesModule from '@/content/modules/tides';
+import { heightAt, highTideHeight, lunarDay } from '@/physics/tides';
 import { massEvaporatingIn, massForHawkingTemperature, netWithCMB } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
@@ -2471,6 +2474,106 @@ function galaxyCases(): Case[] {
   return cases;
 }
 
+/* ----------------------------------- tides ----------------------------------- */
+
+/** 480 px below the `sm` breakpoint, 544 above it; the sweep runs at the taller, the label checks at both. */
+const TD2_HEIGHT = 544;
+const TD2_HEIGHTS = [480, 544];
+
+function tideCases(): Case[] {
+  const params = tidesModule.layers.play.params;
+  const cases: Case[] = [];
+  const DEG = Math.PI / 180;
+  type TideView = Parameters<typeof tid.drawScene>[3];
+
+  const views: { label: string; view: TideView }[] = [];
+  for (const units of ['friendly', 'technical'] as const) {
+    for (const ph of [0, 45, 90, 180, 270, 359]) {
+      for (const d of extremes(paramOf(params, 'dMoon'))) {
+        for (const lat of extremes(paramOf(params, 'lat'))) {
+          for (const t of [0, 5 * 3600, 30 * 3600]) {
+            views.push({
+              label: `phase=${ph}° d=${d.stop} lat=${lat.stop} t=${t / 3600} h ${units}`,
+              view: { phase: ph * DEG, dMoon: d.value, lat: lat.value, t, units },
+            });
+          }
+        }
+      }
+    }
+  }
+  for (const { label, view } of views) cases.push({ label, draw: (ctx, w, h) => void tid.drawScene(ctx, w, h, view) });
+
+  /*
+   * Words only in the strips: never over the Earth panel or inside the trace,
+   * checked from the draw records. And every body drawn on the canvas: the
+   * Moon's disc inside the plot at every distance; the Sun, off-canvas, as an
+   * arrow at the plot's edge.
+   */
+  it('keeps every label out of the picture and the trace, and the Moon in view', () => {
+    const problems: string[] = [];
+    for (const [width, height] of [...WIDTHS, 390].flatMap((w) => TD2_HEIGHTS.map((h) => [w, h] as const))) {
+      for (const { label, view } of views) {
+        const { ctx, records } = recordingContext();
+        const layout = tid.drawScene(ctx, width, height, view);
+        for (const t of records.filter((r) => r.kind === 'text')) {
+          for (const [name, area] of [['picture', layout.plot], ['trace', layout.trace]] as const) {
+            if (t.x1 > area.x0 && t.x0 < area.x1 && t.y1 > area.y0 && t.y0 < area.y1) {
+              problems.push(`${label} @${width}×${height}: "${t.text}" inside the ${name}`);
+            }
+          }
+        }
+        const { cx, cy, moonR, orbitAt } = tid.geometry(width, height);
+        const r = orbitAt(view.dMoon);
+        const mx = cx - r * Math.cos(view.phase);
+        const my = cy + r * Math.sin(view.phase);
+        if (mx - moonR < layout.plot.x0 || mx + moonR > layout.plot.x1 || my - moonR < layout.plot.y0 || my + moonR > layout.plot.y1) {
+          problems.push(`${label} @${width}×${height}: the Moon is outside the picture`);
+        }
+      }
+    }
+    expect(problems.slice(0, 20)).toEqual([]);
+  }, 60_000);
+
+  it('traces the dot’s height with the same function the readouts use', () => {
+    const view = { phase: 0, dMoon: paramOf(params, 'dMoon').default, lat: 0 };
+    const samples = tid.traceSamples(view);
+    const high = highTideHeight(tid.stateFor(view));
+    expect(Math.max(...samples)).toBeCloseTo(high, 3);
+    const day = lunarDay(view.dMoon);
+    // Two highs a lunar day: maxima at 0, half and a whole lunar day.
+    const s = tid.stateFor(view);
+    for (const frac of [0, 0.5, 1]) {
+      expect(heightAt(view.phase + 2 * Math.PI * frac, s)).toBeCloseTo(high, 6);
+    }
+    expect(day / 3600).toBeCloseTo(24.84, 1);
+  });
+
+  it('names the phase and the kind of tide from the range itself', () => {
+    const d = paramOf(params, 'dMoon').default;
+    const kind = (deg: number) => tid.tideKind(tid.stateFor({ phase: deg * DEG, dMoon: d, lat: 0 }));
+    expect([kind(0), kind(180), kind(90), kind(270), kind(45)]).toEqual(['spring', 'spring', 'neap', 'neap', 'between']);
+    expect([0, 90, 180, 270].map((deg) => tid.phaseName(deg * DEG))).toEqual([
+      'new Moon',
+      'first quarter',
+      'full Moon',
+      'last quarter',
+    ]);
+  });
+
+  it('formats the readouts at the defaults the way the module states them', () => {
+    expect(tid.formatHeight(0.7809, false)).toBe('78.1 centimetres');
+    expect(tid.formatTidalAcceleration(1.1278e-6, true)).toBe('1.13 × 10⁻⁶ m/s²');
+    expect(tid.formatTidalAcceleration(1.1278e-6, false)).toBe('1.15 ten-millionths of Earth’s gravity');
+    expect(tid.formatDuration(12.4212 * 3600, false)).toBe('12 hours 25 minutes');
+  });
+
+  it('runs time at one stated rate', () => {
+    expect(tid.REAL_SECONDS_PER_SCREEN_SECOND).toBe(7200);
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -2495,6 +2598,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'neutron-stars', height: NS_HEIGHT, cases: neutronStarCases },
   { name: 'dark-matter', height: DM_HEIGHT, cases: darkMatterCases },
   { name: 'galaxies', height: GX_HEIGHT, cases: galaxyCases },
+  { name: 'tides', height: TD2_HEIGHT, cases: tideCases },
 ];
 
 /**
@@ -2534,6 +2638,7 @@ const MEASURED_PLACEMENT = new Set([
   'neutron-stars',
   'dark-matter',
   'galaxies',
+  'tides',
 ]);
 
 for (const sim of SIMS) {

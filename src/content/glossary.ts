@@ -670,6 +670,33 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Dynamical friction',
     body: 'The gravitational drag on a massive body moving through a sea of stars and dark matter. It slows passing galaxies until they fall together.',
   },
+
+  /* Tides ---------------------------------------------------------- */
+
+  tide: {
+    title: 'Tide',
+    body: 'The regular rise and fall of the sea, twice a day in most places, raised by the difference between the Moon’s and Sun’s pull across Earth.',
+  },
+  'equilibrium-tide': {
+    title: 'Equilibrium tide',
+    body: 'The shape the ocean would take if it covered Earth and followed the tidal pull instantly: two bulges about half a metre high. Real tides are waves instead.',
+  },
+  'spring-tide': {
+    title: 'Spring tide',
+    body: 'The large tides near new and full Moon, when the Sun’s tide adds to the Moon’s. Nothing to do with the season.',
+  },
+  'neap-tide': {
+    title: 'Neap tide',
+    body: 'The small tides near the quarter Moons, when the Sun’s tide partly cancels the Moon’s.',
+  },
+  'amphidromic-point': {
+    title: 'Amphidromic point',
+    body: 'A place in the ocean with almost no tide, around which the tide travels as a wave, high water reaching each coast in turn.',
+  },
+  'roche-limit': {
+    title: 'Roche limit',
+    body: 'The distance inside which a planet’s tide tears apart a moon held together only by its own gravity: about 2.4 planet radii for a fluid moon of equal density.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */
