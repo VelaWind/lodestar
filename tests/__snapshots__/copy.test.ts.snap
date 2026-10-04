@@ -385,6 +385,59 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "Almost every galaxy is moving away from us, and the farther it is, the faster it goes.",
     "title": "The Expansion of the Universe",
   },
+  "galaxies": {
+    "L1 hook": "When two galaxies collide, their stars almost never hit each other. Shrink the Sun to a ping-pong ball, and its nearest neighbour is another ping-pong ball about 1 200 kilometres away.",
+    "L2 intuition": "Picture two huge crowds, each swirling slowly around its own middle, walking straight through each other. The people are so spread out that almost nobody bumps into anyone. But each crowd pulls on the other as it passes. People on the near side are tugged harder than those on the far side, and long streams of them are drawn out behind. Those circling the same way the other crowd goes past are pulled the longest, and stream out the furthest. That is what happens when galaxies meet. A galaxy is a vast spinning system of stars, gas and dust held together by its own gravity. In a collision the stars slip past one another, but gravity reshapes both galaxies, stretching them into long, curving tails of stars. Where the analogy breaks: people do not pull on each other by gravity. And most of a real galaxy’s pull comes from matter we cannot see, a vast cloud of dark matter reaching far beyond its stars.",
+    "L3 approximation 0": "Each galaxy is a single point of mass, standing for its centre and the inner part of its unseen cloud of dark matter. Real galaxies spread their mass through that cloud, far beyond their stars.",
+    "L3 approximation 1": "Each galaxy’s pull is softened within about 3 300 light-years (1 kiloparsec) of its centre, so a star passing close is not flung off by an infinitely sharp point.",
+    "L3 approximation 2": "Stars feel the two galaxies’ pull but not each other’s. So no spiral arms or bars form on their own, as they do in real discs.",
+    "L3 approximation 3": "There is no gas, so there are none of the bursts of new stars that light up real collisions.",
+    "L3 approximation 4": "Nothing slows the galaxies down. In reality each drags on the other’s dark matter, so close pairs usually swing back and merge. Here they pass once and separate.",
+    "L3 approximation 5": "The two follow a parabola, the boundary between a closed orbit and an escape, starting twice their closest distance apart. Every star starts on a perfect circle.",
+    "L3 approximation 6": "The main galaxy weighs 100 billion Suns and its disc reaches about 49 000 light-years (15 kiloparsecs) from its centre. The companion’s disc is smaller, in proportion to the square root of its mass. Both discs are tilted by the same angle.",
+    "L3 approximation 7": "A star counts as thrown into a tail once it is more than twice the disc’s radius, about 98 000 light-years, from the main galaxy’s centre.",
+    "L3 approximation 8": "Stars move in steps of a million years. A lone star, with no companion, keeps to its circle within about half a percent.",
+    "L3 approximation 9": "Time is sped up by the same factor at every setting: one second on screen is 50 million years. While a slider moves, fewer stars are drawn until it stops.",
+    "L3 caption": "A smaller galaxy swings past a bigger one. Tilt the bigger disc from 0 degrees, spinning the same way the companion goes round, to 180 degrees, spinning against it, and compare the tails. Bring the two closer, or make the companion heavier, for a stronger pull.",
+    "L4 figure alt": "Two glowing, tangled galaxy cores on black, one above the other, wrapped in swirls of pale starlight, crossed by brown lanes of dust and dotted with bright pink and blue knots.",
+    "L4 real": "A galaxy is a system of stars, gas, dust and dark matter bound by its own gravity. Ours, the Milky Way, is a barred spiral, usually classed SBbc. It holds a few hundred billion stars, with estimates from 100 to 400 billion, in a disc about 100 000 light-years (30 kiloparsecs) across, more if its faint outer edge is counted. The nearest large galaxy, Andromeda, is about 2.5 million light-years away. How many galaxies the observable universe holds is uncertain: at least two trillion, most too faint to see, by a 2016 estimate; only hundreds of billions, from the faint glow of the sky that New Horizons measured beyond Pluto in 2021. In the 1920 “Great Debate” Harlow Shapley argued that the spiral nebulae lay within our galaxy, Heber Curtis that they were galaxies like ours. Edwin Hubble settled it in 1925: Cepheid variables in Andromeda put it about 900 000 light-years away, far outside the Milky Way. His figure was a third of today’s, because those Cepheids are brighter than he assumed; the Cosmic Distance Ladder module tells that story. In 1926 Hubble sorted galaxies by shape into the Hubble sequence, which he drew as a tuning fork. Elliptical galaxies, from round (E0) to flattened (E7), form the handle; lenticulars (S0), discs without arms, sit at the join; spiral galaxies, plain (S) and barred (SB), form the prongs. He called ellipticals “early” and spirals “late”, meaning no evolution, but the labels misled many. Galaxies do not move along the fork. Spirals are mostly gas-rich discs in ordered rotation, still forming stars; ellipticals are mostly old stars on random orbits, with little gas. Since 2007 volunteers in the Galaxy Zoo project have sorted galaxies by eye, nearly a million in its first year. Galaxies collide, and the tidal force between them reshapes both. In 1972 Alar and Juri Toomre showed, with a model like the one above, that the long tidal tails of pairs like the Antennae are stars flung out in one close pass. Tails are longest when a disc spins the same way the companion goes round, called prograde, and almost absent when it spins the other way, retrograde. Andromeda is approaching us at about 110 km/s, about 400 000 km/h. A collision in about 4.5 billion years was long described as all but certain. A 2025 analysis of Gaia and Hubble data now gives roughly even odds of a merger within 10 billion years, the current best estimate and not the last word. The Antennae galaxies, two spirals in the middle of merging, seen by Hubble. Pink knots are clouds of hydrogen lit by newborn stars, set off by the collision; dark lanes are dust. The two long tails of stars that give the pair its name reach far beyond this frame. NASA, ESA, and the Hubble Heritage Team (STScI/AURA)-ESA/Hubble Collaboration. Acknowledgement: B. Whitmore (Space Telescope Science Institute) and James Long (ESA/Hubble).",
+    "L5 intro": "The first equation is the stretch, the second the speed of the pass, the third why the spin direction matters.",
+    "L5 note (pericentre)": "v_p — the two galaxies’ relative speed at closest approach on a parabolic orbit, one with zero total energy; M_1 = 10^{11}\\,M_\\odot. At the defaults v_p = 254\\,\\text{km/s}; the sim’s integrated orbit, with its softened pull, gives 253.7. Worked example, Andromeda: 765 kpc away and closing at 109.3 km/s. At constant speed the gap would close in 7.65 \\times 10^{5}\\,\\text{pc} \\times 3.086 \\times 10^{13}\\,\\text{km/pc} / 109.3\\,\\text{km/s} = 6.84 billion years. Gravity speeds it up: a straight-line fall with the Local Group’s mass inferred from this very approach, 4.9 \\times 10^{12}\\,M_\\odot, meets in 3.1 billion years. Andromeda’s small sideways motion, the pulls of the Large Magellanic Cloud and M33, and the uncertain masses are why the newest forecast gives even odds of a merger within 10 billion years instead.",
+    "L5 note (resonance)": "\\Omega_p — how fast the companion sweeps around the main galaxy at closest approach, in radians a second; \\Omega_\\ast — how fast a star at the disc’s edge goes round, T its orbital period. When the two are close and turn the same way, the edge stars ride along with the companion’s pull for a long time and are drawn far out: Toomre and Toomre’s explanation of prograde tails. Turning the other way, each star feels the pull only briefly. Worked example, the defaults: \\Omega_p = 2.54 \\times 10^{5} / 6.17 \\times 10^{20} = 4.1 \\times 10^{-16}\\,\\text{rad/s} and \\Omega_\\ast = 3.7 \\times 10^{-16}\\,\\text{rad/s}, a period of 540 million years: within about 12 percent of each other.",
+    "L5 note (tide)": "\\Delta a — how much harder the companion pulls on the near edge of the main disc than on its centre, at closest approach; M_2 — the companion’s mass; r_p — the closest approach; d = 15\\,\\text{kpc} — the disc’s radius. The steep r_p^{-3} is why only close passes matter. Worked example, the defaults: \\Delta a = 2 \\times 6.674 \\times 10^{-11} \\times 9.94 \\times 10^{40} \\times 4.63 \\times 10^{20} / (6.17 \\times 10^{20})^3 = 2.6 \\times 10^{-11}\\,\\text{m/s}^2, against the main galaxy’s own pull at its edge, GM_1/d^2 = 6.2 \\times 10^{-11}\\,\\text{m/s}^2. The tide is 0.42 of the force holding the edge on: a close pass.",
+    "L6 deeper": "Why stars do not collide: near the Sun there are about 0.1 stars per cubic parsec, and the disc’s scale height is about 300 pc, so a star crossing it face-on passes through a column of about 60 stars per square parsec. Two Sun-sized stars touch if their centres pass within two solar radii, a target of \\pi(2R_\\odot)^2 = 6.4 \\times 10^{-15}\\,\\text{pc}^2, which gravitational focusing enlarges about threefold at a relative speed of 400 km/s. The chance per crossing is about 1.3 \\times 10^{-12}. Among the few hundred billion stars of both galaxies, a collision is unlikely to happen at all, and if one does, most likely in a crowded centre. Galaxies grew hierarchically. Small dark matter halos formed first and merged into larger ones, while gas cooled at their centres into stars. Gas that keeps its angular momentum settles into a disc; a merger of comparable galaxies scrambles discs into an elliptical, and dynamical friction, the drag of a moving mass on the matter it passes through, is what brings such pairs back together after a first pass. Where galaxies are crowded, in rich clusters, most are ellipticals and lenticulars; in the sparse field most are spirals (Dressler 1980, the morphology–density relation). A galaxy stops forming stars, is quenched, when its gas is heated or removed: by energy from its central black hole, by being stripped as it plunges through a cluster’s hot gas, or by being cut off from fresh supply. Nearly every large galaxy has a supermassive black hole at its centre, and its mass tracks the galaxy’s central bulge: about half a percent of the bulge’s mass, and rising as roughly the fourth to fifth power of the bulge stars’ velocity spread, \\sigma (the M\\text{–}\\sigma relation). That the two keep in step suggests they grew together, though how is debated. The James Webb Space Telescope sees galaxies a few hundred million years after the Big Bang; among the most distant confirmed by spectroscopy is MoM-z14, at redshift 14.44. It finds more bright galaxies at those times than most models predicted. What is measured is their light; their masses are inferred. Early claims of galaxies too massive for the standard cosmology have largely eased, as some proved to be growing black holes, the “little red dots”, and mass estimates came down. Whether the remaining excess needs faster star formation or new physics is open. The Milky Way and Andromeda each have dozens of satellite galaxies. Many of the Milky Way’s lie in a thin plane and orbit the same way, and Andromeda has a similar plane (Ibata et al. 2013). Some argue such planes are too rare in cold-dark-matter simulations; an analysis with Gaia orbits (Sawala et al. 2023) found the Milky Way’s plane a short-lived alignment, consistent with them. The question is not settled.",
+    "L7 reason -> black-holes": "Every large galaxy has a supermassive black hole at its heart, grown in step with its central bulge.",
+    "L7 reason -> dark-matter": "Most of a galaxy’s mass is the dark halo around it; that module shows how the stars’ speeds reveal it.",
+    "L7 reason -> expansion-of-the-universe": "Andromeda is one of the few galaxies coming toward us; almost all the rest recede, faster the farther away they are.",
+    "L7 reason -> scale-of-the-universe": "Where a galaxy sits among the sizes, from a proton to the observable universe.",
+    "reference 0": {
+      "label": "Hubble 1926, “Extragalactic nebulae”, ApJ 64, 321",
+      "note": "The classification by shape that became the tuning fork",
+      "url": "https://doi.org/10.1086/143018",
+    },
+    "reference 1": {
+      "label": "Toomre & Toomre 1972, “Galactic Bridges and Tails”, ApJ 178, 623",
+      "note": "The restricted three-body model the sim uses; prograde passes make tails",
+      "url": "https://doi.org/10.1086/151823",
+    },
+    "reference 2": {
+      "label": "van der Marel et al. 2012, “The M31 Velocity Vector. III. Future Milky Way M31–M33 Orbital Evolution, Merging, and Fate of the Sun”, ApJ 753, 9",
+      "note": "The earlier forecast: first passage in about 3.9 billion years, merger in about 5.9",
+      "url": "https://doi.org/10.1088/0004-637X/753/1/9",
+    },
+    "reference 3": {
+      "label": "Sawala et al. 2025, “No certainty of a Milky Way–Andromeda collision”, Nature Astronomy 9, 1206",
+      "note": "With Gaia and Hubble data: close to 50% chance of no merger within 10 billion years",
+      "url": "https://doi.org/10.1038/s41550-025-02563-1",
+    },
+    "reference 4": {
+      "label": "Conselice et al. 2016, “The Evolution of Galaxy Number Density at z < 8 and Its Implications”, ApJ 830, 83",
+      "note": "At least two trillion galaxies in the observable universe",
+      "url": "https://doi.org/10.3847/0004-637X/830/2/83",
+    },
+    "tagline": "Islands of hundreds of billions of stars. When two meet, their stars almost never touch, but gravity pulls both into new shapes.",
+    "title": "Galaxies",
+  },
   "gravitational-waves": {
     "L1 hook": "In September 2015, a ripple in space itself swept through Earth. For a fifth of a second it changed the distance between mirrors four kilometres apart, by far less than the width of a single proton. We caught it.",
     "L2 intuition": "Drop a stone into a still pond and rings spread outward, carrying a little of the splash’s energy away across the surface. Now make the stone two black holes, circling each other dozens of times a second and climbing, and make the pond space itself. Their frantic orbit churns the fabric they sit in, and the disturbance spreads out in all directions at the speed of light, growing fainter as it goes. By the time it washes over Earth, the ripple from even the most violent collision in the universe has thinned to almost nothing. As the two holes spiral closer they circle faster, so the ripples come quicker and stronger, rising together toward a crescendo — and then stop. That rising sweep is called the chirp, and it is what the simulation below draws and plays. The analogy breaks in one deep place: pond ripples are water moving up and down, a thing moving through a medium. A gravitational wave has no medium. It is the distances between things that ripple; the “pond” is the geometry you are made of, and when the wave passes, you are stretched one way and squeezed the other, then the reverse, over and over.",
@@ -1126,6 +1179,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "Apparent minus absolute magnitude, 5 log₁₀(d / 10 pc). Each 5 magnitudes is a factor of ten in distance.",
     "title": "Distance modulus",
   },
+  "dynamical-friction": {
+    "body": "The gravitational drag on a massive body moving through a sea of stars and dark matter. It slows passing galaxies until they fall together.",
+    "title": "Dynamical friction",
+  },
   "eclipsing-binary": {
     "body": "Two stars orbiting edge-on to us, each dimming the other as it passes; their dips can mimic a planet’s.",
     "title": "Eclipsing binary",
@@ -1137,6 +1194,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "einstein-rosen-bridge": {
     "body": "The wormhole hidden in the mathematics of a simple black hole, first glimpsed by Ludwig Flamm in 1916 and made explicit by Einstein and Rosen in 1935. It pinches shut faster than light can cross it.",
     "title": "Einstein–Rosen bridge",
+  },
+  "elliptical-galaxy": {
+    "body": "A smooth, oval galaxy of mostly old stars on random orbits, with little gas and few new stars.",
+    "title": "Elliptical galaxy",
   },
   "emission-nebula": {
     "body": "A cloud of gas made to glow by the ultraviolet light of hot stars inside it. The Orion Nebula is one; astronomers call them H II regions.",
@@ -1177,6 +1238,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "freeze-out": {
     "body": "When the universe cools below a particle’s rest energy, light can no longer make it in pairs. What exists then is what survives.",
     "title": "Freeze-out",
+  },
+  "galaxy": {
+    "body": "A system of stars, gas, dust and dark matter held together by its own gravity. The Milky Way is one; the observable universe holds hundreds of billions or more.",
+    "title": "Galaxy",
   },
   "gamow-peak": {
     "body": "The narrow range of collision energies where almost all fusion happens: high enough to tunnel, low enough that some particles actually have it.",
@@ -1225,6 +1290,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "hubble-lemaitre-law": {
     "body": "Recession speed grows in step with distance: twice as far, twice as fast. Named for Edwin Hubble and Georges Lemaître.",
     "title": "Hubble–Lemaître law",
+  },
+  "hubble-sequence": {
+    "body": "Hubble’s 1926 sorting of galaxies by shape, drawn as a tuning fork: ellipticals, lenticulars, then spirals with and without a bar. A classification, not an evolutionary path.",
+    "title": "Hubble sequence",
   },
   "hydrodynamic-escape": {
     "body": "Atmosphere loss as a wind: a heated light gas flows outward in bulk, dragging heavier gases with it.",
@@ -1466,6 +1535,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "How far pressure waves travelled through the hot early universe before it cleared, about 150 megaparsecs today. A fixed ruler that surveys measure against.",
     "title": "Sound horizon",
   },
+  "spiral-galaxy": {
+    "body": "A galaxy with a flat, rotating disc of stars and gas, spiral arms where new stars form, and a central bulge. Many, like the Milky Way, have a bar.",
+    "title": "Spiral galaxy",
+  },
   "sputtering": {
     "body": "Atmosphere loss by impact: fast particles streaming from the Sun, the solar wind, strike molecules at the top of the air and knock them into space.",
     "title": "Sputtering",
@@ -1501,6 +1574,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "tidal-locking": {
     "body": "A planet turning one face permanently to its star, as the Moon does to Earth. Expected for planets in the habitable zones of red dwarfs.",
     "title": "Tidal locking",
+  },
+  "tidal-tail": {
+    "body": "A long, curved stream of stars and gas pulled out of a galaxy by the gravity of a close neighbour.",
+    "title": "Tidal tail",
   },
   "time-dilation": {
     "body": "Clocks running at different rates for different observers: slower when moving fast, and slower deep in gravity. Measured with atomic clocks on aircraft, satellites and a staircase.",
