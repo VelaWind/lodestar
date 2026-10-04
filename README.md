@@ -57,13 +57,13 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 1158 tests in 24 files
+npm test           # vitest, 1162 tests in 24 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
 ```
 
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 1158 of 1158, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
+On a clean install with Node 22: lint reports zero issues, `npm test` passes 1162 of 1162, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
 
 <!-- site:case-study:start -->
 
@@ -82,7 +82,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 ## Tests
 
-`npm test` is 1158 Vitest tests across 24 files, in a Node environment:
+`npm test` is 1162 Vitest tests across 24 files, in a Node environment:
 
 - the 205 physics sanity checks as assertions;
 - equation snapshots, so a formatting change cannot quietly rewrite the maths;
