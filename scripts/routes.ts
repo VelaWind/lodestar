@@ -51,9 +51,15 @@ export interface RouteHead {
    * Plain text and links only, built from the same registry fields.
    */
   noscript: { heading: string; paragraphs: string[]; links?: { href: string; text: string }[] };
-  /** schema.org structured data for the page. No author or other personal details, by rule. */
+  /**
+   * schema.org structured data for the page. The publisher is the project's
+   * name and nothing more; no person, email, address or other personal detail.
+   */
   jsonLd: Record<string, unknown>;
 }
+
+/** Who publishes the site: the project's name only, no url, email, address or logo. */
+const PUBLISHER = { '@type': 'Organization', name: 'VelaWind' } as const;
 
 /** The site as schema.org sees it; every page's data points back to it. */
 const WEBSITE = {
@@ -61,6 +67,7 @@ const WEBSITE = {
   name: 'Lodestar',
   url: absoluteUrl('/'),
   inLanguage: 'en',
+  publisher: PUBLISHER,
 } as const;
 
 /** Said on every page without JavaScript: the simulations need it, the text is the summary. */
@@ -126,6 +133,7 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
         description: ABOUT_DESCRIPTION,
         url: absoluteUrl('/about'),
         inLanguage: 'en',
+        publisher: PUBLISHER,
         isPartOf: WEBSITE,
       },
     },
@@ -156,6 +164,7 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
         isAccessibleForFree: true,
         image: absoluteUrl('/og.png'),
         // The site, and the learning path with this topic's step on it.
+        publisher: PUBLISHER,
         isPartOf: [WEBSITE, { '@type': 'ItemList', name: 'Suggested path for beginners' }],
         position: pathPlace(module.id)?.step,
       },
