@@ -41,6 +41,7 @@ import wormholes from '@/content/modules/wormholes';
 import neutronStars from '@/content/modules/neutron-stars';
 import darkMatter from '@/content/modules/dark-matter';
 import galaxies from '@/content/modules/galaxies';
+import tides from '@/content/modules/tides';
 import gravitationalWaves from '@/content/modules/gravitational-waves';
 import keplerOrbits from '@/content/modules/kepler-orbits';
 import planetaryAtmospheres from '@/content/modules/planetary-atmospheres';
@@ -71,6 +72,7 @@ const MODULES: Module[] = [
   neutronStars,
   darkMatter,
   galaxies,
+  tides,
 ];
 
 /** The tier a reader lands on with nothing persisted — see `useAppStore`. */

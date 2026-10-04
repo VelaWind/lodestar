@@ -55,6 +55,7 @@ const MODULES = [
   'neutron-stars',
   'dark-matter',
   'galaxies',
+  'tides',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -3255,6 +3256,78 @@ test('galaxies: under reduced motion the end state shows prograde against retrog
   assertClean(w, 'galaxies reduced motion');
 });
 
+/**
+ * The tides module, end to end, on every engine.
+ *
+ * At new Moon on the equator: spring tides, a 78.1 cm equilibrium range and a
+ * high tide every 12 h 25 min. A quarter turn of the Moon gives neaps, 28.9 cm.
+ * A glossary term opens from the keyboard, and axe finds nothing serious.
+ */
+test('behaviour: tides readouts follow the sliders, and a term opens by keyboard @cross-engine', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/tides', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'tides at rest');
+
+  const readout = (index: number) => page.locator('#tides-readouts dd').nth(index);
+  await expect(readout(0), 'phase at the default').toHaveText('new Moon: spring tides');
+  await expect(readout(1), 'the Moon’s stretch').toHaveText('1.15 ten-millionths of Earth’s gravity');
+  await expect(readout(3), 'Sun over Moon, exact at the sub-body points').toHaveText('0.448');
+  await expect(readout(4), 'range at the dot').toHaveText('78.1 centimetres');
+  await expect(readout(7), 'time between high tides').toHaveText('12 hours 25 minutes');
+
+  /* A quarter turn of the Moon, by keyboard: neap tides. */
+  await page.locator('#p-phase').focus();
+  for (let i = 0; i < 90; i += 1) await page.keyboard.press('ArrowRight');
+  await expect(readout(0), 'phase after a quarter turn').toHaveText('first quarter: neap tides');
+  await expect(readout(4), 'neap range').toHaveText('28.9 centimetres');
+
+  /* The Moon at the slider's farthest: the Sun's tide is now the larger. */
+  await page.locator('#p-dMoon').focus();
+  await page.keyboard.press('End');
+  await expect(readout(3), 'Sun over Moon with the Moon twice as far').toHaveText(/^3\.\d\d$/);
+  await assertNoOverflow(page, 'tides far Moon');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be tide').toBe('tide');
+  const trigger = page.locator('[data-glossary-term="tide"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('[data-glossary-panel="tide"]')).toContainText('The regular rise and fall of the sea');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'tides: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '28-tides-behaviour');
+  assertClean(w, 'tides behaviour');
+});
+
+/** Reduced motion: the dot is drawn at its first high tide, and the note says so. */
+test('tides: under reduced motion the dot is drawn at high tide @cross-engine', async ({ page }) => {
+  const w = watch(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/m/tides', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  const note = page.locator('#layer-panel-play p', { hasText: /reduced-motion|sped up/ });
+  await expect(note).toContainText('first high tide');
+  await expect(note).not.toContainText('sped up');
+  assertClean(w, 'tides reduced motion');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -3294,7 +3367,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes twenty-one modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes twenty-two modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3982,7 +4055,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All twenty-one modules now, with no exception branch. `kepler-orbits` carried one
+ * All twenty-two modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -4107,7 +4180,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * until a link is added on purpose.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all twenty-three and checks the rendered DOM rather than the
+ * route — so this walks all twenty-four and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -4134,7 +4207,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the repo, and /about says the code is public on GitHub', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all twenty-three routes').toBe(23);
+  expect(routes.length, 'all twenty-four routes').toBe(24);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -4279,7 +4352,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on twenty-three fresh loads. Getting this wrong is what the first run of
+   * asserts on twenty-four fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();

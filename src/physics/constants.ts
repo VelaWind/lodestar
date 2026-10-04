@@ -642,6 +642,77 @@ export const R_ALPHA_CEN_A = 1.2234 * R_SUN;
 /** The Local Group mass from van der Marel et al. 2012 (Paper II)'s abstract, combining estimates, kg: 3.17 × 10¹² M☉. */
 export const M_LOCAL_GROUP_COMBINED = 3.17e12 * M_SUN;
 
+// Tides
+/**
+ * The Moon's mean distance from Earth, m, and its mean perigee and apogee.
+ * Source: NASA Moon Fact Sheet (D. R. Williams, NASA GSFC) — semimajor axis
+ * 384 400 km, perigee 363 300 km, apogee 405 500 km.
+ */
+export const D_MOON = 384_400e3;
+export const D_MOON_PERIGEE = 363_300e3;
+export const D_MOON_APOGEE = 405_500e3;
+/** Earth's sidereal rotation period, s: 23 h 56 min 4.0905 s (IERS). */
+export const SIDEREAL_DAY = 86_164.0905;
+/**
+ * The Moon's recession from Earth, m per year: 38.30 ± 0.09 mm/yr from lunar
+ * laser ranging to the Apollo and Lunokhod reflectors. Source: Williams & Boggs
+ * 2016, "Secular tidal changes in lunar orbit and Earth rotation", Celest.
+ * Mech. Dyn. Astron. 126, 89.
+ */
+export const MOON_RECESSION_PER_YEAR = 38.30e-3;
+/**
+ * Lengthening of the day, s per century: about 2.3 ms/cy predicted from tidal
+ * friction, against 1.78 ± 0.03 ms/cy observed from 2 700 years of eclipse and
+ * occultation records. The difference is largely the ground still rising after
+ * the last ice age, which makes Earth less oblate and speeds it up, with smaller
+ * contributions such as core–mantle coupling. Source:
+ * Stephenson, Morrison & Hohenkerk 2016, Proc. R. Soc. A 472, 20160404.
+ */
+export const LOD_TIDAL_PER_CENTURY = 2.3e-3;
+export const LOD_OBSERVED_PER_CENTURY = 1.78e-3;
+/**
+ * The largest tidal range on Earth, m: about 16 m at Burntcoat Head, Bay of
+ * Fundy (16.3 m recorded; the Canadian Hydrographic Service gives up to 17 m
+ * for the greatest tides).
+ */
+export const FUNDY_RANGE = 16;
+/**
+ * Io's tidal heating, W: (9.33 ± 1.84) × 10¹³ W, 2.24 W/m² over its surface,
+ * from the astrometry of the Galilean moons. Source: Lainey et al. 2009,
+ * "Strong tidal dissipation in Io and Jupiter from astrometric observations",
+ * Nature 459, 957.
+ */
+export const IO_TIDAL_HEATING = 9.33e13;
+/**
+ * The Roche limit's coefficients, dimensionless: d = k R_p (ρ_p / ρ_s)^(1/3),
+ * k ≈ 2.44 for a fluid satellite that deforms freely (Roche; 2.455 in
+ * Chandrasekhar's refinement), k = 2^(1/3) ≈ 1.26 for a rigid sphere held
+ * together by gravity alone.
+ */
+export const ROCHE_FLUID = 2.44;
+export const ROCHE_RIGID = 1.26;
+/**
+ * Saturn's mass, kg, its volumetric mean and equatorial radii, m (NASA Saturn
+ * Fact Sheet: 5.6834 × 10²⁶ kg, 58 232 km, 60 268 km; the mass and mean radius
+ * give its 687 kg/m³ mean density); the outer edge of its A ring, m
+ * (136 775 km); and water ice's density, kg/m³ (917). Ring particles are porous
+ * aggregates of ice, much less dense than solid ice: 500 to 600 kg/m³ is the
+ * range taken here.
+ */
+export const M_SATURN = 5.6834e26;
+export const R_SATURN_MEAN = 58_232e3;
+export const R_SATURN_EQ = 60_268e3;
+export const A_RING_OUTER = 136_775e3;
+export const RHO_ICE = 917;
+export const RHO_ICE_POROUS_MIN = 500;
+export const RHO_ICE_POROUS_MAX = 600;
+/**
+ * The tides sim draws water heights this many times too large, dimensionless:
+ * a display factor, not physics, kept here so the drawing, its on-screen label
+ * and the module's approximations all read one number.
+ */
+export const TIDE_DRAW_EXAGGERATION = 2e6;
+
 // Mathematics
 /**
  * Apéry's constant, ζ(3), dimensionless. It sets the photon number density of
