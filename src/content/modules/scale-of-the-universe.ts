@@ -252,22 +252,22 @@ const scaleOfTheUniverse: Module = {
         ),
         prose(
           p(
-            'Two anchors are never shown to relative scale. They cannot be: at 63,000 to one, drawing a proton beside a hydrogen atom at the same magnification would put the proton below a single pixel. The ratio lives in the zoom transition between rungs, not in any one picture.',
+            'No two anchors are shown to relative scale. They cannot be: at 63,000 to one, drawing a proton beside a hydrogen atom at the same magnification would put the proton below a single pixel. The ratio lives in the zoom transition between rungs, not in any one picture.',
           ),
         ),
         prose(
           p(
-            'Quantum objects have no sharp edge. The proton figure is twice a charge radius and the atom figure is twice the most probable electron distance; both are conventions about where a distribution has thinned out enough to stop counting, not measurements of a boundary.',
+            'Quantum objects have no sharp edge. The proton figure is twice the radius of its spread of electric charge, and the atom figure is twice the electron’s most likely distance. Both are conventions about where a fuzzy spread has thinned out enough to stop counting, not measurements of a boundary.',
           ),
         ),
         prose(
           p(
-            'The observable-universe figure is a comoving diameter, not a light travel distance. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
+            'The observable-universe figure is today’s distance across, not how far the light travelled. It is the present-day separation of the most distant matter we could in principle observe, larger than 2 × 13.8 billion light-years because space expanded while that light was in flight.',
           ),
         ),
         prose(
           p(
-            'The galaxy’s edge is a convention. A disc that thins out gradually has no diameter until someone picks a surface-brightness cut, and published values for the Milky Way range over roughly a factor of two.',
+            'The galaxy’s edge is a convention. A disc that thins out gradually has no diameter until someone picks how faint counts as the edge, and published values for the Milky Way range over roughly a factor of two.',
           ),
         ),
       ],

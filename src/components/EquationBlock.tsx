@@ -7,6 +7,7 @@
 import { useMemo, useState } from 'react';
 import type { EquationLayer, Param, ParamValues } from '@/content/types';
 import { formatWithUnit, siValueToTex } from '@/lib/format';
+import { ScrollX } from './ScrollX';
 import { Tex } from './Tex';
 import { RichText } from './RichText';
 
@@ -108,9 +109,9 @@ export function EquationBlock({ layer, params, values }: Props) {
         const where = mode === 'numbers' ? whereEntries(eq.tex, byId, values) : [];
         return (
         <figure key={eq.id} className="space-y-3">
-          <div className="overflow-x-auto rounded-lg border border-edge-soft bg-void-800/40 px-5 py-6">
+          <ScrollX label="Equation" className="rounded-lg border border-edge-soft bg-void-800/40 px-5 py-6">
             <Tex tex={substitute(eq.tex, byId, values, mode)} display className="text-ink" />
-          </div>
+          </ScrollX>
 
           {where.length > 0 && (
             <p

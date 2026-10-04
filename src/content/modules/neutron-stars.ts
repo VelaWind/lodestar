@@ -150,7 +150,7 @@ const neutronStars: Module = {
         ),
         prose(
           p(
-            'The heaviest neutron star measured precisely, PSR J0740+6620, is 2.08 times the Sun’s mass (a less certain measurement puts PSR J0952−0607 at about 2.35). Above 2.3 times the Sun’s mass the sim collapses the star; the true limit is unknown and could be a little lower or higher, and is for a star that does not spin: fast spin can hold up somewhat more.',
+            'The heaviest neutron star measured precisely, PSR J0740+6620, is 2.08 times the Sun’s mass (a less certain measurement puts PSR J0952−0607 at about 2.35). Above 2.3 times the Sun’s mass the sim collapses the star. The true limit is unknown and could be a little lower or higher; it is for a star that does not spin, and fast spin can hold up somewhat more.',
           ),
         ),
         prose(
@@ -165,7 +165,7 @@ const neutronStars: Module = {
         ),
         prose(
           p(
-            'The spin is drawn slowed down so you can follow it, except for stars that take longer than about three and a half seconds to turn, which are drawn at the real speed; the readouts and the trace’s time axis always use the real speed.',
+            'The spin is drawn slowed down so you can follow it, except for stars that take longer than about three and a half seconds to turn, which are drawn at the real speed. The readouts and the trace’s time axis always use the real speed.',
           ),
         ),
         prose(

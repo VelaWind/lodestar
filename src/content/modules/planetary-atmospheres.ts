@@ -64,7 +64,7 @@ const planetaryAtmospheres: Module = {
           'molecules dart about, and at any moment a few in the swarm are moving far faster than ',
           'the rest. The rim is gravity: a world’s escape threshold. Molecules that happen to be ',
           'in the fast few, headed upward, clear it and never return. Lighter balls bounce higher ',
-          'for the same shake, which is the crucial part: light gases ride the shaking faster than ',
+          'for the same shake, and that is the crucial part. Light gases ride the shaking faster than ',
           'heavy ones, so a world can hold its heavy gases for eternity while its lightest ones ',
           'drain away.',
         ),
@@ -157,7 +157,7 @@ const planetaryAtmospheres: Module = {
           p(
             'The verdict is a rule of thumb. Really, a gas leaks away gradually, at a rate set steeply by the ',
             term('escape parameter', 'escape-parameter'),
-            '; the middle band is where the rule stops answering.',
+            ', a measure of how far escape speed outruns the gas’s typical speed; the middle band is where the rule stops answering.',
           ),
         ),
         prose(
@@ -167,9 +167,9 @@ const planetaryAtmospheres: Module = {
         ),
         prose(
           p(
-            'Only escape by heat is modelled. Mars lost most of its air by routes left out here, such as the solar wind and ',
+            'Only escape by heat is modelled. Mars lost most of its air by routes left out here: the solar wind, the stream of particles the Sun blows out, and ',
             term('sputtering', 'sputtering'),
-            ', so a world can pass this test and still be airless (see Going deeper).',
+            ', where fast particles knock molecules loose. So a world can pass this test and still be airless (see Going deeper).',
           ),
         ),
         prose(
@@ -216,7 +216,7 @@ const planetaryAtmospheres: Module = {
         p(
           'One number in this story is routinely misjudged: the temperature. What matters is not ',
           'the weather at the surface but the temperature at the fringe where escape happens. ',
-          'there, absorbed sunlight makes the thin gas ',
+          'There, absorbed sunlight makes the thin gas ',
           em('hot'),
           '. Earth’s upper atmosphere runs near a thousand kelvin, hotter than a pizza oven, even ',
           'while you need a coat below.',

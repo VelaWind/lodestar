@@ -44,8 +44,8 @@ const cosmicMicrowaveBackground: Module = {
           'long time. The light that set out when the fog cleared is still crossing the room. ',
           'Along the way the stretching of the room has stretched the light too, pulling each ',
           'wave longer and longer. What began as an orange glow, like the inside of a hot oven, ',
-          'has been drawn out into something far redder than red: a faint hum of microwaves, the ',
-          'kind of waves a kitchen oven uses, but billions of times weaker.',
+          'has been drawn out into something far redder than red. It is now a faint hum of ',
+          'microwaves, the kind a microwave oven uses, but billions of times weaker.',
         ),
         p(
           'That is what a radio dish pointed at an empty patch of sky picks up. Not the light of ',
@@ -128,7 +128,7 @@ const cosmicMicrowaveBackground: Module = {
         ),
         prose(
           p(
-            'The slider stops at 3000 K (about 2,700 °C), where the universe first became transparent. It was hotter before that, but no light from those times can reach us directly.',
+            'The slider stops at 3000 kelvin (about 2 700 degrees Celsius), where the universe first became transparent. It was hotter before that, but no light from those times can reach us directly.',
           ),
         ),
         prose(
@@ -434,7 +434,7 @@ const cosmicMicrowaveBackground: Module = {
         {
           moduleId: 'scale-of-the-universe',
           reason:
-            'The surface of last scattering is the farthest thing on that ladder, and the reason the ladder has a top.',
+            'The observable universe tops that ladder; the surface of last scattering, just inside its edge, is the farthest we can see with light, and the reason the ladder has a top.',
         },
       ],
     },

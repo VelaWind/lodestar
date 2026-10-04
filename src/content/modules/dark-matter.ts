@@ -192,7 +192,7 @@ const darkMatter: Module = {
         ),
         prose(
           p(
-            'The defaults are tuned, not fitted. The disc’s mass and size are the Milky Way’s measured values. The halo’s strength and core are set by hand, so the speed at the Sun’s distance comes out at 227 kilometres a second, within 1% of the measured 229. That measurement assumed the Sun slightly closer to the centre, 26 500 rather than 27 000 light-years; at the distance used here the same data give about 233. The curve is not a fit to the Milky Way’s measured rotation curve.',
+            'The defaults are tuned, not fitted. The disc’s mass and size are the Milky Way’s measured values. The halo’s strength and core are set by hand, so the speed at the Sun’s distance comes out at 227 kilometres a second, within 1% of the measured 229. That measurement assumed the Sun slightly closer to the centre, 26 500 rather than 27 000 light-years; at the distance used here the same data give about 233. The curve is not a fit to the Milky Way’s measured speeds at each distance.',
           ),
         ),
         prose(

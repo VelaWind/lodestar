@@ -89,7 +89,7 @@ const tides: Module = {
         p(
           'Turn the Moon around Earth with the phase slider. At new and full Moon the Sun’s tide adds to ',
           'the Moon’s; at the quarter Moons they partly cancel. Move the Moon closer and its own tide ',
-          'grows as the inverse cube of the distance. Beyond about 1.3 times its real distance, the Sun’s ',
+          'grows steeply: halve the distance and it is eight times stronger. Beyond about 1.3 times its real distance, the Sun’s ',
           'tide becomes the larger of the two.',
         ),
       ),
@@ -159,7 +159,7 @@ const tides: Module = {
         ),
         prose(
           p(
-            'While Earth turns, the Moon’s phase is held at the slider’s value. Really it moves on about 12 degrees a day, so spring tides become neap tides in about a week.',
+            'While Earth turns, the Moon’s phase is held at the slider’s value. Really it moves on about 12 degrees a day, so the large tides of new and full Moon become the small ones of the quarter Moons in about a week.',
           ),
         ),
         prose(
@@ -169,7 +169,7 @@ const tides: Module = {
         ),
         prose(
           p(
-            'Heights use the leading term of the formula. The exact pull makes the bulge facing the Moon about 3 percent higher than the far one.',
+            'Heights use a simplified formula. The exact pull makes the bulge facing the Moon about 3 percent higher than the far one.',
           ),
         ),
         prose(

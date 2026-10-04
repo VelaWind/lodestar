@@ -91,7 +91,7 @@ const cosmicDistanceLadder: Module = {
         },
         {
           id: 'delta',
-          friendlyLabel: 'How wrong is the bulbs’ assumed brightness? (in magnitudes; 0.1 is about 9%)',
+          friendlyLabel: 'How wrong is the bulbs’ assumed brightness? (in magnitudes, astronomers’ brightness scale; 0.1 is about 10 percent)',
           technicalLabel: 'Calibration offset',
           symbol: '\\delta',
           unit: '',
@@ -113,12 +113,12 @@ const cosmicDistanceLadder: Module = {
         ),
         prose(
           p(
-            'The calibration panel assumes the true expansion rate is the one the microwave background predicts and asks what error on the ladder would change it. That is a way to measure the size of the disagreement, not a claim about which side is right.',
+            'The calibration panel assumes the true expansion rate is the one the microwave background, the faint glow left from the early universe, predicts and asks what error on the ladder would change it. That is a way to measure the size of the disagreement, not a claim about which side is right.',
           ),
         ),
         prose(
           p(
-            'Parallax precision uses one figure for the Gaia space telescope, 20 millionths of an arcsecond (about the width of a large coin on the Moon, seen from Earth); faint stars are measured several times less precisely.',
+            'The Gaia space telescope’s precision in measuring a star’s parallax, half its yearly shift, is taken as one figure: 20 millionths of an arcsecond, the width of a large coin on the Moon seen from Earth. Faint stars are measured several times less precisely.',
           ),
         ),
       ],
@@ -133,10 +133,11 @@ const cosmicDistanceLadder: Module = {
           ' is the chain of methods astronomers use to measure distance, each calibrated by the one ',
           'below. Its first rung is ',
           term('parallax'),
-          ': as Earth goes around the Sun, a nearby star shifts against the far background by a ',
-          'small angle, and its distance in parsecs is one divided by that angle in arcseconds; the ',
-          'parsec, 3.26 light-years, is defined that way. The shifts are tiny. The nearest star, ',
-          'Proxima Centauri, moves by 0.77 arcseconds, about the width of a coin seen from five ',
+          ': as Earth goes around the Sun, a nearby star shifts back and forth against the far ',
+          'background. Half that swing is its parallax angle, and its distance in parsecs is one ',
+          'divided by that angle in arcseconds; the parsec, 3.26 light-years, is defined that way. ',
+          'The shifts are tiny. The nearest star, Proxima Centauri, has a parallax of 0.77 ',
+          'arcseconds, about the width of a coin seen from five ',
           'kilometres. The Gaia spacecraft measures parallaxes to about 20 millionths of an ',
           'arcsecond for bright stars, which gives distances good to a few percent out to a few ',
           'thousand light-years.',

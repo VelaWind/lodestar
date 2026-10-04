@@ -75,7 +75,7 @@ On a clean install with Node 22: lint reports zero issues, `npm test` passes 116
 - **Canvas first.** Simulations draw in `requestAnimationFrame` loops reading refs, so dragging a slider does not re-render React per frame. Sims are lazy-loaded per route.
 - **Terms are marked, not re-explained.** A `term` node in the AST is a leaf: visible words plus a glossary id, so a definition cannot come to contain a link or an equation. Its panel is portalled to `document.body` and positioned `fixed`, because every layer body sits inside the accordion's `overflow-hidden`.
 - **A sanity suite guards the physics.** `src/physics/sanity.ts` recomputes known quantities (Earth's orbital period, the Schwarzschild radius of the Sun, light travel times: 205 checks in 23 blocks) through the code paths the simulations use, logging on dev boot and asserted in tests.
-- **Every route serves its own head.** `scripts/routeHeadsPlugin.ts` emits one HTML file per route at build time from the registry (24 routes, 47 files) plus `sitemap.xml`, so a shared module link unfurls as the module rather than the front page.
+- **Every route serves its own head.** `scripts/routeHeadsPlugin.ts` emits one HTML file per route at build time from the registry (24 routes, 47 files) plus `sitemap.xml`, so a shared module link unfurls as the module rather than the front page. Each file also carries schema.org data (a `LearningResource` per module, with no author or other personal details) and a `<noscript>` summary, so a crawler that does not run the app still reads the page's subject.
 
 ## Stack
 
@@ -127,4 +127,4 @@ The maths layer's Numbers view substitutes each slider's value in SI base units,
 
 ## Licensing
 
-Code is MIT-licensed (see LICENSE). The figures in `public/figures/` are not: each carries its own licence (NASA public domain, CC BY 4.0, or an institutional image policy), stated in the credit line on its page. Prose, glossary definitions and captions are the author's.
+Code is MIT-licensed (see LICENSE). The figures in `public/figures/` are not: each carries its own licence (NASA public domain, CC BY 4.0, or an institutional image policy). The credit is shown beneath the image on its page, and the licence is recorded in the source, beside the figure in its module file. Prose, glossary definitions and captions are the author's.

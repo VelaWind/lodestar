@@ -40,7 +40,7 @@ const hawkingRadiation: Module = {
           'becomes a trickle, the trickle a stream, and the last of the water rushes out all at once.',
         ),
         p(
-          'A black hole leaks like that bucket. For a black hole the size of a star, the leak is so ',
+          'A black hole leaks like that bucket. For a black hole as heavy as a star, the leak is so ',
           'slow that it is nothing at all; it takes in more from the faint warmth of space than it ',
           'lets out. But the smaller a black hole is, the faster it leaks, and as it leaks it gets ',
           'smaller, so it leaks faster still. A black hole light enough will leak itself away ',
@@ -92,12 +92,12 @@ const hawkingRadiation: Module = {
         ),
         prose(
           p(
-            'Lighter than about 10²¹ kg, a hole gives off neutrinos as well, and from about 2 × 10²⁰ kg down it evaporates about fourteen times as fast, more once heavier particles join in.',
+            'Lighter than about 10²¹ kilograms, a hole gives off neutrinos as well: nearly massless particles that pass through almost anything. From about 2 × 10²⁰ kilograms down it evaporates about fourteen times as fast, more once heavier particles join in.',
           ),
         ),
         prose(
           p(
-            'So the hole finishing its evaporation today started near 5 × 10¹¹ kg, not the 1.7 × 10¹¹ the sim gives.',
+            'So the hole finishing its evaporation today started near 5 × 10¹¹ kilograms, not the 1.7 × 10¹¹ the sim gives.',
           ),
         ),
         prose(
