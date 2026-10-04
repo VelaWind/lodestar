@@ -54,6 +54,7 @@ const MODULES = [
   'wormholes',
   'neutron-stars',
   'dark-matter',
+  'galaxies',
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -3160,6 +3161,100 @@ test('dark-matter: under reduced motion the note describes the still frame @cros
   assertClean(w, 'dark matter reduced motion');
 });
 
+/**
+ * The galaxies module, end to end, on every engine.
+ *
+ * At the defaults the companion, half the main galaxy's mass, passes 20 kpc
+ * from it at 254 km/s. The replay pauses and restarts by keyboard. A glossary
+ * term opens from the keyboard, and axe finds nothing serious.
+ */
+test('behaviour: galaxies readouts, play controls and a term by keyboard @cross-engine', async ({ page }) => {
+  const w = watch(page);
+  await page.goto('/m/galaxies', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+  await assertNoOverflow(page, 'galaxies at rest');
+
+  const readout = (index: number) => page.locator('#galaxies-readouts dd').nth(index);
+  await expect(readout(0), 'closest approach in light-years, from the slider').toHaveText('about 65,200 light-years');
+  await expect(readout(1), 'speed at closest approach, in words').toHaveText('254 kilometres a second');
+  await expect(readout(4), 'companion against the main galaxy').toHaveText('50%');
+
+  /* Pause holds the moment; Restart goes back before closest approach and plays. */
+  const pause = page.getByRole('button', { name: 'Pause', exact: true });
+  await pause.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
+  // The paused frame writes the final moment; the running readout is written at most ten times a second.
+  await page.waitForTimeout(300);
+  const held = await readout(2).textContent();
+  await page.waitForTimeout(600);
+  await expect(readout(2), 'paused, the moment holds').toHaveText(held ?? '');
+  await page.getByRole('button', { name: 'Restart', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeVisible();
+  await expect(readout(2), 'restarted before closest approach').toHaveText(/before/);
+
+  /* A closer, heavier pass by keyboard: the readouts follow. */
+  await page.locator('#p-rp').focus();
+  await page.keyboard.press('Home');
+  // 10 kpc is 32 616 light-years.
+  await expect(readout(0), 'closest approach at the slider’s minimum').toHaveText('about 32,600 light-years');
+  await assertNoOverflow(page, 'galaxies close pass');
+
+  /* A glossary term, reached and opened with the keyboard alone. */
+  await openLayer(page, 'real');
+  await settle(page, 600);
+  await page.locator('#layer-header-real').focus();
+  const reached = await tabToTerm(page);
+  expect(reached, 'the first term in layer 4 should be galaxy').toBe('galaxy');
+  const trigger = page.locator('[data-glossary-term="galaxy"]').first();
+  await expect(trigger, 'keyboard focus should reveal the definition').toHaveAttribute('aria-expanded', 'true');
+  const panel = page.locator('[data-glossary-panel="galaxy"]');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('A system of stars, gas, dust');
+  await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+  await revealEverything(page);
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const blocking = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+  expect(
+    blocking.map((v) => `${v.impact} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`),
+    'galaxies: serious or critical accessibility violations',
+  ).toEqual([]);
+
+  await shot(page, '27-galaxies-behaviour');
+  assertClean(w, 'galaxies behaviour');
+});
+
+/**
+ * Reduced motion: the encounter is drawn at its end, so Toomre & Toomre's
+ * result can be read straight off the tail readout — long tails prograde, few
+ * retrograde — and the note does not claim anything is moving.
+ */
+test('galaxies: under reduced motion the end state shows prograde against retrograde @cross-engine', async ({ page }) => {
+  const w = watch(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/m/galaxies', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#layer-panel-play canvas')).toBeVisible();
+  await settle(page, 900);
+
+  const tail = page.locator('#galaxies-readouts dd').nth(3);
+  await expect(tail, 'prograde at the defaults').toHaveText('36%');
+  await expect(page.getByRole('button', { name: 'Pause', exact: true })).toHaveCount(0);
+  const note = page.locator('#layer-panel-play p', { hasText: /reduced-motion|sped up/ });
+  await expect(note).toContainText('last moment');
+  await expect(note).not.toContainText('sped up');
+
+  await page.locator('#p-tilt').focus();
+  await page.keyboard.press('End');
+  await expect(tail, 'retrograde at the defaults').toHaveText('3%');
+  assertClean(w, 'galaxies reduced motion');
+});
+
 /* 8 ---------------------------------------------------------------- */
 
 /**
@@ -3199,7 +3294,7 @@ function titleCase(slug: string): string {
     .join(' ');
 }
 
-test('behaviour: the registry publishes twenty modules and leaks no drafts', async ({ page }) => {
+test('behaviour: the registry publishes twenty-one modules and leaks no drafts', async ({ page }) => {
   const w = watch(page);
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await settle(page, 700);
@@ -3887,7 +3982,7 @@ test('glossary: only one definition is open at a time @cross-engine', async ({ p
  * `width` and `height` are asserted as present because they are the whole
  * reason the caption does not jump when the image lands.
  *
- * All twenty modules now, with no exception branch. `kepler-orbits` carried one
+ * All twenty-one modules now, with no exception branch. `kepler-orbits` carried one
  * while its figure was unlicensable; it has one, so the branch is gone rather
  * than left standing with an empty list — a skip nothing can reach is a skip
  * nobody notices has stopped meaning anything.
@@ -4012,7 +4107,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * until a link is added on purpose.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
- * route — so this walks all twenty-two and checks the rendered DOM rather than the
+ * route — so this walks all twenty-three and checks the rendered DOM rather than the
  * source. `git grep` finds a hardcoded href; it does not find one built from a
  * template, pulled out of module data, or added to a component that did not
  * have one when the grep was run. This does.
@@ -4039,7 +4134,7 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 test('no route links the repo, and /about says the code is public on GitHub', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
-  expect(routes.length, 'all twenty-two routes').toBe(22);
+  expect(routes.length, 'all twenty-three routes').toBe(23);
 
   const offenders: string[] = [];
   let aboutChecked = false;
@@ -4184,7 +4279,7 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
    * route's. An unknown address is served the root shell by the catch-all
    * rewrite, and nothing rewrites the canonical during client-side navigation —
    * per-route canonicals are a property of the served HTML, which `heads.spec`
-   * asserts on twenty-two fresh loads. Getting this wrong is what the first run of
+   * asserts on twenty-three fresh loads. Getting this wrong is what the first run of
    * this assertion did.
    */
   await page.getByRole('link', { name: 'Back to all modules' }).click();

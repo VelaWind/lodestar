@@ -560,6 +560,88 @@ export const MOND_A0 = 1.2e-10;
 export const ZWICKY_1933_FACTOR = 400;
 export const ZWICKY_1933_H0 = 558 * KM_S_PER_MPC;
 
+// Galaxies
+/**
+ * The galaxies module's main galaxy, kg: one softened point mass of 10¹¹ M☉
+ * standing for its core and the halo inside the encounter. A model choice, not
+ * a measurement: it gives a circular speed of about 200 km/s at 10 kpc, like the
+ * Milky Way's. Toomre & Toomre (1972) likewise used point masses.
+ */
+export const GALAXY_MAIN_MASS = 1e11 * M_SUN;
+/**
+ * The main galaxy's disc of test stars reaches this radius, m: 15 kpc, half the
+ * roughly 100 000-light-year stellar disc scale-of-the-universe uses for the
+ * Milky Way. Its stars start on circular orbits from 0.2 to 1 times it.
+ */
+export const GALAXY_DISC_RADIUS = 15 * KILOPARSEC;
+/** Plummer softening of each galaxy's potential, m: Φ = −GM / √(r² + ε²), ε = 1 kpc. */
+export const ENCOUNTER_SOFTENING = 1 * KILOPARSEC;
+/**
+ * The encounter's fixed step in simulated time, s: 1 million years for the
+ * stars, with the two galaxies' own orbit integrated in eighths of it. At 2 Myr
+ * a lone star's circular orbit drifted by 2.2%; at 1 Myr by 0.55%.
+ */
+export const ENCOUNTER_STEP = 1e6 * JULIAN_YEAR;
+export const ENCOUNTER_CORE_SUBSTEPS = 8;
+/**
+ * How long every encounter runs after closest approach, s: 300 million years,
+ * the same for all settings, so the tail readout compares passes at the same
+ * age. A scan at three masses and closest approaches of 10–50 kpc gave tail
+ * fractions within about one percentage point of their values at 400 and 600
+ * Myr: by 300 Myr the tails have formed at every setting.
+ */
+export const ENCOUNTER_AFTER = 300e6 * JULIAN_YEAR;
+/**
+ * Distance to Andromeda (M31), m: 765 kpc, about 2.5 million light-years, the
+ * figure cosmic-distance-ladder and expansion-of-the-universe already use. Li
+ * et al. 2021 (ApJ 920, 84), from HST near-infrared Cepheids: μ₀ = 24.407 ±
+ * 0.032, 761 ± 11 kpc, consistent with it.
+ */
+export const D_ANDROMEDA = 765 * KILOPARSEC;
+/**
+ * Andromeda's velocity relative to the Milky Way, m/s: radial −109.3 ± 4.4
+ * km/s (approaching) and tangential 17.0 km/s. Source: van der Marel et al.
+ * 2012, "The M31 Velocity Vector. II. Radial Orbit toward the Milky Way and
+ * Implied Local Group Mass", ApJ 753, 8. The same paper's timing-argument Local
+ * Group mass, in its body, for an assumed 770 kpc, is (4.93 ± 1.63) × 10¹² M☉;
+ * its abstract's combined estimate is 3.17 × 10¹² M☉. (Paper III, ApJ 753, 9,
+ * forecast the merger: first passage in about 3.9 Gyr, merger about 2 Gyr later.)
+ */
+export const V_ANDROMEDA_RADIAL = 109.3e3;
+export const V_ANDROMEDA_TANGENTIAL = 17.0e3;
+export const M_LOCAL_GROUP_TIMING = 4.93e12 * M_SUN;
+/**
+ * The census of galaxies in the observable universe. Conselice et al. 2016
+ * (ApJ 830, 83): at least 2.0 (+0.7, −0.6) × 10¹², most of them faint and
+ * unseen, inferred from mass functions. Lauer et al. 2021 (ApJ 906, 77), from
+ * New Horizons' measurement of the optical background, find room for only about
+ * twice the galaxies Hubble can see: hundreds of billions.
+ */
+export const GALAXY_COUNT_CONSELICE = 2e12;
+/**
+ * Stars per cubic parsec near the Sun, m⁻³: about 0.1 pc⁻³, an assumption for
+ * the star-collision estimate. Consistent with the local stellar mass density,
+ * 0.043 M☉ pc⁻³ (McKee, Parravano & Hollenbach 2015, quoted in Bland-Hawthorn
+ * & Gerhard 2016), over a mean stellar mass near 0.4 M☉, and with the 540
+ * stars, brown dwarfs and planets within 10 pc (Reylé et al. 2021, A&A 650,
+ * A201). Mean spacing n^(−1/3) ≈ 2.2 pc.
+ */
+export const LOCAL_STELLAR_DENSITY = 0.1 / PARSEC ** 3;
+/** The thin disc's exponential scale height, m: about 300 pc (Bland-Hawthorn & Gerhard 2016, §5.1.1, range 220–450). */
+export const THIN_DISC_SCALE_HEIGHT = 300 * PARSEC;
+/** A table-tennis ball's diameter, m: 40 mm (ITTF). The hook's scale model. */
+export const PING_PONG_DIAMETER = 0.04;
+/**
+ * Alpha Centauri A: its distance, m, and radius, m. Source: Kervella et al.
+ * 2017, A&A 597, A137 — parallax 747.17 ± 0.61 mas, so 1.3384 ± 0.0011 pc,
+ * and R_A = 1.2234 ± 0.0053 R☉. At the hook's ping-pong-ball scale it is a
+ * 49 mm ball 1 187 km away; Proxima, at 0.15 R☉, a 6 mm bead at 1 155 km.
+ */
+export const D_ALPHA_CEN = 1.3384 * PARSEC;
+export const R_ALPHA_CEN_A = 1.2234 * R_SUN;
+/** The Local Group mass from van der Marel et al. 2012 (Paper II)'s abstract, combining estimates, kg: 3.17 × 10¹² M☉. */
+export const M_LOCAL_GROUP_COMBINED = 3.17e12 * M_SUN;
+
 // Mathematics
 /**
  * Apéry's constant, ζ(3), dimensionless. It sets the photon number density of
