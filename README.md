@@ -17,6 +17,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 - 22 modules, each a seven-layer page: hook, intuition, interactive simulation, real picture, the maths, going deeper, connections. The depth tier persists across sessions via Zustand's `persist`.
 - Simulations run on real SI quantities. Every control is a typed `Param` with a unit and a symbol, and the maths layer renders KaTeX from the same `Param` values the animation uses, so the number in the equation is the number in the physics.
 - Readouts are recomputed, not tabulated: the gravitational-waves page derives chirp mass, frequency at cutoff, peak strain and time from 30 Hz to merger from `src/physics/gw.ts`.
+- A "Start here" learning path on the front page suggests an order through all 22 topics in four stages, checked so that no topic leans on an idea only a later one explains; each module page ends with its step on the path and links to the topics before and after it. The order lives in one data file, `src/content/path.ts`, and a test fails if a module has no place on it.
 - Each simulation lists its approximations in a counted expander beside it, not in the prose.
 - The gravitational-wave chirp can be heard, synthesised through Web Audio at the binary's own frequencies and labelled on the page as a sonification, not a recording.
 - Glossary of 126 entries. Marked terms open a panel placed by a pure geometry function, on hover intent, click, focus or tap, with one `aria-live` region for screen readers.
@@ -57,13 +58,13 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 1162 tests in 24 files
+npm test           # vitest, 1168 tests in 25 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
 ```
 
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 1162 of 1162, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
+On a clean install with Node 22: lint reports zero issues, `npm test` passes 1168 of 1168, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
 
 <!-- site:case-study:start -->
 
@@ -82,7 +83,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 ## Tests
 
-`npm test` is 1162 Vitest tests across 24 files, in a Node environment:
+`npm test` is 1168 Vitest tests across 25 files, in a Node environment:
 
 - the 205 physics sanity checks as assertions;
 - equation snapshots, so a formatting change cannot quietly rewrite the maths;
@@ -91,7 +92,8 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 - the sonification synthesised into a buffer with its frequencies measured back out;
 - content-structure rules, including that every `term` reference resolves in the glossary and every entry is marked somewhere;
 - readout formatting, and tooltip placement at the awkward edges;
-- slider stops on every param: the default is a stop and both ends clamp to the exact bound.
+- slider stops on every param: the default is a stop and both ends clamp to the exact bound;
+- the learning path against the registry: every module on it exactly once, steps numbered without gaps.
 
 `.github/workflows/ci.yml` runs typecheck, lint, test and build in that order on every push and pull request to `main`, on Node 22.
 
