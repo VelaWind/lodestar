@@ -118,7 +118,7 @@ const cosmicDistanceLadder: Module = {
         ),
         prose(
           p(
-            'The Gaia space telescope’s precision in measuring a star’s yearly shift is taken as one figure: 20 millionths of an arcsecond, the width of a large coin on the Moon seen from Earth. Faint stars are measured several times less precisely.',
+            'The Gaia space telescope’s precision in measuring a star’s parallax, half its yearly shift, is taken as one figure: 20 millionths of an arcsecond, the width of a large coin on the Moon seen from Earth. Faint stars are measured several times less precisely.',
           ),
         ),
       ],

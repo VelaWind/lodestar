@@ -127,4 +127,4 @@ The maths layer's Numbers view substitutes each slider's value in SI base units,
 
 ## Licensing
 
-Code is MIT-licensed (see LICENSE). The figures in `public/figures/` are not: each carries its own licence (NASA public domain, CC BY 4.0, or an institutional image policy), stated in the credit line on its page. Prose, glossary definitions and captions are the author's.
+Code is MIT-licensed (see LICENSE). The figures in `public/figures/` are not: each carries its own licence (NASA public domain, CC BY 4.0, or an institutional image policy). The credit is shown beneath the image on its page, and the licence is recorded in the source, beside the figure in its module file. Prose, glossary definitions and captions are the author's.

@@ -75,7 +75,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   'cosmic-microwave-background': {
     title: 'Cosmic microwave background',
-    body: 'The glow left over from the hot early universe, now stretched to microwaves and 2.7 degrees above absolute zero, arriving from every direction.',
+    body: 'The glow left over from the hot early universe, now stretched to microwaves and 2.7 kelvin (2.7 degrees above absolute zero), arriving from every direction.',
   },
   recombination: {
     title: 'Recombination',
