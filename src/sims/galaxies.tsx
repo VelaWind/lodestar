@@ -22,7 +22,9 @@
  * keeps the moment being shown, so a tilt can be compared at the same instant.
  * While a slider is moving the encounter is recomputed with fewer stars, and in
  * full once it has been still for a fifth of a second. Under reduced motion
- * there is no loop: the run's last moment is drawn, tails at their longest.
+ * there is no loop: the run's last moment is drawn, 300 Myr after closest
+ * approach, tails near their longest. When the companion is outside the plot an
+ * arrow at the edge points to it.
  */
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { canvasSize, observeCanvasSize } from './canvasSize';
@@ -68,12 +70,15 @@ function formatSpeed(v: number, deep: boolean): string {
 }
 
 /** Time from closest approach, s, as "N million years after" or "before". */
+const INTEGER = new Intl.NumberFormat('en', { maximumFractionDigits: 0 });
+
 function formatSincePeri(dt: number, deep: boolean): string {
   if (!Number.isFinite(dt)) return '—';
   const myr = Math.round(dt / MYR);
-  if (deep) return `${myr > 0 ? '+' : myr < 0 ? '−' : ''}${Math.abs(myr)} Myr`;
+  const size = INTEGER.format(Math.abs(myr));
+  if (deep) return `${myr > 0 ? '+' : myr < 0 ? '−' : ''}${size} Myr`;
   if (myr === 0) return 'at closest approach';
-  return `${Math.abs(myr)} million years ${myr > 0 ? 'after' : 'before'}`;
+  return `${size} million years ${myr > 0 ? 'after' : 'before'}`;
 }
 
 /** A fraction, as a whole percentage. */
@@ -148,7 +153,10 @@ export interface Layout {
 
 /** Half the plot's height, m: the view always reaches past the disc and past closest approach. */
 function viewHalfHeight(rp: number): number {
-  return Math.max(3.6 * GALAXY_DISC_RADIUS, 1.5 * rp);
+  // At every setting the companion ends 41–57 kpc from the main core with a disc
+  // of up to 15 kpc: 72 kpc keeps all of it in view at the end. Before then,
+  // when the run starts outside the view, an arrow points to it.
+  return Math.max(4.8 * GALAXY_DISC_RADIUS, 1.9 * rp);
 }
 
 /** Interpolated star or core coordinate between the stored states either side of t. */
@@ -190,6 +198,35 @@ function placeFirstOf(
     }
   }
   return false;
+}
+
+/**
+ * A small triangle just inside the plot's edge, on the line from (x0, y0) to
+ * an off-plot point (x1, y1), pointing toward it. Null if the two coincide.
+ */
+function edgeArrow(x0: number, y0: number, x1: number, y1: number, plot: LabelBox) {
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const len = Math.hypot(dx, dy);
+  if (!(len > 0)) return null;
+  const ux = dx / len;
+  const uy = dy / len;
+  const inset = 10;
+  // How far along the ray the inset plot edge is reached.
+  const tx = ux > 0 ? (plot.x1 - inset - x0) / ux : ux < 0 ? (plot.x0 + inset - x0) / ux : Infinity;
+  const ty = uy > 0 ? (plot.y1 - inset - y0) / uy : uy < 0 ? (plot.y0 + inset - y0) / uy : Infinity;
+  const s = Math.max(0, Math.min(tx, ty, len));
+  const tipX = x0 + ux * s;
+  const tipY = y0 + uy * s;
+  const size = 7;
+  return {
+    tipX,
+    tipY,
+    leftX: tipX - ux * size - uy * size * 0.6,
+    leftY: tipY - uy * size + ux * size * 0.6,
+    rightX: tipX - ux * size + uy * size * 0.6,
+    rightY: tipY - uy * size - ux * size * 0.6,
+  };
 }
 
 /** A round scale-bar length, m, no wider than `maxMetres`. */
@@ -235,7 +272,7 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
   ctx.setLineDash([3, 4]);
   ctx.beginPath();
   let started = false;
-  const pathStride = Math.max(1, Math.floor(enc.steps / 240));
+  const pathStride = Math.max(1, Math.floor(enc.steps / 120));
   for (let k = 0; k <= enc.steps; k += pathStride) {
     const o = k * 6;
     const px = cx + (enc.cores[o + 3]! - enc.cores[o]!) * scale;
@@ -258,18 +295,29 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
     ctx.fillRect(pxp - 1.5, pyp - 1.5, 3, 3);
   }
 
-  /* The stars, interpolated between stored states; only those inside the plot. */
+  /*
+   * The stars, interpolated between stored states; only those inside the plot.
+   * One path and one fill per galaxy: hundreds of separate fills, each with its
+   * own style, were most of an idle frame's cost.
+   */
   const N = enc.nStars;
   const b0 = i * N * 2;
   const b1 = Math.min(enc.steps, i + 1) * N * 2;
-  for (let s = 0; s < N; s += 1) {
-    const x = sx(lerp(enc.xy[b0 + s * 2]!, enc.xy[b1 + s * 2]!));
-    const y = sy(lerp(enc.xy[b0 + s * 2 + 1]!, enc.xy[b1 + s * 2 + 1]!));
-    if (!inPlot(x, y)) continue;
-    const main = s < enc.nMain;
-    ctx.fillStyle = main ? COLORS.main : COLORS.companion;
-    ctx.globalAlpha = main ? 0.85 : 0.8;
-    ctx.fillRect(x - 0.9, y - 0.9, 1.8, 1.8);
+  const batches: [number, number, string, number][] = [
+    [0, enc.nMain, COLORS.main, 0.85],
+    [enc.nMain, N, COLORS.companion, 0.8],
+  ];
+  for (const [from, to, color, alpha] of batches) {
+    if (to <= from) continue;
+    ctx.beginPath();
+    for (let s = from; s < to; s += 1) {
+      const x = sx(lerp(enc.xy[b0 + s * 2]!, enc.xy[b1 + s * 2]!));
+      const y = sy(lerp(enc.xy[b0 + s * 2 + 1]!, enc.xy[b1 + s * 2 + 1]!));
+      if (inPlot(x, y)) ctx.rect(x - 0.9, y - 0.9, 1.8, 1.8);
+    }
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.fill();
   }
   ctx.globalAlpha = 1;
 
@@ -289,6 +337,21 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
     ctx.beginPath();
     ctx.arc(x, y, coreR(m), 0, TAU);
     ctx.fill();
+  }
+
+  /* The companion out of view: an arrow at the plot's edge, pointing to it. */
+  const [cx2, cy2, m2] = cores[1]!;
+  if (m2 > 0 && !inPlot(cx2, cy2)) {
+    const arrow = edgeArrow(cx, cy, cx2, cy2, plot);
+    if (arrow) {
+      ctx.fillStyle = COLORS.companion;
+      ctx.beginPath();
+      ctx.moveTo(arrow.tipX, arrow.tipY);
+      ctx.lineTo(arrow.leftX, arrow.leftY);
+      ctx.lineTo(arrow.rightX, arrow.rightY);
+      ctx.closePath();
+      ctx.fill();
+    }
   }
 
   /* The top strip: what is shown, and when, from the same encounter. */
@@ -467,7 +530,16 @@ export default function GalaxiesSim({ params, values }: SimProps) {
     shownRef.current[key] = text;
   }, []);
 
-  const paint = useCallback(() => {
+  /** When the moving readouts were last written, ms (performance clock). */
+  const lastWriteRef = useRef(-Infinity);
+
+  /**
+   * Paints the frame. The readouts that change as the replay runs are written
+   * at most ten times a second, and always on a full repaint: rewriting DOM text
+   * every frame forced a layout per frame, most of an idle frame's cost on a slow
+   * phone. The canvas's own caption still changes every frame.
+   */
+  const paint = useCallback((full: boolean, now: number) => {
     const canvas = canvasRef.current;
     const state = stateRef.current;
     if (!canvas || !state.enc || state.t === null) return;
@@ -485,10 +557,13 @@ export default function GalaxiesSim({ params, values }: SimProps) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const enc = state.enc;
     drawScene(ctx, rect.width, rect.height, { enc, t: state.t, units: state.units });
+    if (!full && now - lastWriteRef.current < 100) return;
+    lastWriteRef.current = now;
     // The readouts, from the same encounter and the same moment as the picture.
     write('since', formatSincePeri(state.t - enc.tPeri, state.deep));
     write('tail', formatPercent(enc.tail[stepAt(enc, state.t)]!));
-    write('rPeri', formatDistance(enc.rPeri, state.deep));
+    // The closest approach the slider sets, rounded as the scale bar is; the integrated orbit reaches it within 0.2%.
+    write('rPeri', formatDistance(enc.settings.rp, state.deep));
     write('vPeri', formatSpeed(enc.vPeri, state.deep));
   }, [write]);
 
@@ -502,16 +577,18 @@ export default function GalaxiesSim({ params, values }: SimProps) {
     const state = stateRef.current;
     state.settings = { M2, rp, tilt };
     state.still = reduced || typeof requestAnimationFrame === 'undefined';
-    state.pending = firstRef.current ? 'full' : 'draft';
+    const requested = firstRef.current ? 'full' : 'draft';
+    state.pending = requested;
     firstRef.current = false;
     requestPaintRef.current();
     if (settleRef.current) clearTimeout(settleRef.current);
-    settleRef.current = setTimeout(() => {
-      if (stateRef.current.draft) {
+    // Decided by what was asked for, not by `state.draft`, which the frame may not have computed yet.
+    if (requested === 'draft') {
+      settleRef.current = setTimeout(() => {
         stateRef.current.pending = 'full';
         requestPaintRef.current();
-      }
-    }, SETTLE_MS);
+      }, SETTLE_MS);
+    }
     return () => {
       if (settleRef.current) clearTimeout(settleRef.current);
     };
@@ -570,7 +647,7 @@ export default function GalaxiesSim({ params, values }: SimProps) {
       } else {
         loop.last = null;
       }
-      paint();
+      paint(loop.dirty, now);
       loop.dirty = false;
       if (moving) loop.raf = requestAnimationFrame(frame);
     };
@@ -640,7 +717,7 @@ export default function GalaxiesSim({ params, values }: SimProps) {
         <Readout label={deep ? 'Relative speed at r_p' : 'Speed past each other there'} ddRef={(el) => (liveRef.current.vPeri = el)} />
         <Readout label={deep ? 'Time since closest approach' : 'Moment shown'} ddRef={(el) => (liveRef.current.since = el)} />
         <Readout
-          label={deep ? 'Main-disc stars beyond 2 R_disc' : 'Main galaxy’s stars thrown out into tails'}
+          label={deep ? 'Main-disc stars beyond 2 R_disc' : 'Main galaxy’s stars pulled far out (tails or onto the companion)'}
           ddRef={(el) => (liveRef.current.tail = el)}
         />
         <div>
@@ -654,15 +731,17 @@ export default function GalaxiesSim({ params, values }: SimProps) {
       <p className="font-ui text-[0.7rem] text-ink-faint">
         {reduced ? (
           <>
-            Animation disabled by your reduced-motion setting: the encounter is drawn at its last moment, when the
-            tails are longest. Pale blue stars belong to the main galaxy, orange ones to the companion; the dashed
-            line is the companion’s path.
+            Animation disabled by your reduced-motion setting: the encounter is drawn at its last moment, 300 million
+            years after closest approach, with the tails near their longest. Pale blue stars belong to the main galaxy,
+            orange ones to the companion; the dashed line is the companion’s path, and an orange arrow at the edge
+            points to the companion when it is out of view.
           </>
         ) : (
           <>
             Time is sped up: one second here is 50 million years, at every setting. The replay holds at the end, then
             starts again. Pale blue stars belong to the main galaxy, orange ones to the companion; the dashed line is the
-            companion’s path. While a slider moves, fewer stars are drawn until it stops.
+            companion’s path, and an orange arrow at the edge points to the companion when it is out of view. While a
+            slider moves, fewer stars are drawn until it stops, and the tail percentage is approximate.
           </>
         )}
       </p>
@@ -722,6 +801,7 @@ export const __internals = {
   formatSincePeri,
   formatPercent,
   viewHalfHeight,
+  edgeArrow,
   SIM_SECONDS_PER_SCREEN_SECOND,
   DRAFT_BUDGET,
   HUBBLE_TYPES,

@@ -652,7 +652,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'hubble-sequence': {
     title: 'Hubble sequence',
-    body: 'Hubble’s 1926 sorting of galaxies by shape, drawn as a tuning fork: ellipticals, lenticulars, then spirals with and without a bar. A classification, not an evolutionary path.',
+    body: 'Hubble’s sorting of galaxies by shape (1926), drawn in 1936 as a tuning fork: ellipticals, lenticulars, then spirals with and without a bar. A classification, not an evolutionary path.',
   },
   'elliptical-galaxy': {
     title: 'Elliptical galaxy',

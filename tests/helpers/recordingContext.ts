@@ -25,7 +25,7 @@
  * `measureText` is judged by the same ruler it used.
  */
 
-export type DrawKind = 'text' | 'arc' | 'rect' | 'point' | 'ellipse' | 'gradient';
+export type DrawKind = 'text' | 'arc' | 'rect' | 'pathRect' | 'point' | 'ellipse' | 'gradient';
 
 export interface DrawRecord {
   kind: DrawKind;
@@ -118,7 +118,11 @@ export function recordingContext(): Recording {
     stroke: () => {},
     fill: () => {},
     clip: () => {},
-    rect: () => {},
+    /* Recorded under its own kind, apart from `fillRect`: most sims use `rect`
+       only to build a clip region, while galaxies batches its stars into one
+       path of rects, and its test needs to see where each one went. */
+    rect: (x: number, y: number, w: number, h: number) =>
+      push('pathRect', Math.min(x, x + w), Math.max(x, x + w), Math.min(y, y + h), Math.max(y, y + h)),
     translate: () => {},
     rotate: () => {},
     scale: () => {},

@@ -5,10 +5,19 @@
  * constants before it was written, and the sanity block `verifyGalaxyModel`
  * holds the code to them: the encounter's two-body energy (drift 1.7 × 10⁻⁷), a
  * lone star's circle (0.55%), the closest-approach speed against
- * √(2G(M₁+M₂)/r_p), prograde against retrograde tails at the defaults, the tidal
- * ratio 0.42 and the angular-speed match at closest approach, the star-collision
- * chance (1.3 × 10⁻¹² per crossing), the hook's 1 155 km, and Andromeda's 6.84
- * billion years at constant speed against 3.1 with gravity.
+ * √(2G(M₁+M₂)/r_p), prograde against retrograde tails at the defaults, closer
+ * passes pulling out more, the exact near-edge tide (4.22, 3.99 softened; the
+ * linear formula's 0.42 fails at d/r_p = 0.75) and the angular-speed match at
+ * closest approach, the star-collision chance (1.3 × 10⁻¹² per crossing), the
+ * hook's 1 155 km (Proxima, a bead) and 1 187 km (Alpha Centauri A, a ball), and
+ * Andromeda's 6.84 billion years at constant speed against 3.1 (timing mass) or
+ * 3.5 (combined mass) with gravity.
+ *
+ * Tail fraction against closest approach, prograde, 300 Myr after it (%):
+ *   M₂ = 0.1 M₁: 10 kpc 14, 15 kpc 13, 20 kpc 10, 25 kpc 2, 30 kpc and beyond 0.
+ *   M₂ = 0.5 M₁: 51, 48, 36, 19, 8 at 30, 1 at 35, 0 at 40.
+ *   M₂ = 1   M₁: 64, 61, 49, 35, 19 at 30, 7 at 35, 1 at 40.
+ * Smallest tails at the defaults come at tilts of 105–150° (1.4% at 120°).
  *
  * Sources cited in comments rather than in the five-reference list:
  *   - Hubble 1936, The Realm of the Nebulae (the tuning fork; "early" and
@@ -64,7 +73,7 @@ const galaxies: Module = {
       body: prose(
         p(
           'When two galaxies collide, their stars almost never hit each other. Shrink the Sun to a ',
-          'ping-pong ball, and its nearest neighbour is another ping-pong ball about 1 200 kilometres away.',
+          'ping-pong ball, and its nearest neighbours are balls and beads about 1 200 kilometres away.',
         ),
       ),
     },
@@ -125,10 +134,12 @@ const galaxies: Module = {
           technicalLabel: 'Closest approach',
           symbol: 'r_p',
           unit: 'm',
-          // 10 to 50 kpc: inside the disc's edge to over three disc radii away.
-          // Default 20 kpc, 1.3 times the 15 kpc disc radius.
+          // 10 to 40 kpc: inside the disc's edge to over two and a half disc
+          // radii away. Past 40 kpc no mass on the slider pulls out even 1% of
+          // the disc (scan at +300 Myr: equal mass 0.9% at 40, 0 at 45), so the
+          // range stops there. Default 20 kpc, 1.3 times the 15 kpc disc radius.
           min: 10 * KILOPARSEC,
-          max: 50 * KILOPARSEC,
+          max: 40 * KILOPARSEC,
           default: 20 * KILOPARSEC,
           step: 0.5 * KILOPARSEC,
           scale: 'linear',
@@ -153,6 +164,16 @@ const galaxies: Module = {
         prose(
           p(
             'Each galaxy is a single point of mass, standing for its centre and the inner part of its unseen cloud of dark matter. Real galaxies spread their mass through that cloud, far beyond their stars.',
+          ),
+        ),
+        prose(
+          p(
+            'So stars far out circle more slowly than nearer ones, unlike real galaxies, where dark matter keeps speeds nearly flat far out (see the Dark Matter module). Here a star 33 000 light-years out moves at 206 kilometres a second, and one at 49 000 light-years at 169.',
+          ),
+        ),
+        prose(
+          p(
+            'Stars are spread evenly across the disc, with none in its central fifth; real discs crowd toward the middle, so the share thrown out here is higher than a real galaxy’s.',
           ),
         ),
         prose(
@@ -187,7 +208,12 @@ const galaxies: Module = {
         ),
         prose(
           p(
-            'A star counts as thrown into a tail once it is more than twice the disc’s radius, about 98 000 light-years, from the main galaxy’s centre.',
+            'A star counts as pulled far out once it is more than twice the disc’s radius, about 98 000 light-years, from the main galaxy’s centre. That includes stars in a tail and stars captured by the companion.',
+          ),
+        ),
+        prose(
+          p(
+            'Every pass is followed for 300 million years after closest approach, so passes are compared at the same age. At the slider’s farthest pass, about 130 000 light-years (40 kiloparsecs), the disc barely notices: under 1 percent of its stars are pulled out.',
           ),
         ),
         prose(
@@ -197,7 +223,7 @@ const galaxies: Module = {
         ),
         prose(
           p(
-            'Time is sped up by the same factor at every setting: one second on screen is 50 million years. While a slider moves, fewer stars are drawn until it stops.',
+            'Time is sped up by the same factor at every setting: one second on screen is 50 million years. While a slider moves, fewer stars are drawn until it stops, and the tail percentage is approximate.',
           ),
         ),
       ],
@@ -215,7 +241,7 @@ const galaxies: Module = {
           'faint outer edge is counted. The nearest large galaxy, Andromeda, is about 2.5 million ',
           'light-years away. How many galaxies the observable universe holds is uncertain: at least two ',
           'trillion, most too faint to see, by a 2016 estimate; only hundreds of billions, from the faint ',
-          'glow of the sky that New Horizons measured beyond Pluto in 2021.',
+          'glow of the sky that New Horizons reported in 2021.',
         ),
         p(
           'In the 1920 “Great Debate” Harlow Shapley argued that the spiral nebulae lay within our galaxy, ',
@@ -226,18 +252,19 @@ const galaxies: Module = {
           'Ladder module tells that story.',
         ),
         p(
-          'In 1926 Hubble sorted galaxies by shape into the ',
+          'In 1926 Hubble sorted galaxies by shape; in 1936 he drew the scheme as a tuning fork, now ',
+          'called the ',
           term('Hubble sequence', 'hubble-sequence'),
-          ', which he drew as a tuning fork. ',
+          '. ',
           term('Elliptical galaxies', 'elliptical-galaxy'),
-          ', from round (E0) to flattened (E7), form the handle; lenticulars (S0), discs without arms, ',
-          'sit at the join; ',
+          ', from round (E0) to flattened (E7), form the handle; ',
           term('spiral galaxies', 'spiral-galaxy'),
-          ', plain (S) and barred (SB), form the prongs. He called ellipticals “early” and spirals ',
+          ', plain (S) and barred (SB), form the prongs. At the join sit lenticulars (S0), discs ',
+          'without arms, added in 1936 and identified in real galaxies only later. He called ellipticals “early” and spirals ',
           '“late”, meaning no evolution, but the labels misled many. Galaxies do not move along the ',
           'fork. Spirals are mostly gas-rich discs in ordered rotation, still forming stars; ellipticals ',
-          'are mostly old stars on random orbits, with little gas. Since 2007 volunteers in the Galaxy ',
-          'Zoo project have sorted galaxies by eye, nearly a million in its first year.',
+          'are mostly old stars on random orbits, with little gas. Since 2007 Galaxy Zoo volunteers have ',
+          'sorted galaxies by eye: nearly a million in its first year.',
         ),
         p(
           'Galaxies collide, and the ',
@@ -246,11 +273,13 @@ const galaxies: Module = {
           'above, that the long ',
           term('tidal tails', 'tidal-tail'),
           ' of pairs like the Antennae are stars flung out in one close pass. Tails are longest when a ',
-          'disc spins the same way the companion goes round, called prograde, and almost absent when it ',
-          'spins the other way, retrograde. Andromeda is approaching us at about 110 km/s, about 400 000 ',
-          'km/h. A collision in about 4.5 billion years was long described as all but certain. A 2025 ',
-          'analysis of Gaia and Hubble data now gives roughly even odds of a merger within 10 billion ',
-          'years, the current best estimate and not the last word.',
+          'disc spins the same way the companion goes round, called prograde. When it spins the other ',
+          'way, retrograde, it throws out only short, stubby loops; tilts of about 105 to 150 degrees give ',
+          'the smallest tails. Andromeda is approaching the Milky Way at about ',
+          '110 km/s, about 400 000 km/h. A first pass in about 4 billion years and a merger about 2 ',
+          'billion years later were long described as all but certain. A 2025 analysis of Gaia and ',
+          'Hubble data gives roughly even odds of a merger within 10 billion years: the current best ',
+          'estimate, not the last word.',
         ),
         /*
          * Source: https://esahubble.org/images/heic0615a/ (ESA/Hubble release
@@ -304,14 +333,18 @@ const galaxies: Module = {
               m`d = 15\,\text{kpc}`,
               ' — the disc’s radius. The steep ',
               m`r_p^{-3}`,
-              ' is why only close passes matter.',
+              ' is why only close passes matter. The approximation is valid only when the disc is much ',
+              'smaller than the closest-approach distance.',
             ),
             p(
-              'Worked example, the defaults: ',
-              m`\Delta a = 2 \times 6.674 \times 10^{-11} \times 9.94 \times 10^{40} \times 4.63 \times 10^{20} / (6.17 \times 10^{20})^3 = 2.6 \times 10^{-11}\,\text{m/s}^2`,
-              ', against the main galaxy’s own pull at its edge, ',
+              'Worked example, the defaults, where it is not: ',
+              m`d/r_p = 0.75`,
+              '. The exact difference on the near edge, ',
+              m`GM_2\left[1/(r_p - d)^2 - 1/r_p^2\right] = 6.674 \times 10^{-11} \times 9.94 \times 10^{40} \times 3.94 \times 10^{-41} = 2.6 \times 10^{-10}\,\text{m/s}^2`,
+              ', is about four times the pull holding the edge star on, ',
               m`GM_1/d^2 = 6.2 \times 10^{-11}\,\text{m/s}^2`,
-              '. The tide is 0.42 of the force holding the edge on: a close pass.',
+              ': for a moment the companion out-pulls its own galaxy. The sim’s softened pulls give 4.0; on ',
+              'the far edge the stretch is 0.19 of the edge star’s own pull.',
             ),
           ),
         },
@@ -333,10 +366,12 @@ const galaxies: Module = {
               'Worked example, Andromeda: 765 kpc away and closing at 109.3 km/s. At constant speed the gap ',
               'would close in ',
               m`7.65 \times 10^{5}\,\text{pc} \times 3.086 \times 10^{13}\,\text{km/pc} / 109.3\,\text{km/s} = 6.84`,
-              ' billion years. Gravity speeds it up: a straight-line fall with the Local Group’s mass ',
-              'inferred from this very approach, ',
+              ' billion years. Gravity speeds it up: a straight-line fall starting at today’s 109.3 km/s, ',
+              'with the Local Group timing mass, ',
               m`4.9 \times 10^{12}\,M_\odot`,
-              ', meets in 3.1 billion years. Andromeda’s small sideways motion, the pulls of the Large ',
+              ' (the paper’s combined estimate, ',
+              m`3.2 \times 10^{12}`,
+              ', gives 3.5), brings two point masses together in 3.1 billion years. Andromeda’s small sideways motion, the pulls of the Large ',
               'Magellanic Cloud and M33, and the uncertain masses are why the newest forecast gives even ',
               'odds of a merger within 10 billion years instead.',
             ),
@@ -345,7 +380,8 @@ const galaxies: Module = {
         {
           id: 'resonance',
           tex: '\\Omega_p = \\dfrac{v_p}{{{rp}}} \\quad\\text{vs}\\quad \\Omega_\\ast = \\dfrac{2\\pi}{T} = \\sqrt{\\dfrac{GM_1}{d^{3}}}',
-          binds: ['rp'],
+          // Ω_p depends on the companion's mass through v_p, as well as on r_p.
+          binds: ['M2', 'rp'],
           note: prose(
             p(
               m`\Omega_p`,
@@ -382,8 +418,9 @@ const galaxies: Module = {
           ', which gravitational focusing enlarges about threefold at a relative speed of 400 km/s. The ',
           'chance per crossing is about ',
           m`1.3 \times 10^{-12}`,
-          '. Among the few hundred billion stars of both galaxies, a collision is unlikely to happen at ',
-          'all, and if one does, most likely in a crowded centre.',
+          '. Multiplied by the few hundred billion stars of both galaxies, that is still less than about ',
+          'one collision per crossing, probably far fewer since most stars are smaller than the Sun. Any ',
+          'that do happen would most likely be in a crowded centre.',
         ),
         p(
           'Galaxies grew hierarchically. Small ',
