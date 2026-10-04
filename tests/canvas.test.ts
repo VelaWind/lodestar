@@ -55,7 +55,7 @@ import { markerReadout, rotationCurve } from '@/physics/darkmatter';
 import { __internals as gx } from '@/sims/galaxies';
 import galaxiesModule from '@/content/modules/galaxies';
 import { MAIN_STARS, encounterSteps, endTime, simulateEncounter, type Encounter } from '@/physics/galaxies';
-import { GALAXY_DISC_RADIUS, GALAXY_MAIN_MASS } from '@/physics/constants';
+import { D_MOON, GALAXY_DISC_RADIUS, GALAXY_MAIN_MASS } from '@/physics/constants';
 import { __internals as tid } from '@/sims/tides';
 import tidesModule from '@/content/modules/tides';
 import { heightAt, highTideHeight, lunarDay } from '@/physics/tides';
@@ -2543,9 +2543,121 @@ function tideCases(): Case[] {
     // Two highs a lunar day: maxima at 0, half and a whole lunar day.
     const s = tid.stateFor(view);
     for (const frac of [0, 0.5, 1]) {
-      expect(heightAt(view.phase + 2 * Math.PI * frac, s)).toBeCloseTo(high, 6);
+      expect(heightAt(tid.dotAngle({ ...view, t: frac * day }), s)).toBeCloseTo(high, 6);
     }
     expect(day / 3600).toBeCloseTo(24.84, 1);
+  });
+
+  /*
+   * The still frame under reduced motion is t = 0, and the note says the dot
+   * is at its high tide: so the dot's height there must be the top of the
+   * trace, at every phase, distance and latitude, not just on the equator at
+   * new Moon where the high tide happens to sit under the Moon.
+   */
+  it('starts the dot, and draws it under reduced motion, at the top of the trace', () => {
+    const problems: string[] = [];
+    for (let ph = 0; ph < 360; ph += 15) {
+      for (const dRel of [0.6, 0.8, 1, 1.3, 1.6, 2]) {
+        for (const latDeg of [0, 20, 40, 54, 55, 60]) {
+          const view = { phase: ph * DEG, dMoon: dRel * D_MOON, lat: latDeg * DEG };
+          const s = tid.stateFor(view);
+          const atStart = heightAt(tid.dotAngle({ ...view, t: 0 }), s);
+          const traceMax = Math.max(...tid.traceSamples(view));
+          const high = highTideHeight(s);
+          if (Math.abs(atStart - high) > 1e-9 || atStart < traceMax - 1e-12) {
+            problems.push(`phase ${ph}° d ${dRel}× lat ${latDeg}°: dot ${atStart}, trace max ${traceMax}, high ${high}`);
+          }
+        }
+      }
+    }
+    expect(problems.slice(0, 10)).toEqual([]);
+  });
+
+  /*
+   * The trace's scale is fixed for the distance and latitude, so a neap tide
+   * is visibly smaller than a spring one, and no phase draws past it.
+   */
+  it('scales the trace per distance and latitude, so neaps shrink and nothing clips', () => {
+    const problems: string[] = [];
+    for (const dRel of [0.6, 1, 1.3, 2]) {
+      for (const latDeg of [0, 30, 54.7, 60]) {
+        const base = { dMoon: dRel * D_MOON, lat: latDeg * DEG };
+        const span = tid.traceSpan(base);
+        let reached = 0;
+        for (let ph = 0; ph < 360; ph += 5) {
+          const samples = tid.traceSamples({ ...base, phase: ph * DEG });
+          const peak = Math.max(...samples.map(Math.abs));
+          reached = Math.max(reached, peak);
+          if (peak > span * (1 + 1e-9)) problems.push(`d ${dRel}× lat ${latDeg}° phase ${ph}°: ${peak} past ${span}`);
+        }
+        // The scale is used: spring reaches it, to the sampling's resolution.
+        if (reached < span * 0.999) problems.push(`d ${dRel}× lat ${latDeg}°: nothing reaches the scale (${reached} of ${span})`);
+      }
+    }
+    expect(problems).toEqual([]);
+    const at = (deg: number) => {
+      const view = { phase: deg * DEG, dMoon: D_MOON, lat: 0 };
+      return { peak: Math.max(...tid.traceSamples(view)), span: tid.traceSpan(view) };
+    };
+    expect(at(90).span).toBe(at(0).span);
+    expect(at(90).peak / at(0).peak).toBeLessThan(0.6);
+  });
+
+  /*
+   * A height scale and the 0 hour tick at every tier and size: friendly units
+   * (Curious and Student) and technical (Deep), at every sweep width and both
+   * heights, for every view.
+   */
+  it('labels the trace’s height scale and its 0 hour at every tier and width', () => {
+    const problems: string[] = [];
+    for (const [width, height] of [...WIDTHS, ...COLLISION_WIDTHS].flatMap((w) => TD2_HEIGHTS.map((h) => [w, h] as const))) {
+      for (const { label, view } of views) {
+        const { ctx, records } = recordingContext();
+        const layout = tid.drawScene(ctx, width, height, view);
+        const texts = records.filter((r) => r.kind === 'text');
+        const under = texts.filter((t) => t.y0 >= layout.trace.y1);
+        const leftOf = texts.filter((t) => t.x1 <= layout.trace.x0 && t.y0 >= layout.trace.y0 - 10 && t.y1 <= layout.trace.y1 + 10);
+        if (!under.some((t) => t.text === '0')) problems.push(`${label} @${width}×${height}: no 0 hour tick`);
+        if (!leftOf.some((t) => /^\+\d/.test(t.text ?? ''))) problems.push(`${label} @${width}×${height}: no + height label`);
+        if (!leftOf.some((t) => /^−\d/.test(t.text ?? ''))) problems.push(`${label} @${width}×${height}: no − height label`);
+      }
+    }
+    expect(problems.slice(0, 20)).toEqual([]);
+  }, 60_000);
+
+  /*
+   * Arrows to one scale, shortened only past the ocean's drawn depth: an
+   * inward arrow then never reaches into the rock, and no arrow reaches the
+   * Moon's disc, at any phase, distance or width.
+   */
+  it('keeps the arrows off the rock and the Moon, shortening only the longest', () => {
+    const problems: string[] = [];
+    const R_OCEAN = 1 + tid.OCEAN_DEPTH;
+    for (let ph = 0; ph < 360; ph += 15) {
+      for (let dRel = 0.6; dRel <= 2.0001; dRel += 0.05) {
+        const view = { phase: ph * DEG, dMoon: dRel * D_MOON };
+        const { arrows } = tid.arrowField(view);
+        for (const width of [...WIDTHS, 390]) {
+          const { R, moonR, orbitAt } = tid.geometry(width, TD2_HEIGHT);
+          const orbit = orbitAt(view.dMoon);
+          const mx = orbit * Math.cos(view.phase);
+          const my = orbit * Math.sin(view.phase);
+          for (const [lambda, ax, ay] of arrows) {
+            if (Math.hypot(ax, ay) > tid.OCEAN_DEPTH + 1e-12) problems.push(`phase ${ph}° d ${dRel.toFixed(2)}×: arrow longer than the cap`);
+            const tx = (R_OCEAN * Math.cos(lambda) + ax) * R;
+            const ty = (R_OCEAN * Math.sin(lambda) + ay) * R;
+            if (Math.hypot(tx, ty) < R - 1e-9) problems.push(`phase ${ph}° d ${dRel.toFixed(2)}× @${width}: arrow into the rock`);
+            if (Math.hypot(tx - mx, ty - my) < moonR + 1) problems.push(`phase ${ph}° d ${dRel.toFixed(2)}× @${width}: arrow on the Moon`);
+          }
+        }
+      }
+    }
+    expect(problems.slice(0, 10)).toEqual([]);
+    // Fixed scale everywhere the real Moon goes but its nearest: no shortening at the mean distance or beyond.
+    for (let ph = 0; ph < 360; ph += 5) {
+      expect(tid.arrowField({ phase: ph * DEG, dMoon: D_MOON }).capped).toBe(false);
+    }
+    expect(tid.arrowField({ phase: 0, dMoon: 0.6 * D_MOON }).capped).toBe(true);
   });
 
   it('names the phase and the kind of tide from the range itself', () => {
@@ -2562,6 +2674,9 @@ function tideCases(): Case[] {
 
   it('formats the readouts at the defaults the way the module states them', () => {
     expect(tid.formatHeight(0.7809, false)).toBe('78.1 centimetres');
+    // High water above about 54.7° stays below the undisturbed level: a true minus sign.
+    expect(tid.formatHeight(-0.06508, false)).toBe('−6.51 centimetres');
+    expect(tid.formatHeight(-0.06508, true)).toBe('−6.51 cm');
     expect(tid.formatTidalAcceleration(1.1278e-6, true)).toBe('1.13 × 10⁻⁶ m/s²');
     expect(tid.formatTidalAcceleration(1.1278e-6, false)).toBe('1.15 ten-millionths of Earth’s gravity');
     expect(tid.formatDuration(12.4212 * 3600, false)).toBe('12 hours 25 minutes');

@@ -100,7 +100,7 @@ export function equilibriumHeight(crest: number, cosTheta: number): number {
  * The exact equilibrium height at the point under the body and the point
  * opposite, m, from the full tide-generating potential (not its leading
  * term): the near-side crest is higher than the far-side one by about 2R/d of
- * either, 3.3% at the Moon's distance (the P₃ term).
+ * either, 3.37% at the Moon's distance (the P₃ term).
  *
  *     W(r) = GM [1/|d − r| − 1/d − r·d̂/d²],   h = W / g,   g = GM⊕/R²
  */
@@ -155,11 +155,13 @@ export function springNeap(s: TideState): { spring: number; neap: number } {
 }
 
 /**
- * The highest equilibrium level the point reaches in a day, m above the
- * undisturbed level: the maximum of `heightAt` over λ, found on a fine grid and
- * refined. The same function as the trace's.
+ * The highest equilibrium level the point reaches in a day, m relative to the
+ * undisturbed level (negative above about 54.7° latitude, where even high water
+ * stays below it), and the longitude angle λ where it does: the maximum of
+ * `heightAt` over λ, found on a fine grid and refined. The same function as the
+ * trace's.
  */
-export function highTideHeight(s: TideState): number {
+export function highTide(s: TideState): { lambda: number; height: number } {
   let best = -Infinity;
   let bestLambda = 0;
   const N = 720;
@@ -180,7 +182,14 @@ export function highTideHeight(s: TideState): number {
     if (heightAt(m1, s) > heightAt(m2, s)) hi = m2;
     else lo = m1;
   }
-  return Math.max(best, heightAt((lo + hi) / 2, s));
+  const refined = (lo + hi) / 2;
+  const h = heightAt(refined, s);
+  return h >= best ? { lambda: refined, height: h } : { lambda: bestLambda, height: best };
+}
+
+/** The height of `highTide`, m relative to the undisturbed level. */
+export function highTideHeight(s: TideState): number {
+  return highTide(s).height;
 }
 
 /* ------------------------------------------------------------------ */

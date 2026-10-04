@@ -7,10 +7,12 @@
  * acceleration at 1.025 (near) and 0.976 (far) of 2GMR/d³ and half of it across
  * the line; equilibrium crests of 0.357 m (Moon) and 0.164 m (Sun) above the
  * undisturbed level; spring range 0.781 m and neap 0.289 m on the equator; a
- * 12.42 h semidiurnal period; a 3.4% near/far crest asymmetry; the caption's
+ * 12.42 h semidiurnal period; a 3.37% near/far crest asymmetry; the caption's
  * claims across the whole slider range; the Sun's tide the larger beyond 1.296
- * times the Moon's real distance; perigee against apogee 1.39; and the fluid
- * Roche limit for ice around Saturn, 2.22 Saturn radii.
+ * times the Moon's real distance (1.304 on the exact stretch ratio); perigee
+ * against apogee 1.39; and the fluid Roche limit around Saturn, from its mass:
+ * 2.14 equatorial radii (129 000 km) for solid ice, 2.47–2.62 for porous ice of
+ * 600–500 kg/m³, against the A ring's outer edge at 2.27.
  *
  * "Crest" and "high tide" heights are above the level the water would have with
  * no Moon or Sun; "range" is high water minus low water.
@@ -19,7 +21,7 @@
  *   - NASA Moon Fact Sheet: mass, 384 400 km mean distance, perigee 363 300 km,
  *     apogee 405 500 km.
  *   - Newton, Principia (1687), Book III: tides from the Moon's and Sun's
- *     gravity. Laplace (1775): the dynamic theory and his tidal equations.
+ *     gravity. Laplace (1775–76): the dynamic theory and his tidal equations.
  *     Galileo, Dialogue (1632), and his 1616 discourse on the tides: tides from
  *     Earth's combined spin and orbital motion, which is wrong.
  *   - Garrett 1972, Nature 238, 441: the Bay of Fundy–Gulf of Maine system's
@@ -28,8 +30,8 @@
  *     (Canadian Hydrographic Service).
  *   - Love numbers k₂ ≈ 0.30, h₂ ≈ 0.61: the solid Earth's own tide; the ocean
  *     tide against the ground is 1 + k₂ − h₂ ≈ 0.69 of the rigid-Earth figure.
- *   - Saturn: NASA Saturn Fact Sheet (60 268 km, 687 kg/m³); A ring outer
- *     edge 136 775 km.
+ *   - Saturn: NASA Saturn Fact Sheet (5.6834 × 10²⁶ kg; radii 58 232 km
+ *     volumetric mean, 60 268 km equatorial); A ring outer edge 136 775 km.
  *   - Lunar declination up to about 28.6° at major standstill (18.6-year cycle);
  *     the Sun's 23.4°.
  */
@@ -50,7 +52,7 @@ const tides: Module = {
     hook: {
       body: prose(
         p(
-          'There are two high tides a day, not one. The sea piles up on the side of Earth facing the ',
+          'Most coasts get two high tides a day, not one. The sea piles up on the side of Earth facing the ',
           'Moon, and on the side facing away from it too.',
         ),
       ),
@@ -177,7 +179,17 @@ const tides: Module = {
         ),
         prose(
           p(
-            'Arrows show the tidal pull of the Moon and Sun together at the coast, all drawn to one fixed scale.',
+            'Arrows show the tidal pull of the Moon and Sun together at the coast, all drawn to one fixed scale. The exception: arrows longer than the ocean is drawn deep are shortened to that length, which happens only with the Moon nearer than about 0.95 times its real distance.',
+          ),
+        ),
+        prose(
+          p(
+            'The ocean’s outline is drawn at the equator, whatever the red dot’s latitude; the trace below it is at the dot’s latitude.',
+          ),
+        ),
+        prose(
+          p(
+            'Real bulges are carried slightly ahead of the Moon by Earth’s spin; this one sits on the line to the Moon.',
           ),
         ),
         prose(
@@ -220,11 +232,11 @@ const tides: Module = {
           'Fundy, where the shape of the bay makes the water resonate.',
         ),
         p(
-          'Tides also brake Earth. Its spin carries the bulges slightly ahead of the Moon, and their pull ',
-          'speeds the Moon along its orbit while the Moon’s pull on them slows Earth. The day lengthens, ',
+          'Tides also brake Earth. Its spin drags the tide slightly ahead of the Moon. The pull of that ',
+          'water speeds the Moon along its orbit, while the Moon’s pull on it slows Earth. The day lengthens, ',
           'and the Moon recedes by 3.83 centimetres a year, measured since 1969 by laser pulses bounced ',
           'off reflectors left on the Moon. Isaac Newton explained tides by gravity in his Principia ',
-          '(1687), and Pierre-Simon Laplace founded their dynamic theory in 1775. Galileo had argued, ',
+          '(1687), and Pierre-Simon Laplace founded their dynamic theory in 1775–76. Galileo had argued, ',
           'wrongly, that Earth’s own motions sloshed the seas.',
         ),
         /*
@@ -316,7 +328,8 @@ const tides: Module = {
               m`5.05 \times 10^{-7}\,\text{m/s}^2`,
               ', the ratio 0.459. With the Moon 1.30 times farther than now, the two would be equal. The ',
               'sim’s readout, the exact accelerations at the points directly under each body, gives 0.448, ',
-              'because the Moon’s exact near-side stretch is 2.5% above the leading-order figure.',
+              'because the Moon’s exact near-side stretch is 2.5% above the leading-order figure. On that ',
+              'exact ratio the crossing is at 1.304 times; the two estimates differ by under 1%.',
             ),
           ),
         },
@@ -362,8 +375,11 @@ const tides: Module = {
           'round the Earth–Moon centre of mass. That swing is real, but it is a revolution without ',
           'rotation: every point of Earth moves on an equal circle, so its acceleration is the same ',
           'everywhere, equal to the Moon’s pull at the centre. Subtracting it is exactly what the ',
-          'free-fall frame does; it cannot make near and far sides differ. The bulges come from how the ',
-          'Moon’s pull varies across Earth. Earth’s daily spin, a separate rotation, raises neither.',
+          'free-fall frame does, and a term that is the same everywhere cannot make near and far sides ',
+          'differ: in that frame the bulges come from how the Moon’s pull varies across Earth. In a frame ',
+          'turning with the Earth and Moon a centrifugal term does vary across Earth, and done carefully ',
+          'that frame gives the same answer; what is wrong is crediting the far bulge to centrifugal force ',
+          'alone and the near bulge to gravity alone. Earth’s daily spin, a separate rotation, raises neither.',
         ),
         p(
           'Ocean basins respond as forced, damped resonators. The main lunar tide travels as long waves, ',
@@ -397,8 +413,9 @@ const tides: Module = {
           m`d = 2.44\,R_p(\rho_p/\rho_s)^{1/3}`,
           ' for a fluid body that deforms freely, ',
           m`1.26\,R_p(\rho_p/\rho_s)^{1/3}`,
-          ' for a rigid one. For ice around Saturn the fluid limit is 2.22 Saturn radii; the main rings ',
-          'lie inside it, with the A ring’s outer edge just beyond, at 2.27. The same differences in pull ',
+          ' for a rigid one. For solid ice around Saturn the fluid limit is about 2.1 Saturn radii; for ',
+          'the fluffy, porous ice of real ring particles it is nearer 2.5, outside all the main rings, whose ',
+          'outer edge is at 2.27. The same differences in pull ',
           'stretch a body falling into a black hole, and draw tidal tails out of passing galaxies.',
         ),
       ),
@@ -420,7 +437,7 @@ const tides: Module = {
           reason: 'The Moon’s orbit and its changing distance, perigee to apogee, are Kepler’s ellipse at work.',
         },
         {
-          moduleId: 'exoplanets',
+          moduleId: 'habitable-zone',
           reason: 'Planets close to their stars, like TRAPPIST-1’s, are expected to be tidally locked, one side always in daylight.',
         },
       ],

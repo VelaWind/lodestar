@@ -692,14 +692,20 @@ export const IO_TIDAL_HEATING = 9.33e13;
 export const ROCHE_FLUID = 2.44;
 export const ROCHE_RIGID = 1.26;
 /**
- * Saturn's equatorial radius, m, and mean density, kg/m³ (NASA Saturn Fact
- * Sheet: 60 268 km, 687 kg/m³); the outer edge of its A ring, m (136 775 km);
- * and water ice's density, kg/m³ (917).
+ * Saturn's mass, kg, its volumetric mean and equatorial radii, m (NASA Saturn
+ * Fact Sheet: 5.6834 × 10²⁶ kg, 58 232 km, 60 268 km; the mass and mean radius
+ * give its 687 kg/m³ mean density); the outer edge of its A ring, m
+ * (136 775 km); and water ice's density, kg/m³ (917). Ring particles are porous
+ * aggregates of ice, much less dense than solid ice: 500 to 600 kg/m³ is the
+ * range taken here.
  */
+export const M_SATURN = 5.6834e26;
+export const R_SATURN_MEAN = 58_232e3;
 export const R_SATURN_EQ = 60_268e3;
-export const RHO_SATURN = 687;
 export const A_RING_OUTER = 136_775e3;
 export const RHO_ICE = 917;
+export const RHO_ICE_POROUS_MIN = 500;
+export const RHO_ICE_POROUS_MAX = 600;
 /**
  * The tides sim draws water heights this many times too large, dimensionless:
  * a display factor, not physics, kept here so the drawing, its on-screen label

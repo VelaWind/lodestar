@@ -90,9 +90,12 @@ import {
   D_MOON,
   D_MOON_APOGEE,
   D_MOON_PERIGEE,
+  M_SATURN,
   R_SATURN_EQ,
+  R_SATURN_MEAN,
   RHO_ICE,
-  RHO_SATURN,
+  RHO_ICE_POROUS_MAX,
+  RHO_ICE_POROUS_MIN,
   ROCHE_FLUID,
   PING_PONG_DIAMETER,
   V_ANDROMEDA_RADIAL,
@@ -2885,7 +2888,7 @@ export function verifyGalaxyModel(): CheckBlock {
  * whole-range claims: the Moon's own tide grows at every step closer; the spring
  * range does too; the range is greatest at phases 0° and 180° at every distance
  * and latitude; and beyond about 1.3 times the real distance the Sun's tide is
- * the larger. Last, the fluid Roche limit for ice around Saturn.
+ * the larger. Last, the fluid Roche limit for ice around Saturn, from its mass.
  */
 export function verifyTideModel(): CheckBlock {
   const results: CheckResult[] = [];
@@ -3002,15 +3005,25 @@ export function verifyTideModel(): CheckBlock {
     0.005,
   );
 
-  /* 17 — Saturn's rings and the Roche limit. */
-  const roche = rocheLimit(ROCHE_FLUID, R_SATURN_EQ, RHO_SATURN, RHO_ICE);
-  check('Fluid Roche limit for ice around Saturn, in Saturn radii', '2.44 (ρ_S/ρ_ice)^(1/3)', roche / R_SATURN_EQ, 2.216, 'R_S', 0.005);
+  /*
+   * 17 — Saturn's rings and the Roche limit, from Saturn's mass: R_p ρ_p^(1/3)
+   * is (3M / 4π)^(1/3) whatever radius the density goes with, so the mean
+   * density comes from the mass and the volumetric mean radius, never from the
+   * equatorial one. Quoted in equatorial radii, as ring distances usually are.
+   */
+  const rhoSaturn = M_SATURN / ((4 / 3) * Math.PI * R_SATURN_MEAN ** 3);
+  const rocheAt = (rhoS: number) => rocheLimit(ROCHE_FLUID, R_SATURN_MEAN, rhoSaturn, rhoS);
+  const rocheSolid = rocheAt(RHO_ICE);
+  check('Fluid Roche limit for solid ice around Saturn, in equatorial radii', '2.44 (3M_S / 4πρ_ice)^(1/3) / R_eq', rocheSolid / R_SATURN_EQ, 2.141, 'R_S', 0.005);
+  /* 18 — porous ring ice: the limit moves outside every main ring. */
+  const porousNear = rocheAt(RHO_ICE_POROUS_MAX);
+  const porousFar = rocheAt(RHO_ICE_POROUS_MIN);
   results.push(
     asserted(
-      'The A ring’s outer edge lies just outside that limit, within 3%',
-      'A-ring edge / Roche limit − 1 < 0.03',
-      `${significant(A_RING_OUTER / roche)}`,
-      A_RING_OUTER / roche - 1 < 0.03 && A_RING_OUTER > roche,
+      'The A ring’s outer edge lies outside the solid-ice limit and inside the porous-ice one',
+      'd(917) < A-ring edge < d(600) ≤ d(500)',
+      `${significant(rocheSolid / R_SATURN_EQ)} < ${significant(A_RING_OUTER / R_SATURN_EQ)} < ${significant(porousNear / R_SATURN_EQ)}–${significant(porousFar / R_SATURN_EQ)} R_S`,
+      rocheSolid < A_RING_OUTER && A_RING_OUTER < porousNear && porousNear <= porousFar,
     ),
   );
 
