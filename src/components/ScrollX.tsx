@@ -4,7 +4,7 @@
  *
  * A scrolled box has to be reachable by keyboard, or a reader without a pointer
  * can see the start of an equation and never the end (axe's
- * `scrollable-region-focusable`). It becomes a focusable, labelled region only
+ * `scrollable-region-focusable`). It becomes a focusable, labelled group only
  * while it actually overflows, so an equation that fits adds no tab stop. A
  * focused region scrolls with the arrow keys natively.
  */
@@ -57,7 +57,9 @@ export function ScrollX({
     <div
       ref={ref}
       className={`overflow-x-auto ${className ?? ''}`}
-      {...(overflows ? { tabIndex: 0, role: 'region', 'aria-label': `${label}, scrolls sideways` } : {})}
+      // A group, not a region: a page with several wide equations would
+      // otherwise fill the landmark list with them.
+      {...(overflows ? { tabIndex: 0, role: 'group', 'aria-label': `${label}, scrolls sideways` } : {})}
     >
       {children}
     </div>

@@ -25,6 +25,7 @@
 import { readdirSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { ABOUT_DESCRIPTION, ROOT_TITLE } from '../../scripts/routes';
+import { pathPlace } from '../../src/content/path';
 import { SITE_ORIGIN } from '../../src/lib/site';
 import blackHoles from '../../src/content/modules/black-holes';
 import cosmicMicrowaveBackground from '../../src/content/modules/cosmic-microwave-background';
@@ -194,6 +195,12 @@ test('every route serves its own head', async ({ request, baseURL }) => {
     expect(data['@type'], `${path}: structured data type`).toBe('LearningResource');
     expect(data.name, `${path}: structured data name`).toBe(module.title);
     expect(data.url, `${path}: structured data url`).toBe(`${SITE_ORIGIN}${path}`);
+    // Its step on the learning path, as the module page's footer shows it.
+    expect(data.position, `${path}: path position`).toBe(pathPlace(module.id)?.step);
+    expect(data.isPartOf, `${path}: part of the site and the path`).toEqual([
+      expect.objectContaining({ '@type': 'WebSite' }),
+      { '@type': 'ItemList', name: 'Suggested path for beginners' },
+    ]);
     expect(pick(html, /<noscript>[\s\S]*?<h1>([^<]*)<\/h1>/), `${path}: no-script heading`).toBe(module.title);
 
     checked.push(path);

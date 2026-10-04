@@ -13,6 +13,7 @@
  * edit anywhere — the same promise the registry makes to the shell, extended to
  * the parts of the page a crawler reads.
  */
+import { pathPlace } from '../src/content/path';
 import type { Module } from '../src/content/types';
 import { plainText } from '../src/lib/plainText';
 import { absoluteUrl } from '../src/lib/site';
@@ -154,7 +155,9 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
         interactivityType: 'mixed',
         isAccessibleForFree: true,
         image: absoluteUrl('/og.png'),
-        isPartOf: WEBSITE,
+        // The site, and the learning path with this topic's step on it.
+        isPartOf: [WEBSITE, { '@type': 'ItemList', name: 'Suggested path for beginners' }],
+        position: pathPlace(module.id)?.step,
       },
     })),
   ];
