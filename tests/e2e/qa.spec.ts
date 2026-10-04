@@ -3176,7 +3176,7 @@ test('behaviour: galaxies readouts, play controls and a term by keyboard @cross-
   await assertNoOverflow(page, 'galaxies at rest');
 
   const readout = (index: number) => page.locator('#galaxies-readouts dd').nth(index);
-  await expect(readout(0), 'closest approach in light-years').toHaveText('about 65,300 light-years');
+  await expect(readout(0), 'closest approach in light-years, from the slider').toHaveText('about 65,200 light-years');
   await expect(readout(1), 'speed at closest approach, in words').toHaveText('254 kilometres a second');
   await expect(readout(4), 'companion against the main galaxy').toHaveText('50%');
 
@@ -3185,6 +3185,8 @@ test('behaviour: galaxies readouts, play controls and a term by keyboard @cross-
   await pause.focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible();
+  // The paused frame writes the final moment; the running readout is written at most ten times a second.
+  await page.waitForTimeout(300);
   const held = await readout(2).textContent();
   await page.waitForTimeout(600);
   await expect(readout(2), 'paused, the moment holds').toHaveText(held ?? '');
@@ -3196,8 +3198,8 @@ test('behaviour: galaxies readouts, play controls and a term by keyboard @cross-
   /* A closer, heavier pass by keyboard: the readouts follow. */
   await page.locator('#p-rp').focus();
   await page.keyboard.press('Home');
-  // 10 kpc is 32 616 light-years; the integrated orbit lands within 0.5% of it.
-  await expect(readout(0), 'closest approach at the slider’s minimum').toHaveText(/^about 32,[5-7]00 light-years$/);
+  // 10 kpc is 32 616 light-years.
+  await expect(readout(0), 'closest approach at the slider’s minimum').toHaveText('about 32,600 light-years');
   await assertNoOverflow(page, 'galaxies close pass');
 
   /* A glossary term, reached and opened with the keyboard alone. */

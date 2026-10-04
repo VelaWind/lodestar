@@ -55,6 +55,7 @@ import { markerReadout, rotationCurve } from '@/physics/darkmatter';
 import { __internals as gx } from '@/sims/galaxies';
 import galaxiesModule from '@/content/modules/galaxies';
 import { MAIN_STARS, encounterSteps, endTime, simulateEncounter, type Encounter } from '@/physics/galaxies';
+import { GALAXY_DISC_RADIUS, GALAXY_MAIN_MASS } from '@/physics/constants';
 import { massEvaporatingIn, massForHawkingTemperature, netWithCMB } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
@@ -2371,7 +2372,9 @@ function galaxyCases(): Case[] {
   /*
    * Stars are drawn only inside the plot, and every word sits in the strips
    * above and below it: checked from the draw records, independently of the
-   * sim's own bookkeeping. A star is a filled rect; the core dots are arcs.
+   * sim's own bookkeeping. A star is a rect in a batched path, the closest-
+   * approach tick a filled rect, the core dots arcs, and the off-plot arrow a
+   * path of points.
    */
   it('keeps every star inside the plot and every label off the stars', () => {
     const problems: string[] = [];
@@ -2379,7 +2382,11 @@ function galaxyCases(): Case[] {
       for (const { label, enc, t, units } of views) {
         const { ctx, records } = recordingContext();
         const layout = gx.drawScene(ctx, width, height, { enc, t, units });
-        const marks = records.filter((r) => r.kind === 'rect' || (r.kind === 'arc' && r.x1 - r.x0 <= 12));
+        const stars = records.filter((r) => r.kind === 'pathRect');
+        if (stars.length === 0) problems.push(`${label} @${width}×${height}: no stars drawn`);
+        const marks = records.filter(
+          (r) => r.kind === 'pathRect' || r.kind === 'rect' || (r.kind === 'arc' && r.x1 - r.x0 <= 12),
+        );
         for (const m of marks) {
           const cxm = (m.x0 + m.x1) / 2;
           const cym = (m.y0 + m.y1) / 2;
@@ -2395,6 +2402,33 @@ function galaxyCases(): Case[] {
     }
     expect(problems.slice(0, 20)).toEqual([]);
   }, 60_000);
+
+  it('points an arrow from inside the plot toward a companion out of view', () => {
+    const plot = { x0: 12, x1: 600, y0: 34, y1: 490 };
+    const cx = (plot.x0 + plot.x1) / 2;
+    const cy = (plot.y0 + plot.y1) / 2;
+    for (const [tx, ty] of [[cx, -400], [2000, cy], [-500, 900], [cx + 1, plot.y1 + 50]] as const) {
+      const a = gx.edgeArrow(cx, cy, tx, ty, plot)!;
+      for (const [x, y] of [[a.tipX, a.tipY], [a.leftX, a.leftY], [a.rightX, a.rightY]] as const) {
+        expect(x).toBeGreaterThanOrEqual(plot.x0);
+        expect(x).toBeLessThanOrEqual(plot.x1);
+        expect(y).toBeGreaterThanOrEqual(plot.y0);
+        expect(y).toBeLessThanOrEqual(plot.y1);
+      }
+      // The tip is the vertex nearest the target.
+      const d = (x: number, y: number) => Math.hypot(tx - x, ty - y);
+      expect(d(a.tipX, a.tipY)).toBeLessThan(Math.min(d(a.leftX, a.leftY), d(a.rightX, a.rightY)));
+    }
+  });
+
+  it('keeps the companion and its disc in view at the end of every run', () => {
+    for (const { enc, units } of views.filter((v) => v.units === 'friendly')) {
+      const o = enc.steps * 6;
+      const dy = Math.abs(enc.cores[o + 4]! - enc.cores[o + 1]!);
+      const disc = GALAXY_DISC_RADIUS * Math.sqrt(enc.settings.M2 / GALAXY_MAIN_MASS);
+      expect(dy + disc, `${units} r_p ${enc.settings.rp}`).toBeLessThan(gx.viewHalfHeight(enc.settings.rp));
+    }
+  });
 
   it('captions the moment from the same encounter it draws', () => {
     for (const { enc, t, units } of views.filter((_, k) => k % 7 === 0)) {

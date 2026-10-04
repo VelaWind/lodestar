@@ -83,6 +83,9 @@ import {
   GALAXY_DISC_RADIUS,
   GALAXY_MAIN_MASS,
   M_LOCAL_GROUP_TIMING,
+  M_LOCAL_GROUP_COMBINED,
+  D_ALPHA_CEN,
+  ENCOUNTER_SOFTENING,
   PING_PONG_DIAMETER,
   V_ANDROMEDA_RADIAL,
 } from './constants';
@@ -2745,14 +2748,34 @@ export function verifyGalaxyModel(): CheckBlock {
     ),
   );
 
-  /* 6 to 8 — the worked numbers in layer 5. */
+  /*
+   * 6 and 7 — the tide at the defaults, where d/r_p = 0.75 and the linear
+   * formula fails. Computed here directly, not through `tidalAcceleration`:
+   * exact near-edge difference over the edge star's own pull, against the
+   * hand value 0.5 × 15² × (1/5² − 1/20²) = 4.21875; and with the sim's
+   * Plummer softening, as the prose quotes. The linear formula's 0.42 is
+   * reported alongside, a tenth of the truth here.
+   */
+  const rp0 = defaults.rp;
+  const exactNear = (G * defaults.M2 * (1 / (rp0 - d) ** 2 - 1 / rp0 ** 2)) / ((G * M1) / d ** 2);
+  check('Exact near-edge tide over the edge’s own pull, defaults', 'GM₂[1/(r_p−d)² − 1/r_p²] / (GM₁/d²)', exactNear, 4.21875, '', TIGHT);
+  const e2 = ENCOUNTER_SOFTENING ** 2;
+  const softPull = (M: number, r: number) => (G * M * r) / (r * r + e2) ** 1.5;
   check(
-    'Tide at closest approach over the disc edge’s own pull, defaults',
-    '(2GM₂d/r_p³) / (GM₁/d²)',
-    tidalAcceleration(defaults.M2, d, defaults.rp) / ((G * M1) / d ** 2),
-    0.4219,
+    'The same with the sim’s softened pulls',
+    '[f(r_p−d) − f(r_p)] / f₁(d), f = GMr/(r²+ε²)^{3/2}',
+    (softPull(defaults.M2, rp0 - d) - softPull(defaults.M2, rp0)) / softPull(M1, d),
+    3.989,
     '',
-    TIGHT,
+    0.005,
+  );
+  results.push(
+    asserted(
+      'The linear tide formula is far off at the defaults, as the prose says',
+      '(2GM₂d/r_p³) / exact < 0.2',
+      `linear ${significant(tidalAcceleration(defaults.M2, d, rp0) / ((G * M1) / d ** 2))}  ·  exact ${significant(exactNear)}`,
+      tidalAcceleration(defaults.M2, d, rp0) / ((G * M1) / d ** 2) / exactNear < 0.2,
+    ),
   );
   const omegaP = pericentreSpeed(M1, defaults.M2, defaults.rp) / defaults.rp;
   const omegaStar = (2 * Math.PI) / circularPeriod(d, M1);
@@ -2765,6 +2788,14 @@ export function verifyGalaxyModel(): CheckBlock {
     'd × (40 mm / 2R☉)',
     (D_PROXIMA * (PING_PONG_DIAMETER / (2 * R_SUN))) / 1e3,
     1155,
+    'km',
+    0.005,
+  );
+  check(
+    'Alpha Centauri A at ping-pong-ball scale, a ball not a bead',
+    'd × (40 mm / 2R☉); size 40 mm × R_A/R☉',
+    (D_ALPHA_CEN * (PING_PONG_DIAMETER / (2 * R_SUN))) / 1e3,
+    1187,
     'km',
     0.005,
   );
@@ -2793,6 +2824,29 @@ export function verifyGalaxyModel(): CheckBlock {
     3.09,
     'Gyr',
     0.01,
+  );
+  check(
+    'Andromeda’s gap closed by a radial fall, the combined Local Group mass',
+    'radial Kepler orbit, M = 3.17 × 10¹² M☉',
+    radialInfallTime(D_ANDROMEDA, V_ANDROMEDA_RADIAL, M_LOCAL_GROUP_COMBINED) / (1e3 * MYR),
+    3.52,
+    'Gyr',
+    0.01,
+  );
+
+  /* 16 — closer passes pull out more, at a fixed mass and the same age after closest approach. */
+  const at = (rpKpc: number) => simulateEncounter({ ...defaults, rp: rpKpc * KILOPARSEC }, { nMain: 280, nComp: 120 });
+  const tails = [10, 20, 30].map((r) => {
+    const enc = at(r);
+    return enc.tail[enc.steps]!;
+  });
+  results.push(
+    asserted(
+      'Closer passes pull more of the disc out, at half the main galaxy’s mass',
+      'tail(10 kpc) > tail(20 kpc) > tail(30 kpc), 300 Myr after closest approach',
+      `10 kpc ${significant(tails[0]!)}  ·  20 kpc ${significant(tails[1]!)}  ·  30 kpc ${significant(tails[2]!)}`,
+      tails[0]! > tails[1]! && tails[1]! > tails[2]!,
+    ),
   );
 
   return emit('galaxy checks', results);

@@ -23,6 +23,7 @@
  * implementation so the two are visibly the same thing.
  */
 import {
+  ENCOUNTER_AFTER,
   ENCOUNTER_CORE_SUBSTEPS,
   ENCOUNTER_SOFTENING,
   ENCOUNTER_STEP,
@@ -147,11 +148,11 @@ export const COMPANION_STARS = 240;
 const RINGS = 12;
 /**
  * The run starts with the two at twice their closest distance, where the
- * companion's tide is an eighth of its peak, and ends 2τ after closest approach,
- * while the tails are still near enough to see.
+ * companion's tide is an eighth of its peak, and ends `ENCOUNTER_AFTER` after
+ * closest approach: the same time for every setting, so tails are compared at
+ * the same age whatever the pass.
  */
 const START_SEPARATION = 2;
-const END_TAU = 2;
 
 /**
  * The companion's disc radius, m: the main disc's scaled by √(M₂/M₁), which
@@ -191,6 +192,8 @@ export interface Encounter {
 export interface EncounterOptions {
   nMain?: number;
   nComp?: number;
+  /** How long the run continues after closest approach, s. Defaults to `ENCOUNTER_AFTER`. */
+  after?: number;
   /** Track the two-body energy and the stars' radii, for the sanity checks. */
   diagnostics?: boolean;
 }
@@ -212,8 +215,9 @@ function buffers(N: number) {
 }
 
 /**
- * Integrates one encounter from two closest-distances apart to 2τ after
- * closest approach, τ = √(2r_p³ / G(M₁+M₂)), and stores every step.
+ * Integrates one encounter from two closest-distances apart, 1.33τ before
+ * closest approach (τ = √(2r_p³ / G(M₁+M₂))), to `ENCOUNTER_AFTER` after it, and
+ * stores every step.
  */
 export function simulateEncounter(settings: EncounterSettings, options: EncounterOptions = {}): Encounter {
   const nMain = options.nMain ?? MAIN_STARS;
@@ -234,7 +238,7 @@ export function simulateEncounter(settings: EncounterSettings, options: Encounte
   const tau = Math.sqrt((2 * rp ** 3) / (G * M));
   const D0 = -Math.sqrt(START_SEPARATION - 1);
   const t0 = tau * (D0 + D0 ** 3 / 3);
-  const steps = Math.ceil((END_TAU * tau - t0) / dt);
+  const steps = Math.ceil(((options.after ?? ENCOUNTER_AFTER) - t0) / dt);
   const nu = 2 * Math.atan(D0);
   const r0 = rp * (1 + D0 * D0);
   const h = Math.sqrt(2 * G * M * rp);
@@ -434,7 +438,7 @@ export function encounterSteps(settings: EncounterSettings): number {
   const M = GALAXY_MAIN_MASS + Math.max(0, settings.M2);
   const tau = Math.sqrt((2 * settings.rp ** 3) / (G * M));
   const D0 = -Math.sqrt(START_SEPARATION - 1);
-  return Math.ceil((END_TAU * tau - tau * (D0 + D0 ** 3 / 3)) / ENCOUNTER_STEP);
+  return Math.ceil((ENCOUNTER_AFTER - tau * (D0 + D0 ** 3 / 3)) / ENCOUNTER_STEP);
 }
 
 /** The stored state nearest simulated time t (s from closest approach), clamped to the run. */

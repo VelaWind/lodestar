@@ -584,6 +584,14 @@ export const ENCOUNTER_SOFTENING = 1 * KILOPARSEC;
 export const ENCOUNTER_STEP = 1e6 * JULIAN_YEAR;
 export const ENCOUNTER_CORE_SUBSTEPS = 8;
 /**
+ * How long every encounter runs after closest approach, s: 300 million years,
+ * the same for all settings, so the tail readout compares passes at the same
+ * age. A scan at three masses and closest approaches of 10–50 kpc gave tail
+ * fractions within about one percentage point of their values at 400 and 600
+ * Myr: by 300 Myr the tails have formed at every setting.
+ */
+export const ENCOUNTER_AFTER = 300e6 * JULIAN_YEAR;
+/**
  * Distance to Andromeda (M31), m: 765 kpc, about 2.5 million light-years, the
  * figure cosmic-distance-ladder and expansion-of-the-universe already use. Li
  * et al. 2021 (ApJ 920, 84), from HST near-infrared Cepheids: μ₀ = 24.407 ±
@@ -595,8 +603,9 @@ export const D_ANDROMEDA = 765 * KILOPARSEC;
  * km/s (approaching) and tangential 17.0 km/s. Source: van der Marel et al.
  * 2012, "The M31 Velocity Vector. II. Radial Orbit toward the Milky Way and
  * Implied Local Group Mass", ApJ 753, 8. The same paper's timing-argument Local
- * Group mass is (4.93 ± 1.63) × 10¹² M☉. (Paper III, ApJ 753, 9, forecast the
- * merger: first passage in about 3.9 Gyr, merger in about 5.9.)
+ * Group mass, in its body, for an assumed 770 kpc, is (4.93 ± 1.63) × 10¹² M☉;
+ * its abstract's combined estimate is 3.17 × 10¹² M☉. (Paper III, ApJ 753, 9,
+ * forecast the merger: first passage in about 3.9 Gyr, merger about 2 Gyr later.)
  */
 export const V_ANDROMEDA_RADIAL = 109.3e3;
 export const V_ANDROMEDA_TANGENTIAL = 17.0e3;
@@ -622,6 +631,16 @@ export const LOCAL_STELLAR_DENSITY = 0.1 / PARSEC ** 3;
 export const THIN_DISC_SCALE_HEIGHT = 300 * PARSEC;
 /** A table-tennis ball's diameter, m: 40 mm (ITTF). The hook's scale model. */
 export const PING_PONG_DIAMETER = 0.04;
+/**
+ * Alpha Centauri A: its distance, m, and radius, m. Source: Kervella et al.
+ * 2017, A&A 597, A137 — parallax 747.17 ± 0.61 mas, so 1.3384 ± 0.0011 pc,
+ * and R_A = 1.2234 ± 0.0053 R☉. At the hook's ping-pong-ball scale it is a
+ * 49 mm ball 1 187 km away; Proxima, at 0.15 R☉, a 6 mm bead at 1 155 km.
+ */
+export const D_ALPHA_CEN = 1.3384 * PARSEC;
+export const R_ALPHA_CEN_A = 1.2234 * R_SUN;
+/** The Local Group mass from van der Marel et al. 2012 (Paper II)'s abstract, combining estimates, kg: 3.17 × 10¹² M☉. */
+export const M_LOCAL_GROUP_COMBINED = 3.17e12 * M_SUN;
 
 // Mathematics
 /**
