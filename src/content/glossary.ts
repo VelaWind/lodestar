@@ -679,7 +679,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'equilibrium-tide': {
     title: 'Equilibrium tide',
-    body: 'The shape the ocean would take if it covered Earth and followed the tidal pull instantly: two bulges about half a metre high. Real tides are waves instead.',
+    body: 'The shape the ocean would take if it covered Earth and followed the tidal pull instantly: two bulges, rising and falling about half a metre. Real tides are waves instead.',
   },
   'spring-tide': {
     title: 'Spring tide',

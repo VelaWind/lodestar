@@ -20,8 +20,9 @@
  * Motion: one second on screen is two hours, at every setting and frame rate
  * (real elapsed time; gaps over a second are skipped). The Moon's phase is held
  * at the slider's value while Earth turns. Painting happens once per animation
- * frame, and the moving readout is written at most ten times a second. Under
- * reduced motion there is no loop: the dot is drawn at the first high tide.
+ * frame, and the moving readout is written at most ten times a second. Time
+ * starts at the dot's high tide, so under reduced motion, with no loop, the dot
+ * is drawn there: at the maximum of the trace.
  */
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { canvasSize, observeCanvasSize } from './canvasSize';
@@ -31,6 +32,7 @@ import {
   equilibriumCrest,
   equilibriumRange,
   heightAt,
+  highTide,
   highTideHeight,
   lunarDay,
   semidiurnalPeriod,
@@ -52,7 +54,8 @@ const DEG = Math.PI / 180;
 
 function formatSig3(value: number): string {
   if (!Number.isFinite(value)) return '—';
-  return SIG3.format(Number(value.toPrecision(3)));
+  // A true minus sign, U+2212, not the hyphen Intl gives.
+  return SIG3.format(Number(value.toPrecision(3))).replace('-', '−');
 }
 
 /** A height in m: centimetres below a metre, words at the beginner tiers. */
@@ -129,8 +132,16 @@ const EXAGGERATION_WORDS = `${['', 'one', 'two', 'three', 'four', 'five'][EXAGGE
  * the radius, still sits above the rock.
  */
 const OCEAN_DEPTH = 0.32;
-/** Arrows: the Moon's stretch at today's distance is drawn this fraction of Earth's drawn radius long. */
-const ARROW_REF = 0.3;
+/**
+ * Arrows start on the drawn ocean's undisturbed surface. The Moon's stretch at
+ * today's distance is drawn this fraction of Earth's drawn radius long, every
+ * arrow to that one scale, except that none is drawn longer than the ocean is
+ * deep (`OCEAN_DEPTH`): so an inward arrow never crosses into the rock, and an
+ * outward one ends at 1.64 radii, inside the Moon's nearest drawn orbit, 2.3
+ * radii less the Moon's own 0.27. The cap acts only with the Moon nearer than
+ * about 0.95 times its distance, and the sim and the module both say so.
+ */
+const ARROW_REF = 0.2;
 const ARROW_POINTS = 16;
 /** One second on screen is this many seconds of real time: two hours, at every setting. */
 const REAL_SECONDS_PER_SCREEN_SECOND = 7200;
@@ -158,6 +169,8 @@ const TAU = 2 * Math.PI;
 const PAD = { left: 12, right: 12 };
 const TOP_STRIP = 34;
 const TRACE_HEIGHT = 128;
+/** Room left of the trace for its height scale: "+182 cm" at the nearest Moon, with a margin. */
+const TRACE_GUTTER = 48;
 
 type Units = 'friendly' | 'technical';
 
@@ -168,7 +181,7 @@ interface View {
   dMoon: number;
   /** Coastal point latitude, rad. */
   lat: number;
-  /** Real time elapsed since the dot's first high tide, s. */
+  /** Real time elapsed since the dot's high tide, s. */
   t: number;
   units: Units;
 }
@@ -191,9 +204,71 @@ function stateFor(view: Pick<View, 'phase' | 'dMoon' | 'lat'>): TideState {
   };
 }
 
-/** The dot's longitude angle at time t: it starts under the Moon and turns once a lunar day. */
-function dotAngle(view: Pick<View, 'phase' | 'dMoon' | 't'>): number {
-  return view.phase + (TAU * view.t) / lunarDay(view.dMoon);
+/**
+ * Where the dot starts: the longitude angle of its high tide, the maximum of
+ * `heightAt` that `highTide` finds. Not simply under the Moon: off the equator,
+ * and with the Sun's tide pulling the high water toward the Sun line between
+ * the quarters, the maximum sits elsewhere. Kept for the last settings.
+ */
+let startKey = '';
+let startCache = 0;
+function startAngle(view: Pick<View, 'phase' | 'dMoon' | 'lat'>): number {
+  const key = `${view.phase}|${view.dMoon}|${view.lat}`;
+  if (key !== startKey) {
+    startCache = highTide(stateFor(view)).lambda;
+    startKey = key;
+  }
+  return startCache;
+}
+
+/** The dot's longitude angle at time t: it starts at its high tide and turns once a lunar day. */
+function dotAngle(view: Pick<View, 'phase' | 'dMoon' | 'lat' | 't'>): number {
+  return startAngle(view) + (TAU * view.t) / lunarDay(view.dMoon);
+}
+
+/**
+ * The trace's fixed height scale, m: the largest height the dot can reach at
+ * this distance and latitude, at any phase. That is at spring tide, when both
+ * bodies' tides line up: its high water, or its low water half way round, at
+ * λ = 90°, whichever is the farther from the undisturbed level (the low one, at
+ * high latitudes, where all of the water stays below it). No phase can exceed
+ * it, so nothing clips, and neap tides visibly shrink against it.
+ */
+function traceSpan(view: Pick<View, 'dMoon' | 'lat'>): number {
+  const spring = stateFor({ ...view, phase: 0 });
+  return Math.max(highTideHeight(spring), -heightAt(Math.PI / 2, spring), 1e-6);
+}
+
+/**
+ * The arrows round the coast: the tidal acceleration of the Moon and Sun
+ * together, exact, at `ARROW_POINTS` points of the equator, scaled so the
+ * Moon's stretch at today's distance is `ARROW_REF` of Earth's radius, as
+ * (λ, ax, ay) with lengths in Earth radii and the physics angle's axes. Any
+ * arrow longer than `OCEAN_DEPTH` is shortened to it, and `capped` says so.
+ */
+function arrowField(view: Pick<View, 'phase' | 'dMoon'>): { arrows: [number, number, number][]; capped: boolean } {
+  const scale = ARROW_REF / nearSideTide(M_MOON, D_MOON);
+  const moonX = view.dMoon * Math.cos(view.phase);
+  const moonY = view.dMoon * Math.sin(view.phase);
+  const arrows: [number, number, number][] = [];
+  let capped = false;
+  for (let k = 0; k < ARROW_POINTS; k += 1) {
+    const lambda = (k / ARROW_POINTS) * TAU;
+    const px = R_EARTH * Math.cos(lambda);
+    const py = R_EARTH * Math.sin(lambda);
+    const [amx, amy] = tidalAccelerationAt(px, py, moonX, moonY, M_MOON);
+    const [asx, asy] = tidalAccelerationAt(px, py, AU, 0, M_SUN);
+    let ax = (amx + asx) * scale;
+    let ay = (amy + asy) * scale;
+    const len = Math.hypot(ax, ay);
+    if (len > OCEAN_DEPTH) {
+      ax *= OCEAN_DEPTH / len;
+      ay *= OCEAN_DEPTH / len;
+      capped = true;
+    }
+    arrows.push([lambda, ax, ay]);
+  }
+  return { arrows, capped };
 }
 
 /**
@@ -281,7 +356,7 @@ function toScreen(cx: number, cy: number, angle: number, r: number): [number, nu
  */
 function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, view: View): Layout {
   const { plot, cx, cy, R, moonR, orbitAt } = geometry(w, h);
-  const trace: LabelBox = { x0: PAD.left + 30, x1: w - PAD.right - 4, y0: h - TRACE_HEIGHT + 30, y1: h - 22 };
+  const trace: LabelBox = { x0: PAD.left + TRACE_GUTTER, x1: w - PAD.right - 4, y0: h - TRACE_HEIGHT + 30, y1: h - 22 };
   const layout: Layout = { labels: [], plot, trace };
   ctx.clearRect(0, 0, w, h);
   if (w <= PAD.left + PAD.right + 80 || plot.y1 - plot.y0 < 60) return layout;
@@ -349,23 +424,15 @@ function drawScene(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
   }
 
   /* The tidal acceleration round the coast, Moon and Sun together, exact; one path. */
-  const aRef = nearSideTide(M_MOON, D_MOON);
-  const arrowScale = (ARROW_REF * R) / aRef;
-  const [moonX, moonY] = [view.dMoon * Math.cos(view.phase), view.dMoon * Math.sin(view.phase)];
   ctx.strokeStyle = COLORS.arrow;
   ctx.fillStyle = COLORS.arrow;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   const heads: [number, number, number, number][] = [];
-  for (let k = 0; k < ARROW_POINTS; k += 1) {
-    const lambda = (k / ARROW_POINTS) * TAU;
-    const px = R_EARTH * Math.cos(lambda);
-    const py = R_EARTH * Math.sin(lambda);
-    const [amx, amy] = tidalAccelerationAt(px, py, moonX, moonY, M_MOON);
-    const [asx, asy] = tidalAccelerationAt(px, py, AU, 0, M_SUN);
-    const ax = (amx + asx) * arrowScale;
-    const ay = (amy + asy) * arrowScale;
-    const [bx, by] = toScreen(cx, cy, lambda, R + ocean * 0.5);
+  for (const [lambda, rx, ry] of arrowField(view).arrows) {
+    const ax = rx * R;
+    const ay = ry * R;
+    const [bx, by] = toScreen(cx, cy, lambda, R + ocean);
     // Screen direction of (ax, ay): the same mapping as toScreen, without the centre.
     const ex = bx - ax;
     const ey = by + ay;
@@ -434,7 +501,7 @@ function drawTrace(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
   if (trace.y1 - trace.y0 < 30 || trace.x1 - trace.x0 < 60) return;
   const samples = traceSamples(view);
   const day = lunarDay(view.dMoon);
-  const span = Math.max(0.05, ...samples.map(Math.abs));
+  const span = traceSpan(view);
   const yOf = (v: number) => (trace.y0 + trace.y1) / 2 - (v / span) * ((trace.y1 - trace.y0) / 2);
   const xOf = (i: number) => trace.x0 + (i / TRACE_SAMPLES) * (trace.x1 - trace.x0);
 
@@ -471,7 +538,9 @@ function drawTrace(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
   placeFirstOf(
     ctx,
     [
-      deep ? 'Height at the dot (cm) over two lunar days (h)' : 'Water height at the red dot, in centimetres, over two days in hours',
+      deep
+        ? 'Height at the dot (cm) over two lunar days (h)'
+        : 'Water height at the red dot, in centimetres, over two lunar days (about 50 hours)',
       deep ? 'Height at the dot (cm), time (h)' : 'Height at the red dot, centimetres; hours',
       'Height (cm), time (h)',
     ],
@@ -480,22 +549,29 @@ function drawTrace(ctx: CanvasRenderingContext2D, w: number, h: number, view: Vi
     layout,
   );
   ctx.fillStyle = COLORS.inkFaint;
-  const left: LabelBox = { x0: 0, x1: trace.x0 - 2, y0: trace.y0 - 8, y1: trace.y1 + 8 };
-  for (const v of [span, -span]) {
-    placeFirstOf(
-      ctx,
-      [deep ? `${v > 0 ? '+' : '−'}${formatSig3(Math.abs(v * 100))} cm` : `${v > 0 ? '+' : '−'}${formatSig3(Math.abs(v * 100))}`],
-      [{ x: trace.x0 - 4, y: yOf(v) + (v > 0 ? 8 : 0), align: 'right' }],
-      left,
-      layout,
-    );
-  }
+  // Hours first, so the 0 under the axis always has its place; the height scale fits round it.
   const bottom: LabelBox = { x0: PAD.left, x1: w - PAD.right, y0: trace.y1 + 2, y1: h - 1 };
   const hours = (TRACE_DAYS * day) / 3600;
   for (const hr of [0, 12, 24, 36, 48]) {
     if (hr > hours) continue;
     const x = trace.x0 + (hr / hours) * (trace.x1 - trace.x0);
     placeFirstOf(ctx, [String(hr)], [{ x, y: h - 9, align: 'center' }], bottom, layout);
+  }
+  const left: LabelBox = { x0: 0, x1: trace.x0 - 2, y0: trace.y0 - 8, y1: trace.y1 + 8 };
+  for (const v of [span, -span]) {
+    const sign = v > 0 ? '+' : '−';
+    const text = `${sign}${formatSig3(Math.abs(v * 100))}`;
+    const y = yOf(v) + (v > 0 ? 8 : 0);
+    placeFirstOf(
+      ctx,
+      deep ? [`${text} cm`, text] : [text],
+      [
+        { x: trace.x0 - 4, y, align: 'right' },
+        { x: trace.x0 - 4, y: v > 0 ? y : y - 5, align: 'right' },
+      ],
+      left,
+      layout,
+    );
   }
 }
 
@@ -541,6 +617,7 @@ export default function TidesSim({ params, values }: SimProps) {
       neap,
       high: highTideHeight(s),
       period: semidiurnalPeriod(dMoon),
+      capped: arrowField({ phase, dMoon }).capped,
     };
   }, [phase, dMoon, lat]);
 
@@ -626,24 +703,28 @@ export default function TidesSim({ params, values }: SimProps) {
           label={deep ? 'Spring / neap range at the dot' : 'At spring tides, and at neap tides'}
           value={`${formatHeight(readouts.spring, deep)} · ${formatHeight(readouts.neap, deep)}`}
         />
-        <Readout label={deep ? 'High water at the dot, above undisturbed' : 'Highest water at the dot, above its level with no Moon or Sun'} value={formatHeight(readouts.high, deep)} />
+        <Readout
+          label={deep ? 'High water at the dot, against undisturbed' : 'High water at the dot, compared with its level with no Moon or Sun'}
+          value={`${formatHeight(readouts.high, deep)}${readouts.high < 0 ? ' (below that level at this latitude)' : ''}`}
+        />
         <Readout label={deep ? 'Between high tides' : 'Time between high tides'} value={formatDuration(readouts.period, deep)} />
       </dl>
 
       <p className="font-ui text-[0.7rem] text-ink-faint">
         {reduced ? (
           <>
-            Animation disabled by your reduced-motion setting: the red dot is drawn at its first high tide, marked on
-            the trace below. The water is the equilibrium tide for the Moon and Sun together, its heights drawn{' '}
-            {EXAGGERATION_WORDS} times too big.
+            Animation disabled by your reduced-motion setting: the red dot is drawn at its first high tide, the top
+            of the trace below.
           </>
         ) : (
           <>
             Time is sped up: one second here is two hours, at every setting. The Moon’s phase is held at the slider’s
-            value while Earth turns. The water is the equilibrium tide for the Moon and Sun together, its heights drawn{' '}
-            {EXAGGERATION_WORDS} times too big.
+            value while Earth turns.
           </>
-        )}
+        )}{' '}
+        The water is the equilibrium tide for the Moon and Sun together, its heights drawn {EXAGGERATION_WORDS} times
+        too big, and its outline is drawn at the equator; the trace is at the dot’s latitude.
+        {readouts.capped ? ' With the Moon this close, the longest arrows are shortened to the ocean’s drawn depth.' : ''}
       </p>
     </div>
   );
@@ -669,6 +750,9 @@ const Readout = memo(function Readout({ label, value }: { label: string; value: 
 export const __internals = {
   drawScene,
   traceSamples,
+  traceSpan,
+  dotAngle,
+  arrowField,
   phaseName,
   tideKind,
   stateFor,
@@ -677,5 +761,6 @@ export const __internals = {
   formatDuration,
   geometry,
   EXAGGERATION,
+  OCEAN_DEPTH,
   REAL_SECONDS_PER_SCREEN_SECOND,
 };
