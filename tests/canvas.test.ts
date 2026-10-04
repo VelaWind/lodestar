@@ -52,6 +52,9 @@ import { beamVisibility, equatorialSpeedFraction, surfaceGravity } from '@/physi
 import { __internals as dm } from '@/sims/dark-matter';
 import darkMatter from '@/content/modules/dark-matter';
 import { markerReadout, rotationCurve } from '@/physics/darkmatter';
+import { __internals as gx } from '@/sims/galaxies';
+import galaxiesModule from '@/content/modules/galaxies';
+import { MAIN_STARS, encounterSteps, endTime, simulateEncounter, type Encounter } from '@/physics/galaxies';
 import { massEvaporatingIn, massForHawkingTemperature, netWithCMB } from '@/physics/hawking';
 import { __internals as ev } from '@/sims/escape-velocity';
 import { __internals as eu } from '@/sims/expansion-of-the-universe';
@@ -2334,6 +2337,106 @@ function darkMatterCases(): Case[] {
   return cases;
 }
 
+/* --------------------------------- galaxies ---------------------------------- */
+
+/** 416 px below the `sm` breakpoint, 512 above it; the sweep runs at the taller, the label checks at both. */
+const GX_HEIGHT = 512;
+const GX_HEIGHTS = [416, 512];
+
+function galaxyCases(): Case[] {
+  const params = galaxiesModule.layers.play.params;
+  const cases: Case[] = [];
+  const MYR = 1e6 * JULIAN_YEAR;
+
+  // Every slider's ends and default against each other, each encounter shown
+  // at its start, at closest approach, midway out and at its end.
+  const views: { label: string; enc: Encounter; t: number; units: 'friendly' | 'technical' }[] = [];
+  for (const m of extremes(paramOf(params, 'M2'))) {
+    for (const r of extremes(paramOf(params, 'rp'))) {
+      for (const i of extremes(paramOf(params, 'tilt'))) {
+        const enc = simulateEncounter({ M2: m.value, rp: r.value, tilt: i.value });
+        const times = [enc.t0, enc.tPeri, (enc.tPeri + endTime(enc)) / 2, endTime(enc)];
+        for (const t of times) {
+          for (const units of ['friendly', 'technical'] as const) {
+            views.push({ label: `M2=${m.stop} rp=${r.stop} tilt=${i.stop} t=${Math.round(t / MYR)} Myr ${units}`, enc, t, units });
+          }
+        }
+      }
+    }
+  }
+  for (const { label, enc, t, units } of views) {
+    cases.push({ label, draw: (ctx, w, h) => void gx.drawScene(ctx, w, h, { enc, t, units }) });
+  }
+
+  /*
+   * Stars are drawn only inside the plot, and every word sits in the strips
+   * above and below it: checked from the draw records, independently of the
+   * sim's own bookkeeping. A star is a filled rect; the core dots are arcs.
+   */
+  it('keeps every star inside the plot and every label off the stars', () => {
+    const problems: string[] = [];
+    for (const [width, height] of [...WIDTHS, 390].flatMap((w) => GX_HEIGHTS.map((h) => [w, h] as const))) {
+      for (const { label, enc, t, units } of views) {
+        const { ctx, records } = recordingContext();
+        const layout = gx.drawScene(ctx, width, height, { enc, t, units });
+        const marks = records.filter((r) => r.kind === 'rect' || (r.kind === 'arc' && r.x1 - r.x0 <= 12));
+        for (const m of marks) {
+          const cxm = (m.x0 + m.x1) / 2;
+          const cym = (m.y0 + m.y1) / 2;
+          if (cxm < layout.plot.x0 - 0.5 || cxm > layout.plot.x1 + 0.5 || cym < layout.plot.y0 - 0.5 || cym > layout.plot.y1 + 0.5) {
+            problems.push(`${label} @${width}×${height}: a ${m.kind} drawn outside the plot`);
+          }
+        }
+        for (const text of records.filter((r) => r.kind === 'text')) {
+          const hit = marks.find((m) => m.x1 > text.x0 && m.x0 < text.x1 && m.y1 > text.y0 && m.y0 < text.y1);
+          if (hit) problems.push(`${label} @${width}×${height}: "${text.text}" drawn over a ${hit.kind}`);
+        }
+      }
+    }
+    expect(problems.slice(0, 20)).toEqual([]);
+  }, 60_000);
+
+  it('captions the moment from the same encounter it draws', () => {
+    for (const { enc, t, units } of views.filter((_, k) => k % 7 === 0)) {
+      const { ctx, records } = recordingContext();
+      gx.drawScene(ctx, 900, GX_HEIGHT, { enc, t, units });
+      const since = gx.formatSincePeri(t - enc.tPeri, units === 'technical');
+      expect(records.some((r) => r.kind === 'text' && (r.text ?? '').includes(since))).toBe(true);
+    }
+  });
+
+  it('shows Toomre’s result at the defaults: long tails prograde, few retrograde', () => {
+    const base = {
+      M2: paramOf(params, 'M2').default,
+      rp: paramOf(params, 'rp').default,
+      tilt: paramOf(params, 'tilt').default,
+    };
+    const pro = simulateEncounter(base);
+    const retro = simulateEncounter({ ...base, tilt: paramOf(params, 'tilt').max });
+    expect(gx.formatPercent(pro.tail[pro.steps]!)).toBe('36%');
+    expect(gx.formatPercent(retro.tail[retro.steps]!)).toBe('3%');
+    expect(gx.formatSpeed(pro.vPeri, false)).toBe('254 kilometres a second');
+    expect(gx.formatDistance(pro.rPeri, true)).toBe('20 kpc');
+  });
+
+  it('keeps a drag’s draft within its budget, and never below a sixth of the stars', () => {
+    const rp = paramOf(params, 'rp');
+    for (const r of [rp.min, rp.default, rp.max]) {
+      const settings = { M2: paramOf(params, 'M2').max, rp: r, tilt: 0 };
+      const { nMain, nComp } = gx.draftCounts(settings);
+      const steps = encounterSteps(settings);
+      expect(steps * (nMain + nComp) <= gx.DRAFT_BUDGET * 1.02 || nMain === Math.round(MAIN_STARS / 6)).toBe(true);
+      expect(nMain).toBeGreaterThanOrEqual(Math.round(MAIN_STARS / 6));
+    }
+  });
+
+  it('runs time at one stated rate', () => {
+    expect(gx.SIM_SECONDS_PER_SCREEN_SECOND).toBe(50 * MYR);
+  });
+
+  return cases;
+}
+
 /* ---------------------------------- the test --------------------------------- */
 
 const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
@@ -2357,6 +2460,7 @@ const SIMS: { name: string; height: number; cases: () => Case[] }[] = [
   { name: 'wormholes', height: WH_HEIGHT, cases: wormholeCases },
   { name: 'neutron-stars', height: NS_HEIGHT, cases: neutronStarCases },
   { name: 'dark-matter', height: DM_HEIGHT, cases: darkMatterCases },
+  { name: 'galaxies', height: GX_HEIGHT, cases: galaxyCases },
 ];
 
 /**
@@ -2395,6 +2499,7 @@ const MEASURED_PLACEMENT = new Set([
   'wormholes',
   'neutron-stars',
   'dark-matter',
+  'galaxies',
 ]);
 
 for (const sim of SIMS) {

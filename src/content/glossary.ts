@@ -643,6 +643,33 @@ export const glossary: Record<string, GlossaryEntry> = {
     title: 'Axion',
     body: 'A hypothetical, extremely light particle proposed in 1977–78 to fix a puzzle in the strong nuclear force, and a candidate for dark matter. None has been found.',
   },
+
+  /* Galaxies ------------------------------------------------------- */
+
+  galaxy: {
+    title: 'Galaxy',
+    body: 'A system of stars, gas, dust and dark matter held together by its own gravity. The Milky Way is one; the observable universe holds hundreds of billions or more.',
+  },
+  'hubble-sequence': {
+    title: 'Hubble sequence',
+    body: 'Hubble’s 1926 sorting of galaxies by shape, drawn as a tuning fork: ellipticals, lenticulars, then spirals with and without a bar. A classification, not an evolutionary path.',
+  },
+  'elliptical-galaxy': {
+    title: 'Elliptical galaxy',
+    body: 'A smooth, oval galaxy of mostly old stars on random orbits, with little gas and few new stars.',
+  },
+  'spiral-galaxy': {
+    title: 'Spiral galaxy',
+    body: 'A galaxy with a flat, rotating disc of stars and gas, spiral arms where new stars form, and a central bulge. Many, like the Milky Way, have a bar.',
+  },
+  'tidal-tail': {
+    title: 'Tidal tail',
+    body: 'A long, curved stream of stars and gas pulled out of a galaxy by the gravity of a close neighbour.',
+  },
+  'dynamical-friction': {
+    title: 'Dynamical friction',
+    body: 'The gravitational drag on a massive body moving through a sea of stars and dark matter. It slows passing galaxies until they fall together.',
+  },
 };
 
 /** The entry a `term` node points at, or undefined if the id is unknown. */
