@@ -32,6 +32,7 @@ if (import.meta.env.DEV) {
       verifyNeutronStarModel,
       verifyDarkMatterModel,
       verifyGalaxyModel,
+      verifyTideModel,
     }) => {
       runSanityChecks();
       verifyEscapeIntegrator();
@@ -55,6 +56,7 @@ if (import.meta.env.DEV) {
       verifyNeutronStarModel();
       verifyDarkMatterModel();
       verifyGalaxyModel();
+      verifyTideModel();
     },
   );
 }

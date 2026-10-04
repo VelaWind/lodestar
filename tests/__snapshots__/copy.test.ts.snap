@@ -912,6 +912,60 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "tagline": "How a star dies depends on one number, its mass. Above a line, it ends in the brightest event in its galaxy.",
     "title": "Supernovae",
   },
+  "tides": {
+    "L1 hook": "Most coasts get two high tides a day, not one. The sea piles up on the side of Earth facing the Moon, and on the side facing away from it too.",
+    "L2 intuition": "Picture three runners in a line, all pulled toward a finish ahead, where the pull is stronger the closer you are. The front runner is pulled hardest and gains ground. The back runner is pulled least and falls behind. Seen from the middle runner, both the others are moving away: the line stretches at both ends. Earth is like that line, and the Moon is the finish. The Moon pulls hardest on the side of Earth facing it, less on Earth’s centre, and least on the far side. So, compared with the centre, the near-side ocean is pulled toward the Moon and the far-side ocean is left behind. The water bulges out on both sides. As Earth turns once a day, a coast passes through both bulges: two high tides a day. Where the analogy breaks: runners drive themselves forward, while here gravity does all the pulling. And the stretch only shows up compared with Earth’s centre, which is itself falling toward the Moon all the time.",
+    "L3 approximation 0": "This is the equilibrium tide: the shape the water would take if it covered the whole Earth and followed the pull instantly. Real oceans, broken up by continents, cannot. Their tides are waves, as the real picture below explains.",
+    "L3 approximation 1": "Water heights are drawn two million times too big, and the ocean far too deep. Distances are not to scale: the Moon is really about 60 Earth radii away, and the Sun about 390 times farther than the Moon.",
+    "L3 approximation 10": "Time is sped up by the same factor at every setting: one second on screen is two hours.",
+    "L3 approximation 2": "The Moon and Sun are kept over the equator. Really the Moon swings up to about 28.6 degrees north and south, and the Sun 23.4. That makes a day’s two high tides unequal at most places.",
+    "L3 approximation 3": "While Earth turns, the Moon’s phase is held at the slider’s value. Really it moves on about 12 degrees a day, so spring tides become neap tides in about a week.",
+    "L3 approximation 4": "Earth’s rock is treated as rigid. In fact the ground itself rises and falls by a few tens of centimetres, so a tide gauge on the shore would see only about 70 percent of the heights shown here.",
+    "L3 approximation 5": "Heights use the leading term of the formula. The exact pull makes the bulge facing the Moon about 3 percent higher than the far one.",
+    "L3 approximation 6": "The Moon moves on a circle at the chosen distance. Its real distance swings between 363 300 and 405 500 kilometres each month, changing its tide by about 40 percent.",
+    "L3 approximation 7": "Arrows show the tidal pull of the Moon and Sun together at the coast, all drawn to one fixed scale. The exception: arrows longer than the ocean is drawn deep are shortened to that length, which happens only with the Moon nearer than about 0.95 times its real distance.",
+    "L3 approximation 8": "The ocean’s outline is drawn at the equator, whatever the red dot’s latitude; the trace below it is at the dot’s latitude.",
+    "L3 approximation 9": "Real bulges are carried slightly ahead of the Moon by Earth’s spin; this one sits on the line to the Moon.",
+    "L3 caption": "Turn the Moon around Earth with the phase slider. At new and full Moon the Sun’s tide adds to the Moon’s; at the quarter Moons they partly cancel. Move the Moon closer and its own tide grows as the inverse cube of the distance. Beyond about 1.3 times its real distance, the Sun’s tide becomes the larger of the two.",
+    "L4 figure alt": "A world map of the oceans coloured from blue through green and yellow to red, with land in grey. White lines radiate from a dozen points in the oceans, where the colour is darkest blue, and fan out across each ocean basin; the deepest reds hug coasts such as the Bay of Fundy, the English Channel and Patagonia.",
+    "L4 real": "A tide is the regular rise and fall of the sea, driven by the tidal force: the difference between the Moon’s pull on Earth’s near side, on its centre and on its far side. Earth as a whole is in free fall around the Earth–Moon centre of mass, so only those differences act on the oceans: outward along the line to the Moon on both sides, inward across it. The stretch is tiny, about one nine-millionth of Earth’s gravity, and it falls as the inverse cube of distance. That is why the Moon, 390 times closer than the Sun, raises the bigger tide, although the Sun pulls on Earth about 180 times harder. The Sun raises its own tide, 0.46 of the Moon’s. At new and full Moon the two line up and add, giving large spring tides (nothing to do with the season). At the quarter Moons they partly cancel, giving small neap tides. Real tides are not two bulges sweeping round. Continents block them, and the ocean is too shallow for a wave to keep pace with the Moon. So the tide travels as waves circling round amphidromic points, places with almost no tide, shown on the map below. The equilibrium tide would rise and fall about half a metre; real ranges run from almost nothing to about 16 metres in Canada’s Bay of Fundy, where the shape of the bay makes the water resonate. Tides also brake Earth. Its spin drags the tide slightly ahead of the Moon. The pull of that water speeds the Moon along its orbit, while the Moon’s pull on it slows Earth. The day lengthens, and the Moon recedes by 3.83 centimetres a year, measured since 1969 by laser pulses bounced off reflectors left on the Moon. Isaac Newton explained tides by gravity in his Principia (1687), and Pierre-Simon Laplace founded their dynamic theory in 1775–76. Galileo had argued, wrongly, that Earth’s own motions sloshed the seas. The main lunar tide, called M2, as measured from orbit by the TOPEX/Poseidon satellite. Colour is its amplitude in centimetres: how far each high tide rises above the mean, half the full rise and fall. White lines join places where high tide comes at the same moment, an hour apart, and they turn around amphidromic points, where the lines meet and there is almost no tide. Richard D. Ray, NASA Goddard Space Flight Center (TOPEX/Poseidon)",
+    "L5 intro": "The first equation is the stretch, the second why the nearer Moon wins over the heavier Sun, the third the rise and fall it makes.",
+    "L5 note (range)": "\\Delta h — the equilibrium tide’s range, high water minus low water, at latitude \\varphi with both bodies over the equator; h — each body’s crest, the water’s height above its undisturbed level at the point under the body (leading order, rigid Earth); \\alpha — the phase angle. Each body’s tide is a constant plus \\tfrac34 h\\cos^2\\varphi\\cos 2(\\lambda - \\lambda_{\\text{body}}), and the two waves add as vectors. Worked example, the equator today: h_{\\text{M}} = 0.0123 \\times (6.371 \\times 10^{6})^4 / (3.844 \\times 10^{8})^3 = 0.357\\,\\text{m} and h_\\odot = 0.164\\,\\text{m}. At spring tides \\Delta h = 1.5 \\times (0.357 + 0.164) = 0.78\\,\\text{m}, at neaps 1.5 \\times (0.357 - 0.164) = 0.29\\,\\text{m}. Earth turns once relative to the Moon in 24 h 50 min, so high tides come every 12 h 25 min.",
+    "L5 note (ratio)": "Each body’s tide goes as its mass over the cube of its distance, while its plain pull goes as mass over the square. The Sun is 2.7 \\times 10^{7} times the Moon’s mass and 389 times as far: its pull on Earth is 2.7 \\times 10^{7}/389^2 = 179 times the Moon’s, its tide 2.7 \\times 10^{7}/389^3 = 0.46 of it. Worked example, today: the solar tidal acceleration is 5.05 \\times 10^{-7}\\,\\text{m/s}^2, the ratio 0.459. With the Moon 1.30 times farther than now, the two would be equal. The sim’s readout, the exact accelerations at the points directly under each body, gives 0.448, because the Moon’s exact near-side stretch is 2.5% above the leading-order figure. On that exact ratio the crossing is at 1.304 times; the two estimates differ by under 1%.",
+    "L5 note (stretch)": "a — the tidal acceleration along the line to the Moon, at the point under it; R_\\oplus — Earth’s radius; d — the Moon’s distance. Valid only when Earth is much smaller than the distance, R_\\oplus \\ll d; at the Moon, R_\\oplus/d = 0.017, and it is good to about 2.5%. Worked example, today: a = 2 \\times 6.674 \\times 10^{-11} \\times 7.346 \\times 10^{22} \\times 6.371 \\times 10^{6} / (3.844 \\times 10^{8})^3 = 1.10 \\times 10^{-6}\\,\\text{m/s}^2, about one nine-millionth of g. The exact difference, GM[1/(d - R)^2 - 1/d^2], gives 1.13 \\times 10^{-6} on the near side and 1.07 \\times 10^{-6} on the far side; across the line, the squeeze is half the stretch.",
+    "L6 deeper": "A common explanation says the far-side bulge is flung out by centrifugal force as Earth swings round the Earth–Moon centre of mass. That swing is real, but it is a revolution without rotation: every point of Earth moves on an equal circle, so its acceleration is the same everywhere, equal to the Moon’s pull at the centre. Subtracting it is exactly what the free-fall frame does, and a term that is the same everywhere cannot make near and far sides differ: in that frame the bulges come from how the Moon’s pull varies across Earth. In a frame turning with the Earth and Moon a centrifugal term does vary across Earth, and done carefully that frame gives the same answer; what is wrong is crediting the far bulge to centrifugal force alone and the near bulge to gravity alone. Earth’s daily spin, a separate rotation, raises neither. Ocean basins respond as forced, damped resonators. The main lunar tide travels as long waves, deflected by Earth’s rotation, round amphidromic points, mostly counter-clockwise in the north. Where a basin’s natural period is near the forcing’s, the tide grows: the Bay of Fundy and Gulf of Maine slosh with a period of about 13.3 hours against the tide’s 12.42 (Garrett 1972). Tidal friction moves angular momentum from Earth’s spin to the Moon’s orbit, most of it dissipated in shallow seas and over rough deep-ocean floor (Egbert & Ray 2000). It alone would lengthen the day by about 2.3 milliseconds a century; eclipse records over 2 700 years give 1.78. The difference is largely the ground still rising after the last ice age, which makes Earth less flattened and speeds it up. Layered tidal sediments, tidal rhythmites, from 620 million years ago record about 400 days a year and a Moon at about 96.5 percent of its present distance (Williams 2000). Earth’s tides on the young Moon braked its spin until it turned once per orbit, so it keeps one face toward us: tidal locking. It has been locked for billions of years; exactly when it locked is uncertain. Jupiter’s moon Io, kept on an eccentric orbit by resonance with Europa and Ganymede, is flexed by a tide that changes through each orbit. It is heated by about 9 \\times 10^{13} watts (Lainey et al. 2009), making it the most volcanically active world known. A body held together only by its own gravity is torn apart inside the Roche limit: d = 2.44\\,R_p(\\rho_p/\\rho_s)^{1/3} for a fluid body that deforms freely, 1.26\\,R_p(\\rho_p/\\rho_s)^{1/3} for a rigid one. For solid ice around Saturn the fluid limit is about 2.1 Saturn radii; for the fluffy, porous ice of real ring particles it is nearer 2.5, outside all the main rings, whose outer edge is at 2.27. The same differences in pull stretch a body falling into a black hole, and draw tidal tails out of passing galaxies.",
+    "L7 reason -> black-holes": "Near a small black hole the same stretch, falling as the cube of distance, would pull a person apart.",
+    "L7 reason -> galaxies": "Scaled up to galaxies, the tidal force throws stars out into long tidal tails.",
+    "L7 reason -> habitable-zone": "Planets close to their stars, like TRAPPIST-1’s, are expected to be tidally locked, one side always in daylight.",
+    "L7 reason -> kepler-orbits": "The Moon’s orbit and its changing distance, perigee to apogee, are Kepler’s ellipse at work.",
+    "reference 0": {
+      "label": "Williams & Boggs 2016, “Secular tidal changes in lunar orbit and Earth rotation”, Celest. Mech. Dyn. Astron. 126, 89",
+      "note": "Lunar laser ranging: the Moon recedes 38.30 ± 0.09 mm a year",
+      "url": "https://doi.org/10.1007/s10569-016-9702-3",
+    },
+    "reference 1": {
+      "label": "Stephenson, Morrison & Hohenkerk 2016, “Measurement of the Earth’s rotation: 720 BC to AD 2015”, Proc. R. Soc. A 472, 20160404",
+      "note": "The day lengthens 1.78 ms a century, against 2.3 from tides alone",
+      "url": "https://doi.org/10.1098/rspa.2016.0404",
+    },
+    "reference 2": {
+      "label": "Egbert & Ray 2000, “Significant dissipation of tidal energy in the deep ocean inferred from satellite altimeter data”, Nature 405, 775",
+      "note": "Where tidal energy is lost, from TOPEX/Poseidon",
+      "url": "https://doi.org/10.1038/35015531",
+    },
+    "reference 3": {
+      "label": "Williams 2000, “Geological constraints on the Precambrian history of Earth’s rotation and the Moon’s orbit”, Rev. Geophys. 38, 37",
+      "note": "Tidal rhythmites: about 400 days a year 620 million years ago",
+      "url": "https://doi.org/10.1029/1999RG900016",
+    },
+    "reference 4": {
+      "label": "Lainey et al. 2009, “Strong tidal dissipation in Io and Jupiter from astrometric observations”, Nature 459, 957",
+      "note": "Io’s tidal heating, (9.33 ± 1.84) × 10¹³ W",
+      "url": "https://doi.org/10.1038/nature08108",
+    },
+    "tagline": "The Moon pulls harder on the near side of Earth than the far side. The oceans stretch both ways, and the sea rises twice a day.",
+    "title": "Tides",
+  },
   "time-dilation": {
     "L1 hook": "An astronaut who spends a year on the Space Station comes home about nine thousandths of a second younger than if they had stayed on the ground. That is time travel, and it is the only kind physics is sure of.",
     "L2 intuition": "Picture a car that can only ever drive at exactly 100 kilometres an hour. Point it due north and all of that speed goes into getting north. Turn it a little east and it still does 100, but now some of the speed goes east, so it makes less progress north. Turn it fully east and it makes no northward progress at all. Everything in the universe is like that car, except that one of the directions is time. Sitting still, all your “speed” goes into moving through time, and your clock ticks at its fullest rate. Start moving through space and some of it is taken from your motion through time, so your clock ticks more slowly than the clock of someone who stayed put. At everyday speeds the share taken is too tiny to notice. Near the speed of light it is most of it. Gravity slows clocks too, for a different reason: time itself runs more slowly deep down in gravity than high up. A clock on the floor runs slower than one on the ceiling, by an amount only the best atomic clocks can see. Near a black hole the difference becomes enormous. Where the analogy breaks: the car can turn fully east, but nothing with mass can ever reach the speed of light. And the car cannot show that two travellers moving apart each see the other’s clock as the slow one.",
@@ -1045,6 +1099,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "acoustic-peaks": {
     "body": "The preferred sizes of the microwave background spots, set by sound waves in the early universe. The first and largest is about one degree across.",
     "title": "Acoustic peaks",
+  },
+  "amphidromic-point": {
+    "body": "A place in the ocean with almost no tide, around which the tide travels as a wave, high water reaching each coast in turn.",
+    "title": "Amphidromic point",
   },
   "analogue-gravity": {
     "body": "Laboratory systems, such as a flowing fluid with a point sound cannot escape, that mimic a black hole’s horizon closely enough to show Hawking-like radiation.",
@@ -1217,6 +1275,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "equilibrium-temperature": {
     "body": "The temperature a planet settles at when the starlight it absorbs balances the heat it radiates, with no atmosphere. Earth’s is 255 K; its surface is 288 K.",
     "title": "Equilibrium temperature",
+  },
+  "equilibrium-tide": {
+    "body": "The shape the ocean would take if it covered Earth and followed the tidal pull instantly: two bulges, rising and falling about half a metre. Real tides are waves instead.",
+    "title": "Equilibrium tide",
   },
   "ergosphere": {
     "body": "A region just outside a spinning hole’s horizon where space itself is dragged around; the hole’s rotational energy can be extracted there.",
@@ -1406,6 +1468,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "Three or more bodies all pulling on each other; no formula solves it, only computation.",
     "title": "N-body",
   },
+  "neap-tide": {
+    "body": "The small tides near the quarter Moons, when the Sun’s tide partly cancels the Moon’s.",
+    "title": "Neap tide",
+  },
   "negative-heat-capacity": {
     "body": "Getting hotter by losing energy. Black holes do it: as one radiates it shrinks, and as it shrinks it heats up, so evaporation runs faster and faster.",
     "title": "Negative heat capacity",
@@ -1506,6 +1572,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
     "body": "The last vibration of the merged hole, ringing like a struck bell as it settles into shape.",
     "title": "Ringdown",
   },
+  "roche-limit": {
+    "body": "The distance inside which a planet’s tide tears apart a moon held together only by its own gravity: about 2.4 planet radii for a fluid moon of equal density.",
+    "title": "Roche limit",
+  },
   "rotation-curve": {
     "body": "How fast stars and gas orbit a galaxy’s centre at each distance from it. Far out, most are nearly flat.",
     "title": "Rotation curve",
@@ -1541,6 +1611,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "spiral-galaxy": {
     "body": "A galaxy with a flat, rotating disc of stars and gas, spiral arms where new stars form, and a central bulge. Many, like the Milky Way, have a bar.",
     "title": "Spiral galaxy",
+  },
+  "spring-tide": {
+    "body": "The large tides near new and full Moon, when the Sun’s tide adds to the Moon’s. Nothing to do with the season.",
+    "title": "Spring tide",
   },
   "sputtering": {
     "body": "Atmosphere loss by impact: fast particles streaming from the Sun, the solar wind, strike molecules at the top of the air and knock them into space.",
@@ -1581,6 +1655,10 @@ exports[`reader-visible copy > the glossary, word for word 1`] = `
   "tidal-tail": {
     "body": "A long, curved stream of stars and gas pulled out of a galaxy by the gravity of a close neighbour.",
     "title": "Tidal tail",
+  },
+  "tide": {
+    "body": "The regular rise and fall of the sea, twice a day in most places, raised by the difference between the Moon’s and Sun’s pull across Earth.",
+    "title": "Tide",
   },
   "time-dilation": {
     "body": "Clocks running at different rates for different observers: slower when moving fast, and slower deep in gravity. Measured with atomic clocks on aircraft, satellites and a staircase.",
