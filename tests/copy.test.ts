@@ -30,6 +30,7 @@
 import { describe, expect, it } from 'vitest';
 import { aboutSections, aboutTitle } from '@/content/about';
 import { glossary } from '@/content/glossary';
+import { LEARNING_PATH, PATH_NOTE } from '@/content/path';
 import { moduleList } from '@/content/registry';
 import type { Block, Module, RichText } from '@/content/types';
 import { plainText } from '@/lib/plainText';
@@ -114,6 +115,13 @@ describe('reader-visible copy', () => {
         heading: section.heading,
         body: plainText(section.body),
       })),
+    }).toMatchSnapshot();
+  });
+
+  it('the learning path, word for word', () => {
+    expect({
+      note: PATH_NOTE,
+      stages: LEARNING_PATH.map((stage) => ({ title: stage.title, description: stage.description, modules: stage.modules })),
     }).toMatchSnapshot();
   });
 });
