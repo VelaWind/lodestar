@@ -26,7 +26,7 @@ const stellarFusion: Module = {
       body: prose(
         p(
           'By the physics of everyday objects, the Sun is not hot enough to shine: its protons ',
-          'should never get close enough to fuse, joining into a heavier nucleus and giving off ',
+          'should never get close enough to fuse, joining into something heavier and giving off ',
           'energy. They do anyway, because the very small plays by ',
           'different rules.',
         ),
@@ -122,7 +122,7 @@ const stellarFusion: Module = {
         ),
         prose(
           p(
-            'The rate is a fit to Sun-like conditions. It runs too high below about 3 million K, and above about 17 million K another route to fusion takes over and is not shown.',
+            'The rate is a fit to Sun-like conditions. It runs too high below about 3 million kelvin, and above about 17 million kelvin another route to fusion takes over and is not shown.',
           ),
         ),
         prose(

@@ -55,7 +55,7 @@ const wormholes: Module = {
         ),
         p(
           'Where the analogy breaks: the paper folds through the room around it, but space does not need ',
-          'anything to fold through; the bending is in space itself, and the fold in the drawing is only ',
+          'anything to fold through. The bending is in space itself, and the fold in the drawing is only ',
           'a way of showing it. And a pencil goes through paper easily, while nothing we know of can ',
           'hold a real throat open.',
         ),
@@ -96,7 +96,7 @@ const wormholes: Module = {
       approximations: [
         prose(
           p(
-            'The wormhole is the simplest traversable kind, with the same gravity everywhere along it and no tidal stretching. Other shapes need less negative mass in total but pack it more densely.',
+            'The wormhole is the simplest traversable kind, with no gravity pulling along it and no head-to-foot stretching for anyone standing still in it. Other shapes need less negative mass in total but pack it more densely.',
           ),
         ),
         prose(
@@ -111,7 +111,7 @@ const wormholes: Module = {
         ),
         prose(
           p(
-            'The negative mass quoted is the exotic matter’s density added up over all space; from outside, this wormhole has no net mass at all. A traveller moving through still feels sideways tidal forces.',
+            'The negative mass quoted is that matter’s density added up over all space; from outside, this wormhole has no net mass at all. A traveller moving through still feels sideways tidal forces.',
           ),
         ),
       ],

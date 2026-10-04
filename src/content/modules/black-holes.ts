@@ -117,12 +117,12 @@ const blackHoles: Module = {
         ),
         prose(
           p(
-            'The stretching figure is for a 1.7 m person falling feet first, measured right at the horizon.',
+            'The stretching figure is for a 1.7-metre person falling feet first, measured right at the horizon.',
           ),
         ),
         prose(
           p(
-            'The evaporation time counts light only, so it is nearly twice too long. And no hole this heavy is shrinking yet: each is colder than the 2.7 K glow left over from the Big Bang, so it takes in more than it gives off.',
+            'Quantum physics predicts that every black hole glows very faintly and so slowly loses mass; the evaporation time is how long that would take. It counts only the light given off, so it is nearly twice too long. And no hole this heavy is shrinking yet: each is colder than the 2.7-kelvin glow left over from the Big Bang, so it takes in more than it gives off.',
           ),
         ),
         prose(

@@ -240,7 +240,7 @@ function ModuleCard({ module }: { module: ModuleSummary }) {
           above it. It used to be a step dimmer than the meta row beneath, which
           put the most persuasive line on the card in the quietest tone on it. */}
       {teaser && (
-        <p className="mt-3.5 border-l border-edge-soft pl-3.5 font-prose text-sm leading-relaxed text-ink-dim">
+        <p className="mt-3.5 border-s border-edge-soft ps-3.5 font-prose text-sm leading-relaxed text-ink-dim">
           {teaser}
         </p>
       )}

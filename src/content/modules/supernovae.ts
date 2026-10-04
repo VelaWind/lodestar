@@ -421,7 +421,7 @@ const supernovae: Module = {
         },
         {
           moduleId: 'nebulae',
-          reason: 'The Crab is one; that module is about the glowing gas, this one about what made it glow.',
+          reason: 'The Crab is one; that module is about how gas clouds glow, this one about the explosion that made the Crab.',
         },
       ],
     },

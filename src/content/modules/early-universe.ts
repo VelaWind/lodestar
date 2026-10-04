@@ -31,7 +31,7 @@ const earlyUniverse: Module = {
       body: prose(
         p(
           'One second after it began, the entire universe was ten billion degrees, hotter than ',
-          'the centre of any star. Every proton and neutron in your body was already there, and had been for ',
+          'the centre of any star. The matter of every atom in your body was already there, and had been for ',
           'most of that second.',
         ),
       ),
@@ -95,7 +95,7 @@ const earlyUniverse: Module = {
         },
         {
           id: 'E',
-          friendlyLabel: 'How heavy a particle? (as the energy locked in its mass, in MeV; an electron is 0.511)',
+          friendlyLabel: 'How heavy a particle? (as the energy locked in its mass, in millions of electronvolts, a tiny unit of energy; an electron is 0.511)',
           technicalLabel: 'Particle rest energy',
           symbol: 'mc^2',
           unit: 'J',
@@ -128,7 +128,7 @@ const earlyUniverse: Module = {
         ),
         prose(
           p(
-            'After two minutes it follows the standard model of the expanding universe, with the amounts of matter, dark energy and light measured by the Planck satellite in 2018, and treats neutrinos as massless.',
+            'After two minutes it follows the standard model of the expanding universe, with the amounts of matter, light and dark energy (the unexplained energy now speeding up the expansion) measured by the Planck satellite in 2018. It treats neutrinos, ghostly particles that barely interact, as massless.',
           ),
         ),
         prose(

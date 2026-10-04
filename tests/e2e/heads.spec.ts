@@ -97,6 +97,17 @@ const ogDescription = (html: string) =>
 const ogUrl = (html: string) => pick(html, /<meta\s+property="og:url"\s+content="([^"]*)"/);
 const canonical = (html: string) => pick(html, /<link\s+rel="canonical"\s+href="([^"]*)"/);
 
+/** The one JSON-LD block, parsed; it must be valid JSON and carry no personal details. */
+function structuredData(html: string, path: string): Record<string, unknown> {
+  const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  expect(blocks.length, `${path || '/'}: one structured-data block`).toBe(1);
+  const raw = blocks[0]![1]!;
+  const data = JSON.parse(raw) as Record<string, unknown>;
+  expect(data['@context'], `${path || '/'}: schema.org context`).toBe('https://schema.org');
+  expect(raw, `${path || '/'}: structured data names a person`).not.toMatch(/"(author|creator|publisher|Person)"/);
+  return data;
+}
+
 test('every route serves its own head', async ({ request, baseURL }) => {
   const onDisk = readdirSync('src/content/modules').filter((f) => f.endsWith('.ts'));
   expect(
@@ -177,8 +188,18 @@ test('every route serves its own head', async ({ request, baseURL }) => {
     );
     expect(html, `${path}: twitter:card`).toContain('content="summary_large_image"');
 
+    // Without JavaScript the page still says what it is about, and its
+    // structured data names the topic and nobody: no author, by rule.
+    const data = structuredData(html, path);
+    expect(data['@type'], `${path}: structured data type`).toBe('LearningResource');
+    expect(data.name, `${path}: structured data name`).toBe(module.title);
+    expect(data.url, `${path}: structured data url`).toBe(`${SITE_ORIGIN}${path}`);
+    expect(pick(html, /<noscript>[\s\S]*?<h1>([^<]*)<\/h1>/), `${path}: no-script heading`).toBe(module.title);
+
     checked.push(path);
   }
+
+  for (const path of ['/', '/about']) structuredData(await fetchHtml(path), path);
 
   /* --- no two routes claim the same address ------------------------- */
 

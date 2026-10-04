@@ -113,7 +113,7 @@ const nebulae: Module = {
         ),
         prose(
           p(
-            'The star’s ultraviolet is a single number, the count of photons able to ionize hydrogen. Which star it is, and how hot, are folded into that count.',
+            'The star’s ultraviolet is a single number, the count of photons able to strip hydrogen of its electron. Which star it is, and how hot, are folded into that count.',
           ),
         ),
         prose(
@@ -391,7 +391,7 @@ const nebulae: Module = {
         {
           moduleId: 'stellar-fusion',
           reason:
-            'The stars doing the ionizing here are the massive end of what that module describes; their ultraviolet comes from the surface of a star whose core is more than twice as hot as the Sun’s.',
+            'That module is how the Sun’s core burns. The stars doing the ionizing here are far heavier, with cores more than twice as hot, where the other route to fusion it mentions takes over.',
         },
         {
           moduleId: 'supernovae',

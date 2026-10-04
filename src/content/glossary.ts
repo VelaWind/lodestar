@@ -75,7 +75,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   'cosmic-microwave-background': {
     title: 'Cosmic microwave background',
-    body: 'The glow left over from the hot early universe, now stretched to microwaves and 2.7 K, arriving from every direction.',
+    body: 'The glow left over from the hot early universe, now stretched to microwaves and 2.7 degrees above absolute zero, arriving from every direction.',
   },
   recombination: {
     title: 'Recombination',
@@ -328,7 +328,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   'escape-parameter': {
     title: 'Escape parameter',
-    body: 'λ, the square of a world’s escape speed divided by a gas molecule’s typical speed. Each step of 1 in λ cuts the rate the gas escapes by a factor of about 2.7.',
+    body: 'λ, the square of the ratio of a world’s escape speed to a gas molecule’s typical speed. Each step of 1 in λ cuts the rate the gas escapes by a factor of about 2.7.',
   },
   photochemistry: {
     title: 'Photochemistry',
@@ -521,7 +521,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   parallax: {
     title: 'Parallax',
-    body: 'The shift of a nearby star against the distant background as Earth moves around the Sun. One arcsecond of shift means one parsec, 3.26 light-years, away.',
+    body: 'Half the yearly back-and-forth shift of a nearby star against the distant background as Earth goes around the Sun. One arcsecond of parallax means one parsec, 3.26 light-years, away.',
   },
   'leavitt-law': {
     title: 'Leavitt law',
@@ -533,7 +533,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'distance-modulus': {
     title: 'Distance modulus',
-    body: 'Apparent minus absolute magnitude, 5 log₁₀(d / 10 pc). Each 5 magnitudes is a factor of ten in distance.',
+    body: 'How much fainter a star looks than it would from 32.6 light-years away, in magnitudes: a measure of distance. Each 5 magnitudes is a factor of ten in distance.',
   },
   'hubble-flow': {
     title: 'Hubble flow',
@@ -675,7 +675,7 @@ export const glossary: Record<string, GlossaryEntry> = {
 
   tide: {
     title: 'Tide',
-    body: 'The regular rise and fall of the sea, twice a day in most places, raised by the difference between the Moon’s and Sun’s pull across Earth.',
+    body: 'The regular rise and fall of the sea, twice a day in most places, raised by how the Moon’s and Sun’s pull varies across Earth.',
   },
   'equilibrium-tide': {
     title: 'Equilibrium tide',
