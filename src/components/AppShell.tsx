@@ -36,7 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           have to walk them on every page. Visually hidden until focused. */}
       <a
         href="#main"
-        className="sr-only left-4 top-4 z-50 rounded-md border border-star/60 bg-void-800 px-4 py-2 font-ui text-sm text-ink focus:not-sr-only focus:absolute"
+        className="sr-only start-4 top-4 z-50 rounded-md border border-star/60 bg-void-800 px-4 py-2 font-ui text-sm text-ink focus:not-sr-only focus:absolute"
       >
         Skip to content
       </a>

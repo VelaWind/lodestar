@@ -12,6 +12,28 @@ import { getModuleSummary } from '@/content/catalog';
 import { PATH_NOTE, pathPlace } from '@/content/path';
 import { prefetchOnIntent } from '@/lib/prefetch';
 
+/**
+ * One line under a module's title: what the page holds, and its step on the
+ * path, linked to the footer that has the neighbours. Manifest data only.
+ */
+export function PageOrientation({ moduleId }: { moduleId: string }) {
+  const place = pathPlace(moduleId);
+  return (
+    <p className="mt-3 max-w-measure font-ui text-xs leading-relaxed text-ink-faint">
+      Seven layers, from plain words to the equations, with a live simulation in layer 3
+      {place && (
+        <>
+          {' · '}
+          <a href="#path-footer" className="text-star underline decoration-star/40 underline-offset-4 hover:decoration-star">
+            Step {place.step} of {place.total}
+          </a>{' '}
+          on the suggested path for beginners
+        </>
+      )}
+    </p>
+  );
+}
+
 export function PathFooter({ moduleId }: { moduleId: string }) {
   const place = pathPlace(moduleId);
   if (!place) return null;
@@ -54,7 +76,7 @@ export function PathFooter({ moduleId }: { moduleId: string }) {
               rel={place.wraps ? undefined : 'next'}
               {...prefetchOnIntent(next.id)}
               data-path-next
-              className="group block h-full rounded-lg border border-edge-soft bg-void-800/40 px-4 py-3 text-right transition-colors hover:border-star-dim/60 hover:bg-void-700/60"
+              className="group block h-full rounded-lg border border-edge-soft bg-void-800/40 px-4 py-3 text-end transition-colors hover:border-star-dim/60 hover:bg-void-700/60"
             >
               <span className="block font-ui text-xs text-ink-faint">
                 {place.wraps ? 'Back to the start of the path →' : 'Next →'}

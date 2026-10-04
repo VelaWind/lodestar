@@ -637,7 +637,7 @@ function Readout({
         {value}
         {suffix && (
           <span
-            className={`ml-2 font-ui text-xs uppercase tracking-[0.12em] ${
+            className={`ms-2 font-ui text-xs uppercase tracking-[0.12em] ${
               accent ? 'text-star' : 'text-ink-dim'
             }`}
           >

@@ -67,7 +67,7 @@ export function Approximations({ items }: { items: RichTextAst[] }) {
                    RichText emits: the shared prose size (1.0625rem/1.75) is set
                    for a reading column, and this is an 18rem sidebar. The
                    rendered result is the string version's, to the pixel. */
-                className="relative pl-4 before:absolute before:left-0 before:top-[0.65em] before:h-1 before:w-1 before:rounded-full before:bg-ember/60 [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-ink-dim [&>div]:max-w-none [&>div]:space-y-2"
+                className="relative ps-4 before:absolute before:start-0 before:top-[0.65em] before:h-1 before:w-1 before:rounded-full before:bg-ember/60 [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-ink-dim [&>div]:max-w-none [&>div]:space-y-2"
               >
                 <RichText content={item} />
               </li>

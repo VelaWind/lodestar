@@ -84,6 +84,38 @@ test('learning path: Start here passes axe with every stage open @cross-engine',
   expect(results.violations.map((v) => `${v.impact} ${v.id}: ${v.nodes[0]?.target.join(' ')}`)).toEqual([]);
 });
 
+test('learning path: a module page says where it sits before the first layer @cross-engine', async ({ page }) => {
+  const index = ORDER.indexOf('black-holes');
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  const line = page.locator('header').getByText('Seven layers, from plain words to the equations');
+  await expect(line).toBeVisible();
+  await expect(line).toContainText(`Step ${index + 1} of ${ORDER.length}`);
+  // On the first screen, even on a phone.
+  const box = (await line.boundingBox())!;
+  expect(box.y + box.height).toBeLessThanOrEqual(page.viewportSize()!.height);
+  await line.getByRole('link', { name: `Step ${index + 1} of ${ORDER.length}` }).click();
+  await expect(page.locator('#path-footer')).toBeInViewport();
+});
+
+/*
+ * A wide equation on a phone scrolls sideways inside its box; a keyboard has
+ * to be able to reach it to scroll it. Only boxes that overflow become stops.
+ */
+test('equations that scroll sideways can be reached by keyboard @cross-engine', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/m/dark-matter', { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: 'Expand all' }).click();
+  const boxes = page.locator('#layer-panel-math .overflow-x-auto');
+  await expect(boxes.first()).toBeVisible();
+  await expect(async () => {
+    const states = await boxes.evaluateAll((els) =>
+      els.map((el) => ({ overflows: el.scrollWidth > el.clientWidth + 1, focusable: el.getAttribute('tabindex') === '0' })),
+    );
+    expect(states.some((s) => s.overflows), 'expected at least one wide equation at 390 px').toBe(true);
+    for (const s of states) expect(s.focusable).toBe(s.overflows);
+  }).toPass();
+});
+
 const MIDDLE = Math.floor(ORDER.length / 2);
 
 for (const index of [0, MIDDLE, ORDER.length - 1]) {

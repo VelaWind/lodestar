@@ -13,7 +13,9 @@
  * edit anywhere — the same promise the registry makes to the shell, extended to
  * the parts of the page a crawler reads.
  */
+import { pathPlace } from '../src/content/path';
 import type { Module } from '../src/content/types';
+import { plainText } from '../src/lib/plainText';
 import { absoluteUrl } from '../src/lib/site';
 
 export interface RouteHead {
@@ -41,7 +43,29 @@ export interface RouteHead {
   title: string;
   description: string;
   canonical: string;
+  /**
+   * What the page says without JavaScript, served in a `<noscript>` inside the
+   * app's root: a heading and a few plain sentences (and, at the root, a link to
+   * every topic). A reader with JavaScript never sees it, and a crawler that
+   * does not run the app gets the page's real subject rather than an empty div.
+   * Plain text and links only, built from the same registry fields.
+   */
+  noscript: { heading: string; paragraphs: string[]; links?: { href: string; text: string }[] };
+  /** schema.org structured data for the page. No author or other personal details, by rule. */
+  jsonLd: Record<string, unknown>;
 }
+
+/** The site as schema.org sees it; every page's data points back to it. */
+const WEBSITE = {
+  '@type': 'WebSite',
+  name: 'Lodestar',
+  url: absoluteUrl('/'),
+  inLanguage: 'en',
+} as const;
+
+/** Said on every page without JavaScript: the simulations need it, the text is the summary. */
+const NEEDS_SCRIPT =
+  'This page’s interactive simulation and its seven layers need JavaScript. With it switched off, here is the summary.';
 
 /**
  * The About page's own description.
@@ -76,6 +100,17 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
       title: ROOT_TITLE,
       description: '',
       canonical: absoluteUrl('/'),
+      noscript: {
+        heading: 'Lodestar: space, explained in layers you choose to open',
+        paragraphs: [
+          'Every topic is one page of seven layers, from a one-sentence hook, through an everyday analogy and a live simulation, down to the derivation and the open questions. The simulations need JavaScript; the topics are:',
+        ],
+        links: published.map((module) => ({
+          href: `/m/${module.id}`,
+          text: `${module.title}: ${module.tagline}`,
+        })),
+      },
+      jsonLd: { '@context': 'https://schema.org', ...WEBSITE },
     },
     {
       path: '/about',
@@ -83,6 +118,16 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
       title: 'How Lodestar is built · Lodestar',
       description: ABOUT_DESCRIPTION,
       canonical: absoluteUrl('/about'),
+      noscript: { heading: 'How Lodestar is built', paragraphs: [ABOUT_DESCRIPTION] },
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        name: 'How Lodestar is built',
+        description: ABOUT_DESCRIPTION,
+        url: absoluteUrl('/about'),
+        inLanguage: 'en',
+        isPartOf: WEBSITE,
+      },
     },
     ...published.map((module) => ({
       path: `/m/${module.id}`,
@@ -94,6 +139,26 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
       // one-line summary the index shows under the title.
       description: module.tagline,
       canonical: absoluteUrl(`/m/${module.id}`),
+      noscript: {
+        heading: module.title,
+        paragraphs: [module.tagline, plainText(module.layers.hook.body), NEEDS_SCRIPT],
+      },
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'LearningResource',
+        name: module.title,
+        description: module.tagline,
+        abstract: plainText(module.layers.hook.body),
+        url: absoluteUrl(`/m/${module.id}`),
+        inLanguage: 'en',
+        learningResourceType: ['interactive simulation', 'explanation'],
+        interactivityType: 'mixed',
+        isAccessibleForFree: true,
+        image: absoluteUrl('/og.png'),
+        // The site, and the learning path with this topic's step on it.
+        isPartOf: [WEBSITE, { '@type': 'ItemList', name: 'Suggested path for beginners' }],
+        position: pathPlace(module.id)?.step,
+      },
     })),
   ];
 }
