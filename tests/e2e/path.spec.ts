@@ -223,7 +223,95 @@ test('navigation: the skip link and the step link still reach their targets @cro
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/#main$/);
   await expect(page.locator('#main')).toBeInViewport();
+  // The keyboard's place moves with the jump: the next Tab continues in the content.
+  await expect(page.locator('#main')).toBeFocused();
 });
+
+/*
+ * The smooth jump ends where it should, and smooth scrolling ends with it.
+ * On the longest module page at 390px (dark-matter, measured across all 22),
+ * the step link's glide is the longest the site has; the class that switches
+ * smooth scrolling on must outlast it and come off promptly after.
+ */
+test('navigation: the step link glides to the footer, and smooth scrolling ends with it @cross-engine', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/m/dark-matter', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#path-footer')).toHaveCount(1);
+  await page.waitForTimeout(400);
+  await page.evaluate(() => {
+    const w = window as unknown as { __track: [number, number, boolean][] };
+    w.__track = [];
+    const t0 = performance.now();
+    const tick = () => {
+      w.__track.push([performance.now() - t0, window.scrollY, document.documentElement.classList.contains('smooth-jump')]);
+      if (performance.now() - t0 < 4000) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await page.locator('header').getByRole('link', { name: /^Step \d+ of \d+$/ }).click();
+  await page.waitForTimeout(4200);
+  const track = await page.evaluate(() => (window as unknown as { __track: [number, number, boolean][] }).__track);
+  const reduced = await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const final = track[track.length - 1]![1];
+  // The last frame on which the page moved, and the first after it with the class gone.
+  let stopped = 0;
+  for (let i = 1; i < track.length; i += 1) if (track[i]![1] !== track[i - 1]![1]) stopped = track[i]![0];
+  const classOff = track.find(([t, , on]) => t >= stopped && !on)?.[0] ?? Infinity;
+  await expect(page.locator('#path-footer')).toBeInViewport();
+  expect(await page.evaluate(() => window.scrollY), 'the page should rest where the jump ended').toBe(final);
+  expect(final, 'the jump should have gone down the page').toBeGreaterThan(1000);
+  if (!reduced) expect(track.some(([, , on]) => on), 'smooth scrolling should have been on for the jump').toBe(true);
+  expect(classOff - stopped, `smooth-jump came off ${Math.round(classOff - stopped)} ms after the scroll stopped`).toBeLessThanOrEqual(300);
+});
+
+/*
+ * Back after an in-page jump returns to where the reader was. Followed
+ * natively, the jump's history entry shared the key "default" with the one
+ * before it, so their saved positions overwrote each other and Back stayed at
+ * the target. Each jump now has its own entry.
+ */
+for (const width of [390, 1280]) {
+  test(`navigation: Back after an in-page jump returns to the place before it, at ${width}px @cross-engine`, async ({ page }) => {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 800 });
+    await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#path-footer')).toHaveCount(1);
+    const step = page.locator('header').getByRole('link', { name: /^Step \d+ of \d+$/ });
+    // Scrolled down by up to 500px, with the step link still on screen to click.
+    const linkTop = await step.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+    const want = Math.max(0, Math.min(500, Math.floor(linkTop - 120)));
+    await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), want);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(want);
+    await expect(step).toBeInViewport();
+    const before = await page.evaluate(() => window.scrollY);
+
+    await step.click();
+    await expect(page).toHaveURL(/#path-footer$/);
+    await expect(page.locator('#path-footer')).toBeInViewport();
+    // Let the glide finish before going back.
+    await expect(page.locator('html')).not.toHaveClass(/smooth-jump/);
+
+    const twoFramesAfterPop = () =>
+      page.evaluate(() => {
+        const w = window as unknown as { __afterPop: Promise<number> };
+        w.__afterPop = new Promise((resolve) =>
+          addEventListener('popstate', () => requestAnimationFrame(() => requestAnimationFrame(() => resolve(window.scrollY))), { once: true }),
+        );
+      });
+    const readAfterPop = () => page.evaluate(() => (window as unknown as { __afterPop: Promise<number> }).__afterPop);
+
+    await twoFramesAfterPop();
+    await page.goBack();
+    const back = await readAfterPop();
+    expect(Math.abs(back - before), `Back: scrollY ${back}, before the jump ${before}`).toBeLessThanOrEqual(2);
+    await expect(page).not.toHaveURL(/#path-footer$/);
+
+    await twoFramesAfterPop();
+    await page.goForward();
+    await readAfterPop();
+    await expect(page).toHaveURL(/#path-footer$/);
+    await expect(page.locator('#path-footer')).toBeInViewport();
+  });
+}
 
 /*
  * A direct load of a hash URL. The browser's own jump runs before the module's
