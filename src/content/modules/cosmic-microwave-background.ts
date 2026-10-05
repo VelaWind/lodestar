@@ -434,7 +434,7 @@ const cosmicMicrowaveBackground: Module = {
         {
           moduleId: 'scale-of-the-universe',
           reason:
-            'The observable universe tops that ladder; the surface of last scattering, just inside its edge, is the farthest we can see with light, and the reason the ladder has a top.',
+            'The observable universe tops that ladder; the surface of last scattering, just inside its edge, is the farthest we can see with light.',
         },
       ],
     },

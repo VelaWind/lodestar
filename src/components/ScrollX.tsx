@@ -31,7 +31,9 @@ export function ScrollX({
     // switches to numbers, and is replaced outright when KaTeX arrives and
     // swaps a placeholder for the typeset maths. So the children are watched
     // for size, and the subtree for replacement, which re-watches them.
-    const measure = () => setOverflows(box.scrollWidth > box.clientWidth + 1);
+    // No tolerance: KaTeX's sub-pixel widths can leave a box 1px scrollable, and
+    // a box that scrolls at all is one a keyboard has to be able to reach.
+    const measure = () => setOverflows(box.scrollWidth > box.clientWidth);
     const resize = new ResizeObserver(measure);
     // KaTeX's web fonts can arrive after the maths is laid out and widen it
     // without resizing the box or anything observed in it.
