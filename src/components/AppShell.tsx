@@ -45,8 +45,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* px-4 and gap-3 at base, not px-5/gap-4: the wordmark and the three
             depth pills together need 318 of the 343px a 375px phone leaves, and
             the old padding put that over the edge. Below 375px everything but
-            the wordmark tightens a little more (here and in the depth pills), so
-            "Lodestar" still reads in full at 320px rather than as "L…". */}
+            the wordmark tightens a little more (here and in the depth pills).
+            With the usual phone fonts that leaves "Lodestar" in full at 320px,
+            with about 8px to spare under Arial- or Palatino-metric fonts; a
+            wider fallback font (DejaVu Sans, say) can still truncate it, to
+            "Lode…". */}
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 max-[374px]:gap-2 max-[374px]:px-3 sm:gap-4 sm:px-8">
           <Link
             to="/"

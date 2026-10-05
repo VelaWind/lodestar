@@ -1,4 +1,4 @@
-import { Suspense, lazy, useLayoutEffect } from 'react';
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef } from 'react';
 import { AnimatePresence, LazyMotion, m } from 'framer-motion';
 import { BrowserRouter, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import type { Location } from 'react-router-dom';
@@ -180,27 +180,141 @@ function RoutedOutlet() {
  */
 const loadMotionFeatures = () => import('@/motion/features').then((mod) => mod.default);
 
+/** Remember the window's scroll position for one history entry. */
+function saveScroll(key: string): void {
+  try {
+    sessionStorage.setItem(`scroll:${key}`, String(Math.round(window.scrollY)));
+  } catch {
+    /* Storage can be unavailable (some private modes); the place is then not kept. */
+  }
+}
+
+/** Whether this document was reached by a reload or by Back/Forward, not a fresh visit. */
+function arrivedByReloadOrHistory(): boolean {
+  const [nav] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+  return nav?.type === 'reload' || nav?.type === 'back_forward';
+}
+
+/** The scroll position remembered for a history entry, or null if none. */
+function savedScroll(key: string): number | null {
+  try {
+    const raw = sessionStorage.getItem(`scroll:${key}`);
+    const value = raw === null ? NaN : Number(raw);
+    return Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * A link followed inside the app (PUSH or REPLACE) opens its page at the top,
  * or at the element its `#hash` names if that element is already rendered.
  *
- * A first load and Back/Forward (POP) are the browser's, with one exception.
- * Without a hash, the browser restores the reader's place and nothing here
- * runs. With a hash whose element is already in the page (the skip link, the
- * step link under a module's title), the browser has already scrolled to it.
- * With a hash whose element is not there yet, typically a direct load of
- * `/m/<id>#path-footer` while the module's content is still loading, the
- * browser's own jump found nothing; so this waits for the element to appear,
- * for at most two seconds, and scrolls to it once.
+ * Back/Forward and a reload (POP) without a hash return the reader to the
+ * position saved for that history entry, once the page has rendered tall
+ * enough (waiting at most two seconds); an entry with nothing saved, such as a
+ * first visit, is left alone. With a hash whose element is already in the page
+ * (the skip link, the step link under a module's title), the browser has
+ * already scrolled to it. With a hash whose element is not there yet,
+ * typically a direct load of `/m/<id>#path-footer` while the module's content
+ * is still loading, the browser's own jump found nothing; so this waits for
+ * the element to appear, for at most two seconds, and scrolls to it once.
  *
  * Layout effect, so a new page is never painted at the old position first.
+ *
+ * Smooth scrolling is switched on only for an in-page jump the reader sets
+ * off: activating a `#fragment` link adds `smooth-jump` to <html> (see
+ * index.css) for a second, long enough for the jump. Keyboard activation of a
+ * link fires a click too. Everything else, the browser's own restoration on
+ * Back included, scrolls instantly.
  */
 function ScrollOnNavigate() {
-  const { pathname, hash } = useLocation();
+  const { pathname, hash, key } = useLocation();
   const navigationType = useNavigationType();
+  /*
+   * The reader's place on each history entry, kept by the app rather than the
+   * browser. The browser restores scroll on Back before React has rendered the
+   * page being returned to, against the page being left; when that one is
+   * shorter, the position is clamped and the reader lands short of where they
+   * were. So restoration is manual: each entry's position is remembered (in
+   * sessionStorage, so a reload keeps it) and put back after the page renders.
+   * It is saved on every scroll, and again on any click before the router acts
+   * on it, so a link followed in the same frame as a scroll still leaves the
+   * right position behind.
+   */
+  // The history entry's key alone is not enough: every fresh document load
+  // gets the key "default", so the path is part of the name.
+  const entry = `${key} ${pathname}`;
+  const keyRef = useRef(entry);
   useLayoutEffect(() => {
+    keyRef.current = entry;
+  });
+  const firstRenderRef = useRef(true);
+  useEffect(() => {
+    const previous = history.scrollRestoration;
+    history.scrollRestoration = 'manual';
+    const save = () => saveScroll(keyRef.current);
+    window.addEventListener('scroll', save, { passive: true });
+    window.addEventListener('pagehide', save);
+    return () => {
+      window.removeEventListener('scroll', save);
+      window.removeEventListener('pagehide', save);
+      history.scrollRestoration = previous;
+    };
+  }, []);
+  useEffect(() => {
+    const root = document.documentElement;
+    let timer = 0;
+    const onClick = (event: MouseEvent) => {
+      saveScroll(keyRef.current);
+      const link = (event.target as Element | null)?.closest?.('a[href^="#"]');
+      if (!link) return;
+      root.classList.add('smooth-jump');
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => root.classList.remove('smooth-jump'), 1000);
+    };
+    // Capture phase, so the class is on before the browser starts the jump.
+    document.addEventListener('click', onClick, true);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      window.clearTimeout(timer);
+      root.classList.remove('smooth-jump');
+    };
+  }, []);
+  useLayoutEffect(() => {
+    const firstRender = firstRenderRef.current;
+    firstRenderRef.current = false;
+    if (navigationType === 'POP' && !hash) {
+      // A document's first render is a POP too. Only a reload, or a return to
+      // this document through history, should put a saved place back; a fresh
+      // visit (a typed or followed URL) starts at the top as a browser would.
+      if (firstRender && !arrivedByReloadOrHistory()) return;
+      const top = savedScroll(entry);
+      if (top === null) return;
+      const fits = () => document.documentElement.scrollHeight - window.innerHeight >= top - 1;
+      if (fits()) {
+        window.scrollTo({ top, left: 0, behavior: 'instant' });
+        return;
+      }
+      // The page is still filling in (a module's content loading): wait for
+      // it to be tall enough, for at most two seconds, then go there.
+      const observer = new MutationObserver(() => {
+        if (!fits()) return;
+        stop();
+        window.scrollTo({ top, left: 0, behavior: 'instant' });
+      });
+      const timer = window.setTimeout(() => {
+        stop();
+        window.scrollTo({ top, left: 0, behavior: 'instant' });
+      }, 2000);
+      function stop() {
+        observer.disconnect();
+        window.clearTimeout(timer);
+      }
+      observer.observe(document.body, { childList: true, subtree: true });
+      return stop;
+    }
     if (navigationType === 'POP') {
-      if (!hash) return;
       const id = decodeURIComponent(hash.slice(1));
       if (document.getElementById(id)) return;
       const observer = new MutationObserver(() => {
@@ -217,13 +331,18 @@ function ScrollOnNavigate() {
       observer.observe(document.body, { childList: true, subtree: true });
       return stop;
     }
-    // Instant, overriding the stylesheet's smooth scrolling (meant for in-page
-    // jumps): a new page should simply open at its top, not glide there across
+    // Focus can still be on the link just followed, inside the page that is
+    // now fading out (inert). WebKit scrolls a focused element back into view,
+    // which undid the scroll below; so focus leaves the outgoing page first.
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.closest('[inert]')) active.blur();
+    // Instant, even if a fragment link has just switched smooth scrolling on:
+    // a new page should simply open at its top, not glide there across
     // thousands of pixels of the page it replaced.
     const target = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
     if (target) target.scrollIntoView({ behavior: 'instant' });
     else window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-  }, [pathname, hash, navigationType]);
+  }, [pathname, hash, entry, navigationType]);
   return null;
 }
 
