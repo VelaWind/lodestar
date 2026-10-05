@@ -940,7 +940,7 @@ exports[`reader-visible copy > every published module, word for word 1`] = `
     "L7 reason -> kepler-orbits": "The Moon’s orbit and its changing distance, perigee to apogee, are Kepler’s ellipse at work.",
     "reference 0": {
       "label": "Williams & Boggs 2016, “Secular tidal changes in lunar orbit and Earth rotation”, Celest. Mech. Dyn. Astron. 126, 89",
-      "note": "Lunar laser ranging: the Moon recedes 38.30 ± 0.09 mm a year",
+      "note": "Lunar laser ranging: the Moon recedes 38.30 ± 0.09 mm a year (doi:10.1007/s10569-016-9702-3)",
       "url": "https://doi.org/10.1007/s10569-016-9702-3",
     },
     "reference 1": {

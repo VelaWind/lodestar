@@ -67,6 +67,16 @@ export interface ParamFormat {
    * `displayed = si * factor`. e.g. { unit: 'km', factor: 1e-3 }
    */
   displayUnit?: { unit: string; factor: number };
+  /**
+   * Optional: pick the display unit by magnitude, for a slider whose range
+   * crosses a unit boundary (milliseconds to seconds, say). Each rung applies
+   * from `from` (in SI) upward; sorted ascending; a value below the lowest
+   * `from` takes the first rung. When present it overrides `displayUnit` for the
+   * slider's visible value and its accessible text only. The equation's
+   * Numbers view still substitutes SI. A slider with a ladder names its
+   * quantity without a unit in its label, since the value carries its own.
+   */
+  displayUnits?: Array<{ from: number; unit: string; factor: number }>;
 }
 
 /** Live values for a module, keyed by `Param.id`, always in SI units. */

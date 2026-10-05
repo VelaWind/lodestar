@@ -58,13 +58,14 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 1168 tests in 25 files
+npm test           # vitest, 1178 tests in 25 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
+npm run path:audit # forward glossary-term references on the learning path, for review
 ```
 
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 1168 of 1168, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
+On a clean install with Node 22: lint reports zero issues, `npm test` passes 1178 of 1178, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
 
 <!-- site:case-study:start -->
 
@@ -83,7 +84,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 ## Tests
 
-`npm test` is 1168 Vitest tests across 25 files, in a Node environment:
+`npm test` is 1178 Vitest tests across 25 files, in a Node environment:
 
 - the 205 physics sanity checks as assertions;
 - equation snapshots, so a formatting change cannot quietly rewrite the maths;
@@ -93,7 +94,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 - content-structure rules, including that every `term` reference resolves in the glossary and every entry is marked somewhere;
 - readout formatting, and tooltip placement at the awkward edges;
 - slider stops on every param: the default is a stop and both ends clamp to the exact bound;
-- the learning path against the registry: every module on it exactly once, steps numbered without gaps.
+- the learning path against the registry: every module on it exactly once, steps numbered without gaps, and every module's declared prerequisites existing, earlier on the path, and free of cycles.
 
 `.github/workflows/ci.yml` runs typecheck, lint, test and build in that order on every push and pull request to `main`, on Node 22.
 
@@ -120,6 +121,8 @@ Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic
 ## Known limits
 
 Some files are very large and heavily commented: `sanity.ts` is 2367 lines and the largest simulation, supernovae, 926, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
+
+The learning path's order is checked through declared prerequisites: each module lists the topics it assumes in `src/content/path.ts`, and a test enforces that they come earlier. What a test cannot judge, a glossary term used before the topic that teaches it, `npm run path:audit` lists for manual review.
 
 The maths layer's Numbers view substitutes each slider's value in SI base units, because the constants in the equations are SI; a "where" line under each equation gives the slider's own reading (v₀ = 8 km/s beside 8000 m/s in the formula) for every substituted value shown in another unit.
 
