@@ -391,7 +391,7 @@ const nebulae: Module = {
         {
           moduleId: 'stellar-fusion',
           reason:
-            'That module is how the Sun’s core burns. The stars doing the ionizing here are far heavier, with cores more than twice as hot, where the other route to fusion it mentions takes over.',
+            'That module covers the route to fusion the Sun’s core uses. The stars doing the ionizing here are far heavier, with cores more than twice as hot, where the other route to fusion it mentions takes over.',
         },
         {
           moduleId: 'supernovae',

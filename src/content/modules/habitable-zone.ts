@@ -137,7 +137,7 @@ const habitableZone: Module = {
         ),
         prose(
           p(
-            'The length of the year takes the star’s mass from its brightness with a rule of thumb for stars still burning hydrogen in their cores, like the Sun: brightness grows as mass to the power 3.5. It is good to about a factor of two. A real star’s mass is measured, not inferred.',
+            'The length of the year takes the star’s mass from its brightness with a rule of thumb. For stars still burning hydrogen in their cores, like the Sun, brightness grows as mass to the power 3.5. It is good to about a factor of two. A real star’s mass is measured, not inferred.',
           ),
         ),
       ],
