@@ -13,8 +13,8 @@
  * invisible to every other test in the suite, all of which run a browser that
  * papers over it.
  *
- * The module descriptions are asserted *equal to the tagline on the module
- * object*, imported from the same files the app renders. That is the point of
+ * The module descriptions are asserted *equal to "Title: tagline" from the
+ * module object*, imported from the same files the app renders. That is the point of
  * the test rather than a nicety: the generator reads the registry at build
  * time, and this is what makes it impossible for the two to drift without
  * something going red.
@@ -139,6 +139,7 @@ test('every route serves its own head', async ({ request, baseURL }) => {
   const CARD = `${SITE_ORIGIN}/og.png`;
 
   const checked: string[] = [];
+  const checkedDescriptions: string[] = [];
 
   const fetchHtml = async (path: string): Promise<string> => {
     const response = await request.get(`${baseURL}${path}`);
@@ -184,13 +185,14 @@ test('every route serves its own head', async ({ request, baseURL }) => {
     expect(title(html), `${path}: title`).toBe(`${module.title} · Lodestar`);
     expect(ogTitle(html), `${path}: og:title`).toBe(`${module.title} · Lodestar`);
     // The assertion the generator is built around: what a crawler reads is the
-    // module's own tagline, character for character.
-    expect(description(html), `${path}: description should be the module's tagline`).toBe(
-      module.tagline,
-    );
-    expect(ogDescription(html), `${path}: og:description should be the module's tagline`).toBe(
-      module.tagline,
-    );
+    // module's own title and tagline, character for character, so a search
+    // result names its topic. Spelled out here rather than imported from the
+    // generator, so the two cannot drift together.
+    const expected = `${module.title}: ${module.tagline}`;
+    expect(description(html), `${path}: description should be "Title: tagline"`).toBe(expected);
+    expect(ogDescription(html), `${path}: og:description should be "Title: tagline"`).toBe(expected);
+    expect(expected.length, `${path}: description over 160 characters`).toBeLessThanOrEqual(160);
+    checkedDescriptions.push(expected);
     expect(canonical(html), `${path}: canonical`).toBe(`${SITE_ORIGIN}${path}`);
     expect(ogUrl(html), `${path}: og:url`).toBe(`${SITE_ORIGIN}${path}`);
 
@@ -208,6 +210,7 @@ test('every route serves its own head', async ({ request, baseURL }) => {
     const data = structuredData(html, path);
     expect(data['@type'], `${path}: structured data type`).toBe('LearningResource');
     expect(data.name, `${path}: structured data name`).toBe(module.title);
+    expect(data.description, `${path}: structured data description`).toBe(`${module.title}: ${module.tagline}`);
     expect(data.url, `${path}: structured data url`).toBe(`${SITE_ORIGIN}${path}`);
     // Its step on the learning path, as the module page's footer shows it.
     expect(data.position, `${path}: path position`).toBe(pathPlace(module.id)?.step);
@@ -228,6 +231,8 @@ test('every route serves its own head', async ({ request, baseURL }) => {
   expect(new Set(checked).size, 'every route path is distinct').toBe(24);
 
   console.log(`  heads: ${checked.length} routes, each with its own title, description and canonical`);
+  const longest = Math.max(...checkedDescriptions.map((d) => d.length));
+  console.log(`  heads: longest module description ${longest} characters`);
 });
 
 test('the sitemap is a real file listing every route', async ({ request, baseURL }) => {

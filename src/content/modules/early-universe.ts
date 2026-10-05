@@ -128,7 +128,7 @@ const earlyUniverse: Module = {
         ),
         prose(
           p(
-            'After two minutes it follows the standard model of the expanding universe, with the amounts of matter, light and dark energy (the unexplained energy now speeding up the expansion) measured by the Planck satellite in 2018. It treats neutrinos, ghostly particles that barely interact, as massless.',
+            'After two minutes it follows the standard model of the expanding universe. The amounts of matter, of light and of dark energy (the unexplained energy now speeding up the expansion) are those the Planck satellite measured in 2018. It treats neutrinos, ghostly particles that barely interact, as massless.',
           ),
         ),
         prose(
@@ -281,8 +281,8 @@ const earlyUniverse: Module = {
               m`T_0`,
               ' — today’s temperature, 2.7255 K; ',
               m`g_s`,
-              ' — the entropy count of particle species, 3.91 today and 10.75 before positrons ',
-              'annihilated. The second factor is 0.71 before that and 1 after.',
+              ' — the effective number of particle spin states carrying the entropy, with fermions ',
+              'counted at 7/8: 3.91 today and 10.75 before positrons annihilated. The second factor is 0.71 before that and 1 after.',
             ),
           ),
         },

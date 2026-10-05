@@ -398,7 +398,7 @@ const gravitationalWaves: Module = {
           'detected amplitude is 2/5 of it (the plain mean, 0.35). A detector records ',
           m`F_+h_+ + F_\times h_\times`,
           ', its antenna pattern and the orbit’s inclination setting how much of each ',
-          'polarisation gets through. Nothing is redshifted: a signal from 410 Mpc arrives with ',
+          'polarisation gets through. A real signal is redshifted throughout: one from 410 Mpc arrives with ',
           'every frequency lowered by ',
           m`(1+z) \approx 1.09`,
           ', so GW150914’s detector-frame chirp mass is about 30.5 ',

@@ -181,17 +181,42 @@ function RoutedOutlet() {
 const loadMotionFeatures = () => import('@/motion/features').then((mod) => mod.default);
 
 /**
- * A link opens its page at the top, or at the element its `#hash` names. Back
- * and Forward are left to the browser, which restores the reader's place on
- * its own; an in-page fragment link (the skip link, the step link under a
- * module's title) arrives as one of those and is left to the browser too.
- * Layout effect, so the new page is never painted at the old position first.
+ * A link followed inside the app (PUSH or REPLACE) opens its page at the top,
+ * or at the element its `#hash` names if that element is already rendered.
+ *
+ * A first load and Back/Forward (POP) are the browser's, with one exception.
+ * Without a hash, the browser restores the reader's place and nothing here
+ * runs. With a hash whose element is already in the page (the skip link, the
+ * step link under a module's title), the browser has already scrolled to it.
+ * With a hash whose element is not there yet, typically a direct load of
+ * `/m/<id>#path-footer` while the module's content is still loading, the
+ * browser's own jump found nothing; so this waits for the element to appear,
+ * for at most two seconds, and scrolls to it once.
+ *
+ * Layout effect, so a new page is never painted at the old position first.
  */
 function ScrollOnNavigate() {
   const { pathname, hash } = useLocation();
   const navigationType = useNavigationType();
   useLayoutEffect(() => {
-    if (navigationType === 'POP') return;
+    if (navigationType === 'POP') {
+      if (!hash) return;
+      const id = decodeURIComponent(hash.slice(1));
+      if (document.getElementById(id)) return;
+      const observer = new MutationObserver(() => {
+        const target = document.getElementById(id);
+        if (!target) return;
+        stop();
+        target.scrollIntoView({ behavior: 'instant' });
+      });
+      const timer = window.setTimeout(() => stop(), 2000);
+      function stop() {
+        observer.disconnect();
+        window.clearTimeout(timer);
+      }
+      observer.observe(document.body, { childList: true, subtree: true });
+      return stop;
+    }
     // Instant, overriding the stylesheet's smooth scrolling (meant for in-page
     // jumps): a new page should simply open at its top, not glide there across
     // thousands of pixels of the page it replaced.

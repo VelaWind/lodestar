@@ -157,7 +157,7 @@ const planetaryAtmospheres: Module = {
           p(
             'The verdict is a rule of thumb. Really, a gas leaks away gradually, at a rate set steeply by the ',
             term('escape parameter', 'escape-parameter'),
-            ', a measure of how far escape speed outruns the gas’s typical speed; the middle band is where the rule stops answering.',
+            ', a measure of how far escape speed outruns the gas’s typical speed. The middle band is where the rule stops answering.',
           ),
         ),
         prose(
