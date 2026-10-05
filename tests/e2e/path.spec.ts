@@ -149,6 +149,83 @@ test('navigation: a link opens the page at its top @cross-engine', async ({ page
 });
 
 /*
+ * Back snaps to the reader's place. Smooth scrolling on the whole document used
+ * to animate the browser's own restoration, so Back glided down from the top
+ * for most of a second; it is now scoped to in-page jumps. Measured from the
+ * popstate: by the second animation frame the page is where the reader left it.
+ * The position is kept well inside the index's height so no engine has to
+ * clamp it while the page re-renders.
+ */
+test('navigation: Back returns to the saved position at once, not by gliding @cross-engine', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('main ul.breakout a[href^="/m/"]')).toHaveCount(ORDER.length);
+  await page.evaluate(() => window.scrollTo({ top: 1500, behavior: 'instant' }));
+  const card = page.locator('main ul.breakout a[href^="/m/"]').nth(4);
+  await card.focus();
+  // Focusing can scroll the card into view, a frame or more later on mobile
+  // WebKit; the place to return to is wherever the page settles before the
+  // link is followed.
+  let saved = -1;
+  await expect
+    .poll(async () => {
+      const now = await page.evaluate(
+        () => new Promise<number>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve(window.scrollY)))),
+      );
+      const settled = now === saved;
+      saved = now;
+      return settled;
+    })
+    .toBe(true);
+  expect(saved, 'the index should be scrolled well down').toBeGreaterThan(500);
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/m\//);
+  await expect(page.locator('h1')).toHaveCount(1);
+  await page.evaluate(() => {
+    (window as unknown as { __afterBack: Promise<number> }).__afterBack = new Promise((resolve) =>
+      addEventListener('popstate', () => requestAnimationFrame(() => requestAnimationFrame(() => resolve(window.scrollY))), { once: true }),
+    );
+  });
+  await page.goBack();
+  const atSecondFrame = await page.evaluate(() => (window as unknown as { __afterBack: Promise<number> }).__afterBack);
+  expect(Math.abs(atSecondFrame - saved), `scrollY ${atSecondFrame} two frames after Back, saved ${saved}`).toBeLessThanOrEqual(2);
+});
+
+/*
+ * A fresh visit starts at the top. Every fresh document load shares the
+ * history key "default"; positions saved for one page must not be applied to
+ * the next page loaded fresh.
+ */
+test('navigation: a fresh visit to another page is not scrolled to an old place @cross-engine', async ({ page }) => {
+  await page.goto('/m/kepler-orbits', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('[data-path-footer]')).toHaveCount(1);
+  await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'instant' }));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(1200);
+  await page.goto('/m/escape-velocity', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('[data-path-footer]')).toHaveCount(1);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+/*
+ * In-page jumps still arrive: the skip link and the step link under a title.
+ */
+test('navigation: the skip link and the step link still reach their targets @cross-engine', async ({ page }) => {
+  await page.goto('/m/black-holes', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#path-footer')).toHaveCount(1);
+  const step = page.locator('header').getByRole('link', { name: /^Step \d+ of \d+$/ });
+  await step.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#path-footer')).toBeInViewport();
+
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await page.keyboard.press('Shift+Tab'); // leave the step link
+  await page.locator('a[href="#main"]').focus();
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/#main$/);
+  await expect(page.locator('#main')).toBeInViewport();
+});
+
+/*
  * A direct load of a hash URL. The browser's own jump runs before the module's
  * content has loaded, finds no element, and leaves the page at the top; the app
  * waits for the element and scrolls to it once.

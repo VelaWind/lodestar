@@ -23,11 +23,25 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+  }
+
+  /* Smooth only for a jump the reader sets off inside the page (the skip
+     link, the step link under a module's title): `ScrollOnNavigate` in App.tsx
+     adds this class when such a link is activated and removes it a second
+     later. On the document as a whole, smooth scrolling also animated the
+     browser's own restoration, so Back glided down from the top for most of a
+     second instead of returning the reader to their place. Scoping it to
+     `:focus-within` was tried and was not reliable: focus can still be inside
+     the document when Back fires. */
+  html.smooth-jump {
     scroll-behavior: smooth;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html {
+    /* Matches the rule above's selector, which would otherwise outrank a plain
+       `html` here and keep smooth scrolling on. */
+    html,
+    html.smooth-jump {
       scroll-behavior: auto;
     }
     /* Belt and braces: Framer honours prefers-reduced-motion via

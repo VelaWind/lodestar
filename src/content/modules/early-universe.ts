@@ -161,7 +161,7 @@ const earlyUniverse: Module = {
           term('Big Bang nucleosynthesis', 'nucleosynthesis'),
           ': protons and neutrons fused into deuterium, then helium, so that a quarter of the ',
           'ordinary matter by mass has been helium ever since, with traces of lithium. Nothing ',
-          'heavier was made. Almost every other element came later, most of it from stars.',
+          'heavier was made in more than traces. Almost every other element came later, most of it from stars.',
         ),
         p(
           'Then, for a long time, little happened. Light outweighed matter for the first fifty ',
