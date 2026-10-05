@@ -1,6 +1,6 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useLayoutEffect } from 'react';
 import { AnimatePresence, LazyMotion, m } from 'framer-motion';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
 import type { Location } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
 import { DISTANCE, DURATION, EASE } from '@/motion/tokens';
@@ -166,13 +166,12 @@ function RoutedOutlet() {
  * than a URL — the same link should read correctly for anyone regardless of the
  * tier they've chosen.
  *
- * No scroll management here, deliberately, because there has never been any.
- * React Router leaves `window.scrollY` where it was and the browser clamps it
- * to whatever the incoming document allows — measured, from the index at 600px,
- * a module page lands at 305 rather than at 0. Adding a scroll-to-top would be
- * a behaviour change wearing the costume of a bug fix, so this pass preserves
- * it, and `popLayout` above is part of preserving it: keeping the outgoing route
- * in flow would hold the document tall enough that no clamp happened at all.
+ * Scroll is handled by `ScrollOnNavigate` below. There used to be none, and an
+ * earlier pass kept it that way so as not to change behaviour inside a
+ * refactor. Measured since, that cost readers the top of every page they
+ * reached by a link: from a card low on the index, a module opened about four
+ * thousand pixels down, past its title and hook, and the learning path's "Next"
+ * (pressed at the very bottom of a page) did the same.
  */
 /**
  * Framer Motion's features load in their own chunk (see `motion/features`), so
@@ -181,10 +180,33 @@ function RoutedOutlet() {
  */
 const loadMotionFeatures = () => import('@/motion/features').then((mod) => mod.default);
 
+/**
+ * A link opens its page at the top, or at the element its `#hash` names. Back
+ * and Forward are left to the browser, which restores the reader's place on
+ * its own; an in-page fragment link (the skip link, the step link under a
+ * module's title) arrives as one of those and is left to the browser too.
+ * Layout effect, so the new page is never painted at the old position first.
+ */
+function ScrollOnNavigate() {
+  const { pathname, hash } = useLocation();
+  const navigationType = useNavigationType();
+  useLayoutEffect(() => {
+    if (navigationType === 'POP') return;
+    // Instant, overriding the stylesheet's smooth scrolling (meant for in-page
+    // jumps): a new page should simply open at its top, not glide there across
+    // thousands of pixels of the page it replaced.
+    const target = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
+    if (target) target.scrollIntoView({ behavior: 'instant' });
+    else window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname, hash, navigationType]);
+  return null;
+}
+
 export default function App() {
   return (
     <LazyMotion features={loadMotionFeatures} strict>
       <BrowserRouter>
+        <ScrollOnNavigate />
         <AppShell>
           <RoutedOutlet />
         </AppShell>
