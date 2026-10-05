@@ -61,6 +61,11 @@ export interface RouteHead {
 /** Who publishes the site: the project's name only, no url, email, address or logo. */
 const PUBLISHER = { '@type': 'Organization', name: 'VelaWind' } as const;
 
+/** A module page's search and social description: "Title: tagline". */
+export function moduleDescription(module: Pick<Module, 'title' | 'tagline'>): string {
+  return `${module.title}: ${module.tagline}`;
+}
+
 /** The site as schema.org sees it; every page's data points back to it. */
 const WEBSITE = {
   '@type': 'WebSite',
@@ -143,9 +148,11 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
       // Matches the convention `ModulePage` already sets at runtime, so the
       // served title and the hydrated one are the same string.
       title: `${module.title} · Lodestar`,
-      // Read from the module, never retyped. The tagline is already the
-      // one-line summary the index shows under the title.
-      description: module.tagline,
+      // Read from the module, never retyped: the title, then the tagline the
+      // index shows under it. The title is there because a search result shows
+      // the description on its own, and a tagline alone ("One number, how
+      // heavy, decides everything else about it.") never names its topic.
+      description: moduleDescription(module),
       canonical: absoluteUrl(`/m/${module.id}`),
       noscript: {
         heading: module.title,
@@ -155,7 +162,7 @@ export function routeHeads(moduleList: Module[]): RouteHead[] {
         '@context': 'https://schema.org',
         '@type': 'LearningResource',
         name: module.title,
-        description: module.tagline,
+        description: moduleDescription(module),
         abstract: plainText(module.layers.hook.body),
         url: absoluteUrl(`/m/${module.id}`),
         inLanguage: 'en',

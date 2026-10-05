@@ -148,6 +148,20 @@ test('navigation: a link opens the page at its top @cross-engine', async ({ page
   await expect(page).toHaveURL(/\/m\/wormholes$/);
 });
 
+/*
+ * A direct load of a hash URL. The browser's own jump runs before the module's
+ * content has loaded, finds no element, and leaves the page at the top; the app
+ * waits for the element and scrolls to it once.
+ */
+for (const width of [390, 1280]) {
+  test(`navigation: a direct load of #path-footer lands on the footer at ${width}px @cross-engine`, async ({ page }) => {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 800 });
+    await page.goto('/m/black-holes#path-footer', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#path-footer')).toBeInViewport();
+    expect(await page.evaluate(() => window.scrollY), 'the page should have scrolled down to the footer').toBeGreaterThan(500);
+  });
+}
+
 const MIDDLE = Math.floor(ORDER.length / 2);
 
 for (const index of [0, MIDDLE, ORDER.length - 1]) {

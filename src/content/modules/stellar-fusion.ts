@@ -44,7 +44,7 @@ const stellarFusion: Module = {
         ),
         p(
           'A proton is more mist than ball. Two protons repel each other, and that repulsion is ',
-          'the hill: the closer they get, the steeper it becomes, and the top is hundreds of times ',
+          'the hill. The closer they get, the steeper it becomes, and the top is hundreds of times ',
           'higher than the energy a proton in the Sun’s core typically has. Thrown as balls, they ',
           'would never meet. As mist, a tiny wisp of each one is already on the far side, and once ',
           'there they stick, and release energy. The wisp is extraordinarily small. But the Sun’s ',

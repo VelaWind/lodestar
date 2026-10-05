@@ -109,7 +109,7 @@ const darkMatter: Module = {
         p(
           'Each star circles at the speed the graph below gives for its distance. Take away the dark ',
           'halo, the unseen cloud of matter around the galaxy, with the button or by dragging its ',
-          'strength to zero, and the outer stars slow to what the visible matter alone can hold. Move ',
+          'strength to zero. The outer stars slow to what the visible matter alone can hold. Move ',
           'the marked star outward and watch the two speeds part.',
         ),
       ),
@@ -182,7 +182,7 @@ const darkMatter: Module = {
       approximations: [
         prose(
           p(
-            'The visible galaxy is one flat disc of stars and gas, thinning out steadily from the centre. The Milky Way’s crowded centre (the bulge and bar), about a third of its stars, is folded into the disc, and so is its gas, which in reality spreads about twice as far as its stars. The curve inside about 10 000 light-years (3 kiloparsecs) is therefore only rough.',
+            'The visible galaxy is one flat disc of stars and gas, thinning out steadily from the centre. The Milky Way’s crowded centre (the bulge and bar), about a third of its stars, is folded into the disc. So is its gas, which in reality spreads about twice as far as its stars. The curve inside about 10 000 light-years (3 kiloparsecs) is therefore only rough.',
           ),
         ),
         prose(
@@ -212,7 +212,7 @@ const darkMatter: Module = {
         ),
         prose(
           p(
-            'The real disc has few bright stars beyond about 33 000 light-years (10 kiloparsecs), where the two speeds part, so the sim adds a sparse, evenly spread ring of brighter stars from there to the edge of the picture.',
+            'The real disc has few bright stars beyond about 33 000 light-years (10 kiloparsecs), where the two speeds part. So the sim adds a sparse, evenly spread ring of brighter stars from there to the edge of the picture.',
           ),
         ),
         prose(

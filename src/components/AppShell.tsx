@@ -44,18 +44,20 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-edge-soft bg-void-900/85 backdrop-blur-md">
         {/* px-4 and gap-3 at base, not px-5/gap-4: the wordmark and the three
             depth pills together need 318 of the 343px a 375px phone leaves, and
-            the old padding put that over the edge. */}
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-8">
+            the old padding put that over the edge. Below 375px everything but
+            the wordmark tightens a little more (here and in the depth pills), so
+            "Lodestar" still reads in full at 320px rather than as "L…". */}
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 max-[374px]:gap-2 max-[374px]:px-3 sm:gap-4 sm:px-8">
           <Link
             to="/"
-            className="group flex min-w-0 items-baseline gap-2.5 transition-opacity hover:opacity-90"
+            className="group flex min-w-0 items-baseline gap-2.5 transition-opacity hover:opacity-90 max-[374px]:gap-1.5"
           >
             <span aria-hidden className="text-star">
               ✦
             </span>
             <span className="truncate font-prose text-lg tracking-wide text-ink">Lodestar</span>
           </Link>
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 max-[374px]:gap-2 sm:gap-4">
             {/* Visible at every width now. It is the only route to the page
                 besides the footer, and a link that disappears on the devices
                 most people arrive on is not really in the header. It fits
