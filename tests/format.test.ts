@@ -8,7 +8,9 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { Param, ParamFormat } from '@/content/types';
-import { formatWithUnit, siValueToTex } from '@/lib/format';
+import neutronStars from '@/content/modules/neutron-stars';
+import wormholes from '@/content/modules/wormholes';
+import { formatWithUnit, ladderRung, siValueToTex, sliderAriaLabel } from '@/lib/format';
 
 /** A minimal param with the given format and unit, display = SI unless a displayUnit is given. */
 function param(format: ParamFormat, unit = 'u'): Param {
@@ -78,6 +80,73 @@ describe('formatWithUnit, auto notation', () => {
   it('scales by the display unit before choosing a band', () => {
     const ly = param({ notation: 'auto', digits: 3, displayUnit: { unit: 'light-years', factor: 1e-3 } }, 'm');
     expect(show(ly, 1.62e8)).toBe('162,000 light-years');
+  });
+});
+
+describe('unit ladder (displayUnits)', () => {
+  const ladder = param(
+    {
+      notation: 'auto',
+      digits: 3,
+      displayUnits: [
+        { from: 1e-3, unit: 'ms', factor: 1e3 },
+        { from: 1, unit: 's', factor: 1 },
+        { from: 60, unit: 'min', factor: 1 / 60 },
+      ],
+    },
+    's',
+  );
+
+  it('picks the highest rung whose `from` is at or below the value', () => {
+    expect(ladderRung(ladder, 0.5)?.unit).toBe('ms');
+    expect(ladderRung(ladder, 30)?.unit).toBe('s');
+    expect(ladderRung(ladder, 600)?.unit).toBe('min');
+  });
+
+  it('switches at exactly `from`, and not a hair before', () => {
+    expect(show(ladder, 1)).toBe('1 s');
+    expect(show(ladder, 1 - 1e-9)).toBe('1000 ms');
+    expect(show(ladder, 60)).toBe('1 min');
+    expect(show(ladder, 1e-3)).toBe('1 ms');
+  });
+
+  it('gives a value below the lowest `from` the first rung', () => {
+    expect(ladderRung(ladder, 1e-6)?.unit).toBe('ms');
+    expect(show(ladder, 5e-4)).toBe('0.5 ms');
+  });
+
+  it('overrides displayUnit, and leaves a ladderless param alone', () => {
+    const both = param({ displayUnit: { unit: 'h', factor: 1 / 3600 }, displayUnits: [{ from: 0, unit: 'ms', factor: 1e3 }] }, 's');
+    expect(show(both, 0.25)).toBe('250 ms');
+    expect(ladderRung(auto3, 5)).toBeUndefined();
+  });
+
+  it('names the slider without a unit when the value carries its own', () => {
+    expect(sliderAriaLabel('Spin period', ladder)).toBe('Spin period');
+    expect(sliderAriaLabel('Throat radius', param({ displayUnit: { unit: 'm', factor: 1 } }, 'm'))).toBe('Throat radius (m)');
+  });
+
+  it('reads the neutron-star period in ms below a second and s from one, at every end', () => {
+    const P = neutronStars.layers.play.params.find((p) => p.id === 'P')!;
+    expect(formatWithUnit(P, P.min)).toBe('1.4 ms');
+    expect(formatWithUnit(P, P.default)).toBe('33.4 ms');
+    expect(formatWithUnit(P, P.max)).toBe('10 s');
+    expect(formatWithUnit(P, 1)).toBe('1 s');
+    expect(formatWithUnit(P, 0.5)).toBe('500 ms');
+    expect(sliderAriaLabel(P.technicalLabel, P)).toBe('Spin period');
+  });
+
+  it('leaves the wormhole throat, which has no ladder, as it was', () => {
+    const b0 = wormholes.layers.play.params.find((p) => p.id === 'b0')!;
+    expect(b0.format?.displayUnits).toBeUndefined();
+    expect(formatWithUnit(b0, b0.min)).toBe('1.00 × 10⁻³ m');
+    expect(formatWithUnit(b0, b0.default)).toBe('1 m');
+    expect(formatWithUnit(b0, b0.max)).toBe('10 trillion m');
+  });
+
+  it('leaves the equation path in SI', () => {
+    const P = neutronStars.layers.play.params.find((p) => p.id === 'P')!;
+    expect(siValueToTex(P, P.max)).toBe(siValueToTex({ ...P, format: { notation: 'auto', digits: 3 } }, P.max));
   });
 });
 

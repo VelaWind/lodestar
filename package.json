@@ -11,7 +11,8 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "path:audit": "node --experimental-strip-types --no-warnings scripts/pathAudit.ts"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",

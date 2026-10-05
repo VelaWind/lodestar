@@ -657,7 +657,13 @@ export const SIDEREAL_DAY = 86_164.0905;
  * The Moon's recession from Earth, m per year: 38.30 ± 0.09 mm/yr from lunar
  * laser ranging to the Apollo and Lunokhod reflectors. Source: Williams & Boggs
  * 2016, "Secular tidal changes in lunar orbit and Earth rotation", Celest.
- * Mech. Dyn. Astron. 126, 89.
+ * Mech. Dyn. Astron. 126, 89, doi:10.1007/s10569-016-9702-3.
+ *
+ * The journal text is paywalled, so the figure and its uncertainty were
+ * verified through the authors' own LPSC 2016 abstract 1096 ("da/dt =
+ * 38.30±0.09 mm/yr") and an independent citing paper, Casati et al.,
+ * arXiv:2110.09037, section II.1, which gives 38.30 ± 0.09 mm/yr and cites
+ * both.
  */
 export const MOON_RECESSION_PER_YEAR = 38.30e-3;
 /**

@@ -6,7 +6,7 @@
  */
 import { useMemo, useState } from 'react';
 import type { EquationLayer, Param, ParamValues } from '@/content/types';
-import { formatWithUnit, siValueToTex } from '@/lib/format';
+import { formatWithUnit, ladderRung, siValueToTex } from '@/lib/format';
 import { ScrollX } from './ScrollX';
 import { Tex } from './Tex';
 import { RichText } from './RichText';
@@ -64,8 +64,10 @@ function whereEntries(
     if (id === undefined || seen.has(id)) continue;
     seen.add(id);
     const param = byId.get(id);
-    const du = param?.format?.displayUnit;
-    if (!param || !du || du.unit === param.unit) continue;
+    if (!param) continue;
+    // The unit the slider shows right now: its ladder's rung, else its display unit.
+    const du = ladderRung(param, values[id] ?? param.default) ?? param.format?.displayUnit;
+    if (!du || du.unit === param.unit) continue;
     out.push({ id, symbol: param.symbol, shown: formatWithUnit(param, values[id] ?? param.default) });
   }
   return out;
