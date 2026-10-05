@@ -109,11 +109,43 @@ test('equations that scroll sideways can be reached by keyboard @cross-engine', 
   await expect(boxes.first()).toBeVisible();
   await expect(async () => {
     const states = await boxes.evaluateAll((els) =>
-      els.map((el) => ({ overflows: el.scrollWidth > el.clientWidth + 1, focusable: el.getAttribute('tabindex') === '0' })),
+      els.map((el) => ({ overflows: el.scrollWidth > el.clientWidth, focusable: el.getAttribute('tabindex') === '0' })),
     );
     expect(states.some((s) => s.overflows), 'expected at least one wide equation at 390 px').toBe(true);
     for (const s of states) expect(s.focusable).toBe(s.overflows);
   }).toPass();
+});
+
+/*
+ * A link opens its page at the top. Without this a module reached from a card
+ * low on the index opened thousands of pixels down, past its title and hook,
+ * and the footer's Next (pressed at the bottom of a page) did the same. Back
+ * still returns the reader to where they were.
+ */
+test('navigation: a link opens the page at its top @cross-engine', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  const card = page.locator('main ul.breakout a[href="/m/wormholes"]');
+  await card.scrollIntoViewIfNeeded();
+  const onIndex = await page.evaluate(() => window.scrollY);
+  expect(onIndex, 'the card should be well down the index').toBeGreaterThan(1000);
+  await card.click();
+  await expect(page).toHaveURL(/\/m\/wormholes$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.getByRole('heading', { level: 1, name: 'Wormholes and White Holes' })).toBeInViewport();
+
+  // Followed by keyboard: the stylesheet's smooth scrolling can still be moving
+  // the footer when a pointer click lands, and Enter on a focused link cannot miss.
+  const next = page.locator('[data-path-next]');
+  await next.focus();
+  await page.keyboard.press('Enter');
+  await expect(page).not.toHaveURL(/\/m\/wormholes$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+
+  // Back is the browser's: the app does not touch scroll on it. Whether the
+  // browser lands exactly where the reader was depends on when the lazily
+  // loaded page is tall enough to scroll, so only the route is asserted here.
+  await page.goBack();
+  await expect(page).toHaveURL(/\/m\/wormholes$/);
 });
 
 const MIDDLE = Math.floor(ORDER.length / 2);

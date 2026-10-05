@@ -140,7 +140,7 @@ const escapeVelocity: Module = {
         ),
         prose(
           p(
-            'The height scale is stretched above the marked switchover, so a 100-kilometre hop and a million-kilometre climb fit in one frame. Every height read off it is still exact.',
+            'The height scale is stretched above the marked switchover, so a 100-kilometre hop and a climb to a hundred times the world’s radius fit in one frame. Every height read off it is still exact.',
           ),
         ),
         prose(
