@@ -272,7 +272,7 @@ const stellarFusion: Module = {
               m`T`,
               ' appears. At the Sun’s ',
               m`E_0`,
-              ' of 6 keV the exponent is −9, so about one collision in ten thousand succeeds.',
+              ' of 6 keV the exponent is −9, so about one collision in ten thousand tunnels through the barrier.',
             ),
           ),
         },
