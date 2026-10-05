@@ -42,9 +42,27 @@ export function paramLabel(param: Param, tier: DepthTier): string {
   return tier === 'deep' ? param.technicalLabel : param.friendlyLabel;
 }
 
-/** Apply a param's optional displayUnit conversion. Returns SI if there is none. */
+/**
+ * The rung of a param's unit ladder that applies at `si`: the highest whose
+ * `from` is at or below the value, or the first when the value is below them
+ * all. Undefined when the param has no ladder. Compares magnitudes, so a
+ * ladder works the same on a negative value.
+ */
+export function ladderRung(param: Param, si: number): { unit: string; factor: number } | undefined {
+  const rungs = param.format?.displayUnits;
+  if (!rungs || rungs.length === 0) return undefined;
+  const magnitude = Math.abs(si);
+  let rung = rungs[0]!;
+  for (const candidate of rungs) if (candidate.from <= magnitude) rung = candidate;
+  return rung;
+}
+
+/**
+ * Apply a param's display conversion: its unit ladder if it has one, else its
+ * optional `displayUnit`. Returns SI if there is neither.
+ */
 export function toDisplay(param: Param, si: number): { value: number; unit: string } {
-  const du = param.format?.displayUnit;
+  const du = ladderRung(param, si) ?? param.format?.displayUnit;
   return du ? { value: si * du.factor, unit: du.unit } : { value: si, unit: param.unit };
 }
 
@@ -210,6 +228,9 @@ export function formatWithUnit(param: Param, si: number): string {
  * decides whether a unit is worth announcing.
  */
 export function sliderAriaLabel(label: string, param: Param): string {
+  // A slider with a unit ladder has no one unit to announce: its value text
+  // ("33.4 ms", "2 s") carries the unit that applies, so the name is the label.
+  if (param.format?.displayUnits?.length) return label;
   const unit = param.format?.displayUnit?.unit ?? param.unit;
   return unit ? `${label} (${unit})` : label;
 }

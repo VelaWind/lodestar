@@ -448,7 +448,10 @@ const tides: Module = {
     {
       label: 'Williams & Boggs 2016, “Secular tidal changes in lunar orbit and Earth rotation”, Celest. Mech. Dyn. Astron. 126, 89',
       url: 'https://doi.org/10.1007/s10569-016-9702-3',
-      note: 'Lunar laser ranging: the Moon recedes 38.30 ± 0.09 mm a year',
+      // The journal text is paywalled; the figure and uncertainty were checked
+      // against the authors' LPSC 2016 abstract 1096 and against Casati et al.,
+      // arXiv:2110.09037, section II.1, which cites both. See MOON_RECESSION_PER_YEAR.
+      note: 'Lunar laser ranging: the Moon recedes 38.30 ± 0.09 mm a year (doi:10.1007/s10569-016-9702-3)',
     },
     {
       label: 'Stephenson, Morrison & Hohenkerk 2016, “Measurement of the Earth’s rotation: 720 BC to AD 2015”, Proc. R. Soc. A 472, 20160404',

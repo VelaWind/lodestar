@@ -6,7 +6,7 @@
  * `src/content/path.ts`, and a renamed one fails until the path follows.
  */
 import { describe, expect, it } from 'vitest';
-import { LEARNING_PATH, PATH_STEPS, pathPlace } from '@/content/path';
+import { LEARNING_PATH, PATH_STEPS, PREREQUISITES, pathPlace } from '@/content/path';
 import { modules } from '@/content/registry';
 
 const pathIds = LEARNING_PATH.flatMap((stage) => stage.modules);
@@ -35,6 +35,40 @@ describe('learning path', () => {
       expect(stage.title.split(/\s+/).length).toBeLessThanOrEqual(6);
       expect(stage.description).toMatch(/^[A-Z][^.]*\.$/);
     }
+  });
+
+  it('declares prerequisites for every module, all existing and all earlier on the path', () => {
+    const at = new Map(PATH_STEPS.map((s) => [s.id, s.step]));
+    expect(Object.keys(PREREQUISITES).sort(), 'one entry per module, no strays').toEqual([...registryIds].sort());
+    const problems: string[] = [];
+    for (const [id, needs] of Object.entries(PREREQUISITES)) {
+      for (const need of needs) {
+        if (!(need in modules)) problems.push(`${id} needs "${need}", which is not a module`);
+        else if (need === id) problems.push(`${id} lists itself`);
+        else if (at.get(need)! >= at.get(id)!) problems.push(`${id} (step ${at.get(id)}) needs ${need} (step ${at.get(need)}), which comes later`);
+      }
+      if (new Set(needs).size !== needs.length) problems.push(`${id} lists a prerequisite twice`);
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it('has no cycle among the prerequisites', () => {
+    // Implied by "every prerequisite is earlier", but checked on its own so a
+    // future change to the ordering rule cannot let one in unnoticed.
+    const state = new Map<string, 'visiting' | 'done'>();
+    const cycle: string[] = [];
+    const visit = (id: string, trail: string[]): void => {
+      if (state.get(id) === 'done' || cycle.length) return;
+      if (state.get(id) === 'visiting') {
+        cycle.push(...trail.slice(trail.indexOf(id)), id);
+        return;
+      }
+      state.set(id, 'visiting');
+      for (const need of PREREQUISITES[id] ?? []) visit(need, [...trail, id]);
+      state.set(id, 'done');
+    };
+    for (const id of Object.keys(PREREQUISITES)) visit(id, []);
+    expect(cycle).toEqual([]);
   });
 
   it('links each step to its neighbours, and the last back to the start', () => {

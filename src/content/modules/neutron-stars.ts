@@ -109,7 +109,16 @@ const neutronStars: Module = {
           default: 1 / CRAB_F0,
           step: 0.01, // decades
           scale: 'log',
-          format: { notation: 'auto', digits: 3, displayUnit: { unit: 'ms', factor: 1e3 } },
+          // Milliseconds below a second and seconds from one, as the sim's own
+          // strip labels it: the top of the slider reads "10 s", not "10,000 ms".
+          format: {
+            notation: 'auto',
+            digits: 3,
+            displayUnits: [
+              { from: 0, unit: 'ms', factor: 1e3 },
+              { from: 1, unit: 's', factor: 1 },
+            ],
+          },
         },
         {
           id: 'alpha',
