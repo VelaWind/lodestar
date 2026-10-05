@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useLayoutEffect, useRef } from 'react';
 import { AnimatePresence, LazyMotion, m } from 'framer-motion';
-import { BrowserRouter, Route, Routes, useLocation, useNavigationType } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import type { Location } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
 import { DISTANCE, DURATION, EASE } from '@/motion/tokens';
@@ -195,6 +195,79 @@ function arrivedByReloadOrHistory(): boolean {
   return nav?.type === 'reload' || nav?.type === 'back_forward';
 }
 
+/** Ends the current smooth jump early, if one is running. */
+let endSmoothJump: (() => void) | null = null;
+
+/**
+ * Turns smooth scrolling on (`smooth-jump` on <html>, see index.css) for one
+ * in-page jump, and off again when the jump has finished: on `scrollend`
+ * where the browser has it, otherwise (Safari before 26) after 2 s. Where
+ * `scrollend` exists the 2 s timer is still kept as a guard, restarted by
+ * every scroll event, so a jump that does not move at all still clears the
+ * class and a long glide is never cut short. Whichever ends it clears the other.
+ */
+function holdSmoothJump(): void {
+  endSmoothJump?.();
+  const root = document.documentElement;
+  const hasScrollEnd = 'onscrollend' in window;
+  let timer = 0;
+  const finish = () => {
+    root.classList.remove('smooth-jump');
+    window.clearTimeout(timer);
+    document.removeEventListener('scrollend', finish);
+    window.removeEventListener('scroll', rearm);
+    endSmoothJump = null;
+  };
+  const rearm = () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(finish, 2000);
+  };
+  root.classList.add('smooth-jump');
+  if (hasScrollEnd) {
+    document.addEventListener('scrollend', finish);
+    window.addEventListener('scroll', rearm, { passive: true });
+  }
+  timer = window.setTimeout(finish, 2000);
+  endSmoothJump = finish;
+}
+
+/**
+ * Moves the keyboard's place to an in-page target, as following a fragment
+ * link natively would: the next Tab continues from there. A target that is
+ * not focusable is made focusable from script only (tabindex −1).
+ */
+function focusJumpTarget(target: HTMLElement): void {
+  if (target.tabIndex < 0 && !target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+  target.focus({ preventScroll: true });
+}
+
+/**
+ * Scrolls to `top` once the page is tall enough to, waiting at most two
+ * seconds for content still loading. Returns a cleanup for the wait.
+ */
+function restoreScroll(top: number): (() => void) | undefined {
+  const fits = () => document.documentElement.scrollHeight - window.innerHeight >= top - 1;
+  if (fits()) {
+    window.scrollTo({ top, left: 0, behavior: 'instant' });
+    return undefined;
+  }
+  const observer = new MutationObserver(() => {
+    if (!fits()) return;
+    stop();
+    window.scrollTo({ top, left: 0, behavior: 'instant' });
+  });
+  const timer = window.setTimeout(() => {
+    stop();
+    window.scrollTo({ top, left: 0, behavior: 'instant' });
+  }, 2000);
+  function stop() {
+    observer.disconnect();
+    window.clearTimeout(timer);
+  }
+  observer.observe(document.body, { childList: true, subtree: true });
+  return stop;
+}
+
 /** The scroll position remembered for a history entry, or null if none. */
 function savedScroll(key: string): number | null {
   try {
@@ -210,23 +283,25 @@ function savedScroll(key: string): number | null {
  * A link followed inside the app (PUSH or REPLACE) opens its page at the top,
  * or at the element its `#hash` names if that element is already rendered.
  *
- * Back/Forward and a reload (POP) without a hash return the reader to the
- * position saved for that history entry, once the page has rendered tall
- * enough (waiting at most two seconds); an entry with nothing saved, such as a
- * first visit, is left alone. With a hash whose element is already in the page
- * (the skip link, the step link under a module's title), the browser has
- * already scrolled to it. With a hash whose element is not there yet,
- * typically a direct load of `/m/<id>#path-footer` while the module's content
- * is still loading, the browser's own jump found nothing; so this waits for
- * the element to appear, for at most two seconds, and scrolls to it once.
+ * A same-page `#fragment` link (the skip link, the step link under a module's
+ * title) is pushed through the router as its own history entry and scrolled
+ * to smoothly, or instantly under reduced motion, with keyboard focus moved to
+ * the target. Smooth scrolling is on only for that jump: `smooth-jump` on
+ * <html> (see index.css), removed when the jump ends. Keyboard activation of a
+ * link fires a click too.
  *
- * Layout effect, so a new page is never painted at the old position first.
+ * Back/Forward and a reload (POP) return the reader to the position saved for
+ * that history entry, once the page has rendered tall enough (waiting at most
+ * two seconds). An entry with nothing saved is left at its #hash target if it
+ * has one, or alone if not. A first visit is never restored: with a hash whose
+ * element is already in the page the browser has made the jump; with a hash
+ * whose element is not there yet, typically a direct load of
+ * `/m/<id>#path-footer` while the module's content is still loading, this
+ * waits for the element to appear, for at most two seconds, and scrolls to it
+ * once.
  *
- * Smooth scrolling is switched on only for an in-page jump the reader sets
- * off: activating a `#fragment` link adds `smooth-jump` to <html> (see
- * index.css) for a second, long enough for the jump. Keyboard activation of a
- * link fires a click too. Everything else, the browser's own restoration on
- * Back included, scrolls instantly.
+ * Every scroll the app makes outside an in-page jump is instant. Layout effect,
+ * so a new page is never painted at the old position first.
  */
 function ScrollOnNavigate() {
   const { pathname, hash, key } = useLocation();
@@ -262,61 +337,66 @@ function ScrollOnNavigate() {
       history.scrollRestoration = previous;
     };
   }, []);
+  /*
+   * In-page jumps (the skip link, the step link under a module's title, any
+   * same-page `#fragment` link) go through the router rather than the
+   * browser. Followed natively, a fragment link makes a history entry with no
+   * state, which the router gives the same key, "default", as the entry before
+   * it; both then shared one saved position and Back after a jump stayed put.
+   * Pushed through the router, each jump is an entry of its own, so Back
+   * returns to where the reader was and Forward to the target. A click with a
+   * modifier key, or on a link to another page, is left alone.
+   */
+  const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
+  useLayoutEffect(() => {
+    navigateRef.current = navigate;
+  });
+  const pendingJumpRef = useRef<string | null>(null);
   useEffect(() => {
-    const root = document.documentElement;
-    let timer = 0;
     const onClick = (event: MouseEvent) => {
       saveScroll(keyRef.current);
-      const link = (event.target as Element | null)?.closest?.('a[href^="#"]');
-      if (!link) return;
-      root.classList.add('smooth-jump');
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => root.classList.remove('smooth-jump'), 1000);
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = (event.target as Element | null)?.closest?.('a[href]');
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if ((link.target && link.target !== '_self') || link.hasAttribute('download')) return;
+      const url = new URL(link.href);
+      const here = window.location;
+      const samePage =
+        (link.getAttribute('href') ?? '').startsWith('#') ||
+        (url.origin === here.origin && url.pathname === here.pathname && url.search === here.search);
+      if (!samePage || url.hash.length < 2) return;
+      event.preventDefault();
+      pendingJumpRef.current = decodeURIComponent(url.hash.slice(1));
+      navigateRef.current({ pathname: here.pathname, search: here.search, hash: url.hash });
     };
-    // Capture phase, so the class is on before the browser starts the jump.
+    // Capture phase: before the browser follows the link natively.
     document.addEventListener('click', onClick, true);
     return () => {
       document.removeEventListener('click', onClick, true);
-      window.clearTimeout(timer);
-      root.classList.remove('smooth-jump');
+      endSmoothJump?.();
     };
   }, []);
   useLayoutEffect(() => {
     const firstRender = firstRenderRef.current;
     firstRenderRef.current = false;
-    if (navigationType === 'POP' && !hash) {
+    if (navigationType === 'POP') {
       // A document's first render is a POP too. Only a reload, or a return to
       // this document through history, should put a saved place back; a fresh
-      // visit (a typed or followed URL) starts at the top as a browser would.
-      if (firstRender && !arrivedByReloadOrHistory()) return;
-      const top = savedScroll(entry);
-      if (top === null) return;
-      const fits = () => document.documentElement.scrollHeight - window.innerHeight >= top - 1;
-      if (fits()) {
-        window.scrollTo({ top, left: 0, behavior: 'instant' });
+      // visit (a typed or followed URL) starts at the top as a browser would,
+      // or at its #hash.
+      const top = firstRender && !arrivedByReloadOrHistory() ? null : savedScroll(entry);
+      if (top !== null) return restoreScroll(top);
+      if (!hash) return;
+      const id = decodeURIComponent(hash.slice(1));
+      const present = document.getElementById(id);
+      if (present) {
+        // On a first load the browser has already made this jump; on a later
+        // entry with nothing saved, make it here.
+        if (!firstRender) present.scrollIntoView({ behavior: 'instant' });
         return;
       }
-      // The page is still filling in (a module's content loading): wait for
-      // it to be tall enough, for at most two seconds, then go there.
-      const observer = new MutationObserver(() => {
-        if (!fits()) return;
-        stop();
-        window.scrollTo({ top, left: 0, behavior: 'instant' });
-      });
-      const timer = window.setTimeout(() => {
-        stop();
-        window.scrollTo({ top, left: 0, behavior: 'instant' });
-      }, 2000);
-      function stop() {
-        observer.disconnect();
-        window.clearTimeout(timer);
-      }
-      observer.observe(document.body, { childList: true, subtree: true });
-      return stop;
-    }
-    if (navigationType === 'POP') {
-      const id = decodeURIComponent(hash.slice(1));
-      if (document.getElementById(id)) return;
       const observer = new MutationObserver(() => {
         const target = document.getElementById(id);
         if (!target) return;
@@ -336,10 +416,22 @@ function ScrollOnNavigate() {
     // which undid the scroll below; so focus leaves the outgoing page first.
     const active = document.activeElement;
     if (active instanceof HTMLElement && active.closest('[inert]')) active.blur();
-    // Instant, even if a fragment link has just switched smooth scrolling on:
+    const id = hash ? decodeURIComponent(hash.slice(1)) : null;
+    const target = id ? document.getElementById(id) : null;
+    // An in-page jump the reader set off: smooth, unless they prefer reduced
+    // motion, and the keyboard's place moves to the target.
+    const jump = pendingJumpRef.current;
+    pendingJumpRef.current = null;
+    if (target && jump === id) {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) holdSmoothJump();
+      target.scrollIntoView({ behavior: reduced ? 'instant' : 'smooth', block: 'start' });
+      focusJumpTarget(target);
+      return;
+    }
+    // Instant, even if an in-page jump has just switched smooth scrolling on:
     // a new page should simply open at its top, not glide there across
     // thousands of pixels of the page it replaced.
-    const target = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null;
     if (target) target.scrollIntoView({ behavior: 'instant' });
     else window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [pathname, hash, entry, navigationType]);
