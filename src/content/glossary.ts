@@ -548,7 +548,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'lorentz-factor': {
     title: 'Lorentz factor',
-    body: 'γ = 1/√(1 − v²/c²): how much slower a moving clock runs. 1.000000000000005 at motorway speed, 1.67 at 80 percent of light speed, and without limit as speed nears c.',
+    body: 'The factor by which a moving clock runs slow, set by how close its speed is to light’s: 1.000000000000005 at motorway speed, 1.67 at 80 percent of light speed, and without limit as speed nears light’s.',
   },
   'twin-paradox': {
     title: 'Twin paradox',

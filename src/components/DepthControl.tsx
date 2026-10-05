@@ -86,7 +86,9 @@ export function DepthControl() {
               // px-3 at base buys the ~20px the header needs to fit a 375px
               // phone; py-2.5 takes the pill to 36px, the most a 64px header can
               // give a tap target without the chrome growing.
-              className={`relative rounded-full px-3 py-2.5 font-ui text-xs transition-colors sm:px-4 sm:py-1.5 ${
+              // Below 375px the sides drop to px-1.5, the room the wordmark needs
+              // at 320px; the pill keeps its 36px height and stays over 40px wide.
+              className={`relative rounded-full px-3 py-2.5 font-ui text-xs transition-colors max-[374px]:px-1.5 sm:px-4 sm:py-1.5 ${
                 active ? 'text-void-900' : 'text-ink-faint hover:text-ink-dim'
               }`}
             >

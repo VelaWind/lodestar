@@ -96,8 +96,9 @@ export const aboutSections: AboutSection[] = [
       p(
         'Vite, React 18, TypeScript in strict mode, Tailwind, Zustand, Framer Motion, KaTeX, and ',
         'hand-drawn Canvas 2D. Content is typed data, not a CMS: a new module is one data file ',
-        'and one simulation component, and the shell discovers both. Deployed on Vercel; tested ',
-        'in CI on every push. The code, the tests and the history described here are public on ',
+        'and one simulation component, and the shell discovers both. Deployed on Vercel; the ',
+        'checks run in CI on every pull request to the main branch and every push to it. The ',
+        'code, the tests and the history described here are public on ',
         'GitHub.',
       ),
     ),

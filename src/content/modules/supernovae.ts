@@ -43,7 +43,7 @@ const supernovae: Module = {
           'whole life.',
         ),
         p(
-          'Fuel runs out. For a star like the Sun that is undramatic: the core shrinks, the outer ',
+          'Fuel runs out. For a star like the Sun that is undramatic. The core shrinks, the outer ',
           'layers drift away as a glowing shell, and what is left is a hot, dense ember the size ',
           'of the Earth that cools for the rest of time. But a star many times heavier burns ',
           'through its fuel in a few million years and then, in its last day, forges iron at its ',
