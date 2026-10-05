@@ -198,8 +198,8 @@ const expansionOfTheUniverse: Module = {
           term('blueshift'),
           ', a shortening of wavelength. Andromeda does: its own motion through space, its ',
           term('peculiar velocity'),
-          ', carries it toward the Milky Way at about 110 km/s, more than the roughly 50 km/s of ',
-          'expansion across the 2.5 million light-years between us. Gravity wins over expansion ',
+          ', more than cancels the roughly 50 km/s of expansion across the 2.5 million ',
+          'light-years between us, and it approaches at about 110 km/s. Gravity wins over expansion ',
           'inside groups and clusters of galaxies; expansion wins across the gulfs between them.',
         ),
         p(

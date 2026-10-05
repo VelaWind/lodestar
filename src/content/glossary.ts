@@ -138,7 +138,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   },
   'degrees-of-freedom': {
     title: 'Degrees of freedom, g*',
-    body: 'The count of particle species light enough to be made at a given temperature, with fermions weighted 7/8. Sets how fast the early universe cooled.',
+    body: 'The count of particle spin states light enough to be made at a given temperature, with fermions weighted 7/8. Sets how fast the early universe cooled.',
   },
   inflation: {
     title: 'Inflation',
