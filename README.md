@@ -96,7 +96,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 - slider stops on every param: the default is a stop and both ends clamp to the exact bound;
 - the learning path against the registry: every module on it exactly once, steps numbered without gaps, and every module's declared prerequisites existing, earlier on the path, and free of cycles.
 
-`.github/workflows/ci.yml` runs typecheck, lint, test and build in that order on every push and pull request to `main`, on Node 22.
+`.github/workflows/ci.yml` runs typecheck, lint, test and build in that order on every push and pull request to `main`, on Node 22; once those pass, a second job runs the Playwright suite on the two Chromium projects against `vite preview` of the build, and keeps the HTML report as an artifact when it fails.
 
 The browser suite is separate: `playwright.config.ts` defines five projects (Chromium at two viewports, WebKit, Firefox, mobile WebKit) covering tooltip journeys, figures, axe accessibility passes, keyboard operability and the not-found route. It starts no dev server, so `baseURL` defaults to the live site and `E2E_BASE_URL` retargets it at a local `npm run preview`.
 
@@ -120,7 +120,7 @@ Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic
 
 ## Known limits
 
-Some files are very large and heavily commented: `sanity.ts` is 2367 lines and the largest simulation, supernovae, 926, which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered only by the Playwright suite, which needs a live deployment; a component regression is invisible to `npm test` and to CI.
+Some files are very large and heavily commented: `sanity.ts` is 3031 lines and the largest simulation, dark-matter, 1050 (supernovae, once the largest, is 926), which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered by the Playwright suite. CI runs it on the two Chromium projects (a phone and a desktop viewport) against a preview of the build, after the typecheck, lint, unit tests and build; the WebKit, Firefox and mobile-WebKit projects run only locally, so an engine-specific regression in Safari or Firefox is still invisible to CI.
 
 The learning path's order is checked through declared prerequisites: each module lists the topics it assumes in `src/content/path.ts`, and a test enforces that they come earlier. What a test cannot judge, a glossary term used before the topic that teaches it, `npm run path:audit` lists for manual review.
 
