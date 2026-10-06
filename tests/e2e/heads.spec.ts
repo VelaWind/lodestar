@@ -5,7 +5,7 @@
  * started emitting per-route shells every address served the same head. A
  * browser fixed that on hydration and nobody noticed; a crawler does not
  * hydrate, so every module link shared anywhere unfurled as the site's front
- * page — eighteen modules, one card, one canonical-less shell.
+ * page — every module, one card, one canonical-less shell.
  *
  * So this asks for the raw bytes. No browser, no `page.goto`, no hydration:
  * `request.get` returns exactly what a crawler is handed, and the assertions
@@ -140,6 +140,7 @@ test('every route serves its own head', async ({ request, baseURL }) => {
 
   const checked: string[] = [];
   const checkedDescriptions: string[] = [];
+  const descriptionPairs = new Set<string>();
 
   const fetchHtml = async (path: string): Promise<string> => {
     const response = await request.get(`${baseURL}${path}`);
@@ -148,7 +149,13 @@ test('every route serves its own head', async ({ request, baseURL }) => {
       response.headers()['content-type'],
       `${path || '/'}: not served as HTML`,
     ).toContain('text/html');
-    return response.text();
+    const html = await response.text();
+    // On every route the social card says what the search result says.
+    expect(ogDescription(html), `${path || '/'}: og:description should equal the description`).toBe(
+      description(html),
+    );
+    descriptionPairs.add(path || '/');
+    return html;
   };
 
   /* --- the root ----------------------------------------------------- */
@@ -228,6 +235,7 @@ test('every route serves its own head', async ({ request, baseURL }) => {
   /* --- no two routes claim the same address ------------------------- */
 
   expect(checked.length, 'twenty-four routes checked').toBe(24);
+  expect(descriptionPairs.size, 'description and og:description compared on every route').toBe(24);
   expect(new Set(checked).size, 'every route path is distinct').toBe(24);
 
   console.log(`  heads: ${checked.length} routes, each with its own title, description and canonical`);

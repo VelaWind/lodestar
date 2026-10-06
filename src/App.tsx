@@ -3,6 +3,8 @@ import { AnimatePresence, LazyMotion, m } from 'framer-motion';
 import { BrowserRouter, Route, Routes, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import type { Location } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
+import { LoadErrorBoundary } from '@/components/LoadErrorBoundary';
+import { moduleLoadFailed, retryModule } from '@/content/catalog';
 import { DISTANCE, DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
 import { ModuleListPage } from '@/pages/ModuleListPage';
@@ -45,17 +47,34 @@ function AppRoutes({ location }: { location: Location }) {
        screen and was shoved down when the route arrived, which Lighthouse
        measured as 0.156 of layout shift on a module page. A screenful of
        placeholder puts it below the fold, so nothing visible moves. */
-    <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
-      <Routes location={location}>
-        <Route path="/" element={<ModuleListPage />} />
-        <Route path="/m/:id" element={<ModulePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        {/* Not a redirect. Bouncing an unknown address to the index loses both
-            the fact that it was wrong and the address itself. */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Suspense>
+    <LoadErrorBoundary resetKey={location.pathname} onRetry={() => retryRoute(location.pathname)}>
+      <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+        <Routes location={location}>
+          <Route path="/" element={<ModuleListPage />} />
+          <Route path="/m/:id" element={<ModulePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          {/* Not a redirect. Bouncing an unknown address to the index loses both
+              the fact that it was wrong and the address itself. */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+    </LoadErrorBoundary>
   );
+}
+
+/**
+ * "Try again" after a failed load. A module's own data can be fetched again in
+ * place; anything else that failed (a page chunk or a simulation, which
+ * `React.lazy` holds on to once it has failed) needs a reload, which the
+ * boundary does when this rejects.
+ */
+async function retryRoute(pathname: string): Promise<void> {
+  const id = /^\/m\/([^/]+)$/.exec(pathname)?.[1];
+  if (id && moduleLoadFailed(id)) {
+    await retryModule(id);
+    return;
+  }
+  throw new Error('Only a reload can recover this load');
 }
 
 /**

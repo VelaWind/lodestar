@@ -19,7 +19,7 @@ import type { LayerId, Module, Param, ParamUpdate, ParamValues } from '@/content
 import { getModuleSummary, readModule } from '@/content/catalog';
 import { DISTANCE } from '@/motion/tokens';
 import { Reveal } from '@/motion/Reveal';
-import { useNoindex } from '@/lib/useNoindex';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 import { LAYER_META, LAYER_ORDER, defaultOpenFor, layerHasMath } from '@/lib/layers';
 import { defaultsOf, useAppStore } from '@/store/useAppStore';
 import { Layer } from '@/components/Layer';
@@ -347,18 +347,7 @@ function renderLayer(layerId: LayerId, module: Module): ReactNode {
   }
 }
 
+/** A slug that names no module: the site's not-found page, naming the slug. */
 function NotFound({ id }: { id: string | undefined }) {
-  useNoindex();
-
-  return (
-    <div className="py-24 text-center">
-      <p className="font-prose text-2xl text-ink">No module called “{id}”.</p>
-      <Link
-        to="/"
-        className="mt-4 inline-block font-ui text-sm text-star underline-offset-4 hover:underline"
-      >
-        Back to all modules
-      </Link>
-    </div>
-  );
+  return <NotFoundPage heading={`No module called “${id ?? ''}”`} message={null} />;
 }

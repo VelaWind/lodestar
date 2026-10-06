@@ -52,14 +52,42 @@ export function loadModule(id: string): Promise<Module> {
   if (!promise) {
     const load = loaders[id];
     if (!load) return Promise.reject(new Error(`No module data for "${id}"`));
-    promise = load().then((mod) => {
-      loaded.set(id, mod.default);
-      pending.delete(id);
-      return mod.default;
-    });
+    promise = load().then(
+      (mod) => {
+        loaded.set(id, mod.default);
+        pending.delete(id);
+        return mod.default;
+      },
+      (error: unknown) => {
+        // Remembered as a failure rather than left as a rejected promise in
+        // flight: re-thrown by `readModule`, the rejected promise only ever
+        // suspended the page again, and a chunk that failed to arrive (a 502,
+        // a dropped connection) left the reader with a blank page.
+        pending.delete(id);
+        failed.set(id, error);
+        throw error;
+      },
+    );
     pending.set(id, promise);
   }
   return promise;
+}
+
+/** Load failures by module id, until a retry clears them. */
+const failed = new Map<string, unknown>();
+
+/** Whether this module's data failed to load and has not been retried since. */
+export function moduleLoadFailed(id: string): boolean {
+  return failed.has(id);
+}
+
+/**
+ * Clear a failed load and fetch again. Rejects if it fails again; a browser
+ * may also have cached the failed chunk, in which case only a reload helps.
+ */
+export function retryModule(id: string): Promise<Module> {
+  failed.delete(id);
+  return loadModule(id);
 }
 
 /** Start loading without waiting, for link-intent prefetching. Errors surface on the page. */
@@ -76,5 +104,8 @@ export function prefetchModule(id: string): void {
 export function readModule(id: string): Module {
   const ready = loaded.get(id);
   if (ready) return ready;
+  // A failed load is thrown as an error, for the route's error boundary to
+  // catch and offer a retry; see `LoadErrorBoundary`.
+  if (failed.has(id)) throw failed.get(id);
   throw loadModule(id);
 }

@@ -5,8 +5,9 @@
  * list, so dropping `src/content/modules/foo.ts` into the tree wires it up with
  * zero edits anywhere. Vite statically analyses the glob.
  *
- * The app's pages do not import this file. Eagerly, all eighteen modules' prose
- * was about 91 kB gzipped, and it used to sit in the entry chunk of every route.
+ * The app's pages do not import this file. Eagerly, the modules' prose was
+ * about 91 kB gzipped when that was measured, and it used to sit in the entry
+ * chunk of every route.
  * The pages read `catalog.ts` instead: a small manifest generated from this
  * registry at build time, plus a lazy loader per module. The registry is what
  * the build reads to write per-route heads and the manifest, and what the tests
