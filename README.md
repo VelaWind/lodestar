@@ -8,7 +8,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 
 ## Screenshots
 
-![Lodestar landing page: hero copy, depth control in the header, module cards](screenshots/01-home.png)
+![Lodestar landing page: hero copy, depth control in the header, and the start of the "Start here" learning path](screenshots/01-home.png)
 
 ![Gravitational waves module: strain trace on canvas, sliders in real units, derived readouts, approximations disclosure](screenshots/02-module.png)
 
@@ -20,10 +20,10 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 - A "Start here" learning path on the front page suggests an order through all 22 topics in four stages, checked so that no topic leans on an idea only a later one explains; each module page ends with its step on the path and links to the topics before and after it. The order lives in one data file, `src/content/path.ts`, and a test fails if a module has no place on it.
 - Each simulation lists its approximations in a counted expander beside it, not in the prose.
 - The gravitational-wave chirp can be heard, synthesised through Web Audio at the binary's own frequencies and labelled on the page as a sonification, not a recording.
-- Glossary of 126 entries. Marked terms open a panel placed by a pure geometry function, on hover intent, click, focus or tap, with one `aria-live` region for screen readers.
-- Every module closes its "real picture" layer with a licensed photograph or published measurement (18 figures in `public/figures/`), credited on the page.
-- All 18 simulations honour `prefers-reduced-motion` with a static rendering carrying the same information.
-- Constants follow CODATA 2018 and IAU 2015 Resolution B3, defined once and never inlined. Each module cites four or five primary references.
+- Glossary of 150 entries. Marked terms open a panel placed by a pure geometry function, on hover intent, click, focus or tap, with one `aria-live` region for screen readers.
+- Every module closes its "real picture" layer with a licensed photograph or published measurement (22 figures in `public/figures/`, each with 640 w and 1080 w copies), credited on the page.
+- All 22 simulations honour `prefers-reduced-motion`: the 21 that animate show a static rendering carrying the same information, and planetary atmospheres never animates.
+- Constants follow CODATA 2018 and IAU 2015 Resolution B3, defined once and never inlined. Each module cites five primary references.
 
 ## Modules
 
@@ -77,6 +77,7 @@ On a clean install with Node 22: lint reports zero issues, `npm test` passes 117
 - **Terms are marked, not re-explained.** A `term` node in the AST is a leaf: visible words plus a glossary id, so a definition cannot come to contain a link or an equation. Its panel is portalled to `document.body` and positioned `fixed`, because every layer body sits inside the accordion's `overflow-hidden`.
 - **A sanity suite guards the physics.** `src/physics/sanity.ts` recomputes known quantities (Earth's orbital period, the Schwarzschild radius of the Sun, light travel times: 205 checks in 23 blocks) through the code paths the simulations use, logging on dev boot and asserted in tests.
 - **Every route serves its own head.** `scripts/routeHeadsPlugin.ts` emits one HTML file per route at build time from the registry (24 routes, 47 files) plus `sitemap.xml`, so a shared module link unfurls as the module rather than the front page. Each file also carries schema.org data (a `LearningResource` per module, with no author or other personal details) and a `<noscript>` summary, so a crawler that does not run the app still reads the page's subject.
+- **Built to fail gracefully.** A chunk that fails to load (a 502, a dropped connection) shows a page with a retry button instead of a blank screen (`LoadErrorBoundary`), and the app manages scroll itself per history entry, so Back returns readers to their place and each in-page jump has an entry of its own. Hashed assets are served as immutable for a year while HTML revalidates on every visit, and `vercel.json` sets the security headers, but deliberately no Content-Security-Policy, because KaTeX and the motion library set inline styles that a wrong policy would silently break.
 
 ## Stack
 
@@ -98,7 +99,7 @@ Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and 
 
 `.github/workflows/ci.yml` runs typecheck, lint, test and build in that order on every push and pull request to `main`, on Node 22; once those pass, a second job runs the Playwright suite on the two Chromium projects against `vite preview` of the build, and keeps the HTML report as an artifact when it fails.
 
-The browser suite is separate: `playwright.config.ts` defines five projects (Chromium at two viewports, WebKit, Firefox, mobile WebKit) covering tooltip journeys, figures, axe accessibility passes, keyboard operability and the not-found route. It starts no dev server, so `baseURL` defaults to the live site and `E2E_BASE_URL` retargets it at a local `npm run preview`.
+The browser suite is separate: `playwright.config.ts` defines five projects (Chromium at two viewports, WebKit, Firefox, mobile WebKit) covering tooltip journeys, figures, axe accessibility passes, keyboard operability, the not-found route, scroll restoration on links, Back and Forward and in-page jumps, recovery from a chunk that fails to load, and each route's served head and structured data. It starts no dev server, so `baseURL` defaults to the live site and `E2E_BASE_URL` retargets it at a local `npm run preview`.
 
 ## Performance
 
@@ -116,6 +117,8 @@ Measured in the lab against `npm run preview`: Lighthouse 13 in mobile mode (sim
 | Slider drag, slowest module (early universe before) | 24.4 fps | 44.8 fps (hawking radiation; 50.8 median of four runs) |
 | Entry JavaScript, gzipped | 145.1 kB | 23.8 kB |
 
+A returning visitor now loads the scripts from cache, since every hashed asset is served as immutable; and all of these figures are from the lab, not from field data.
+
 Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic; most of a drag's time in the profile is software canvas drawing. What changed: slider ticks re-render only the sim and its readouts, not the page; sims read their size from a `ResizeObserver` instead of forcing a layout per paint; label widths are cached; the early-universe scale factor comes from a table built once (agreeing with the old bisection to about 10⁻¹¹) instead of 240 000 integrand evaluations per frame; the starfield pauses while a sim is on screen; each module's content loads on its own page, with a build-time manifest for the index; framer-motion's features and KaTeX load only when needed; module pages preload their chunks; and figures ship 640 w and 1080 w copies.
 
 ## Known limits
@@ -125,6 +128,10 @@ Some files are very large and heavily commented: `sanity.ts` is 3031 lines and t
 The learning path's order is checked through declared prerequisites: each module lists the topics it assumes in `src/content/path.ts`, and a test enforces that they come earlier. What a test cannot judge, a glossary term used before the topic that teaches it, `npm run path:audit` lists for manual review.
 
 The maths layer's Numbers view substitutes each slider's value in SI base units, because the constants in the equations are SI; a "where" line under each equation gives the slider's own reading (v₀ = 8 km/s beside 8000 m/s in the formula) for every substituted value shown in another unit.
+
+## How the physics was checked
+
+Claims that can be computed are recomputed through the site's own physics code before publication, and the sanity suite keeps 205 of those checks running, through the same code the simulations run, on every test run. Every module's physics was also checked by separate AI reviewers that had not seen it being written, twice for most modules, followed by whole-site audits and one review by a model from a different AI developer. Each correction those reviews found was checked against its primary source before it was applied. No human astrophysicist has reviewed the site yet. Errors can be reported on the repository's [issues page](https://github.com/VelaWind/lodestar/issues).
 
 <!-- site:case-study:end -->
 
