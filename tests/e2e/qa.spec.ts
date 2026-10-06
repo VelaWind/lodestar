@@ -4357,6 +4357,17 @@ test('an address that matches nothing says so @cross-engine', async ({ page }) =
     'the module route should name the slug it could not find',
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Back to all modules' })).toBeVisible();
+  // A proper page: one heading naming the slug, and the tab says where you are.
+  await expect(page.locator('main h1')).toHaveCount(1);
+  await expect(page.locator('main h1')).toHaveText('No module called “does-not-exist”');
+  await expect(page).toHaveTitle('Nothing here · Lodestar');
+
+  await page.goto('/m/not-a-topic', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('main h1')).toHaveCount(1);
+  await expect(page.locator('main h1')).toHaveText('No module called “not-a-topic”');
+  await expect(page).toHaveTitle('Nothing here · Lodestar');
+  await page.goto('/m/does-not-exist', { waitUntil: 'domcontentloaded' });
+  await settle(page, 700);
 
   const namedSlug = await headMarkers(page);
   expect(namedSlug.noindex, '/m/<unknown> should be noindex').toBe('noindex');

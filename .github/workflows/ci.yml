@@ -70,3 +70,56 @@ jobs:
       # something bundler-specific rather than a type error.
       - name: Build
         run: npm run build
+
+  e2e:
+    # The browser suite, on the two Chromium projects only (mobile-390x844 and
+    # desktop-1280x800). They run every test; the three cross-engine projects
+    # (WebKit, Firefox, mobile WebKit) run a subset, need two more browser
+    # downloads and roughly double the time, so they stay a local check before
+    # merging. This is what makes a component regression visible to CI: no
+    # unit test renders a component.
+    name: e2e (chromium)
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same Node as `verify`, for the same lockfile reason.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      # Against `vite preview`, as the local runs are: playwright.config.ts has
+      # no webServer and reads the address from E2E_BASE_URL. The server is
+      # started here, in the same step as the tests, and waited for.
+      - name: Playwright (Chromium projects)
+        env:
+          E2E_BASE_URL: http://localhost:4173
+        run: |
+          npm run preview -- --port 4173 --strictPort > preview.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -sf -o /dev/null http://localhost:4173/; then break; fi
+            if [ "$attempt" -eq 60 ]; then cat preview.log; exit 1; fi
+            sleep 1
+          done
+          npx playwright test --project=mobile-390x844 --project=desktop-1280x800 --reporter=list,html
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
