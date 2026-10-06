@@ -1,7 +1,7 @@
 {
   "name": "lodestar",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Interactive astrophysics in seven layers, with every simulation running on real SI quantities.",
   "scripts": {
