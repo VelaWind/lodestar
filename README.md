@@ -131,7 +131,7 @@ The maths layer's Numbers view substitutes each slider's value in SI base units,
 
 ## How the physics was checked
 
-Claims that can be computed are recomputed through the site's own physics code before publication, and the sanity suite keeps 205 of those checks running, through the same code the simulations run, on every test run. Every module's physics was also checked by separate AI reviewers that had not seen it being written, twice for most modules, followed by whole-site audits and one review by a model from a different AI developer. Each correction those reviews found was checked against its primary source before it was applied. No human astrophysicist has reviewed the site yet. Errors can be reported on the repository's [issues page](https://github.com/VelaWind/lodestar/issues).
+Claims that can be computed are recomputed through the site's own physics code before publication, and the sanity suite keeps 205 of those checks running, through the same code the simulations run, on every test run. Every module's physics was also checked by separate AI reviewers that had not seen it being written, twice for most modules, followed by whole-site audits and one review by a model from a different AI developer. Each correction those reviews found was checked against its primary source before it was applied. No human astrophysicist has reviewed the site yet. Errors can be reported on Lodestar's [feedback page](https://github.com/VelaWind/lodestar-feedback/issues).
 
 <!-- site:case-study:end -->
 
