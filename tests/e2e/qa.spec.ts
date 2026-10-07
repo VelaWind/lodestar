@@ -4180,13 +4180,14 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
 /* ------------------------------------------------------------------ */
 
 /**
- * No route links the repository, and /about says where the code is.
+ * No route links the code repository; corrections go to the feedback page.
  *
- * The repository was private when this test was written, so a link to it was a
- * 404. It is public now, and /about says so in words. One link was then added
- * on purpose: /about's corrections sentence points at the repository's issues
- * page. That one link, on that one page, is allowed and required; any other
- * GitHub link anywhere on the site still fails.
+ * The code repository is private, so a link to it is a 404 for every reader.
+ * Scientific corrections go to a separate, public feedback repository instead:
+ * /about's corrections sentence links its issues page. That one link, on that
+ * one page, is allowed and required; any other GitHub link anywhere on the
+ * site fails, and so does any link to the code repository, with or without a
+ * path. /about must not claim the code is public on GitHub, as it once did.
  *
  * One literal anchor was removed from the footer, and a footer renders on every
  * route — so this walks all twenty-four and checks the rendered DOM rather than the
@@ -4197,26 +4198,23 @@ test('every module shows its layer-4 photograph @cross-engine', async ({ page })
  * Scope is the rendered site only. README, LICENSE and source comments name the
  * repository freely and should: they are read by people who already have it.
  *
- * The second half is the other side of the same claim. Removing the link left
- * the site silent about where the code is, so About says so — first that access
- * was on request, now that the code is public on GitHub. The first version of
- * that sentence was once missing from the rendered page, because it had never
- * been written. Checking
- * "no link" without checking "and here is what to do instead" is how that gap
- * survived a release: the absence was asserted, the replacement was not. Both
- * halves live in one test so neither can be satisfied alone.
+ * The second half is the other side of the same rule. A reader who finds an
+ * error still needs somewhere to say so, so /about must carry the feedback
+ * link. Checking "no link" without checking "and here is what to do instead"
+ * is how such a gap once survived a release. Both halves live in one test so
+ * neither can be satisfied alone.
  *
- * The href match is `github.com`, not `github.com/VelaWind`. Nothing in
- * `src/` links to GitHub at all, so the broader pattern costs nothing and also
+ * The href match is `github.com`, not `github.com/VelaWind`. Nothing else in
+ * `src/` links to GitHub, so the broader pattern costs nothing and also
  * catches a link to some other account's mirror of this repository.
  *
  * Chromium-only by omission of the `@cross-engine` tag — an href is an href on
  * every engine, and this is about content rather than rendering.
  */
 /** Where /about sends scientific corrections: the one GitHub link the site carries. */
-const ISSUES_URL = 'https://github.com/VelaWind/lodestar/issues';
+const ISSUES_URL = 'https://github.com/VelaWind/lodestar-feedback/issues';
 
-test('no route links the repo, and /about says the code is public on GitHub', async ({ page }) => {
+test('no route links the code repo, and /about links only the feedback page for corrections', async ({ page }) => {
   const w = watch(page);
   const routes = ['/', '/about', ...MODULES.map((id) => `/m/${id}`)];
   expect(routes.length, 'all twenty-four routes').toBe(24);
@@ -4235,9 +4233,10 @@ test('no route links the repo, and /about says the code is public on GitHub', as
     );
     expect(hrefs.length, `${route}: no links at all — did the page render?`).toBeGreaterThan(0);
 
-    // One exception, by the owner's ruling: /about links the repository's
-    // issues page, where scientific corrections go. Any other GitHub link, or
-    // this one anywhere else, is still an offender.
+    // One exception, by the owner's ruling: /about links the feedback
+    // repository's issues page, where scientific corrections go. Any other
+    // GitHub link, any link to the code repository, or this one anywhere else,
+    // is an offender.
     for (const href of hrefs) {
       if (!href.includes('github.com')) continue;
       if (route === '/about' && href === ISSUES_URL) continue;
@@ -4249,11 +4248,11 @@ test('no route links the repo, and /about says the code is public on GitHub', as
       // rendered where a reader meets it, which is exactly what a logged-out
       // check of the page looks at.
       const main = await page.locator('main').innerText();
-      expect(main, '/about must tell a reader where the code is').toContain('public on GitHub');
+      expect(main, '/about must not claim the code is public').not.toContain('public on GitHub');
       expect(main, 'the old private-repository sentence is back').not.toContain('on request');
       await expect(
-        page.locator('main').getByRole('link', { name: 'the project’s GitHub repository' }),
-        '/about should link the issues page for corrections, once',
+        page.locator('main').getByRole('link', { name: 'Lodestar’s feedback page on GitHub' }),
+        '/about should link the feedback issues page for corrections, once',
       ).toHaveAttribute('href', ISSUES_URL);
 
       // The seam this shipped alongside. The paragraph said "the division of
