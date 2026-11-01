@@ -1,7 +1,7 @@
 /**
  * The physics sanity suite, as assertions.
  *
- * `src/physics/sanity.ts` has run on every dev boot since the first module and
+ * `src/physics/sanity/` has run on every dev boot since the first module and
  * has caught real errors, but a check that only writes to a console is a check
  * nobody sees fail in CI. It now returns its results as well as logging them,
  * and this file turns each one into a test — the same functions, the same

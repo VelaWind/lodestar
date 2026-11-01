@@ -292,8 +292,9 @@ export const R_EARTH = 6.371e6; // m, IUGG mean radius (6371.0 km); NASA Earth F
  * The Moon, which the atmospheres module leans on twice: once for the retention
  * criterion it narrowly passes, and once as Titan’s near-twin in gravity.
  *
- * Both were inlined in `physics/sanity.ts` until the copy started quoting the
- * verdict they produce. A figure a reader can check has to come from one place.
+ * Both were inlined in the sanity suite (`physics/sanity/`) until the copy
+ * started quoting the verdict they produce. A figure a reader can check has to
+ * come from one place.
  *
  * Source: NASA Moon Fact Sheet (D. R. Williams, NASA GSFC) — mass 7.346e22 kg,
  * volumetric mean radius 1737.4 km.

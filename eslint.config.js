@@ -15,7 +15,7 @@
  *   - `tests/` and `scripts/` print on purpose — the QA suite's whole design
  *     is to report what a page said before asserting it said nothing broken,
  *     and the build plugin announces the files it wrote.
- *   - `src/physics/sanity.ts` logs by design in the shipped bundle: it is the
+ *   - `src/physics/sanity/` logs by design in the shipped bundle: it is the
  *     dev-time sanity suite whose entire output is console blocks, which the
  *     README documents as the thing `npm run dev` shows you.
  *
@@ -86,13 +86,14 @@ export default tseslint.config(
 
   {
     /*
-     * The dev-time sanity suite. Its output *is* the feature: eight blocks of
+     * The dev-time sanity suite. Its output *is* the feature: 23 blocks of
      * recomputed physics printed on load, which is what `npm run dev` is
-     * documented to show. Excepted here rather than with two inline comments
-     * because the exemption belongs to the file's purpose, not to two lines
-     * that happen to call `console`.
+     * documented to show. Every block logs through `emit` in `core.ts` except
+     * the escape integrator's, which formats its own line in `escape.ts`; those
+     * are the two files in the suite that call `console`, so the exemption is
+     * theirs alone rather than the whole folder's.
      */
-    files: ['src/physics/sanity.ts'],
+    files: ['src/physics/sanity/core.ts', 'src/physics/sanity/escape.ts'],
     rules: { 'no-console': 'off' },
   },
 

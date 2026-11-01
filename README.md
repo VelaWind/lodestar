@@ -21,7 +21,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 - Each simulation lists its approximations in a counted expander beside it, not in the prose.
 - The gravitational-wave chirp can be heard, synthesised through Web Audio at the binary's own frequencies and labelled on the page as a sonification, not a recording.
 - Glossary of 150 entries. Marked terms open a panel placed by a pure geometry function, on hover intent, click, focus or tap, with one `aria-live` region for screen readers.
-- Every module closes its "real picture" layer with a licensed photograph or published measurement (22 figures in `public/figures/`, each with 640 w and 1080 w copies), credited on the page.
+- Every module closes its "real picture" layer with a licensed photograph or published measurement (22 figures in `public/figures/`, each with a 640 w copy and, for the 17 originals wider than 1080 px, a 1080 w copy), credited on the page.
 - All 22 simulations honour `prefers-reduced-motion`: the 21 that animate show a static rendering carrying the same information, and planetary atmospheres never animates.
 - Constants follow CODATA 2018 and IAU 2015 Resolution B3, defined once and never inlined. Each module cites five primary references.
 
@@ -58,14 +58,14 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 npm install
 npm run dev        # sanity suite logs to the browser console on boot
 npm run lint       # eslint, correctness rules only
-npm test           # vitest, 1178 tests in 25 files
+npm test           # vitest, 1191 tests in 27 files
 npm run build      # typecheck, production build, per-route HTML, sitemap
 npm run preview    # serve dist/
 npm run e2e        # playwright, needs a deployment (see Tests)
 npm run path:audit # forward glossary-term references on the learning path, for review
 ```
 
-On a clean install with Node 22: lint reports zero issues, `npm test` passes 1178 of 1178, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
+On a clean install with Node 22: lint reports zero issues, `npm audit` reports zero vulnerabilities, `npm test` passes 1191 of 1191, and `npm run build` emits 24 route HTML files (47 total) plus `sitemap.xml`.
 
 <!-- site:case-study:start -->
 
@@ -75,18 +75,20 @@ On a clean install with Node 22: lint reports zero issues, `npm test` passes 117
 - **One source of truth per quantity.** Formulae and constants live in `src/physics/`, shared by the animation loop, the readouts and the equation renderer. The simulations hold no physics of their own: every simulation imports from `@/physics`.
 - **Canvas first.** Simulations draw in `requestAnimationFrame` loops reading refs, so dragging a slider does not re-render React per frame. Sims are lazy-loaded per route.
 - **Terms are marked, not re-explained.** A `term` node in the AST is a leaf: visible words plus a glossary id, so a definition cannot come to contain a link or an equation. Its panel is portalled to `document.body` and positioned `fixed`, because every layer body sits inside the accordion's `overflow-hidden`.
-- **A sanity suite guards the physics.** `src/physics/sanity.ts` recomputes known quantities (Earth's orbital period, the Schwarzschild radius of the Sun, light travel times: 205 checks in 23 blocks) through the code paths the simulations use, logging on dev boot and asserted in tests.
+- **A sanity suite guards the physics.** `src/physics/sanity/` recomputes known quantities (Earth's orbital period, the Schwarzschild radius of the Sun, light travel times: 205 checks in 23 blocks) through the code paths the simulations use, logging on dev boot and asserted in tests. Each block has its own file, mostly named after the physics file it checks, with the shared tolerances and logging in `core.ts`.
 - **Every route serves its own head.** `scripts/routeHeadsPlugin.ts` emits one HTML file per route at build time from the registry (24 routes, 47 files) plus `sitemap.xml`, so a shared module link unfurls as the module rather than the front page. Each file also carries schema.org data (a `LearningResource` per module, with no author or other personal details) and a `<noscript>` summary, so a crawler that does not run the app still reads the page's subject.
 - **Built to fail gracefully.** A chunk that fails to load (a 502, a dropped connection) shows a page with a retry button instead of a blank screen (`LoadErrorBoundary`), and the app manages scroll itself per history entry, so Back returns readers to their place and each in-page jump has an entry of its own. Hashed assets are served as immutable for a year while HTML revalidates on every visit, and `vercel.json` sets the security headers, but deliberately no Content-Security-Policy, because KaTeX and the motion library set inline styles that a wrong policy would silently break.
 
 ## Stack
 
-Vite 5, React 18, React Router 6, TypeScript (strict, plus `noUnusedLocals` and `noUnusedParameters`), Tailwind 3, Zustand 5, Framer Motion 11, KaTeX, Canvas 2D. Deployed on Vercel.
+Vite 6, React 18, React Router 7, TypeScript (strict, plus `noUnusedLocals` and `noUnusedParameters`), Tailwind 3, Zustand 5, Framer Motion 11, KaTeX 0.19, Canvas 2D. Tested with Vitest 4, React Testing Library and Playwright. Deployed on Vercel.
 
 ## Tests
 
-`npm test` is 1178 Vitest tests across 25 files, in a Node environment:
+`npm test` is 1191 Vitest tests across 27 files. 25 of the files run in a Node environment and 2 render React in jsdom:
 
+- the module page shell, rendered as the app renders it with React Testing Library: the title in the heading and the tab, all seven layers in order, the layers each depth tier opens, a layer opening and closing from its header, one labelled slider per parameter, the simulation's readouts, the step on the learning path, and the not-found page;
+- one simulation's controls end to end: moving the escape-velocity mass slider changes the slider's label, the escape-speed readout and the equation in the Numbers view together, and the escape speed recomputed from the numbers the equation shows matches the readout; the launch-speed slider updates the apex equation and its "where" line; Reset puts every view back;
 - the 205 physics sanity checks as assertions;
 - equation snapshots, so a formatting change cannot quietly rewrite the maths;
 - a copy snapshot pinning every word a reader can see (layers, glossary, About page, captions, credits, alt text), so a copy edit fails until the snapshot is updated deliberately;
@@ -103,7 +105,7 @@ The browser suite is separate: `playwright.config.ts` defines five projects (Chr
 
 ## Performance
 
-Measured in the lab against `npm run preview`: Lighthouse 13 in mobile mode (simulated slow 4G, 4× CPU), median of three runs per route, and a Playwright frame-rate test at 4× CPU slowdown on a 390 px phone viewport (5 s idle with the sim on screen, then a 3 s slider drag at 60 input events per second).
+The table records the October 2026 performance pass, measured in the lab against `npm run preview`: Lighthouse 13 in mobile mode (simulated slow 4G, 4× CPU), median of three runs per route, and a Playwright frame-rate test at 4× CPU slowdown on a 390 px phone viewport (5 s idle with the sim on screen, then a 3 s slider drag at 60 input events per second).
 
 | | Before | After |
 |---|---|---|
@@ -119,11 +121,13 @@ Measured in the lab against `npm run preview`: Lighthouse 13 in mobile mode (sim
 
 A returning visitor now loads the scripts from cache, since every hashed asset is served as immutable; and all of these figures are from the lab, not from field data.
 
-Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic; most of a drag's time in the profile is software canvas drawing. What changed: slider ticks re-render only the sim and its readouts, not the page; sims read their size from a `ResizeObserver` instead of forcing a layout per paint; label widths are cached; the early-universe scale factor comes from a table built once (agreeing with the old bisection to about 10⁻¹¹) instead of 240 000 integrand evaluations per frame; the starfield pauses while a sim is on screen; each module's content loads on its own page, with a build-time manifest for the index; framer-motion's features and KaTeX load only when needed; module pages preload their chunks; and figures ship 640 w and 1080 w copies.
+The entry chunk has grown since that pass with the features added after it: it is now 27.8 kB gzipped, and the React vendor chunk (React, React DOM and the router) is 59.1 kB. The November 2026 dependency update added 6.3 kB to the vendor chunk, almost all of it React Router 7. Lighthouse runs alternating the build before and after that update on one machine, five of each, found the same largest contentful paint, a median total blocking time within noise on the home page (145 ms before, 141 ms after) and about 30 ms higher on early universe (359 ms before, 391 ms after); run-to-run spread was about 60 ms. Those runs used a different machine from the table above, so their absolute values are not comparable with it.
+
+Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic; most of a drag's time in the profile is software canvas drawing. What changed: slider ticks re-render only the sim and its readouts, not the page; sims read their size from a `ResizeObserver` instead of forcing a layout per paint; label widths are cached; the early-universe scale factor comes from a table built once (agreeing with the old bisection to about 10⁻¹¹) instead of 240 000 integrand evaluations per frame; the starfield pauses while a sim is on screen; each module's content loads on its own page, with a build-time manifest for the index; framer-motion's features and KaTeX load only when needed; module pages preload their chunks; and figures ship a 640 w copy, plus a 1080 w one where the original is wider than that.
 
 ## Known limits
 
-Some files are very large and heavily commented: `sanity.ts` is 3031 lines and the largest simulation, dark-matter, 1050 (supernovae, once the largest, is 926), which is awkward for a second contributor to navigate. No unit test renders a React component, so component behaviour is covered by the Playwright suite. CI runs it on the two Chromium projects (a phone and a desktop viewport) against a preview of the build, after the typecheck, lint, unit tests and build; the WebKit, Firefox and mobile-WebKit projects run only locally, so an engine-specific regression in Safari or Firefox is still invisible to CI.
+Some simulation files are large and heavily commented: the largest, dark-matter, is 1050 lines and supernovae 926, which is awkward for a second contributor to navigate. The sanity suite, once a single 3031-line file, is split into 25 files of at most 209 lines. Component tests cover the module page shell and one simulation's controls (escape velocity); every other component's behaviour is covered only by the Playwright suite. CI runs it on the two Chromium projects (a phone and a desktop viewport) against a preview of the build, after the typecheck, lint, unit tests and build; the WebKit, Firefox and mobile-WebKit projects run only locally, so an engine-specific regression in Safari or Firefox is still invisible to CI.
 
 The learning path's order is checked through declared prerequisites: each module lists the topics it assumes in `src/content/path.ts`, and a test enforces that they come earlier. What a test cannot judge, a glossary term used before the topic that teaches it, `npm run path:audit` lists for manual review.
 
