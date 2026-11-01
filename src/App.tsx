@@ -452,8 +452,32 @@ function ScrollOnNavigate() {
     // Instant, even if an in-page jump has just switched smooth scrolling on:
     // a new page should simply open at its top, not glide there across
     // thousands of pixels of the page it replaced.
-    if (target) target.scrollIntoView({ behavior: 'instant' });
-    else window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (target) {
+      target.scrollIntoView({ behavior: 'instant' });
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (!id) return;
+    // A link to a section of another page (the consent bar's "Details" goes to
+    // /about#statistics): that page is a lazy chunk, so the section does not
+    // exist yet. Wait for it, as the POP branch does, and open the page there
+    // rather than at its top with the section thousands of pixels below. Wait
+    // too for the outgoing page to leave (it is `inert` while it fades): until
+    // then the document is taller by that page, and a jump made against it is
+    // clamped back up the moment it goes, so the reader saw two moves, not one.
+    const observer = new MutationObserver(() => {
+      const arrived = document.getElementById(id);
+      if (!arrived || document.querySelector('main [inert]')) return;
+      stop();
+      arrived.scrollIntoView({ behavior: 'instant', block: 'start' });
+    });
+    const timer = window.setTimeout(() => stop(), 2000);
+    function stop() {
+      observer.disconnect();
+      window.clearTimeout(timer);
+    }
+    observer.observe(document.body, { childList: true, subtree: true });
+    return stop;
   }, [pathname, hash, entry, navigationType]);
   return null;
 }

@@ -11,6 +11,14 @@ import { useSyncExternalStore } from 'react';
 import { Link } from 'react-router-dom';
 import { analyticsAvailable, getConsent, setConsent, subscribeConsent } from '@/lib/analytics';
 
+/**
+ * Starts loading the About page's chunk the moment a reader shows intent to
+ * open it, so "Details" does not open onto an empty pause. The same import the
+ * router uses, so it is one request either way.
+ */
+const loadAbout = () => void import('@/pages/AboutPage');
+const prefetchAbout = { onPointerEnter: loadAbout, onFocus: loadAbout, onTouchStart: loadAbout };
+
 export function ConsentBanner() {
   const consent = useSyncExternalStore(subscribeConsent, getConsent, () => null);
   if (!analyticsAvailable() || consent !== null) return null;
@@ -25,7 +33,11 @@ export function ConsentBanner() {
         <p className="max-w-measure">
           May Lodestar count visits with Google Analytics? It sees which pages are read, never who
           reads them, and nothing is sent unless you allow it.{' '}
-          <Link to="/about#statistics" className="text-ink-faint underline underline-offset-4 hover:text-star">
+          <Link
+            to="/about#statistics"
+            {...prefetchAbout}
+            className="text-ink-faint underline underline-offset-4 hover:text-star"
+          >
             Details
           </Link>
         </p>
