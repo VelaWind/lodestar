@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { aboutSections, aboutTitle } from '@/content/about';
 import { RichText } from '@/components/RichText';
+import { StatisticsSetting } from '@/components/ConsentBanner';
 
 export function AboutPage() {
   useEffect(() => {
@@ -46,6 +47,7 @@ export function AboutPage() {
             <RichText content={section.body} />
           </section>
         ))}
+        <StatisticsSetting />
       </div>
     </article>
   );

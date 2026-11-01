@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Starfield } from '@/visual/Starfield';
 import { DepthControl } from './DepthControl';
+import { ConsentBanner } from './ConsentBanner';
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -113,6 +114,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </span>
         </div>
       </footer>
+
+      <ConsentBanner />
     </div>
   );
 }
