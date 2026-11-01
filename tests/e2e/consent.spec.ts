@@ -69,3 +69,23 @@ test('"Allow" loads gtag and sends a page view per route; About takes it back', 
   await expect(setting).toContainText('not allowed');
   expect(await page.evaluate(() => localStorage.getItem('lodestar-analytics'))).toBe('denied');
 });
+
+test('"Details" opens About at the statistics section, in one move', async ({ page }) => {
+  await page.route(GOOGLE, (route) => route.fulfill({ status: 204, body: '' }));
+  await page.goto('/');
+  await page.evaluate(() => {
+    const w = window as unknown as { __scrolls: number[] };
+    w.__scrolls = [];
+    addEventListener('scroll', () => w.__scrolls.push(Math.round(scrollY)), { passive: true });
+  });
+  await page.getByRole('region', { name: 'Usage statistics' }).getByRole('link', { name: 'Details' }).click();
+  await expect(page).toHaveURL(/\/about#statistics$/);
+  const section = page.locator('#statistics');
+  await expect(section).toBeInViewport();
+  // Settle past the crossfade, then check the reader is still there and that
+  // the page did not jump to one place and get clamped back to another.
+  await page.waitForTimeout(800);
+  await expect(section).toBeInViewport();
+  const distinct = await page.evaluate(() => [...new Set((window as unknown as { __scrolls: number[] }).__scrolls)].filter((y) => y > 0));
+  expect(distinct.length, `scroll positions after the click: ${distinct.join(', ')}`).toBeLessThanOrEqual(1);
+});
