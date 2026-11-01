@@ -13,9 +13,19 @@
  *     draw on". jsdom's own version logs "not implemented" instead.
  *   - `scrollTo` and `scrollIntoView` do nothing: jsdom has no layout to scroll.
  */
-import { afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { afterEach, vi } from 'vitest';
+import { cleanup, configure } from '@testing-library/react';
 import { useAppStore } from '@/store/useAppStore';
+
+/*
+ * The first render of a module page loads its content and simulation lazily.
+ * Testing Library's default one-second wait is enough on an idle machine but
+ * not on a busy one: with the CPU loaded, the first test in a file timed out
+ * waiting for the heading. Ten seconds is ample, and only a real failure waits
+ * that long; the per-test limit for these files is raised to match.
+ */
+configure({ asyncUtilTimeout: 10_000 });
+vi.setConfig({ testTimeout: 20_000 });
 
 class InertObserver {
   observe(): void {}

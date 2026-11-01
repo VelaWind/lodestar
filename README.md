@@ -21,7 +21,7 @@ Lodestar is an astrophysics education site. Every topic is one page of seven lay
 - Each simulation lists its approximations in a counted expander beside it, not in the prose.
 - The gravitational-wave chirp can be heard, synthesised through Web Audio at the binary's own frequencies and labelled on the page as a sonification, not a recording.
 - Glossary of 150 entries. Marked terms open a panel placed by a pure geometry function, on hover intent, click, focus or tap, with one `aria-live` region for screen readers.
-- Every module closes its "real picture" layer with a licensed photograph or published measurement (22 figures in `public/figures/`, each with 640 w and 1080 w copies), credited on the page.
+- Every module closes its "real picture" layer with a licensed photograph or published measurement (22 figures in `public/figures/`, each with a 640 w copy and, for the 17 originals wider than 1080 px, a 1080 w copy), credited on the page.
 - All 22 simulations honour `prefers-reduced-motion`: the 21 that animate show a static rendering carrying the same information, and planetary atmospheres never animates.
 - Constants follow CODATA 2018 and IAU 2015 Resolution B3, defined once and never inlined. Each module cites five primary references.
 
@@ -81,7 +81,7 @@ On a clean install with Node 22: lint reports zero issues, `npm audit` reports z
 
 ## Stack
 
-Vite 6, React 18, React Router 7, TypeScript (strict, plus `noUnusedLocals` and `noUnusedParameters`), Tailwind 3, Zustand 5, Framer Motion 11, KaTeX 0.18, Canvas 2D. Tested with Vitest 4, React Testing Library and Playwright. Deployed on Vercel.
+Vite 6, React 18, React Router 7, TypeScript (strict, plus `noUnusedLocals` and `noUnusedParameters`), Tailwind 3, Zustand 5, Framer Motion 11, KaTeX 0.19, Canvas 2D. Tested with Vitest 4, React Testing Library and Playwright. Deployed on Vercel.
 
 ## Tests
 
@@ -123,7 +123,7 @@ A returning visitor now loads the scripts from cache, since every hashed asset i
 
 The entry chunk has grown since that pass with the features added after it: it is now 27.8 kB gzipped, and the React vendor chunk (React, React DOM and the router) is 59.1 kB. The November 2026 dependency update added 6.3 kB to the vendor chunk, almost all of it React Router 7. Lighthouse runs alternating the build before and after that update on one machine, five of each, found the same largest contentful paint, a median total blocking time within noise on the home page (145 ms before, 141 ms after) and about 30 ms higher on early universe (359 ms before, 391 ms after); run-to-run spread was about 60 ms. Those runs used a different machine from the table above, so their absolute values are not comparable with it.
 
-Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic; most of a drag's time in the profile is software canvas drawing. What changed: slider ticks re-render only the sim and its readouts, not the page; sims read their size from a `ResizeObserver` instead of forcing a layout per paint; label widths are cached; the early-universe scale factor comes from a table built once (agreeing with the old bisection to about 10⁻¹¹) instead of 240 000 integrand evaluations per frame; the starfield pauses while a sim is on screen; each module's content loads on its own page, with a build-time manifest for the index; framer-motion's features and KaTeX load only when needed; module pages preload their chunks; and figures ship 640 w and 1080 w copies.
+Headless Chromium draws canvas without a GPU, so the frame rates are pessimistic; most of a drag's time in the profile is software canvas drawing. What changed: slider ticks re-render only the sim and its readouts, not the page; sims read their size from a `ResizeObserver` instead of forcing a layout per paint; label widths are cached; the early-universe scale factor comes from a table built once (agreeing with the old bisection to about 10⁻¹¹) instead of 240 000 integrand evaluations per frame; the starfield pauses while a sim is on screen; each module's content loads on its own page, with a build-time manifest for the index; framer-motion's features and KaTeX load only when needed; module pages preload their chunks; and figures ship a 640 w copy, plus a 1080 w one where the original is wider than that.
 
 ## Known limits
 
