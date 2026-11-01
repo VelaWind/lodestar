@@ -38,8 +38,8 @@ jobs:
       #
       # npm 10.9.9 also crashes building a fresh tree for this project
       # ("Cannot read properties of null (reading 'edgesOut')" in arborist's
-      # peer-set loader), so the 1.0.x dependency update was resolved with
-      # npm 11. The rule that matters is the check: after any lockfile change,
+      # peer-set loader), so the November 2026 dependency update was resolved
+      # with npm 11. The rule that matters is the check: after any lockfile change,
       # run `npx -y npm@10 ci` from an empty node_modules. An incremental
       # `npm install` cannot see this class of failure, because node_modules is
       # already populated when it runs.
