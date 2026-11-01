@@ -7,7 +7,8 @@
  * "allowed" so the suite never loads Google's script or sends page views from
  * a test run. `consent.spec.ts` clears this state to test the bar itself.
  */
-import { writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import type { FullConfig } from '@playwright/test';
 
 export const CONSENT_STATE_FILE = 'test-results/consent-denied.json';
@@ -15,6 +16,7 @@ export const CONSENT_STATE_FILE = 'test-results/consent-denied.json';
 export default function globalSetup(config: FullConfig): void {
   const baseURL = config.projects[0]?.use.baseURL ?? 'https://lodestar-nu-six.vercel.app';
   const origin = new URL(baseURL).origin;
+  mkdirSync(dirname(CONSENT_STATE_FILE), { recursive: true });
   writeFileSync(
     CONSENT_STATE_FILE,
     JSON.stringify({ cookies: [], origins: [{ origin, localStorage: [{ name: 'lodestar-analytics', value: 'denied' }] }] }),

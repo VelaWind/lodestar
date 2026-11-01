@@ -25,4 +25,4 @@ export function absoluteUrl(path: string): string {
  * statistics. While it is empty nothing analytics-related renders or loads,
  * which is how the site behaved before the consent banner existed.
  */
-export const GA_MEASUREMENT_ID = '';
+export const GA_MEASUREMENT_ID: string = 'G-X40FC1M8CD';
