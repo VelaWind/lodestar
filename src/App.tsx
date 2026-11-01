@@ -460,7 +460,13 @@ function ScrollOnNavigate() {
 export default function App() {
   return (
     <LazyMotion features={loadMotionFeatures} strict>
-      <BrowserRouter>
+      {/* `useTransitions={false}` keeps React Router 6's synchronous updates.
+          Version 7 wraps every navigation in `React.startTransition` by
+          default, which renders a Back navigation late; `ScrollOnNavigate`
+          then restores the saved position after the frames in which the
+          reader expects to be back in place (path.spec's "Back returns to
+          the saved position at once"). */}
+      <BrowserRouter useTransitions={false}>
         <ScrollOnNavigate />
         <AppShell>
           <RoutedOutlet />
