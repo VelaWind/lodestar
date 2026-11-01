@@ -17,3 +17,12 @@ export const SITE_ORIGIN = 'https://lodestar-nu-six.vercel.app';
 export function absoluteUrl(path: string): string {
   return `${SITE_ORIGIN}${path}`;
 }
+
+/**
+ * The Google Analytics 4 measurement ID, or an empty string for none.
+ *
+ * Public by design: it is in every page's script once a visitor allows
+ * statistics. While it is empty nothing analytics-related renders or loads,
+ * which is how the site behaved before the consent banner existed.
+ */
+export const GA_MEASUREMENT_ID: string = 'G-X40FC1M8CD';

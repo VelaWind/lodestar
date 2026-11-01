@@ -7,6 +7,7 @@ import { LoadErrorBoundary } from '@/components/LoadErrorBoundary';
 import { moduleLoadFailed, retryModule } from '@/content/catalog';
 import { DISTANCE, DURATION, EASE } from '@/motion/tokens';
 import { useReducedMotion } from '@/motion/useReducedMotion';
+import { initAnalytics, trackPageView } from '@/lib/analytics';
 import { ModuleListPage } from '@/pages/ModuleListPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
@@ -457,6 +458,22 @@ function ScrollOnNavigate() {
   return null;
 }
 
+/**
+ * One page view per route, after the route has set its own title. Does nothing
+ * unless the reader has allowed statistics (see `lib/analytics.ts`).
+ */
+function PageViews() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => trackPageView(pathname), 0);
+    return () => clearTimeout(timer);
+  }, [pathname]);
+  return null;
+}
+
 export default function App() {
   return (
     <LazyMotion features={loadMotionFeatures} strict>
@@ -468,6 +485,7 @@ export default function App() {
           the saved position at once"). */}
       <BrowserRouter useTransitions={false}>
         <ScrollOnNavigate />
+        <PageViews />
         <AppShell>
           <RoutedOutlet />
         </AppShell>

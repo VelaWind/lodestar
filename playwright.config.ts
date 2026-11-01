@@ -18,6 +18,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/consent-state.ts',
 
   // One worker, no parallelism: the assertions read console output and canvas
   // pixels, both of which are easier to attribute when one page runs at a time,
@@ -33,6 +34,8 @@ export default defineConfig({
 
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'https://lodestar-nu-six.vercel.app',
+    // Written by the global setup: the statistics question already answered "No thanks".
+    storageState: 'test-results/consent-denied.json',
     trace: 'off',
     video: 'off',
     screenshot: 'off',
